@@ -1,0 +1,73 @@
+Obbiettivo : Possibile matricola deve essere ammessa in collegio
+Per essere ammessa, la matricola deve passare 3 sfide in difficoltà crescente.
+
+1 Prova : test logica 
+2 Prova : mostrare  capacità elettroniche. 
+3 Prova : rivoluzione robot
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+OGGETTI DA RACCOGLIERE DURANTE LE PRIME 3 PROVE  : Trita spezia,avvolgi spezia,filtra spezia, accendino
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+PROVA BONUS (avrà un tempo apparte al tempo di gioco effettivo)
+4 Prova : Sconfiggere Cruel 
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+1) Subquest prova 1 (tempo 10 minunti)
+
+1.1 Narrazione,introduzione,obbiettivo. (svolto da Mike The Cruel)  ->(identificazione,documento per far capire all'utente come usare l inventario)
+1.2 Incontro e spiegazione ,come essere ammessi (tutor)
+1.3 Somministrazione test logica 
+1.3.1 Trovare la penna in una stanza buia per svolger il test
+1.3.2 Start quiz (se time > 10 -> restart prova) *VEDE ACCENDINO 
+1.4 Test superato , lorenzo burdo prensenta il nuovo piano del collegio (laboratorio)
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+2) Subquest prova 2 (tempo 20 min)
+
+2.1 Mike introduce seconda prova
+2.2 Assemblare pc
+2.2.1 Ricerca oggetti ( cpu -> lab , ram -> pino , s.m -> data da michele , alimentatore -> pino , pasta t -> lab, dissipatore -> lab, gpu ->lab )
+2.2.2 Assemblaggio pc 
+Oggetti in ordine di assemblaggio : s.m. ,ram, cpu, p.t., dissipatore, gpu, alimentatorie )
+Successivamnete collegare cavi ,
+test accensione , (se test accensione = fallito -> restart subquest 2 ).
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+3) Subquest prova 3 (tempo 20)
+
+3.1 Nel mentre michele si congratula con il candidato arriva il portinaio dicendogli che i robottini sono impazziti 
+3.2 Trovare flipper zero 
+3.3 Individuare funzioni per fermare i robottini 
+3.4 Michele si congratula dicendogli che in realtà era una prova poichè il collegio si basa prettamente sull'informatica e testare le tue capacità. 
+
+FINE : Michele si congratula confermando la tua ammissione !! 
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+4) Quest prova BONUS (tempo 15)
+if per ogni oggetto per ptf appartenente inventario vai enlla stanza di jbj 
+
+4.0 Gli arriva un bigliettino con su scritto di trovare gli oggetti mancanti e/o dirigersi in stanza di JBJ se li ha trovati già tutti nel corso delle 3 prove
+4.1 La matricola arriva in stanza e jbj si assembla un ptf e invita a consumarlo insieme 
+4.2 Mike the cruel  diventa un androide impossessato da san jose maria
+4.3 Da definire come uccidere the cruel (zzzzzio faaaa wwwwoooo)
+4.n La matricola si risveglia
+
+FINE
+
+
+
+
+
+
+
+
+
+
+
+ 
