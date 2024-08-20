@@ -29,6 +29,10 @@ import di.uniba.map.b.adventure.GameObserver;
  * codice sorgente - l'utilizzo di file e DBMS non è semplice poiché all'interno
  * del file o del DBMS dovrebbe anche essere codificata la logica del gioco
  * (nextMove) oltre alla descrizione di stanze, oggetti, ecc...
+ * 
+ * 
+ * La classe FireHouseGame estende GameDescription che è una classe astratta che contiene la struttura base del gioco
+ * e implementa l'interfaccia GameObservable che permette di notificare gli observer quando avviene un'azione.
  *
  * @author pierpaolo
  */
@@ -40,7 +44,9 @@ public class FireHouseGame extends GameDescription implements GameObservable {
 
     private final List<String> messages = new ArrayList<>();
 
-    /**
+    /**Metodo Init : inizializza il gioco
+     * Questo metodo viene chiamato per inizializzare il gioco. 
+     * Vengono definite le stanze, gli oggetti e i comandi che il giocatore può usare
      *
      * @throws Exception
      */
@@ -48,9 +54,13 @@ public class FireHouseGame extends GameDescription implements GameObservable {
     public void init() throws Exception {
         messages.clear();
         //Commands
+        /*
+         * Command è un attributo della classe GameDescription. Ogni comando ha un tipo e un nome.
+         * Permette di definire i comandi che il giocatore può usare.
+         */
         Command nord = new Command(CommandType.NORD, "nord");
-        nord.setAlias(new String[]{"n", "N", "Nord", "NORD"});
-        getCommands().add(nord);
+        nord.setAlias(new String[]{"n", "N", "Nord", "NORD"}); //aggiunge degli alias al comando nord , lo stesso per gli altri comandi
+        getCommands().add(nord); //aggiunge il comando nord alla lista dei comandi disponibili, lo stesso per gli altri comandi
         Command iventory = new Command(CommandType.INVENTORY, "inventario");
         iventory.setAlias(new String[]{"inv"});
         getCommands().add(iventory);
@@ -82,6 +92,11 @@ public class FireHouseGame extends GameDescription implements GameObservable {
         use.setAlias(new String[]{"utilizza", "combina"});
         getCommands().add(use);
         //Rooms
+        /*
+         * Room è un attributo della classe GameDescription. Ogni stanza ha un id, un nome e una descrizione.
+         * Ogni stanza ha un metodo setLook che permette di visualizzare la stanza e i collegamenti con le altre stanze.
+         * L'inizializzazione delle stanze avviene tramite il costruttore della classe Room.
+         */
         Room hall = new Room(0, "Corridoio", "Sei nel corridoio della vecchia casa.\nOrmai non abiti più qui da anni!\nTi ricorderai come raggiungere le innumerevoli stanze?");
         hall.setLook("Sei nel corridoio, a nord vedi il bagno, a sud il soggiorno e ad ovest la tua cameretta.\nForse il gioco sarà lì?");
         Room livingRoom = new Room(1, "Soggiorno", "Ti trovi nel soggiorno.\nCi sono quei mobili marrone scuro che hai sempre odiato e delle orribili sedie.");
@@ -94,33 +109,44 @@ public class FireHouseGame extends GameDescription implements GameObservable {
         Room yourRoom = new Room(4, "La tua cameratta", "Finalmente la tua cameretta!\nQuesto luogo ti è così famigliare...ma non ricordi dove hai messo il nuovo regalo di zia Lina.");
         yourRoom.setLook("C'è un armadio bianco, di solito ci conservi i tuoi giochi.");
         //map
-        kitchen.setEast(livingRoom);
-        livingRoom.setNorth(hall);
-        livingRoom.setWest(kitchen);
-        hall.setSouth(livingRoom);
-        hall.setWest(yourRoom);
-        hall.setNorth(bathroom);
-        bathroom.setSouth(hall);
-        yourRoom.setEast(hall);
-        getRooms().add(kitchen);
+        /**
+         * I metodi sottostanti definiscono la mappa del gioco. Ogni stanza ha un nome e una descrizione.
+         */
+        kitchen.setEast(livingRoom); //collega la cucina al soggiorno
+        livingRoom.setNorth(hall); //collega il soggiorno al corridoio 
+        livingRoom.setWest(kitchen); // collega il soggiorno alla cucina
+        hall.setSouth(livingRoom); // collega il corridoio al soggiorno
+        hall.setWest(yourRoom); // collega il corridoio alla tua cameretta
+        hall.setNorth(bathroom); // collega il corridoio al bagno
+        bathroom.setSouth(hall); // collega il bagno al corridoio
+        yourRoom.setEast(hall);  // collega la tua cameretta al corridoio
+        /*
+         * Questi comandi aggiungono le stanze (kitchen, livingRoom, hall, bathroom, yourRoom) alla lista delle stanze del gioco
+         * che si trovano nella classe GameDescription
+         */
+        getRooms().add(kitchen);  
         getRooms().add(livingRoom);
         getRooms().add(hall);
         getRooms().add(bathroom);
         getRooms().add(yourRoom);
         //obejcts
+        /*
+         * Permette di definire gli oggetti presenti nelle stanze.
+         * Ogni AdvObject crea un oggetto con un id, un nome e una descrizione.
+         */
         AdvObject battery = new AdvObject(1, "batteria", "Un pacco di batterie, chissà se sono cariche.");
         battery.setAlias(new String[]{"batterie", "pile", "pila"});
         bathroom.getObjects().add(battery);
         AdvObjectContainer wardrobe = new AdvObjectContainer(2, "armadio", "Un semplice armadio.");
         wardrobe.setAlias(new String[]{"guardaroba", "vestiario"});
-        wardrobe.setOpenable(false);
-        wardrobe.setPickupable(false);
-        wardrobe.setOpen(false);
-        yourRoom.getObjects().add(wardrobe);
+        wardrobe.setOpenable(false); //metodo che setta l'armadio come non apribile
+        wardrobe.setPickupable(false); //metodo che setta l'armadio come non raccoglibile
+        wardrobe.setOpen(false); //metodo che setta l'armadio come chiuso
+        yourRoom.getObjects().add(wardrobe); 
         AdvObject toy = new AdvObject(3, "giocattolo", "Il gioco che ti ha regalato zia Lina.");
         toy.setAlias(new String[]{"gioco", "robot"});
         toy.setPushable(false);
-        toy.setPush(false);
+        toy.setPush(false); 
         wardrobe.add(toy);
         AdvObject kkey = new AdvObject(4, "chiave", "Usa semplice chiave come tante altre.");
         kkey.setAlias(new String[]{"key"});
@@ -128,26 +154,31 @@ public class FireHouseGame extends GameDescription implements GameObservable {
         kkey.setPush(false);
         kitchen.getObjects().add(kkey);
         //Observer
-        GameObserver moveObserver = new MoveObserver();
+        /*
+         * Viene utilizzato GameObserver per notificare gli observer quando avviene un'azione.
+         * I vari observer sottostanti creano un'istanza di GameObserver e monitorano le azioni del giocatore
+         * 
+         */
+        GameObserver moveObserver = new MoveObserver(); // si uccuperà di gestire il movimento del giocatore
         this.attach(moveObserver);
-        GameObserver invObserver = new InventoryObserver();
+        GameObserver invObserver = new InventoryObserver(); // si occuperà di gestire l'inventario del giocatore
         this.attach(invObserver);
-        GameObserver pushObserver = new PushObserver();
+        GameObserver pushObserver = new PushObserver(); // si occuperà di gestire l'azione di premere
         this.attach(pushObserver);
-        GameObserver lookatObserver = new LookAtObserver();
-        this.attach(lookatObserver);
-        GameObserver pickupObserver = new PickUpObserver();
+        GameObserver lookatObserver = new LookAtObserver(); // si occuperà di gestire l'azione di osservare
+        this.attach(lookatObserver); 
+        GameObserver pickupObserver = new PickUpObserver();  // si occuperà di gestire l'azione di raccogliere
         this.attach(pickupObserver);
-        GameObserver openObserver = new OpenObserver();
+        GameObserver openObserver = new OpenObserver(); // si occuperà di gestire l'azione di aprire
         this.attach(openObserver);
-        GameObserver useObserver = new UseObserver();
+        GameObserver useObserver = new UseObserver(); // si occuperà di gestire l'azione di usare
         this.attach(useObserver);
         //set starting room
-        setCurrentRoom(hall);
+        setCurrentRoom(hall); //setta la stanza iniziale del giocatore (nel  nostro caso sarà ingresso)
     }
 
     /**
-     *
+     * Metodo che gestisce il comando successivo
      * @param p
      * @param out
      */
@@ -176,8 +207,10 @@ public class FireHouseGame extends GameDescription implements GameObservable {
         }
     }
 
-    /**
-     *
+
+    /** 
+     *Metodo che permette di aggiungere un observer
+     * 
      * @param o
      */
     @Override
@@ -188,7 +221,7 @@ public class FireHouseGame extends GameDescription implements GameObservable {
     }
 
     /**
-     *
+     * Metodo che permette di rimuovere un observer
      * @param o
      */
     @Override
@@ -197,7 +230,7 @@ public class FireHouseGame extends GameDescription implements GameObservable {
     }
 
     /**
-     *
+     *Metodo che permette di notificare gli observer
      */
     @Override
     public void notifyObservers() {
@@ -207,7 +240,7 @@ public class FireHouseGame extends GameDescription implements GameObservable {
     }
 
     /**
-     *
+     *Metodo che restituisce il messaggio di benvenuto
      * @return
      */
     @Override

@@ -17,7 +17,10 @@ import di.uniba.map.b.adventure.GameObserver;
 public class InventoryObserver implements GameObserver {
 
     /**
-     *
+     * Metodo che permette di visualizzare l'inventario del giocatore
+     * Observer verifica che il comando sia di tipo INVENTORY e restituisce la lista degli oggetti presenti nell'inventario
+     * Implementa GameObserver e aggiorna la descrizione del gioco
+     * 
      * @param description
      * @param parserOutput
      * @return
@@ -30,8 +33,8 @@ public class InventoryObserver implements GameObserver {
                 msg.append("Il tuo inventario è vuoto!");
             } else {
                 msg.append("Nel tuo inventario ci sono:\n");
-                for (AdvObject o : description.getInventory()) {
-                    msg.append(o.getName()).append(": ").append(o.getDescription()).append("\n");
+                for (AdvObject o : description.getInventory()) { //for each utilizzato per scorrere la lista degli oggetti presenti nell'inventario
+                    msg.append(o.getName()).append(": ").append(o.getDescription()).append("\n"); //aggiunge alla stringa il nome e la descrizione dell'oggetto
                 }
             }
         }

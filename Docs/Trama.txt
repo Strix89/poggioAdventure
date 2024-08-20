@@ -31,7 +31,7 @@ PROVA BONUS (avrà un tempo apparte al tempo di gioco effettivo)
 2.2 Assemblare pc
 2.2.1 Ricerca oggetti ( cpu -> lab , ram -> pino , s.m -> data da michele , alimentatore -> pino , pasta t -> lab, dissipatore -> lab, gpu ->lab )
 2.2.2 Assemblaggio pc 
-Oggetti in ordine di assemblaggio : s.m. ,ram, cpu, p.t., dissipatore, gpu, alimentatorie )
+Oggetti in ordine di assemblaggio : s.m. ,ram, cpu, p.t., dissipatore, gpu, alimentatore )
 Successivamnete collegare cavi ,
 test accensione , (se test accensione = fallito -> restart subquest 2 ).
 
@@ -50,7 +50,7 @@ FINE : Michele si congratula confermando la tua ammissione !!
 
 
 4) Quest prova BONUS (tempo 15)
-if per ogni oggetto per ptf appartenente inventario vai enlla stanza di jbj 
+if per ogni oggetto per ptf appartenente inventario vai nella stanza di jbj 
 
 4.0 Gli arriva un bigliettino con su scritto di trovare gli oggetti mancanti e/o dirigersi in stanza di JBJ se li ha trovati già tutti nel corso delle 3 prove
 4.1 La matricola arriva in stanza e jbj si assembla un ptf e invita a consumarlo insieme 

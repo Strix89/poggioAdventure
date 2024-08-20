@@ -10,7 +10,7 @@ import di.uniba.map.b.adventure.type.CommandType;
 import di.uniba.map.b.adventure.GameObserver;
 
 /**
- *
+ * Observer che permette di visualizzare la descrizione di un oggetto o di una stanza 
  * @author pierpaolo
  */
 public class LookAtObserver implements GameObserver {
