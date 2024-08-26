@@ -32,6 +32,7 @@ public class InventoryObserver implements GameObserver {
             if (description.getInventory().isEmpty()) {
                 msg.append("Il tuo inventario è vuoto!");
             } else {
+                
                 msg.append("Nel tuo inventario ci sono:\n");
                 for (AdvObject o : description.getInventory()) { //for each utilizzato per scorrere la lista degli oggetti presenti nell'inventario
                     msg.append(o.getName()).append(": ").append(o.getDescription()).append("\n"); //aggiunge alla stringa il nome e la descrizione dell'oggetto

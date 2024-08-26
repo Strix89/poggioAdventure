@@ -5,6 +5,7 @@
  */
 package di.uniba.map.b.adventure.type;
 
+import com.mycompany.poggioadventure.ui.UI_Inventory;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +21,7 @@ import java.util.List;
 public class Inventory {
 
     private List<AdvObject> list = new ArrayList<>();
+    private UI_Inventory guiObj = new UI_Inventory();
 
     /**
      *
@@ -43,6 +45,7 @@ public class Inventory {
      */
     public void add(AdvObject o) {
         list.add(o);
+        
     }
 
     /**

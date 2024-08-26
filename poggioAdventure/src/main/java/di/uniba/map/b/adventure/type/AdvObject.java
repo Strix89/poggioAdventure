@@ -5,6 +5,7 @@
  */
 package di.uniba.map.b.adventure.type;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -37,6 +38,8 @@ public class AdvObject {
     private boolean open = false;
 
     private boolean push = false;
+    
+    private File imagePath = null;
 
     /**
      *
@@ -55,16 +58,30 @@ public class AdvObject {
         this.id = id;
         this.name = name;
     }
+    
+    /**
+     *
+     * @param id
+     * @param name
+     * @param imagePath
+     */
+    public AdvObject(int id, String name, String imagePath) {
+        this.id = id;
+        this.name = name;
+        this.imagePath = new File(imagePath);
+    }
 
     /**
      *
      * @param id
      * @param name
      * @param description
+     * @param imagePath
      */
-    public AdvObject(int id, String name, String description) {
+    public AdvObject(int id, String name, String imagePath, String description) {
         this.id = id;
         this.name = name;
+        this.imagePath = new File(imagePath);
         this.description = description;
     }
 
@@ -74,10 +91,12 @@ public class AdvObject {
      * @param name
      * @param description
      * @param alias
+     * @param imagePath
      */
-    public AdvObject(int id, String name, String description, Set<String> alias) {
+    public AdvObject(int id, String name, String imagePath, String description, Set<String> alias) {
         this.id = id;
         this.name = name;
+        this.imagePath = new File(imagePath);
         this.description = description;
         this.alias = alias;
     }
