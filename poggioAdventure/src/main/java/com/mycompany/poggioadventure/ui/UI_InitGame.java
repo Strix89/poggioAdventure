@@ -4,7 +4,9 @@
  */
 package com.mycompany.poggioadventure.ui;
 
+import java.awt.Point;
 import javax.swing.ImageIcon;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 
 /**
@@ -18,8 +20,7 @@ public class UI_InitGame extends javax.swing.JFrame {
      */
     public UI_InitGame() {
         initComponents();
-        ImageIcon icon = new ImageIcon(getClass().getResource("/images/scudoPoggio.png"));
-        JLabel label = new JLabel(icon);
+        this.setLocationRelativeTo(null); //Inizializza il Jframe al centro dello schermo
     }
 
     /**
@@ -32,10 +33,10 @@ public class UI_InitGame extends javax.swing.JFrame {
     private void initComponents() {
 
         jLabel1 = new javax.swing.JLabel();
-        myButton1 = new com.mycompany.poggioadventure.ui.MyButton();
-        myButton2 = new com.mycompany.poggioadventure.ui.MyButton();
-        myButton3 = new com.mycompany.poggioadventure.ui.MyButton();
-        myButton4 = new com.mycompany.poggioadventure.ui.MyButton();
+        newGame = new com.mycompany.poggioadventure.ui.MyButton();
+        loadGame = new com.mycompany.poggioadventure.ui.MyButton();
+        rankingBottom = new com.mycompany.poggioadventure.ui.MyButton();
+        exit = new com.mycompany.poggioadventure.ui.MyButton();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
@@ -55,56 +56,68 @@ public class UI_InitGame extends javax.swing.JFrame {
         jLabel1.setPreferredSize(new java.awt.Dimension(400, 60));
         getContentPane().add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 40, 500, 85));
 
-        myButton1.setText("NUOVA PARTITA");
-        myButton1.setToolTipText("");
-        myButton1.setBorderColor(new java.awt.Color(51, 0, 255));
-        myButton1.setColor(new java.awt.Color(255, 0, 0));
-        myButton1.setColorClick(new java.awt.Color(51, 0, 255));
-        myButton1.setColorOver(new java.awt.Color(255, 0, 0));
-        myButton1.setFont(new java.awt.Font("Crimson Pro", 2, 24)); // NOI18N
-        myButton1.setMaximumSize(new java.awt.Dimension(200, 55));
-        myButton1.setMinimumSize(new java.awt.Dimension(200, 55));
-        myButton1.setPreferredSize(new java.awt.Dimension(200, 55));
-        myButton1.setRadius(25);
-        getContentPane().add(myButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 166, -1, -1));
-
-        myButton2.setText("CARICA PARTITA");
-        myButton2.setBorderColor(new java.awt.Color(51, 0, 255));
-        myButton2.setColor(new java.awt.Color(255, 0, 0));
-        myButton2.setColorClick(new java.awt.Color(51, 0, 255));
-        myButton2.setColorOver(new java.awt.Color(255, 0, 0));
-        myButton2.setFont(new java.awt.Font("Crimson Pro", 2, 24)); // NOI18N
-        myButton2.setMaximumSize(new java.awt.Dimension(200, 55));
-        myButton2.setMinimumSize(new java.awt.Dimension(200, 55));
-        myButton2.setPreferredSize(new java.awt.Dimension(200, 55));
-        myButton2.setRadius(25);
-        getContentPane().add(myButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 275, -1, -1));
-
-        myButton3.setText("CLASSIFICA");
-        myButton3.setBorderColor(new java.awt.Color(51, 0, 255));
-        myButton3.setColor(new java.awt.Color(255, 0, 0));
-        myButton3.setColorClick(new java.awt.Color(51, 0, 255));
-        myButton3.setColorOver(new java.awt.Color(255, 0, 0));
-        myButton3.setFont(new java.awt.Font("Crimson Pro", 2, 24)); // NOI18N
-        myButton3.setMaximumSize(new java.awt.Dimension(200, 55));
-        myButton3.setMinimumSize(new java.awt.Dimension(200, 55));
-        myButton3.setPreferredSize(new java.awt.Dimension(200, 55));
-        myButton3.setRadius(25);
-        getContentPane().add(myButton3, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 384, -1, -1));
-
-        myButton4.setText("ESCI");
-        myButton4.setBorderColor(new java.awt.Color(51, 0, 255));
-        myButton4.setColor(new java.awt.Color(255, 0, 0));
-        myButton4.setColorClick(new java.awt.Color(51, 0, 255));
-        myButton4.setColorOver(new java.awt.Color(255, 0, 0));
-        myButton4.setFont(new java.awt.Font("Crimson Pro", 2, 24)); // NOI18N
-        myButton4.setRadius(25);
-        myButton4.addActionListener(new java.awt.event.ActionListener() {
+        newGame.setText("NUOVA PARTITA");
+        newGame.setToolTipText("");
+        newGame.setActionCommand("newGame");
+        newGame.setBorderColor(new java.awt.Color(51, 0, 255));
+        newGame.setColor(new java.awt.Color(255, 0, 0));
+        newGame.setColorClick(new java.awt.Color(51, 0, 255));
+        newGame.setColorOver(new java.awt.Color(255, 0, 0));
+        newGame.setFont(new java.awt.Font("Crimson Pro", 2, 24)); // NOI18N
+        newGame.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        newGame.setMaximumSize(new java.awt.Dimension(200, 55));
+        newGame.setMinimumSize(new java.awt.Dimension(200, 55));
+        newGame.setPreferredSize(new java.awt.Dimension(200, 55));
+        newGame.setRadius(25);
+        newGame.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                myButton4ActionPerformed(evt);
+                newGameActionPerformed(evt);
             }
         });
-        getContentPane().add(myButton4, new org.netbeans.lib.awtextra.AbsoluteConstraints(450, 500, 100, 46));
+        getContentPane().add(newGame, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 166, -1, -1));
+
+        loadGame.setText("CARICA PARTITA");
+        loadGame.setBorderColor(new java.awt.Color(51, 0, 255));
+        loadGame.setColor(new java.awt.Color(255, 0, 0));
+        loadGame.setColorClick(new java.awt.Color(51, 0, 255));
+        loadGame.setColorOver(new java.awt.Color(255, 0, 0));
+        loadGame.setFont(new java.awt.Font("Crimson Pro", 2, 24)); // NOI18N
+        loadGame.setMaximumSize(new java.awt.Dimension(200, 55));
+        loadGame.setMinimumSize(new java.awt.Dimension(200, 55));
+        loadGame.setPreferredSize(new java.awt.Dimension(200, 55));
+        loadGame.setRadius(25);
+        getContentPane().add(loadGame, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 275, -1, -1));
+
+        rankingBottom.setText("CLASSIFICA");
+        rankingBottom.setBorderColor(new java.awt.Color(51, 0, 255));
+        rankingBottom.setColor(new java.awt.Color(255, 0, 0));
+        rankingBottom.setColorClick(new java.awt.Color(51, 0, 255));
+        rankingBottom.setColorOver(new java.awt.Color(255, 0, 0));
+        rankingBottom.setFont(new java.awt.Font("Crimson Pro", 2, 24)); // NOI18N
+        rankingBottom.setMaximumSize(new java.awt.Dimension(200, 55));
+        rankingBottom.setMinimumSize(new java.awt.Dimension(200, 55));
+        rankingBottom.setPreferredSize(new java.awt.Dimension(200, 55));
+        rankingBottom.setRadius(25);
+        rankingBottom.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                rankingBottomActionPerformed(evt);
+            }
+        });
+        getContentPane().add(rankingBottom, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 384, -1, -1));
+
+        exit.setText("ESCI");
+        exit.setBorderColor(new java.awt.Color(51, 0, 255));
+        exit.setColor(new java.awt.Color(255, 0, 0));
+        exit.setColorClick(new java.awt.Color(51, 0, 255));
+        exit.setColorOver(new java.awt.Color(255, 0, 0));
+        exit.setFont(new java.awt.Font("Crimson Pro", 2, 24)); // NOI18N
+        exit.setRadius(25);
+        exit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                exitActionPerformed(evt);
+            }
+        });
+        getContentPane().add(exit, new org.netbeans.lib.awtextra.AbsoluteConstraints(450, 500, 100, 46));
 
         jLabel3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/scudoPoggio.png"))); // NOI18N
         getContentPane().add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(837, 28, -1, -1));
@@ -118,9 +131,37 @@ public class UI_InitGame extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void myButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_myButton4ActionPerformed
+    private void exitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_myButton4ActionPerformed
+    }//GEN-LAST:event_exitActionPerformed
+
+    //Questo metodo viene invoca la creazione del Jframe utile a visualizzare la classifica
+    private void rankingBottomActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rankingBottomActionPerformed
+        UI_Ranking rankFrame = new UI_Ranking();
+        
+        // Ottieni la posizione del JFrame padre (quello che contiene il JButton)
+        Point parentLocation = this.getLocation();
+
+        // Imposta la posizione del nuovo JFrame per essere uguale a quella del JFrame padre
+        rankFrame.setLocation(parentLocation);
+        
+        rankFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); //Se chiudo il nuovo Jframe creato non viene chiuso anche il Jframe padre
+        
+        rankFrame.setVisible(true);
+    }//GEN-LAST:event_rankingBottomActionPerformed
+
+    private void newGameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newGameActionPerformed
+        UI_LoadGame loadGameFrame = new UI_LoadGame();
+        // Ottieni la posizione del JFrame padre (quello che contiene il JButton)
+        Point parentLocation = this.getLocation();
+
+        // Imposta la posizione del nuovo JFrame per essere uguale a quella del JFrame padre
+        loadGameFrame.setLocation(parentLocation);
+        
+        loadGameFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); //Se chiudo il nuovo Jframe creato non viene chiuso anche il Jframe padre
+        
+        loadGameFrame.setVisible(true);
+    }//GEN-LAST:event_newGameActionPerformed
 
     /**
      * @param args the command line arguments
@@ -158,13 +199,13 @@ public class UI_InitGame extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private com.mycompany.poggioadventure.ui.MyButton exit;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
-    private com.mycompany.poggioadventure.ui.MyButton myButton1;
-    private com.mycompany.poggioadventure.ui.MyButton myButton2;
-    private com.mycompany.poggioadventure.ui.MyButton myButton3;
-    private com.mycompany.poggioadventure.ui.MyButton myButton4;
+    private com.mycompany.poggioadventure.ui.MyButton loadGame;
+    private com.mycompany.poggioadventure.ui.MyButton newGame;
+    private com.mycompany.poggioadventure.ui.MyButton rankingBottom;
     // End of variables declaration//GEN-END:variables
 }
