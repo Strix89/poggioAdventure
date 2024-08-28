@@ -4,6 +4,9 @@
  */
 package com.mycompany.poggioadventure.ui;
 
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+
 /**
  *
  * @author valen
@@ -15,6 +18,8 @@ public class UI_InitGame extends javax.swing.JFrame {
      */
     public UI_InitGame() {
         initComponents();
+        ImageIcon icon = new ImageIcon(getClass().getResource("/images/scudoPoggio.png"));
+        JLabel label = new JLabel(icon);
     }
 
     /**
@@ -30,20 +35,26 @@ public class UI_InitGame extends javax.swing.JFrame {
         myButton1 = new com.mycompany.poggioadventure.ui.MyButton();
         myButton2 = new com.mycompany.poggioadventure.ui.MyButton();
         myButton3 = new com.mycompany.poggioadventure.ui.MyButton();
+        myButton4 = new com.mycompany.poggioadventure.ui.MyButton();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setPreferredSize(new java.awt.Dimension(1000, 650));
         setResizable(false);
+        getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jLabel1.setFont(new java.awt.Font("Crimson Pro", 2, 72)); // NOI18N
+        jLabel1.setForeground(new java.awt.Color(255, 255, 0));
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel1.setText("PoggioAdventure");
         jLabel1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         jLabel1.setMaximumSize(new java.awt.Dimension(400, 60));
         jLabel1.setMinimumSize(new java.awt.Dimension(400, 60));
         jLabel1.setPreferredSize(new java.awt.Dimension(400, 60));
+        getContentPane().add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 40, 500, 85));
 
-        myButton1.setForeground(new java.awt.Color(255, 255, 255));
         myButton1.setText("NUOVA PARTITA");
         myButton1.setToolTipText("");
         myButton1.setBorderColor(new java.awt.Color(51, 0, 255));
@@ -55,8 +66,8 @@ public class UI_InitGame extends javax.swing.JFrame {
         myButton1.setMinimumSize(new java.awt.Dimension(200, 55));
         myButton1.setPreferredSize(new java.awt.Dimension(200, 55));
         myButton1.setRadius(25);
+        getContentPane().add(myButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 166, -1, -1));
 
-        myButton2.setForeground(new java.awt.Color(255, 255, 255));
         myButton2.setText("CARICA PARTITA");
         myButton2.setBorderColor(new java.awt.Color(51, 0, 255));
         myButton2.setColor(new java.awt.Color(255, 0, 0));
@@ -67,45 +78,49 @@ public class UI_InitGame extends javax.swing.JFrame {
         myButton2.setMinimumSize(new java.awt.Dimension(200, 55));
         myButton2.setPreferredSize(new java.awt.Dimension(200, 55));
         myButton2.setRadius(25);
+        getContentPane().add(myButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 275, -1, -1));
 
-        myButton3.setText("myButton3");
+        myButton3.setText("CLASSIFICA");
+        myButton3.setBorderColor(new java.awt.Color(51, 0, 255));
+        myButton3.setColor(new java.awt.Color(255, 0, 0));
+        myButton3.setColorClick(new java.awt.Color(51, 0, 255));
+        myButton3.setColorOver(new java.awt.Color(255, 0, 0));
+        myButton3.setFont(new java.awt.Font("Crimson Pro", 2, 24)); // NOI18N
+        myButton3.setMaximumSize(new java.awt.Dimension(200, 55));
+        myButton3.setMinimumSize(new java.awt.Dimension(200, 55));
+        myButton3.setPreferredSize(new java.awt.Dimension(200, 55));
+        myButton3.setRadius(25);
+        getContentPane().add(myButton3, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 384, -1, -1));
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(myButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(myButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(400, 400, 400))
-            .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(250, 250, 250)
-                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 500, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(451, 451, 451)
-                        .addComponent(myButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(250, Short.MAX_VALUE))
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(14, 14, 14)
-                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(67, 67, 67)
-                .addComponent(myButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(54, 54, 54)
-                .addComponent(myButton2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(60, 60, 60)
-                .addComponent(myButton3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(238, Short.MAX_VALUE))
-        );
+        myButton4.setText("ESCI");
+        myButton4.setBorderColor(new java.awt.Color(51, 0, 255));
+        myButton4.setColor(new java.awt.Color(255, 0, 0));
+        myButton4.setColorClick(new java.awt.Color(51, 0, 255));
+        myButton4.setColorOver(new java.awt.Color(255, 0, 0));
+        myButton4.setFont(new java.awt.Font("Crimson Pro", 2, 24)); // NOI18N
+        myButton4.setRadius(25);
+        myButton4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                myButton4ActionPerformed(evt);
+            }
+        });
+        getContentPane().add(myButton4, new org.netbeans.lib.awtextra.AbsoluteConstraints(450, 500, 100, 46));
+
+        jLabel3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/scudoPoggio.png"))); // NOI18N
+        getContentPane().add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(837, 28, -1, -1));
+
+        jLabel4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/scudoPoggio.png"))); // NOI18N
+        getContentPane().add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(63, 28, -1, -1));
+
+        jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/PoggioBack.jpg"))); // NOI18N
+        getContentPane().add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, -4, 1000, 660));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void myButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_myButton4ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_myButton4ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -144,8 +159,12 @@ public class UI_InitGame extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private com.mycompany.poggioadventure.ui.MyButton myButton1;
     private com.mycompany.poggioadventure.ui.MyButton myButton2;
     private com.mycompany.poggioadventure.ui.MyButton myButton3;
+    private com.mycompany.poggioadventure.ui.MyButton myButton4;
     // End of variables declaration//GEN-END:variables
 }

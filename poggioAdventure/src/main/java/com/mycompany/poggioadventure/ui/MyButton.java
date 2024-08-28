@@ -26,7 +26,7 @@ public class MyButton extends JButton {
         colorOver = new Color(179, 250, 160);
         colorClick = new Color(152, 184, 144);
         borderColor = new Color(30, 136, 56);
-        textColor = Color.BLACK;
+        textColor = Color.WHITE;
         textColorOver = Color.WHITE; // Set default text color to white when mouse is over
         setContentAreaFilled(false);
         setForeground(textColor); // Set initial text color
