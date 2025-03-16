@@ -91,6 +91,9 @@ public class FireHouseGame extends GameDescription implements GameObservable {
         Command use = new Command(CommandType.USE, "usa");
         use.setAlias(new String[]{"utilizza", "combina"});
         getCommands().add(use);
+        Command save = new Command(CommandType.SAVE, "salva");
+        save.setAlias(new String[]{"salvataggio"});
+        getCommands().add(save);
         //Rooms
         /*
          * Room è un attributo della classe GameDescription. Ogni stanza ha un id, un nome e una descrizione.
@@ -246,6 +249,6 @@ public class FireHouseGame extends GameDescription implements GameObservable {
     @Override
     public String getWelcomeMsg() {
         return "Sei appena tornato a casa e non sai cosa fare.\nTi ricordi che non hai ancora utilizzato quel fantastico regalo di tua zia Lina.\n"
-                + "Sarà il caso di cercarlo e di giocarci!";
+                + "Sarà il caso di cercarlo e di giocarci!\n";
     }
 }

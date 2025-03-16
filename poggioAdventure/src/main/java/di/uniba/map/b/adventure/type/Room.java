@@ -7,6 +7,7 @@ package di.uniba.map.b.adventure.type;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.io.Serializable;
 
 /* Classe Entity che definisce e costruisce le stanze che poi costituiranno la 
     mappa di gioco. Ogni stanza ha un id, nome, descrizione, se all'inizio è buia 
@@ -18,7 +19,7 @@ import java.util.List;
  *
  * @author pierpaolo
  */
-public class Room {
+public class Room implements Serializable {
 
     private final int id;
 
