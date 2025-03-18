@@ -2,9 +2,13 @@ package di.uniba.map.b.adventure;
 
 import di.uniba.map.b.adventure.impl.FireHouseGame;
 import di.uniba.map.b.adventure.parser.*;
+import di.uniba.map.b.adventure.type.AdvObject;
 import di.uniba.map.b.adventure.type.CommandType;
+import di.uniba.map.b.adventure.type.Room;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 
@@ -99,15 +103,32 @@ public class Engine {
         System.out.print("?> ");
 
         while (scanner.hasNextLine()) {
-            String command = scanner.nextLine();
+            String command = scanner.nextLine().trim();
+            
+            // Salvataggio dello stato precedente del gioco
+            Room previousRoom = game.getCurrentRoom();
+            List<AdvObject> previousInventory = new ArrayList<>(game.getInventory());
+            List<AdvObject> previousObjInRoom = new ArrayList<>(game.getCurrentRoom().getObjects());
+        
             ParserOutput p = parser.parse(command, game.getCommands(), game.getCurrentRoom().getObjects(), game.getInventory());
-
+        
             if (p == null || p.getCommand() == null) {
                 System.out.println("Non capisco quello che mi vuoi dire.");
             } else {
-
-                logger.logInput(command);
-            
+                // Esegue il comando
+                game.nextMove(p, System.out);
+        
+                // Controlla se lo stato del gioco è cambiato
+                boolean roomChanged = !previousRoom.equals(game.getCurrentRoom()); // Se la stanza è cambiata
+                boolean inventoryChanged = !previousInventory.equals(game.getInventory()); // Se l'inventario è cambiato
+                boolean objectsInRoomChanged = !previousObjInRoom.equals(game.getCurrentRoom().getObjects()); // Se gli oggetti nella stanza sono cambiati
+                boolean isLookAtCommand = p.getCommand().getType() == CommandType.LOOK_AT; // Se il comando è di tipo "osserva"
+        
+                // Registra il comando solo se ha prodotto un cambiamento di stato
+                if (roomChanged || inventoryChanged || objectsInRoomChanged || isLookAtCommand) {
+                    logger.logInput(command);
+                }
+        
                 if (p.getCommand().getType() == CommandType.END) {
                     System.out.println("Sei un fifone, addio!");
                     scanner.close();
@@ -117,16 +138,13 @@ public class Engine {
                     System.out.println("Ci rivediamo presto per continuare la tua avventura!");
                     scanner.close();
                     System.exit(0);
-                } else {
-                    game.nextMove(p, System.out);
-                    if (game.getCurrentRoom() == null) {
-                        System.out.println("La tua avventura termina qui! Complimenti!");
-                        System.exit(0);
-                    }
+                } else if (game.getCurrentRoom() == null) {
+                    System.out.println("La tua avventura termina qui! Complimenti!");
+                    System.exit(0);
                 }
             }
             System.out.print("?> ");
-        }
+        }        
     }
 
     /**
