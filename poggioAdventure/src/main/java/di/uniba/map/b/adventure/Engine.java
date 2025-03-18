@@ -1,15 +1,10 @@
 package di.uniba.map.b.adventure;
 
 import di.uniba.map.b.adventure.impl.FireHouseGame;
-import di.uniba.map.b.adventure.parser.Parser;
-import di.uniba.map.b.adventure.parser.ParserOutput;
-import di.uniba.map.b.adventure.type.AdvObject;
+import di.uniba.map.b.adventure.parser.*;
 import di.uniba.map.b.adventure.type.CommandType;
-import di.uniba.map.b.adventure.type.Room;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 
@@ -71,6 +66,8 @@ public class Engine {
         System.out.print("Inserisci il tuo nome: ");
         playerName = scanner.nextLine().trim();
 
+        LoggerInput logger = new LoggerInput(playerName); 
+
         // Mostra i salvataggi disponibili
         SaveGame.listSaves();
 
@@ -107,18 +104,25 @@ public class Engine {
 
             if (p == null || p.getCommand() == null) {
                 System.out.println("Non capisco quello che mi vuoi dire.");
-            } else if (p.getCommand().getType() == CommandType.END) {
-                System.out.println("Sei un fifone, addio!");
-                break;
-            } else if (p.getCommand().getType() == CommandType.SAVE) {
-                saveGame();
-                System.out.println("Ci rivediamo presto per continuare la tua avventura!");
-                System.exit(0);
             } else {
-                game.nextMove(p, System.out);
-                if (game.getCurrentRoom() == null) {
-                    System.out.println("La tua avventura termina qui! Complimenti!");
+
+                logger.logInput(command);
+            
+                if (p.getCommand().getType() == CommandType.END) {
+                    System.out.println("Sei un fifone, addio!");
+                    scanner.close();
+                    break;
+                } else if (p.getCommand().getType() == CommandType.SAVE) {
+                    saveGame();
+                    System.out.println("Ci rivediamo presto per continuare la tua avventura!");
+                    scanner.close();
                     System.exit(0);
+                } else {
+                    game.nextMove(p, System.out);
+                    if (game.getCurrentRoom() == null) {
+                        System.out.println("La tua avventura termina qui! Complimenti!");
+                        System.exit(0);
+                    }
                 }
             }
             System.out.print("?> ");
