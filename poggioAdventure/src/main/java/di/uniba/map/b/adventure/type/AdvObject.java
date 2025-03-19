@@ -5,6 +5,7 @@
  */
 package di.uniba.map.b.adventure.type;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -40,6 +41,8 @@ public class AdvObject implements Serializable {
     private boolean open = false;
 
     private boolean push = false;
+    
+    private File imagePath = null;
 
     /**
      *
@@ -58,16 +61,30 @@ public class AdvObject implements Serializable {
         this.id = id;
         this.name = name;
     }
+    
+    /**
+     *
+     * @param id
+     * @param name
+     * @param imagePath
+     */
+    public AdvObject(int id, String name, String imagePath) {
+        this.id = id;
+        this.name = name;
+        this.imagePath = new File(imagePath);
+    }
 
     /**
      *
      * @param id
      * @param name
      * @param description
+     * @param imagePath
      */
-    public AdvObject(int id, String name, String description) {
+    public AdvObject(int id, String name, String imagePath, String description) {
         this.id = id;
         this.name = name;
+        this.imagePath = new File(imagePath);
         this.description = description;
     }
 
@@ -77,10 +94,12 @@ public class AdvObject implements Serializable {
      * @param name
      * @param description
      * @param alias
+     * @param imagePath
      */
-    public AdvObject(int id, String name, String description, Set<String> alias) {
+    public AdvObject(int id, String name, String imagePath, String description, Set<String> alias) {
         this.id = id;
         this.name = name;
+        this.imagePath = new File(imagePath);
         this.description = description;
         this.alias = alias;
     }
@@ -238,6 +257,14 @@ public class AdvObject implements Serializable {
         int hash = 7;
         hash = 37 * hash + this.id;
         return hash;
+    }
+
+    public File getImagePath() {
+        return imagePath;
+    }
+
+    public void setImagePath(File imagePath) {
+        this.imagePath = imagePath;
     }
 
     /**
