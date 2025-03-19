@@ -14,20 +14,25 @@ PROVA BONUS (avrà un tempo apparte al tempo di gioco effettivo)
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+NPC: [Guido, tutor, Dottor burdo]
+
 1) Subquest prova 1 (tempo 10 minunti)
 
-1.1 Narrazione,introduzione,obbiettivo. (svolto da Mike The Cruel)  ->(identificazione, documento per far capire all'utente come usare l inventario)
-1.2 Incontro e spiegazione ,come essere ammessi (tutor)
-1.3 Somministrazione test logica 
-1.3.1 Trovare la penna in una stanza buia per svolger il test
+1.1 Narrazione,introduzione,obbiettivo. (Guido)  ->(identificazione, documento per far capire all'utente come usare l inventario)
+1.2 Incontro e spiegazione ,come essere ammessi (Cupulino) 
+1.3 Somministrazione test logica (Cupulino)
+1.3.1 Trovare la penna in una stanza buia per svolger il test (Tutor)
 1.3.2 Start quiz (se time > 10 -> restart prova) *VEDE ACCENDINO 
 1.4 Test superato , lorenzo burdo prensenta il nuovo piano del collegio (laboratorio)
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+NPC: [Cupulino, Pino, Luigi D.]
+
 2) Subquest prova 2 (tempo 20 min)
 
-2.1 Mike introduce seconda prova
+2.1 Luigi scimmia introduce lab
+2.1.1 Mike introduce seconda prova
 2.2 Assemblare pc
 2.2.1 Ricerca oggetti ( cpu -> lab , ram -> pino , s.m -> data da michele , alimentatore -> pino , pasta t -> lab, dissipatore -> lab, gpu ->lab )
 2.2.2 Assemblaggio pc 
@@ -40,11 +45,16 @@ test accensione , (se test accensione = fallito -> restart subquest 2 ).
 3) Subquest prova 3 (tempo 20)
 
 3.1 Nel mentre michele si congratula con il candidato arriva il portinaio dicendogli che i robottini sono impazziti 
-3.2 Trovare flipper zero 
+3.2 viene dato il manuale di istruzioni dei robot da guido, il quale avverte del problema con quest'ultimi || Trovare flipper zero
+3.2.1 Il manuale contiene tre comandi: GoToRecharge (Win), Override (Lose 30s left) , Stop (+1 min)
+Per inviare comandi con il flipper bisogna inserire la giusta frequenza (descritta in un'altro manuale non prendibile presente nel lab [non dove è presente il flipper])
+Usa flipper zero con inserimento frequenza.
 3.3 Individuare funzioni per fermare i robottini 
 3.4 Michele si congratula dicendogli che in realtà era una prova poichè il collegio si basa prettamente sull'informatica e testare le tue capacità. 
 
 FINE : Michele si congratula confermando la tua ammissione !! 
+
+
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
