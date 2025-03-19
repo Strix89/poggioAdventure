@@ -5,6 +5,7 @@
  */
 package di.uniba.map.b.adventure.type;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +18,7 @@ import java.util.List;
  *
  * @author pierpaolo
  */
-public class Inventory {
+public class Inventory implements Serializable{
 
     private List<AdvObject> list = new ArrayList<>();
 

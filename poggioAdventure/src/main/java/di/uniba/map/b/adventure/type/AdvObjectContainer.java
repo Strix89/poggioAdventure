@@ -5,6 +5,7 @@
  */
 package di.uniba.map.b.adventure.type;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -22,6 +23,7 @@ import java.util.Set;
  */
 public class AdvObjectContainer extends AdvObject {
 
+    private static final long serialVersionUID = 1L;
     private List<AdvObject> list = new ArrayList<>();
 
     /**

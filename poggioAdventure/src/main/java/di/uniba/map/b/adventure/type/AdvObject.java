@@ -6,6 +6,7 @@
 package di.uniba.map.b.adventure.type;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -19,7 +20,9 @@ import java.util.Set;
  *
  * @author pierpaolo
  */
-public class AdvObject {
+public class AdvObject implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private final int id;
 

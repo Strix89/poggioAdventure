@@ -19,6 +19,11 @@ public enum CommandType {
     /**
      *
      */
+    SAVE,
+
+    /**
+     *
+     */
     END,
 
     /**
