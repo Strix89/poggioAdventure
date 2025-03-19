@@ -256,6 +256,14 @@ public class AdvObject {
         return hash;
     }
 
+    public File getImagePath() {
+        return imagePath;
+    }
+
+    public void setImagePath(File imagePath) {
+        this.imagePath = imagePath;
+    }
+
     /**
      *
      * @param obj
