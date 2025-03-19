@@ -44,6 +44,7 @@ public class Inventory implements Serializable{
      */
     public void add(AdvObject o) {
         list.add(o);
+        
     }
 
     /**

@@ -21,6 +21,7 @@ public class Engine {
     private final GameDescription game;
     private Parser parser;
     private String playerName;
+    private TimeManager timeManager;
 
     /**
      * Costruttore dell'Engine.
@@ -44,7 +45,8 @@ public class Engine {
         } catch (Exception ex) {
             System.err.println(ex);
         }
-
+        // Inizializza TimeManager utilizzando i valori di default
+        timeManager = new TimeManager();
     }
 
     /**
@@ -101,6 +103,7 @@ public class Engine {
         System.out.println(game.getCurrentRoom().getDescription());
         System.out.println();
         System.out.print("?> ");
+        timeManager.start();
 
         while (scanner.hasNextLine()) {
             String command = scanner.nextLine().trim();
@@ -144,7 +147,8 @@ public class Engine {
                 }
             }
             System.out.print("?> ");
-        }        
+        }
+        timeManager.stop();
     }
 
     /**

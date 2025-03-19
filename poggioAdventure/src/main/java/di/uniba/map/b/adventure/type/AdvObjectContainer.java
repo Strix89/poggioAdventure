@@ -56,11 +56,12 @@ public class AdvObjectContainer extends AdvObject {
      *
      * @param id
      * @param name
+     * @param imagePath
      * @param description
      * @param alias
      */
-    public AdvObjectContainer(int id, String name, String description, Set<String> alias) {
-        super(id, name, description, alias);
+    public AdvObjectContainer(int id, String name, String imagePath, String description, Set<String> alias) {
+        super(id, name, imagePath, description, alias);
     }
 
     /**
