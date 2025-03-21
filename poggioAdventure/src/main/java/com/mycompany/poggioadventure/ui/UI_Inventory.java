@@ -1,42 +1,3 @@
-/**
- * Classe che rappresenta un'interfaccia grafica (GUI) per visualizzare l'inventario di un gioco.
- * Estende JFrame e utilizza componenti Swing per la renderizzazione.
- * 
- * Caratteristiche principali:
- * - Mostra una lista scrollabile di oggetti (a sinistra).
- * - Visualizza dettagli come immagine e descrizione quando un oggetto viene selezionato (a destra).
- * - Supporta personalizzazione del font e dello stile grafico (tema FlatLaf).
- * - Pulsante "ESCI" per terminare l'applicazione (da valutare se adeguato al contesto).
- * 
- * Struttura:
- * - Utilizza un layout BorderLayout diviso in due sezioni principali:
- *   1. Pannello sinistro: Lista degli oggetti dell'inventario con scroll.
- *   2. Pannello destro: 
- *      - Area per l'immagine dell'oggetto selezionato.
- *      - Area di testo per la descrizione dettagliata.
- *      - Pulsante "ESCI".
- * 
- * Funzionalità chiave:
- * - Metodo addObjectsToScroller(): Popola dinamicamente la lista degli oggetti.
- * - Gestione degli eventi: Click sugli oggetti per visualizzarne i dettagli.
- * - Validazione del font tramite setFontName().
- * 
- * Note importanti:
- * - Il costruttore UI_Inventory(String name) imposta solo il nome della finestra ma NON inizializza i componenti.
- *   Potrebbe essere un bug poiché initComponents() non viene chiamato.
- * - Il pulsante "ESCI" utilizza System.exit(0), che termina l'intera applicazione. Potrebbe non essere appropriato 
- *   se questa finestra è parte di un'applicazione più complessa.
- * - Il font personalizzato (nameFont) non è applicato a tutti i componenti (es. i componenti usano "Segoe UI" in initComponents()).
- * - Utilizza FlatLightLaf per il tema grafico, ma questo viene impostato solo nel main() (non nel costruttore).
- * 
- * Esempio d'uso:
- * UI_Inventory inventory = new UI_Inventory();
- * inventory.addObjectsToScroller(listaOggetti);
- * inventory.setVisible(true);
- * 
- * @author Strix89
- * @version 1.0
- */
 package com.mycompany.poggioadventure.ui;
 
 import com.formdev.flatlaf.FlatLightLaf;
@@ -56,7 +17,6 @@ public class UI_Inventory extends JFrame {
     
     // Configurazioni
     private String nameWindow = "INVENTARIO";  // Nome default della finestra
-    private String nameFont = "Crismon Pro";   // Font personalizzabile (non completamente implementato)
 
     /**
      * Costruttore principale. Inizializza i componenti dell'interfaccia.
@@ -73,31 +33,6 @@ public class UI_Inventory extends JFrame {
     public UI_Inventory(String name) {
         nameWindow = name; // Potrebbe richiedere una chiamata a initComponents()
     }
-    
-    /**
-     * Imposta il font globale dell'interfaccia. Esegue controlli di validità.
-     * @param fontName Nome del font da utilizzare.
-     * @throws IllegalArgumentException Se il font non è valido o non trovato.
-     */
-    public void setFontName(String fontName) {
-        if (fontName == null || fontName.trim().isEmpty()) {
-            throw new IllegalArgumentException("Nome del font nullo o vuoto");
-        }
-        Font testFont = new Font(fontName, Font.PLAIN, 12);
-        String actualFontName = testFont.getFamily();
-        if (!actualFontName.equalsIgnoreCase(fontName)) {
-            throw new IllegalArgumentException("Font non valido: " + fontName);
-        }
-        this.nameFont = fontName;
-    }
-
-    /**
-     * Getter del nome del Font.
-     * @return String nome del font
-     */
-    public String getFontName() {
-        return nameFont;
-    }
 
     /**
      * Inizializza tutti i componenti grafici e configura il layout.
@@ -107,38 +42,40 @@ public class UI_Inventory extends JFrame {
         // Configurazione generale della finestra
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setTitle(nameWindow);
-        setSize(650, 480);
+        setSize(650, 480); // Dimensioni fisse (come nella versione precedente)
         setResizable(false);
-        getContentPane().setBackground(new Color(45, 45, 45)); // Sfondo scuro
+        getContentPane().setBackground(UI_Config.BACKGROUND_COLOR); // Sfondo scuro
         // Layout principale con margini
         setLayout(new BorderLayout(15, 15));
         ((JComponent) getContentPane()).setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+
         // 1. PANNELLO SINISTRA - LISTA OGGETTI
         JPanel listPanel = new JPanel(new BorderLayout());
-        listPanel.setBackground(new Color(70, 70, 70));
-        listPanel.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY, 2));
+        listPanel.setBackground(new Color(70, 70, 70)); // Colore invariato
+        listPanel.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY, 2)); // Bordo invariato
         JLabel listTitle = new JLabel(nameWindow);
-        listTitle.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        listTitle.setForeground(Color.WHITE);
-        listTitle.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        listTitle.setFont(UI_Config.getBoldFont().deriveFont(18f)); // Font da UI_Config
+        listTitle.setForeground(UI_Config.TEXT_COLOR); // Colore del testo da UI_Config
+        listTitle.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10)); // Spaziatura invariata
         listPanel.add(listTitle, BorderLayout.NORTH);
         objectsScroller = new JScrollPane();
         objectsScroller.setBorder(null);
-        objectsScroller.getViewport().setBackground(new Color(90, 90, 90));
+        objectsScroller.getViewport().setBackground(new Color(90, 90, 90)); // Colore invariato
         listPanel.add(objectsScroller, BorderLayout.CENTER);
         add(listPanel, BorderLayout.WEST);
+
         // 2. PANNELLO DESTRA - IMMAGINE E DESCRIZIONE
         JPanel rightPanel = new JPanel(new GridBagLayout());
-        rightPanel.setBackground(new Color(45, 45, 45));
+        rightPanel.setBackground(UI_Config.BACKGROUND_COLOR); // Sfondo da UI_Config
         GridBagConstraints gbc = new GridBagConstraints();
         // 2a. PANNELLO IMMAGINE
         imageObjects = new JPanel(new BorderLayout());
-        imageObjects.setBackground(new Color(30, 30, 30));
+        imageObjects.setBackground(new Color(30, 30, 30)); // Colore invariato
         imageObjects.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(Color.DARK_GRAY, 2),
-            BorderFactory.createEmptyBorder(5, 5, 5, 5)
+            BorderFactory.createLineBorder(Color.DARK_GRAY, 2), // Bordo invariato
+            BorderFactory.createEmptyBorder(5, 5, 5, 5) // Spaziatura invariata
         ));
-        imageObjects.setPreferredSize(new Dimension(300, 250));
+        imageObjects.setPreferredSize(new Dimension(300, 250)); // Dimensione invariata
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.weightx = 1;
@@ -147,15 +84,15 @@ public class UI_Inventory extends JFrame {
         rightPanel.add(imageObjects, gbc);
         // 2b. PANNELLO DESCRIZIONE
         JPanel descPanel = new JPanel(new BorderLayout());
-        descPanel.setBackground(new Color(30, 30, 30));
+        descPanel.setBackground(new Color(30, 30, 30)); // Colore invariato
         descPanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(Color.DARK_GRAY, 2),
-            BorderFactory.createEmptyBorder(5, 5, 5, 5)
+            BorderFactory.createLineBorder(Color.DARK_GRAY, 2), // Bordo invariato
+            BorderFactory.createEmptyBorder(5, 5, 5, 5) // Spaziatura invariata
         ));
         descriptionArea = new JTextArea();
-        descriptionArea.setBackground(new Color(60, 60, 60));
-        descriptionArea.setForeground(Color.WHITE);
-        descriptionArea.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        descriptionArea.setBackground(new Color(60, 60, 60)); // Colore invariato
+        descriptionArea.setForeground(UI_Config.TEXT_COLOR); // Colore del testo da UI_Config
+        descriptionArea.setFont(UI_Config.getNormalFont().deriveFont(14f)); // Font da UI_Config
         descriptionArea.setEditable(false);
         descriptionArea.setLineWrap(true);
         descriptionArea.setWrapStyleWord(true);
@@ -167,16 +104,16 @@ public class UI_Inventory extends JFrame {
         rightPanel.add(descPanel, gbc);
         // 2c. PULSANTE ESCI
         escButton = new JButton("ESCI");
-        escButton.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        escButton.setBackground(new Color(100, 100, 100));
-        escButton.setForeground(Color.WHITE);
+        escButton.setFont(UI_Config.getBoldFont().deriveFont(14f)); // Font da UI_Config
+        escButton.setBackground(new Color(100, 100, 100)); // Colore invariato
+        escButton.setForeground(UI_Config.TEXT_COLOR); // Colore del testo da UI_Config
         escButton.setFocusPainted(false);
-        escButton.setBorder(BorderFactory.createEmptyBorder(5, 15, 5, 15));
+        escButton.setBorder(BorderFactory.createEmptyBorder(5, 15, 5, 15)); // Spaziatura invariata
         escButton.addActionListener(e -> System.exit(0));
         gbc.gridy = 2;
         gbc.weighty = 0;
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(10, 0, 0, 0);
+        gbc.insets = new Insets(10, 0, 0, 0); // Spaziatura invariata
         rightPanel.add(escButton, gbc);
         add(rightPanel, BorderLayout.CENTER);
     }
@@ -189,11 +126,23 @@ public class UI_Inventory extends JFrame {
     public void addObjectsToScroller(java.util.List<AdvObject> objects) {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBackground(new Color(90, 90, 90));
+        panel.setBackground(new Color(90, 90, 90)); // Colore invariato
+
+        // Calcola la larghezza massima del testo
+        Font font = UI_Config.getNormalFont().deriveFont(12f);
+        FontMetrics fontMetrics = getFontMetrics(font);
+        int maxTextWidth = 0;
+
         for (AdvObject obj : objects) {
-            JLabel label = new JLabel(" • " + obj.getName());
-            label.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-            label.setForeground(Color.WHITE);
+            String text = " • " + obj.getName();
+            int textWidth = fontMetrics.stringWidth(text);
+            if (textWidth > maxTextWidth) {
+                maxTextWidth = textWidth;
+            }
+
+            JLabel label = new JLabel(text);
+            label.setFont(font);
+            label.setForeground(UI_Config.TEXT_COLOR);
             label.setBorder(BorderFactory.createEmptyBorder(3, 5, 3, 5));
             label.addMouseListener(new MouseAdapter() {
                 @Override
@@ -203,7 +152,14 @@ public class UI_Inventory extends JFrame {
             });
             panel.add(label);
         }
+
+        // Imposta la larghezza del pannello in base alla larghezza massima del testo
+        int padding = 30; // Padding per evitare che il testo sia troppo vicino ai bordi
+        int panelWidth = maxTextWidth + padding;
+        panel.setPreferredSize(new Dimension(panelWidth, panel.getPreferredSize().height));
+
         objectsScroller.setViewportView(panel);
+        objectsScroller.setPreferredSize(new Dimension(panelWidth, objectsScroller.getPreferredSize().height));
     }
 
     /**
@@ -221,7 +177,7 @@ public class UI_Inventory extends JFrame {
             imageObjects.add(imageLabel, BorderLayout.CENTER);
         } else {
             JLabel noImageLabel = new JLabel("Nessuna immagine disponibile");
-            noImageLabel.setForeground(Color.WHITE);
+            noImageLabel.setForeground(UI_Config.TEXT_COLOR); // Colore del testo da UI_Config
             noImageLabel.setHorizontalAlignment(JLabel.CENTER);
             imageObjects.add(noImageLabel, BorderLayout.CENTER);
         }
@@ -245,7 +201,7 @@ public class UI_Inventory extends JFrame {
             for(int i = 1; i <= 26; i++) {
                 objects.add(new AdvObject(
                     i,
-                    "Oggetto " + i,
+                    "Oggetto fsefesfsefe" + i,
                     "./resources/img/none.png",
                     "Descrizione dettagliata per l'oggetto " + i + ".\n\n" +
                     "Materiale: Speciale\nPeso: " + (i % 10 + 1) + "kg\nRarità: " + (i % 5 + 1) + "/5"
