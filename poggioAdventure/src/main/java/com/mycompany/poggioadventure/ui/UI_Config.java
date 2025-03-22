@@ -1,24 +1,20 @@
 package com.mycompany.poggioadventure.ui;
 
+import di.uniba.map.b.adventure.ResourceLoader;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontFormatException;
-import java.awt.GraphicsEnvironment;
 import java.awt.Insets;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.imageio.ImageIO;
 
 /**
  * Classe di configurazione UI con caricamento risorse centralizzato.
  * Implementa il pattern Singleton per garantire un'unica istanza.
  */
 public final class UI_Config {
-    private static final Logger LOGGER = Logger.getLogger(UI_Config.class.getName());
-    
     // Costanti di configurazione
     public static final Color BACKGROUND_COLOR = new Color(45, 45, 45);
     public static final Color BUTTON_BASE_COLOR = new Color(100, 100, 100);
@@ -55,51 +51,16 @@ public final class UI_Config {
 
     static {
         try {
-            loadResources();
-        } catch (InitializationException ex) {
-            LOGGER.log(Level.SEVERE, "Errore critico durante l'inizializzazione", ex);
-            System.exit(1);
+            ResourceLoader.loadUIResources();
+        } catch (IOException ex) {
+            Logger.getLogger(UI_Config.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (FontFormatException ex) {
+            Logger.getLogger(UI_Config.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
     private UI_Config() {
         throw new AssertionError("Classe di utilità, non istanziabile");
-    }
-
-    private static void loadResources() throws InitializationException {
-        try {
-            shieldImage = loadImage(SHIELD_IMAGE_PATH);
-            normalFont = loadFont(FONT_NORMAL_PATH);
-            boldFont = loadFont(FONT_BOLD_PATH);
-            italicFont = loadFont(FONT_ITALIC_PATH);
-            asciiFlipper = loadImage(ASCII_FLIPPER_PATH);
-        } catch (IOException | FontFormatException e) {
-            throw new InitializationException("Caricamento risorse fallito", e);
-        }
-    }
-
-    private static BufferedImage loadImage(String path) throws IOException {
-        File imageFile = new File(path);
-        if (!imageFile.exists()) {
-            throw new IOException("File immagine non trovato: " + path);
-        }
-        
-        BufferedImage image = ImageIO.read(imageFile);
-        if (image == null) {
-            throw new IOException("Formato immagine non supportato: " + path);
-        }
-        return image;
-    }
-
-    private static Font loadFont(String path) throws IOException, FontFormatException {
-        File fontFile = new File(path);
-        if (!fontFile.exists()) {
-            throw new IOException("File font non trovato: " + path);
-        }
-        
-        Font font = Font.createFont(Font.TRUETYPE_FONT, fontFile);
-        GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(font);
-        return font;
     }
 
     // Getter per le risorse
@@ -122,10 +83,44 @@ public final class UI_Config {
     public static BufferedImage getAsciiImage(){
         return asciiFlipper;
     }
-    
-    private static class InitializationException extends Exception {
-        public InitializationException(String message, Throwable cause) {
-            super(message, cause);
-        }
+
+    public static void setShieldImage(BufferedImage shieldImage) {
+        UI_Config.shieldImage = shieldImage;
+    }
+
+    public static void setAsciiFlipper(BufferedImage asciiFlipper) {
+        UI_Config.asciiFlipper = asciiFlipper;
+    }
+
+    public static void setNormalFont(Font normalFont) {
+        UI_Config.normalFont = normalFont;
+    }
+
+    public static void setBoldFont(Font boldFont) {
+        UI_Config.boldFont = boldFont;
+    }
+
+    public static void setItalicFont(Font italicFont) {
+        UI_Config.italicFont = italicFont;
+    }
+
+    public static String getSHIELD_IMAGE_PATH() {
+        return SHIELD_IMAGE_PATH;
+    }
+
+    public static String getFONT_NORMAL_PATH() {
+        return FONT_NORMAL_PATH;
+    }
+
+    public static String getFONT_BOLD_PATH() {
+        return FONT_BOLD_PATH;
+    }
+
+    public static String getFONT_ITALIC_PATH() {
+        return FONT_ITALIC_PATH;
+    }
+
+    public static String getASCII_FLIPPER_PATH() {
+        return ASCII_FLIPPER_PATH;
     }
 }
