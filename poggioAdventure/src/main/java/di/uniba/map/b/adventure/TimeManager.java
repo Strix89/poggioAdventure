@@ -100,11 +100,11 @@ public class TimeManager implements Runnable {
             // Utilizza le sequenze ANSI:
             // "\033[F" sposta il cursore una riga in alto
             // "\033[2K" cancella l'intera riga corrente
-            System.out.print("\033[F\033[2K");
-            System.out.println("[Timer] Tempo rimanente: " + minuti + "m " + secondi + "s");
+            //System.out.print("\033[F\033[2K");
+            //System.out.println("[Timer] Tempo rimanente: " + minuti + "m " + secondi + "s");
             // Ripristina il prompt di input (assumendo che sia sempre "?> ")
-            System.out.print("?> ");
-            System.out.flush();
+            //System.out.print("?> ");
+            //System.out.flush();
         }
 
         // Se il countdown è terminato, visualizza un messaggio finale e termina l'applicazione

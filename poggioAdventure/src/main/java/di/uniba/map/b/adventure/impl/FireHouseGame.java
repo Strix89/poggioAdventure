@@ -140,6 +140,11 @@ public class FireHouseGame extends GameDescription implements GameObservable {
         AdvObject battery = new AdvObject(1, "batteria", "Un pacco di batterie, chissà se sono cariche.");
         battery.setAlias(new String[]{"batterie", "pile", "pila"});
         bathroom.getObjects().add(battery);
+        AdvObject scopettino = new AdvObject(5, "scopettino", "Uno scopettino per pulire il cesso.");
+        scopettino.setAlias(new String[]{"scopa", "spazzolino", "scopettino"});
+        bathroom.getObjects().add(scopettino);
+
+
         AdvObjectContainer wardrobe = new AdvObjectContainer(2, "armadio", "Un semplice armadio.");
         wardrobe.setAlias(new String[]{"guardaroba", "vestiario"});
         wardrobe.setOpenable(false); //metodo che setta l'armadio come non apribile

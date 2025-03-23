@@ -66,12 +66,12 @@ public class AdvObject implements Serializable {
      *
      * @param id
      * @param name
-     * @param imagePath
+     * @param description
      */
-    public AdvObject(int id, String name, String imagePath) {
+    public AdvObject(int id, String name, String description) {
         this.id = id;
         this.name = name;
-        this.imagePath = new File(imagePath);
+        this.description = description;
     }
 
     /**
@@ -87,6 +87,7 @@ public class AdvObject implements Serializable {
         this.imagePath = new File(imagePath);
         this.description = description;
     }
+
 
     /**
      *
