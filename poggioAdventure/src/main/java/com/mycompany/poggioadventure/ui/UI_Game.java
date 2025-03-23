@@ -1,6 +1,10 @@
 package com.mycompany.poggioadventure.ui;
 
 import com.formdev.flatlaf.FlatLightLaf;
+import di.uniba.map.b.adventure.Engine;
+import di.uniba.map.b.adventure.FlowOutput;
+import di.uniba.map.b.adventure.impl.GUIOutput;
+import di.uniba.map.b.adventure.impl.PoggioAdventureGame;
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
@@ -39,11 +43,18 @@ public class UI_Game extends UI_Abstract {
     private Timer countdownTimer;         // Timer per gestire il countdown del livello
     private long startTime;               // Timestamp di inizio del gioco (in millisecondi)
     private int remainingSeconds;         // Secondi rimanenti per il countdown del livello
+    private Engine gameEngine;
 
     /**
-     * Costruttore della classe. Chiama il costruttore della superclasse UI_Abstract
+     * Costruttore della classe.Chiama il costruttore della superclasse UI_Abstract
      * per inizializzare l'interfaccia grafica.
+     * @param playerName
      */
+    public UI_Game(String playerName) {
+        super();
+        initEngineAfterUI(playerName);
+    }
+    
     public UI_Game() {
         super();
     }
@@ -77,6 +88,15 @@ public class UI_Game extends UI_Abstract {
         add(rightPanel, BorderLayout.EAST);
 
         pack();  // Ridimensiona la finestra per adattarsi ai componenti
+    }
+    
+    private void initEngineAfterUI(String playerName) {
+        FlowOutput guiOutput = new GUIOutput(gameOutputArea);
+        this.gameEngine = new Engine(new PoggioAdventureGame(), playerName, guiOutput);
+
+        // Aggiungi listener per l'input
+        commandInput.addActionListener(this::processCommand);
+        sendButton.addActionListener(this::processCommand);
     }
 
     /**
@@ -320,7 +340,6 @@ public class UI_Game extends UI_Abstract {
      * Mostra un dialogo di conferma per il salvataggio del gioco.
      */
     private void saveGame() {
-        applyDialogStyles();  // Applica lo stile personalizzato ai dialoghi
         JOptionPane.showMessageDialog(this, 
             "Gioco salvato con successo!", 
             "Salvataggio", 
@@ -328,10 +347,9 @@ public class UI_Game extends UI_Abstract {
     }
 
     /**
-     * Mostra un dialogo di conferma per l'uscita dal gioco.
+     * Mostra un dialogo di conferma per l'uscita dal gioco. Riaprendo la schermata iniziale.
      */
     private void confirmExit() {
-        applyDialogStyles();
         int choice = JOptionPane.showConfirmDialog(this,
             "Vuoi salvare prima di uscire?",
             "Conferma uscita",
@@ -339,18 +357,9 @@ public class UI_Game extends UI_Abstract {
 
         if (choice == JOptionPane.YES_OPTION) saveGame();
         if (choice != JOptionPane.CANCEL_OPTION) dispose();
-    }
-
-    /**
-     * Applica le impostazioni di stile personalizzate ai dialoghi Swing.
-     */
-    private void applyDialogStyles() {
-        UIManager.put("OptionPane.background", UI_Config.BACKGROUND_COLOR);
-        UIManager.put("Panel.background", UI_Config.BACKGROUND_COLOR);
-        UIManager.put("Button.background", UI_Config.BUTTON_BASE_COLOR);
-        UIManager.put("Button.foreground", UI_Config.TEXT_COLOR);
-        UIManager.put("OptionPane.messageFont", UI_Config.getNormalFont().deriveFont(14f));
-        UIManager.put("OptionPane.messageForeground", UI_Config.TEXT_COLOR);
+        
+        UI_Init init = new UI_Init();
+        init.setVisible(true);
     }
 
     /**

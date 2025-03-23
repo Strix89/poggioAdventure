@@ -1,6 +1,5 @@
 package com.mycompany.poggioadventure.ui;
 
-import com.formdev.flatlaf.FlatLightLaf;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -236,8 +235,8 @@ public class UI_Init extends UI_Abstract {
      * Mostra la finestra per iniziare una nuova partita.
      */
     private void showNewGame() {
-        JFrame newGame = new UI_NewGame();  // Crea la finestra per una nuova partita
-        newGame.setLocationRelativeTo(this);  // Centra la finestra rispetto a questa
+        JFrame newGame = new UI_NewGame(this);  // Crea la finestra per una nuova partita
+        newGame.setLocationRelativeTo(null);  // Centra la finestra rispetto a questa
         newGame.setVisible(true);  // Rende la finestra visibile
     }
 
@@ -269,7 +268,6 @@ public class UI_Init extends UI_Abstract {
      */
     public static void main(String[] args) {
         try {
-            FlatLightLaf.setup();  // Configura il tema FlatLaf light per l'interfaccia
             EventQueue.invokeLater(() -> {
                 UI_Init mainWindow = new UI_Init();  // Crea la finestra principale
                 mainWindow.setVisible(true);  // Rende la finestra visibile

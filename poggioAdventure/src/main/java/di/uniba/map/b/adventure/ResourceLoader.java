@@ -3,11 +3,17 @@ package di.uniba.map.b.adventure;
 import com.mycompany.poggioadventure.ui.UI_Config;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 import javax.imageio.ImageIO;
 
 public class ResourceLoader {
+    
+    public static final String STOPWORDS_PATH = "./resources/stopwords"; 
 
     public static BufferedImage loadImage(String path) throws IOException {
         File imageFile = new File(path);
@@ -23,6 +29,21 @@ public class ResourceLoader {
             throw new IOException("Font non trovato: " + path);
         }
         return Font.createFont(Font.TRUETYPE_FONT, fontFile);
+    }
+    /**
+     *
+     * @param file
+     * @return
+     * @throws IOException
+     */
+    static Set<String> loadFileListInSet(File file) throws IOException {
+        Set<String> set = new HashSet<>();
+        BufferedReader reader = new BufferedReader(new FileReader(file));
+        while (reader.ready()) {
+            set.add(reader.readLine().trim().toLowerCase());
+        }
+        reader.close();
+        return set;
     }
 
     // Carica tutte le risorse necessarie

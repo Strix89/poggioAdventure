@@ -78,7 +78,7 @@ public abstract class GameDescription {
      * @param p
      * @param out
      */
-    public abstract void nextMove(ParserOutput p, PrintStream out);
+    public abstract void nextMove(ParserOutput p, FlowOutput out);
     
     /**
      *

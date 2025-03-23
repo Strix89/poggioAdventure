@@ -19,23 +19,6 @@ import java.util.Set;
  * @author pierpaolo
  */
 public class Utils {
-
-    /**
-     *
-     * @param file
-     * @return
-     * @throws IOException
-     */
-    public static Set<String> loadFileListInSet(File file) throws IOException {
-        Set<String> set = new HashSet<>();
-        BufferedReader reader = new BufferedReader(new FileReader(file));
-        while (reader.ready()) {
-            set.add(reader.readLine().trim().toLowerCase());
-        }
-        reader.close();
-        return set;
-    }
-
     /**
      *
      * @param string

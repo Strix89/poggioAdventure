@@ -5,6 +5,7 @@
  */
 package di.uniba.map.b.adventure.impl;
 
+import di.uniba.map.b.adventure.FlowOutput;
 import di.uniba.map.b.adventure.GameDescription;
 import di.uniba.map.b.adventure.parser.ParserOutput;
 import di.uniba.map.b.adventure.type.AdvObject;
@@ -22,7 +23,7 @@ import di.uniba.map.b.adventure.GameObserver;
  * ATTENZIONE: La descrizione del gioco è fatta in modo che qualsiasi gioco
  * debba estendere la classe GameDescription. L'Engine è fatto in modo che possa
  * eseguire qualsiasi gioco che estende GameDescription, in questo modo si
- * possono creare più gioci utilizzando lo stesso Engine.
+ * possono creare più giochi utilizzando lo stesso Engine.
  *
  * Diverse migliorie possono essere applicate: - la descrizione del gioco
  * potrebbe essere caricate da file o da DBMS in modo da non modificare il
@@ -36,7 +37,7 @@ import di.uniba.map.b.adventure.GameObserver;
  *
  * @author pierpaolo
  */
-public class FireHouseGame extends GameDescription implements GameObservable {
+public class PoggioAdventureGame extends GameDescription implements GameObservable {
 
     private final List<GameObserver> observer = new ArrayList<>();
 
@@ -186,11 +187,11 @@ public class FireHouseGame extends GameDescription implements GameObservable {
      * @param out
      */
     @Override
-    public void nextMove(ParserOutput p, PrintStream out) {
+    public void nextMove(ParserOutput p, FlowOutput out) {
         parserOutput = p;
         messages.clear();
         if (p.getCommand() == null) {
-            out.println("Non ho capito cosa devo fare! Prova con un altro comando.");
+            out.writeln("Non ho capito cosa devo fare! Prova con un altro comando.");
         } else {
             Room cr = getCurrentRoom();
             notifyObservers();
@@ -198,14 +199,14 @@ public class FireHouseGame extends GameDescription implements GameObservable {
             if (!messages.isEmpty()) {
                 for (String m : messages) {
                     if (m.length() > 0) {
-                        out.println(m);
+                        out.writeln(m);
                     }
                 }
             }
             if (move) {
-                out.println(getCurrentRoom().getName());
-                out.println("================================================");
-                out.println(getCurrentRoom().getDescription());
+                out.writeln(getCurrentRoom().getName());
+                out.writeln("================================================");
+                out.writeln(getCurrentRoom().getDescription());
             }
         }
     }

@@ -18,11 +18,18 @@ public class UI_NewGame extends UI_Abstract {
     private JTextField nameField;  // Campo di testo per inserire il nome del giocatore
     private JButton startButton;   // Pulsante per avviare la nuova partita
     private JLabel titleLabel;     // Etichetta per il titolo della finestra
+    private JFrame parentFrame = new JFrame(); 
 
     /**
-     * Costruttore della classe. Chiama il costruttore della superclasse UI_Abstract
+     * Costruttore della classe.Chiama il costruttore della superclasse UI_Abstract
      * per inizializzare l'interfaccia grafica.
+     * @param parent
      */
+    public UI_NewGame(JFrame parent) {
+        super();
+        this.parentFrame = parent;
+    }
+    
     public UI_NewGame() {
         super();
     }
@@ -34,6 +41,7 @@ public class UI_NewGame extends UI_Abstract {
      */
     @Override
     protected void initComponents() {
+        applyDialogStyles();
         configureFrame();          // Configura la finestra principale
         createComponents();        // Crea i componenti dell'interfaccia
         setupLayout();             // Configura il layout della finestra
@@ -128,6 +136,7 @@ public class UI_NewGame extends UI_Abstract {
             (int)(getPreferredSize().width * 0.7),  // Larghezza del campo di testo
             (int)(getPreferredSize().height * 0.1)  // Altezza del campo di testo
         ));
+        nameField.setFont(UI_Config.getBoldFont().deriveFont(18f));
         mainPanel.add(nameField, gbc);  // Aggiunge il campo di testo al pannello
 
         // Pulsante Start
@@ -135,9 +144,10 @@ public class UI_NewGame extends UI_Abstract {
         gbc.ipady = 0;  // Ripristina l'altezza interna
         gbc.fill = GridBagConstraints.NONE;  // Non riempire lo spazio
         startButton.setPreferredSize(new Dimension(
-            (int)(getPreferredSize().width * UI_Config.BUTTON_WIDTH_RATIO),  // Larghezza del pulsante
-            (int)(getPreferredSize().height * UI_Config.BUTTON_HEIGHT_RATIO)  // Altezza del pulsante
+            (int)(getPreferredSize().width * (UI_Config.BUTTON_WIDTH_RATIO + 0.1)),  // Larghezza del pulsante
+            (int)(getPreferredSize().height * (UI_Config.BUTTON_HEIGHT_RATIO + 0.05))  // Altezza del pulsante
         ));
+        startButton.setFont(UI_Config.getBoldFont().deriveFont(22f));
         mainPanel.add(startButton, gbc);  // Aggiunge il pulsante al pannello
 
         add(mainPanel, BorderLayout.CENTER);  // Aggiunge il pannello principale alla finestra
@@ -207,10 +217,12 @@ public class UI_NewGame extends UI_Abstract {
                 JOptionPane.WARNING_MESSAGE);  // Mostra un messaggio di errore
             return;
         }
-
-        // Logica per avviare il gioco (da implementare)
-        dispose();  // Chiude la finestra
-        //new UI_Game().setVisible(true);  // Avvia il gioco (esempio)
+        parentFrame.dispose();
+        dispose(); // Chiude UI_NewGame
+        EventQueue.invokeLater(() -> {
+            UI_Game game = new UI_Game(playerName);
+            game.setVisible(true);
+        });
     }
 
     /**
@@ -230,6 +242,18 @@ public class UI_NewGame extends UI_Abstract {
                 "Errore", JOptionPane.ERROR_MESSAGE);  // Mostra un messaggio di errore
             System.exit(1);  // Termina l'applicazione
         }
+    }
+    
+    /**
+     * Applica le impostazioni di stile personalizzate ai dialoghi Swing.
+     */
+    private void applyDialogStyles() {
+        UIManager.put("OptionPane.background", UI_Config.BACKGROUND_COLOR);
+        UIManager.put("Panel.background", UI_Config.BACKGROUND_COLOR);
+        UIManager.put("Button.background", UI_Config.BUTTON_BASE_COLOR);
+        UIManager.put("Button.foreground", UI_Config.TEXT_COLOR);
+        UIManager.put("OptionPane.messageFont", UI_Config.getNormalFont().deriveFont(14f));
+        UIManager.put("OptionPane.messageForeground", UI_Config.TEXT_COLOR);
     }
 
     /**

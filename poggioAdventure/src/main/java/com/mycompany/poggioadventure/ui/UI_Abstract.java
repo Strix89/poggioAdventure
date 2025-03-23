@@ -1,5 +1,6 @@
 package com.mycompany.poggioadventure.ui;
 
+import com.formdev.flatlaf.FlatLightLaf;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
@@ -33,11 +34,20 @@ public abstract class UI_Abstract extends JFrame {
      * - Altre proprietà generali
      */
     private void initUI() {
+        try {
+            FlatLightLaf.setup();  // Configura il tema FlatLaf light per l'interfaccia
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, 
+                "Errore nel caricamento dello stile UI", 
+                "Errore", 
+                JOptionPane.ERROR_MESSAGE);
+            UI_Config.getExitDefaultOp();
+        }
         setTitle(getWindowTitle());
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         getContentPane().setLayout(new BorderLayout(10, 10));
         getContentPane().setBackground(UI_Config.BACKGROUND_COLOR);
-
+        setIconImage(UI_Config.getShieldImage());
         initComponents();
         setResizable(false);
         setLocationRelativeTo(null);
