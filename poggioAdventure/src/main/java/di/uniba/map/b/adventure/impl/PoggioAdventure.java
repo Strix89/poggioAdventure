@@ -5,6 +5,7 @@
  */
 package di.uniba.map.b.adventure.impl;
 
+import di.uniba.map.b.adventure.ColorText;
 import di.uniba.map.b.adventure.FlowOutput;
 import di.uniba.map.b.adventure.GameDescription;
 import di.uniba.map.b.adventure.parser.ParserOutput;
@@ -13,7 +14,6 @@ import di.uniba.map.b.adventure.type.AdvObjectContainer;
 import di.uniba.map.b.adventure.type.Command;
 import di.uniba.map.b.adventure.type.CommandType;
 import di.uniba.map.b.adventure.type.Room;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import di.uniba.map.b.adventure.GameObservable;
@@ -35,9 +35,9 @@ import di.uniba.map.b.adventure.GameObserver;
  * La classe FireHouseGame estende GameDescription che è una classe astratta che contiene la struttura base del gioco
  * e implementa l'interfaccia GameObservable che permette di notificare gli observer quando avviene un'azione.
  *
- * @author pierpaolo
+ * @author pierpaolo & Strix89
  */
-public class PoggioAdventureGame extends GameDescription implements GameObservable {
+public class PoggioAdventure extends GameDescription implements GameObservable {
 
     private final List<GameObserver> observer = new ArrayList<>();
 
@@ -191,7 +191,7 @@ public class PoggioAdventureGame extends GameDescription implements GameObservab
         parserOutput = p;
         messages.clear();
         if (p.getCommand() == null) {
-            out.writeln("Non ho capito cosa devo fare! Prova con un altro comando.");
+            out.writeln("Non ho capito cosa devo fare! Prova con un altro comando.", ColorText.BRIGHT_RED);
         } else {
             Room cr = getCurrentRoom();
             notifyObservers();
@@ -199,14 +199,14 @@ public class PoggioAdventureGame extends GameDescription implements GameObservab
             if (!messages.isEmpty()) {
                 for (String m : messages) {
                     if (m.length() > 0) {
-                        out.writeln(m);
+                        out.writeln(m, ColorText.WHITE);
                     }
                 }
             }
             if (move) {
-                out.writeln(getCurrentRoom().getName());
-                out.writeln("================================================");
-                out.writeln(getCurrentRoom().getDescription());
+                out.writeln("\n" + getCurrentRoom().getName(), ColorText.YELLOW);
+                out.writeln("================================================", ColorText.WHITE);
+                out.writeln(getCurrentRoom().getDescription(), ColorText.WHITE);
             }
         }
     }
@@ -252,4 +252,16 @@ public class PoggioAdventureGame extends GameDescription implements GameObservab
         return "Sei appena tornato a casa e non sai cosa fare.\nTi ricordi che non hai ancora utilizzato quel fantastico regalo di tua zia Lina.\n"
                 + "Sarà il caso di cercarlo e di giocarci!\n";
     }
+
+    @Override
+    public String getGameVersion() {
+        return 
+        "==================================================\n" +
+        "*      PoggioAdventure .v0.1 - 2024-2025         *\n" +
+        "*                 developed by:                  *\n" +
+        "*      Strix89 | MikeRvsso | Elia-Valenza26      *\n" +
+        "==================================================\n";
+    }
+    
+    
 }

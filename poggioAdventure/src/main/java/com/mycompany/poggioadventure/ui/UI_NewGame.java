@@ -1,6 +1,5 @@
 package com.mycompany.poggioadventure.ui;
 
-import com.formdev.flatlaf.FlatLightLaf;
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
@@ -18,7 +17,7 @@ public class UI_NewGame extends UI_Abstract {
     private JTextField nameField;  // Campo di testo per inserire il nome del giocatore
     private JButton startButton;   // Pulsante per avviare la nuova partita
     private JLabel titleLabel;     // Etichetta per il titolo della finestra
-    private JFrame parentFrame = new JFrame(); 
+    private JFrame parentFrame = null; 
 
     /**
      * Costruttore della classe.Chiama il costruttore della superclasse UI_Abstract
@@ -203,6 +202,7 @@ public class UI_NewGame extends UI_Abstract {
      */
     private void setupEventListeners() {
         startButton.addActionListener(e -> handleStartGame());  // Gestisce l'avvio del gioco
+        nameField.addActionListener(e -> handleStartGame());
     }
 
     /**
@@ -217,7 +217,7 @@ public class UI_NewGame extends UI_Abstract {
                 JOptionPane.WARNING_MESSAGE);  // Mostra un messaggio di errore
             return;
         }
-        parentFrame.dispose();
+        if(parentFrame != null) parentFrame.dispose();
         dispose(); // Chiude UI_NewGame
         EventQueue.invokeLater(() -> {
             UI_Game game = new UI_Game(playerName);
@@ -231,7 +231,6 @@ public class UI_NewGame extends UI_Abstract {
      */
     public static void main(String[] args) {
         try {
-            FlatLightLaf.setup();  // Configura il tema FlatLaf light
             EventQueue.invokeLater(() -> {
                 UI_NewGame mainWindow = new UI_NewGame();  // Crea la finestra principale
                 mainWindow.setVisible(true);  // Rende la finestra visibile

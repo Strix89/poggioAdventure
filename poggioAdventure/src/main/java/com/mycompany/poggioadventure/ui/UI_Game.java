@@ -1,14 +1,12 @@
 package com.mycompany.poggioadventure.ui;
-
-import com.formdev.flatlaf.FlatLightLaf;
+import di.uniba.map.b.adventure.ColorText;
 import di.uniba.map.b.adventure.Engine;
 import di.uniba.map.b.adventure.FlowOutput;
 import di.uniba.map.b.adventure.impl.GUIOutput;
-import di.uniba.map.b.adventure.impl.PoggioAdventureGame;
+import di.uniba.map.b.adventure.impl.PoggioAdventure;
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -29,7 +27,7 @@ public class UI_Game extends UI_Abstract {
     private static final int WINDOW_HEIGHT = 550;  // Altezza della finestra in pixel
 
     // Componenti principali dell'interfaccia utente
-    private JTextArea gameOutputArea;      // Area di testo per visualizzare i messaggi di gioco
+    private JTextPane gameOutputArea;      // Area di testo per visualizzare i messaggi di gioco
     private JScrollPane outputScrollPane;  // Scroll pane per rendere scrollabile l'area di testo
     private JTextField commandInput;       // Campo di testo per l'inserimento dei comandi
     private JButton sendButton;           // Pulsante per inviare i comandi
@@ -92,11 +90,9 @@ public class UI_Game extends UI_Abstract {
     
     private void initEngineAfterUI(String playerName) {
         FlowOutput guiOutput = new GUIOutput(gameOutputArea);
-        this.gameEngine = new Engine(new PoggioAdventureGame(), playerName, guiOutput);
-
-        // Aggiungi listener per l'input
-        commandInput.addActionListener(this::processCommand);
-        sendButton.addActionListener(this::processCommand);
+        this.gameEngine = new Engine(new PoggioAdventure(), playerName, guiOutput, true);
+        commandInput.addActionListener(e -> processCommand());
+        sendButton.addActionListener(e -> processCommand());
     }
 
     /**
@@ -112,9 +108,10 @@ public class UI_Game extends UI_Abstract {
         panel.setOpaque(false);  // Rende il pannello trasparente
 
         // Configurazione dell'area di testo per i messaggi di gioco
-        gameOutputArea = new JTextArea();
+        gameOutputArea = new JTextPane();
         gameOutputArea.setEditable(false);  // Impedisce la modifica del testo
-        gameOutputArea.setFont(UI_Config.getNormalFont().deriveFont(14f));
+        gameOutputArea.setFont(UI_Config.getNormalFont().deriveFont(18f));
+        gameOutputArea.setForeground(Color.WHITE);
         gameOutputArea.setBackground(new Color(60, 60, 60));  // Colore di sfondo scuro
         outputScrollPane = new JScrollPane(gameOutputArea);
         outputScrollPane.setBorder(createSectionBorder("Log Gioco"));  // Aggiunge un bordo con titolo
@@ -124,7 +121,6 @@ public class UI_Game extends UI_Abstract {
         inputPanel.setOpaque(false);
         commandInput = new JTextField();
         sendButton = createButton("INVIA", UI_Config.BUTTON_BASE_COLOR, 14f);
-        sendButton.addActionListener(this::processCommand);  // Aggiunge l'azione al pulsante
 
         inputPanel.add(commandInput, BorderLayout.CENTER);
         inputPanel.add(sendButton, BorderLayout.EAST);
@@ -252,9 +248,11 @@ public class UI_Game extends UI_Abstract {
 
         // Effetto hover: cambia colore quando il mouse passa sopra il pulsante
         button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 button.setBackground(bgColor.darker());
             }
+            @Override
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 button.setBackground(bgColor);
             }
@@ -289,7 +287,7 @@ public class UI_Game extends UI_Abstract {
         countdownTimer = new Timer(1000, e -> {
             if (remainingSeconds <= 0) {
                 countdownTimer.stop();
-                gameOutputArea.append("\nTempo scaduto!");
+                //gameOutputArea.append("\nTempo scaduto!");
             } else {
                 remainingSeconds--;
                 countdownLabel.setText("Countdown: " + 
@@ -304,13 +302,13 @@ public class UI_Game extends UI_Abstract {
      *
      * @param e Evento di azione generato dal pulsante "INVIA"
      */
-    private void processCommand(ActionEvent e) {
+    private void processCommand() {
         String command = commandInput.getText().trim();
         if (!command.isEmpty()) {
-            gameOutputArea.append("\n> " + command);  // Aggiunge il comando al log
-            commandInput.setText("");  // Resetta il campo di input
-            gameOutputArea.setCaretPosition(gameOutputArea.getDocument().getLength());  // Scorri in basso
-            // TODO: Implementare la logica di elaborazione dei comandi
+            gameEngine.getOutput().write("\nComando Inserito: ", ColorText.WHITE);
+            gameEngine.getOutput().writeln(command + "\n", ColorText.WHITE);
+            gameEngine.processCommand(command);
+            commandInput.setText("");
         }
     }
 
@@ -368,15 +366,6 @@ public class UI_Game extends UI_Abstract {
      * @param args Argomenti della riga di comando (non utilizzati)
      */
     public static void main(String[] args) {
-        try {
-            FlatLightLaf.setup();  // Configura il tema FlatLaf light per l'interfaccia
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(null, 
-                "Errore nel caricamento dello stile UI", 
-                "Errore", 
-                JOptionPane.ERROR_MESSAGE);
-        }
-
         EventQueue.invokeLater(() -> {
             UI_Game gameScreen = new UI_Game();
             gameScreen.setVisible(true);

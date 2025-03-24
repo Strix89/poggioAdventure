@@ -2,19 +2,21 @@ package di.uniba.map.b.adventure;
 
 import static com.mycompany.poggioadventure.ui.UI_Config.getExitDefaultOp;
 import di.uniba.map.b.adventure.impl.ConsoleOutput;
-import di.uniba.map.b.adventure.impl.PoggioAdventureGame;
+import di.uniba.map.b.adventure.impl.PoggioAdventure;
 import di.uniba.map.b.adventure.parser.*;
 import di.uniba.map.b.adventure.type.AdvObject;
 import di.uniba.map.b.adventure.type.CommandType;
 import di.uniba.map.b.adventure.type.Room;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 
 /**
  * L'Engine gestisce l'interazione con l'utente e il flusso di gioco.
@@ -27,135 +29,108 @@ public class Engine {
     private String playerName;
     private TimeManager timeManager;
     private final FlowOutput output;
+    private boolean guiMode;
 
     /**
      * Costruttore dell'Engine.
      *
      * @param game Istanza della classe che implementa GameDescription.
      */
-    public Engine(GameDescription game, String playerName, FlowOutput output) {
-        
+    public Engine(GameDescription game, String playerName, FlowOutput output, boolean guiMode) {
+        this.guiMode = guiMode;
         this.game = game;
         this.playerName = playerName;
         this.output = output;
         try {
             this.game.init();
         } catch (Exception ex) {
-            System.err.println(ex);
+            if (guiMode) {
+                JOptionPane.showMessageDialog(null,
+                    "Errore critico nel caricamento dell'Engine: " + ex.getMessage(),
+                    "Errore", JOptionPane.ERROR_MESSAGE);  // Mostra un messaggio di errore
+            } else {
+                Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, 
+                    "Errore critico caricamento dell'Engine", ex);
+            }
         }
 
         try {
             Set<String> stopWords = ResourceLoader.loadFileListInSet(new File(ResourceLoader.STOPWORDS_PATH));
             parser = new Parser(stopWords);
             
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             // Se si verifica un errore durante il caricamento delle risorse, registra l'errore e termina il programma
-            Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, 
-                    "Errore caricamento STOPWORDS", ex);
+            if (guiMode) {
+                JOptionPane.showMessageDialog(null,
+                    "Errore critico nel caricamento delle STOPWORDS: " + ex.getMessage(),
+                    "Errore", JOptionPane.ERROR_MESSAGE);  // Mostra un messaggio di errore
+            } else {
+                Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, 
+                    "Errore critico caricamento STOPWORDS", ex);
+            }
             getExitDefaultOp(); // Termina il programma con codice di uscita 1
         }
+        output.writeln(game.getGameVersion(), ColorText.RED);
+        output.writeln(game.getWelcomeMsg(), ColorText.WHITE);
+        output.write("\nTi trovi qui: ", ColorText.WHITE);
+        output.writeln(game.getCurrentRoom().getName(), ColorText.BRIGHT_YELLOW);
+        output.writeln(game.getCurrentRoom().getDescription(), ColorText.WHITE);
+        printCursor();
         // Inizializza TimeManager utilizzando i valori di default
         timeManager = new TimeManager();
     }
 
     /**
      * Metodo che avvia l'esecuzione del gioco.
+     * @param command
      */
+    public void processCommand(String command) {
+        Room previousRoom = game.getCurrentRoom();
+        List<AdvObject> previousInventory = new ArrayList<>(game.getInventory());
+        List<AdvObject> previousObjInRoom = new ArrayList<>(game.getCurrentRoom().getObjects());
+
+        ParserOutput p = parser.parse(command, game.getCommands(), 
+            game.getCurrentRoom().getObjects(), game.getInventory());
+
+        if (p == null || p.getCommand() == null) {
+            output.writeln("Non capisco quello che mi vuoi dire.", ColorText.BRIGHT_RED);
+        } else {
+            game.nextMove(p, output);
+
+            // Gestione comandi speciali
+            if (p.getCommand().getType() == CommandType.END) {
+                output.writeln("Sei un fifone, addio!", ColorText.RED);
+                System.exit(0);
+            } else if (game.getCurrentRoom() == null) {
+                output.writeln("La tua avventura termina qui! Complimenti!", ColorText.YELLOW);
+                System.exit(0);
+            }
+        }
+        printCursor();
+    }
+
+    // Modifica execute()
     public void execute() {
         if (parser == null) {
-            System.err.println("Errore critico: il parser non è stato inizializzato correttamente. Impossibile eseguire il gioco.");
+            System.err.println("Errore critico: parser non inizializzato");
             return;
         }
 
-        Scanner scanner = new Scanner(System.in);
-        
-        output.writeln();
-        output.writeln("================================");
-        output.writeln("* Adventure v. 0.4 - 2023-2024 *");
-        output.writeln("*         developed by         *");
-        output.writeln("*       Pierpaolo Basile       *");
-        output.writeln("================================");
-        output.writeln();
-
-        LoggerInput logger = new LoggerInput(playerName); 
-
-        // Mostra i salvataggi disponibili
-        //SaveGame.listSaves();
-
-        // Chiedere se si vuole caricare una partita salvata
-        output.write("\nVuoi caricare una partita salvata? (si/no): ");
-        String choice = scanner.nextLine().trim().toLowerCase();
-
-        if (choice.equals("si")) {
-            output.write("Inserisci il nome del file di salvataggio: ");
-            String fileName = scanner.nextLine().trim();
-
-            GameState loadedState = SaveGame.loadGame(fileName);
-            if (loadedState != null) {
-                game.setCurrentRoom(loadedState.getCurrentRoom());
-                game.getInventory().clear();
-                game.getInventory().addAll(loadedState.getInventory());
-                output.write("\nPartita caricata con successo!");
-            } else {
-                output.write("\nCaricamento fallito. Inizio una nuova partita.");
+        if(!guiMode) {
+            try (Scanner scanner = new Scanner(System.in)) {
+                cliGameLoop(scanner);
             }
         }
-
-        // Avvio del gioco
-        output.writeln("\n" + game.getWelcomeMsg());
-        output.writeln("Ti trovi qui: " + game.getCurrentRoom().getName());
-        output.writeln();
-        output.writeln(game.getCurrentRoom().getDescription());
-        output.writeln();
-        output.write("?> ");
-        //timeManager.start();
-
-        while (scanner.hasNextLine()) {
-            String command = scanner.nextLine().trim();
-            
-            // Salvataggio dello stato precedente del gioco
-            Room previousRoom = game.getCurrentRoom();
-            List<AdvObject> previousInventory = new ArrayList<>(game.getInventory());
-            List<AdvObject> previousObjInRoom = new ArrayList<>(game.getCurrentRoom().getObjects());
-        
-            ParserOutput p = parser.parse(command, game.getCommands(), game.getCurrentRoom().getObjects(), game.getInventory());
-        
-            if (p == null || p.getCommand() == null) {
-                output.writeln("Non capisco quello che mi vuoi dire.");
-            } else {
-                // Esegue il comando
-                game.nextMove(p, output);
-        
-                // Controlla se lo stato del gioco è cambiato
-                boolean roomChanged = !previousRoom.equals(game.getCurrentRoom()); // Se la stanza è cambiata
-                boolean inventoryChanged = !previousInventory.equals(game.getInventory()); // Se l'inventario è cambiato
-                boolean objectsInRoomChanged = !previousObjInRoom.equals(game.getCurrentRoom().getObjects()); // Se gli oggetti nella stanza sono cambiati
-                boolean isLookAtCommand = p.getCommand().getType() == CommandType.LOOK_AT; // Se il comando è di tipo "osserva"
-        
-                // Registra il comando solo se ha prodotto un cambiamento di stato
-                if (roomChanged || inventoryChanged || objectsInRoomChanged || isLookAtCommand) {
-                    logger.logInput(command);
-                }
-        
-                if (p.getCommand().getType() == CommandType.END) {
-                    output.writeln("Sei un fifone, addio!");
-                    scanner.close();
-                    break;
-                } else if (p.getCommand().getType() == CommandType.SAVE) {
-                    saveGame();
-                    output.writeln("Ci rivediamo presto per continuare la tua avventura!");
-                    scanner.close();
-                    System.exit(0);
-                } else if (game.getCurrentRoom() == null) {
-                    output.writeln("La tua avventura termina qui! Complimenti!");
-                    System.exit(0);
-                }
-            }
-            output.write("?> ");
-        }
-        timeManager.stop();
     }
-
+    
+    private void cliGameLoop(Scanner scanner) {
+        // Implementazione originale del loop per CLI
+        while (true) {
+            String command = scanner.nextLine().trim();
+            processCommand(command);
+            if (game.getCurrentRoom() == null) break;
+        }
+    }
     /**
      * Metodo per salvare il gioco.
      */
@@ -164,11 +139,26 @@ public class Engine {
         SaveGame.saveGame(playerName, chapter, game.getCurrentRoom(), game.getInventory());
     }
 
+    public FlowOutput getOutput() {
+        return output;
+    }
+
     /**
      * Metodo main per avviare il gioco.
+     * @param args
      */
     public static void main(String[] args) {
-        Engine engine = new Engine(new PoggioAdventureGame(), "NONE", new ConsoleOutput());
-        engine.execute();
+        Engine consoleEngine = new Engine(new PoggioAdventure(), "NONE", new ConsoleOutput(), false);
+        consoleEngine.execute();
     }
+    
+    public GameDescription getGame() {
+        return game;
+    }
+    
+    private void printCursor(){
+        if (this.guiMode) output.write("", ColorText.WHITE);
+        else output.write("\n?> ", ColorText.WHITE);
+    }
+    
 }
