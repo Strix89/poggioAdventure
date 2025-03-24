@@ -75,10 +75,11 @@ public abstract class GameDescription {
 
     /**
      *
-     * @param p
+     * @param list
      * @param out
      */
-    public abstract void nextMove(ParserOutput p, PrintStream out);
+    public abstract void nextMove(List<ParserOutput> list, PrintStream out);
+
     
     /**
      *

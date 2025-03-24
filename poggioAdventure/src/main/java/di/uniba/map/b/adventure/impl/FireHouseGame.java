@@ -139,10 +139,17 @@ public class FireHouseGame extends GameDescription implements GameObservable {
          */
         AdvObject battery = new AdvObject(1, "batteria", "Un pacco di batterie, chissà se sono cariche.");
         battery.setAlias(new String[]{"batterie", "pile", "pila"});
+        battery.setPushable(true); //metodo che setta la batteria come non spingibile
         bathroom.getObjects().add(battery);
         AdvObject scopettino = new AdvObject(5, "scopettino", "Uno scopettino per pulire il cesso.");
         scopettino.setAlias(new String[]{"scopa", "spazzolino", "scopettino"});
+        scopettino.setPushable(true);
         bathroom.getObjects().add(scopettino);
+        AdvObjectContainer armadietto = new AdvObjectContainer(6, "armadietto", "Un piccolo armadietto da bagno");
+        armadietto.setAlias(new String[]{"mobiletto", "cassettiera"});
+        armadietto.setOpenable(true);
+        bathroom.getObjects().add(armadietto);
+        armadietto.add(battery);
 
 
         AdvObjectContainer wardrobe = new AdvObjectContainer(2, "armadio", "Un semplice armadio.");
@@ -185,35 +192,46 @@ public class FireHouseGame extends GameDescription implements GameObservable {
         setCurrentRoom(hall); //setta la stanza iniziale del giocatore (nel  nostro caso sarà ingresso)
     }
 
-    /**
-     * Metodo che gestisce il comando successivo
-     * @param p
-     * @param out
-     */
     @Override
-    public void nextMove(ParserOutput p, PrintStream out) {
-        parserOutput = p;
+    public void nextMove(List<ParserOutput> list, PrintStream out) {
+
         messages.clear();
-        if (p.getCommand() == null) {
-            out.println("Non ho capito cosa devo fare! Prova con un altro comando.");
-        } else {
-            Room cr = getCurrentRoom();
+
+        Room initialRoom = getCurrentRoom(); // Salva la stanza iniziale
+
+        for (ParserOutput p : list) {
+            this.parserOutput = p;
+            if (p.getCommand() == null) {
+                out.println("Non ho capito cosa devo fare! Prova con un altro comando.");
+                continue;
+            }
+
             notifyObservers();
-            boolean move = !cr.equals(getCurrentRoom()) && getCurrentRoom() != null;
+
             if (!messages.isEmpty()) {
                 for (String m : messages) {
-                    if (m.length() > 0) {
+                    if (!m.trim().isEmpty()) {
                         out.println(m);
                     }
                 }
+                messages.clear();
             }
-            if (move) {
-                out.println(getCurrentRoom().getName());
-                out.println("================================================");
-                out.println(getCurrentRoom().getDescription());
+
+            // Se il gioco termina (es. stanza == null), esci subito
+            if (getCurrentRoom() == null) {
+                return;
             }
         }
+
+        // Se alla fine del ciclo la stanza è cambiata, stampala una sola volta
+        if (!getCurrentRoom().equals(initialRoom)) {
+            out.println(getCurrentRoom().getName());
+            out.println("================================================");
+            out.println(getCurrentRoom().getDescription());
+        }
     }
+
+    
 
 
     /** 

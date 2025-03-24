@@ -108,7 +108,7 @@ public class Engine {
         while (scanner.hasNextLine()) {
             String command = scanner.nextLine().trim();
             
-            // Usa il parser migliorato per ottenere una lista di comandi
+            //utilizzo del parser per ottenere una lista di comandi
             List<ParserOutput> outputs = parser.parseMultiple(command, game.getCommands(), 
                                                          game.getCurrentRoom().getObjects(), 
                                                          game.getInventory());
@@ -130,7 +130,7 @@ public class Engine {
                         commandExecuted = true;
                         
                         // Esegue il comando
-                        game.nextMove(p, System.out);
+                        game.nextMove(List.of(p), System.out);
                         
                         // Controlla se il gioco deve terminare
                         if (p.getCommand().getType() == CommandType.END) {

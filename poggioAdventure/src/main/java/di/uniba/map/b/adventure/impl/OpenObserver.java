@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package di.uniba.map.b.adventure.impl;
 
 import di.uniba.map.b.adventure.GameDescription;
@@ -9,88 +5,87 @@ import di.uniba.map.b.adventure.parser.ParserOutput;
 import di.uniba.map.b.adventure.type.AdvObject;
 import di.uniba.map.b.adventure.type.AdvObjectContainer;
 import di.uniba.map.b.adventure.type.CommandType;
-import java.util.Iterator;
+import java.util.List;
 import di.uniba.map.b.adventure.GameObserver;
 
-/**
- *
- * @author pierpaolo
- */
 public class OpenObserver implements GameObserver {
 
-    /** 
-     * La classe OpenObserver gestisce l'azione di apertura di oggetti nel gioco. 
-     * Gestisce sia oggetti nella stanza corrente che nell'inventario del giocatore. 
-     * Se un oggetto è un contenitore, gli oggetti al suo interno vengono trasferiti alla stanza o all'inventario a seconda della loro posizione. 
-     * Fornisce feedback al giocatore attraverso messaggi dettagliati su cosa è stato aperto e su eventuali errori o restrizioni
+    /**
+     * La classe OpenObserver gestisce l'apertura di oggetti, supportando:
+     * - Più oggetti contemporaneamente (comandi multipli)
+     * - Oggetti contenitori (AdvObjectContainer)
      *
-     * @param description
-     * @param parserOutput
-     * @return
+     * MIGLIORAMENTO:
+     * In questa versione, gli oggetti contenuti nei contenitori NON vengono più
+     * rilasciati automaticamente nella stanza o nell'inventario.
+     * Viene solo mostrato il contenuto, lasciando al giocatore la scelta se
+     * raccoglierli esplicitamente tramite "prendi".
+     *
+     * Questo evita comportamenti indesiderati e rende il gameplay più controllato.
      */
     @Override
     public String update(GameDescription description, ParserOutput parserOutput) {
         StringBuilder msg = new StringBuilder();
+
         if (parserOutput.getCommand().getType() == CommandType.OPEN) {
-            /*ATTENZIONE: quando un oggetto contenitore viene aperto, tutti gli oggetti contenuti
-                * vengongo inseriti nella stanza o nell'inventario a seconda di dove si trova l'oggetto contenitore.
-                * Potrebbe non esssere la soluzione ottimale.( Commento di PippoKill)
-             */
-            if (parserOutput.getObject() == null && parserOutput.getInvObject() == null) { //controlla se l'oggetto è presente nella stanza o nell'inventario
-                msg.append("Non c'è niente da aprire qui."); 
-            } else {
-                if (parserOutput.getObject() != null) { 
-                    if (parserOutput.getObject().isOpenable() && parserOutput.getObject().isOpen() == false) { //controlla se l'oggetto è apribile
-                        if (parserOutput.getObject() instanceof AdvObjectContainer) {  //controlla se l'oggetto è un contenitore, ovvero un oggetto che può contenere altri oggetti
-                            msg.append("Hai aperto: ").append(parserOutput.getObject().getName()); //messaggio di conferma
-                            AdvObjectContainer c = (AdvObjectContainer) parserOutput.getObject();  //crea un nuovo oggetto AdvObjectContainer
-                            if (!c.getList().isEmpty()) { //controlla se la lista degli oggetti contenuti nell'oggetto è vuota
-                                msg.append(c.getName()).append(" contiene:"); //
-                                Iterator<AdvObject> it = c.getList().iterator();//crea un nuovo iteratore per scorrere la lista degli oggetti contenuti nell'oggetto
-                                while (it.hasNext()) {
-                                    AdvObject next = it.next(); //restituisce l'oggetto successivo nella lista
-                                    description.getCurrentRoom().getObjects().add(next); //aggiunge l'oggetto alla stanza
-                                    msg.append(" ").append(next.getName()); //aggiunge il nome dell'oggetto alla stringa
-                                    it.remove(); //rimuove l'oggetto dalla lista
-                                }
-                                msg.append("\n"); 
-                            }
-                            parserOutput.getObject().setOpen(true); //aggiorna la variabile booleana per aprire l'oggetto
-                        } else {
-                            msg.append("Hai aperto: ").append(parserOutput.getObject().getName()); 
-                            parserOutput.getObject().setOpen(true); //aggiorna la variabile booleana per aprire l'oggetto
-                        }
-                    } else {
-                        msg.append("Non puoi aprire questo oggetto.");
-                    }
+            boolean interacted = false;
+
+            // Unione degli oggetti della stanza e dell'inventario
+            List<AdvObject> allObjects = parserOutput.getObjects();
+            allObjects.addAll(parserOutput.getInvObjects());
+
+            // Se non ci sono oggetti validi
+            if (allObjects.isEmpty()) {
+                msg.append("Non c'è niente da aprire qui.");
+                return msg.toString();
+            }
+
+            // Itera su tutti gli oggetti individuati nel comando
+            for (AdvObject obj : allObjects) {
+                if (obj == null) continue;
+
+                if (!obj.isOpenable()) {
+                    msg.append("Non puoi aprire questo oggetto: ").append(obj.getName()).append("\n");
+                    continue;
                 }
-                if (parserOutput.getInvObject() != null) {
-                    if (parserOutput.getInvObject().isOpenable() && parserOutput.getInvObject().isOpen() == false) { 
-                        if (parserOutput.getInvObject() instanceof AdvObjectContainer) {
-                            AdvObjectContainer c = (AdvObjectContainer) parserOutput.getInvObject();
-                            if (!c.getList().isEmpty()) {
-                                msg.append(c.getName()).append(" contiene:");
-                                Iterator<AdvObject> it = c.getList().iterator();
-                                while (it.hasNext()) {
-                                    AdvObject next = it.next();
-                                    description.getInventory().add(next);
-                                    msg.append(" ").append(next.getName());
-                                    it.remove();
-                                }
-                                msg.append("\n");
-                            }
-                            parserOutput.getInvObject().setOpen(true);
-                        } else {
-                            parserOutput.getInvObject().setOpen(true);
-                        }
-                        msg.append("Hai aperto nel tuo inventario: ").append(parserOutput.getInvObject().getName());
-                    } else {
-                        msg.append("Non puoi aprire questo oggetto.");
-                    }
+
+                if (obj.isOpen()) {
+                    msg.append(obj.getName()).append(" è già aperto.\n");
+                    continue;
                 }
+
+                obj.setOpen(true);
+                msg.append("Hai aperto: ").append(obj.getName()).append("\n");
+
+                // Gestione dei contenitori
+                if (obj instanceof AdvObjectContainer) {
+                    AdvObjectContainer container = (AdvObjectContainer) obj;
+
+                    // Mostra il contenuto del contenitore SENZA svuotarlo
+                    if (container.getList().isEmpty()) {
+                        msg.append("Ma non contiene nulla.\n");
+                    } else {
+                        msg.append(container.getName()).append(" contiene:\n");
+                        for (AdvObject inner : container.getList()) {
+                            msg.append(" - ").append(inner.getName()).append(": ").append(inner.getDescription()).append("\n");
+                        }
+                        msg.append("Puoi ora raccogliere questi oggetti se lo desideri.\n");
+                    }
+
+                    // MIGLIORAMENTO:
+                    // Prima: tutti gli oggetti venivano rimossi dal contenitore e spostati nella stanza/inventario
+                    // Ora: gli oggetti restano nel contenitore e devono essere raccolti manualmente
+                }
+
+                interacted = true;
+            }
+
+            // Se nessun oggetto è stato effettivamente aperto
+            if (!interacted) {
+                msg.append("Non ci sono oggetti che puoi aprire.");
             }
         }
+
         return msg.toString();
     }
-
 }
