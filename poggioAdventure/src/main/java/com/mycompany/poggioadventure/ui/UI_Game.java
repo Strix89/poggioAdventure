@@ -2,6 +2,7 @@ package com.mycompany.poggioadventure.ui;
 import di.uniba.map.b.adventure.ColorText;
 import di.uniba.map.b.adventure.Engine;
 import di.uniba.map.b.adventure.FlowOutput;
+import di.uniba.map.b.adventure.SaveGame;
 import di.uniba.map.b.adventure.impl.GUIOutput;
 import di.uniba.map.b.adventure.impl.PoggioAdventure;
 import javax.swing.*;
@@ -35,6 +36,7 @@ public class UI_Game extends UI_Abstract {
     private JLabel timeLabel;             // Etichetta per visualizzare il tempo di gioco trascorso
     private JLabel countdownLabel;        // Etichetta per visualizzare il countdown del livello
     private JPanel outputImagePane;       // Pannello contenitore per l'immagine della stanza
+    private JLabel playerNameLabel;
 
     // Timer e gestione del tempo
     private Timer gameTimer;              // Timer per aggiornare il tempo totale di gioco
@@ -55,6 +57,7 @@ public class UI_Game extends UI_Abstract {
     
     public UI_Game() {
         super();
+        initEngineAfterUI("NONE");
     }
 
     /**
@@ -91,6 +94,7 @@ public class UI_Game extends UI_Abstract {
     private void initEngineAfterUI(String playerName) {
         FlowOutput guiOutput = new GUIOutput(gameOutputArea);
         this.gameEngine = new Engine(new PoggioAdventure(), playerName, guiOutput, true);
+        playerNameLabel.setText(playerName);
         commandInput.addActionListener(e -> processCommand());
         sendButton.addActionListener(e -> processCommand());
     }
@@ -132,59 +136,97 @@ public class UI_Game extends UI_Abstract {
     }
 
     /**
-     * Crea e configura il pannello destro, che contiene:
-     * - Un'immagine della stanza corrente
-     * - Informazioni temporali (timer di gioco e countdown)
-     * - Pulsanti di controllo (salva/esci)
-     *
-     * @return JPanel configurato per il lato destro della finestra
-     */
-    private JPanel createRightPanel() {
-        JPanel panel = new JPanel(new BorderLayout(10, 10));
-        panel.setOpaque(false);
+    * Crea e configura il pannello destro, che contiene:
+    * - Un'immagine della stanza corrente
+    * - Informazioni temporali (timer di gioco e countdown)
+    * - Pulsanti di controllo (salva/esci)
+    *
+    * @return JPanel configurato per il lato destro della finestra
+    */
+   private JPanel createRightPanel() {
+       JPanel panel = new JPanel(new BorderLayout(10, 10));
+       panel.setOpaque(false);
 
-        // Configurazione del pannello per l'immagine della stanza
-        imagePanel = new JPanel(new BorderLayout());
-        imagePanel.setBackground(new Color(60, 60, 60));  // Colore di sfondo scuro
-        outputImagePane = new JPanel(new BorderLayout());
-        outputImagePane.setBackground(UI_Config.BACKGROUND_COLOR);
-        outputImagePane.add(imagePanel);
-        outputImagePane.setBorder(createSectionBorder("Stanza Corrente"));
-        outputImagePane.setPreferredSize(new Dimension(
-            (int)(WINDOW_WIDTH * 0.35),  // 35% della larghezza totale
-            (int)(WINDOW_HEIGHT * 0.45)   // 45% dell'altezza totale
-        ));
+       // Pannello per l'immagine della stanza
+       imagePanel = new JPanel(new BorderLayout());
+       imagePanel.setBackground(new Color(60, 60, 60));
+       outputImagePane = new JPanel(new BorderLayout());
+       outputImagePane.setBackground(UI_Config.BACKGROUND_COLOR);
+       outputImagePane.add(imagePanel);
+       outputImagePane.setBorder(createSectionBorder("Stanza Corrente"));
+       outputImagePane.setPreferredSize(new Dimension(
+           (int)(WINDOW_WIDTH * 0.35),
+           (int)(WINDOW_HEIGHT * 0.45)
+       ));
 
-        // Configurazione del pannello informazioni e pulsanti
-        JPanel infoPanel = new JPanel(new BorderLayout(10, 20));
-        infoPanel.setOpaque(false);
+       // Pannello per le informazioni e i pulsanti
+       JPanel infoPanel = new JPanel(new BorderLayout(10, 20));
+       infoPanel.setOpaque(false);
 
-        // Configurazione delle etichette per il tempo e il countdown
-        JPanel timePanel = new JPanel(new GridLayout(2, 1, 10, 5));
-        timePanel.setOpaque(false);
-        timeLabel = new JLabel("Tempo: 00:00:00");
-        countdownLabel = new JLabel("Level Countdowns: --:--");
-        timePanel.add(timeLabel);
-        timePanel.add(countdownLabel);
+       // Pannello per le etichette (nome, tempo, countdown)
+       JPanel timePanel = new JPanel();
+       timePanel.setLayout(new BoxLayout(timePanel, BoxLayout.Y_AXIS));
+       timePanel.setOpaque(false);
 
-        // Configurazione dei pulsanti di controllo (salva/esci)
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
-        buttonPanel.setOpaque(false);
-        JButton saveButton = createButton("SALVA", new Color(80, 120, 80), 14f);
-        JButton exitButton = createButton("ESCI", new Color(120, 80, 80), 14f);
-        saveButton.addActionListener(e -> saveGame());
-        exitButton.addActionListener(e -> confirmExit());
-        buttonPanel.add(saveButton);
-        buttonPanel.add(exitButton);
+       // Inizializza le etichette
+       timeLabel = new JLabel("Tempo: 00:00:00");
+       countdownLabel = new JLabel("Countdown: --:--");
+       playerNameLabel = new JLabel("NONE"); 
+       playerNameLabel.setFont(UI_Config.getBoldFont().deriveFont(20f));
+       timeLabel.setFont(UI_Config.getNormalFont().deriveFont(16f));
+       countdownLabel.setFont(UI_Config.getNormalFont().deriveFont(16f));
+       playerNameLabel.setForeground(ColorText.WHITE.getSwingColor());
+       timeLabel.setForeground(ColorText.WHITE.getSwingColor());
+       countdownLabel.setForeground(ColorText.RED.getSwingColor());
 
-        infoPanel.add(timePanel, BorderLayout.NORTH);
-        infoPanel.add(buttonPanel, BorderLayout.CENTER);
+       // Player name centrato
+       JPanel playerNameContainer = new JPanel(new FlowLayout(FlowLayout.CENTER));
+       playerNameContainer.setOpaque(false);
+       playerNameContainer.add(playerNameLabel);
 
-        panel.add(outputImagePane, BorderLayout.CENTER);
-        panel.add(infoPanel, BorderLayout.SOUTH);
+       // Pannelli per allineare tempo e countdown a sinistra
+       JPanel timeLabelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+       timeLabelPanel.setOpaque(false);
+       timeLabelPanel.add(timeLabel);
 
-        return panel;
-    }
+       JPanel countdownLabelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+       countdownLabelPanel.setOpaque(false);
+       countdownLabelPanel.add(countdownLabel);
+
+       // Aggiungi gli elementi al timePanel con spaziatura
+       timePanel.add(playerNameContainer);
+       timePanel.add(Box.createVerticalStrut(15)); 
+       timePanel.add(timeLabelPanel);
+       timePanel.add(Box.createVerticalStrut(8)); 
+       timePanel.add(countdownLabelPanel);
+
+       // Pannello per i pulsanti (Salva/Esci)
+       JPanel buttonPanel = new JPanel(new GridLayout(1, 2, 10, 0));
+       buttonPanel.setOpaque(false);
+
+       // Crea pulsanti con dimensioni fisse
+       JButton saveButton = createButton("SALVA", ColorText.NAVY.getSwingColor(), 18f);
+       saveButton.setPreferredSize(new Dimension(160, 45));
+
+       JButton exitButton = createButton("ESCI", ColorText.CRIMSON.getSwingColor(), 18f);
+       exitButton.setPreferredSize(new Dimension(160, 45));
+
+       saveButton.addActionListener(e -> saveGame());
+       exitButton.addActionListener(e -> confirmExit());
+
+       buttonPanel.add(saveButton);
+       buttonPanel.add(exitButton);
+
+       // Assembla i componenti
+       infoPanel.add(timePanel, BorderLayout.NORTH);
+       infoPanel.add(buttonPanel, BorderLayout.CENTER);
+
+       // Aggiungi i pannelli principali
+       panel.add(outputImagePane, BorderLayout.CENTER);
+       panel.add(infoPanel, BorderLayout.SOUTH);
+
+       return panel;
+   }
 
     /**
      * Implementazione del metodo astratto getWindowTitle() della superclasse UI_Abstract.
@@ -306,7 +348,7 @@ public class UI_Game extends UI_Abstract {
         String command = commandInput.getText().trim();
         if (!command.isEmpty()) {
             gameEngine.getOutput().write("\nComando Inserito: ", ColorText.WHITE);
-            gameEngine.getOutput().writeln(command + "\n", ColorText.WHITE);
+            gameEngine.getOutput().writeln(command, ColorText.ORANGE);
             gameEngine.processCommand(command);
             commandInput.setText("");
         }
@@ -338,10 +380,31 @@ public class UI_Game extends UI_Abstract {
      * Mostra un dialogo di conferma per il salvataggio del gioco.
      */
     private void saveGame() {
-        JOptionPane.showMessageDialog(this, 
-            "Gioco salvato con successo!", 
-            "Salvataggio", 
-            JOptionPane.INFORMATION_MESSAGE);
+        new Thread(() -> {
+            try {
+                SaveGame.saveGame(gameEngine, gameEngine.getOutput());
+
+                // Aggiornamento thread-safe della GUI
+                SwingUtilities.invokeLater(() -> {
+                    JOptionPane.showMessageDialog(
+                        UI_Game.this, 
+                        "Salvataggio completato!", 
+                        "Successo", 
+                        JOptionPane.INFORMATION_MESSAGE
+                    );
+                });
+
+            } catch (Exception ex) {
+                SwingUtilities.invokeLater(() -> {
+                    JOptionPane.showMessageDialog(
+                        UI_Game.this, 
+                        "Errore durante il salvataggio:\n" + ex.getMessage(), 
+                        "Errore", 
+                        JOptionPane.ERROR_MESSAGE
+                    );
+                });
+            }
+        }).start();
     }
 
     /**
@@ -355,7 +418,9 @@ public class UI_Game extends UI_Abstract {
 
         if (choice == JOptionPane.YES_OPTION) saveGame();
         if (choice != JOptionPane.CANCEL_OPTION) dispose();
+        if (choice == JOptionPane.CANCEL_OPTION) return;
         
+        // outputScrollPane.set
         UI_Init init = new UI_Init();
         init.setVisible(true);
     }

@@ -40,7 +40,6 @@ public class UI_NewGame extends UI_Abstract {
      */
     @Override
     protected void initComponents() {
-        applyDialogStyles();
         configureFrame();          // Configura la finestra principale
         createComponents();        // Crea i componenti dell'interfaccia
         setupLayout();             // Configura il layout della finestra
@@ -135,7 +134,7 @@ public class UI_NewGame extends UI_Abstract {
             (int)(getPreferredSize().width * 0.7),  // Larghezza del campo di testo
             (int)(getPreferredSize().height * 0.1)  // Altezza del campo di testo
         ));
-        nameField.setFont(UI_Config.getBoldFont().deriveFont(18f));
+        nameField.setFont(UI_Config.getBoldFont().deriveFont(22f));
         mainPanel.add(nameField, gbc);  // Aggiunge il campo di testo al pannello
 
         // Pulsante Start
@@ -220,8 +219,14 @@ public class UI_NewGame extends UI_Abstract {
         if(parentFrame != null) parentFrame.dispose();
         dispose(); // Chiude UI_NewGame
         EventQueue.invokeLater(() -> {
-            UI_Game game = new UI_Game(playerName);
-            game.setVisible(true);
+            try {
+                UI_Game game = new UI_Game(playerName);
+                game.setVisible(true);
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null,
+                    "Errore critico nell'avvio della partita: " + e.getMessage(),
+                    "Errore", JOptionPane.ERROR_MESSAGE);  // Mostra un messaggio di errore
+            }
         });
     }
 
@@ -243,18 +248,6 @@ public class UI_NewGame extends UI_Abstract {
         }
     }
     
-    /**
-     * Applica le impostazioni di stile personalizzate ai dialoghi Swing.
-     */
-    private void applyDialogStyles() {
-        UIManager.put("OptionPane.background", UI_Config.BACKGROUND_COLOR);
-        UIManager.put("Panel.background", UI_Config.BACKGROUND_COLOR);
-        UIManager.put("Button.background", UI_Config.BUTTON_BASE_COLOR);
-        UIManager.put("Button.foreground", UI_Config.TEXT_COLOR);
-        UIManager.put("OptionPane.messageFont", UI_Config.getNormalFont().deriveFont(14f));
-        UIManager.put("OptionPane.messageForeground", UI_Config.TEXT_COLOR);
-    }
-
     /**
      * Implementazione del metodo astratto getWindowTitle() della superclasse UI_Abstract.
      * Restituisce il titolo della finestra.

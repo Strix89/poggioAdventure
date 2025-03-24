@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package di.uniba.map.b.adventure.impl;
 
 import di.uniba.map.b.adventure.ColorText;
@@ -93,7 +88,7 @@ public class PoggioAdventure extends GameDescription implements GameObservable {
         use.setAlias(new String[]{"utilizza", "combina"});
         getCommands().add(use);
         Command save = new Command(CommandType.SAVE, "salva");
-        save.setAlias(new String[]{"salvataggio"});
+        save.setAlias(new String[]{"salva"});
         getCommands().add(save);
         //Rooms
         /*
@@ -211,7 +206,6 @@ public class PoggioAdventure extends GameDescription implements GameObservable {
         }
     }
 
-
     /** 
      *Metodo che permette di aggiungere un observer
      * 
@@ -256,12 +250,10 @@ public class PoggioAdventure extends GameDescription implements GameObservable {
     @Override
     public String getGameVersion() {
         return 
-        "==================================================\n" +
-        "*      PoggioAdventure .v0.1 - 2024-2025         *\n" +
-        "*                 developed by:                  *\n" +
-        "*      Strix89 | MikeRvsso | Elia-Valenza26      *\n" +
-        "==================================================\n";
-    }
-    
-    
+        "\t   ==================================================\n" +
+        "\t  *      PoggioAdventure .v0.1 - 2024-2025         *\n" +
+        "\t  *                 developed by:                  *\n" +
+        "\t  *      Strix89 | MikeRvsso | Elia-Valenza26      *\n" +
+        "\t  ==================================================\n";
+    } 
 }

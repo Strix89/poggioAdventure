@@ -9,11 +9,14 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 
 public class ResourceLoader {
     
-    public static final String STOPWORDS_PATH = "./resources/stopwords"; 
+    public static final String STOPWORDS_PATH = "./resources/stopwords";
+    public static final String SAVES_DIRECTORY = "./sav/";
 
     public static BufferedImage loadImage(String path) throws IOException {
         File imageFile = new File(path);
@@ -30,6 +33,21 @@ public class ResourceLoader {
         }
         return Font.createFont(Font.TRUETYPE_FONT, fontFile);
     }
+    
+    // Verifica e crea la cartella dei salvataggi se non esiste
+    private static void checkSavesDirectory() {
+        File savesDir = new File(SAVES_DIRECTORY);
+        if (!savesDir.exists()) {
+            if (savesDir.mkdirs()) {
+                Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, 
+                    "Cartella dei salvataggi creata: " + SAVES_DIRECTORY);
+            } else {
+                Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, 
+                    "Impossibile creare la cartella dei salvataggi: " + SAVES_DIRECTORY);
+            }
+        }
+    }
+
     /**
      *
      * @param file
@@ -47,7 +65,8 @@ public class ResourceLoader {
     }
 
     // Carica tutte le risorse necessarie
-    public static void loadUIResources() throws IOException, FontFormatException {
+    public static void loadResources() throws IOException, FontFormatException {
+        checkSavesDirectory();
         // Caricamento delle immagini
         UI_Config.setShieldImage(loadImage(UI_Config.getSHIELD_IMAGE_PATH()));
         UI_Config.setAsciiFlipper(loadImage(UI_Config.getASCII_FLIPPER_PATH()));

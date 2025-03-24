@@ -49,6 +49,7 @@ public abstract class UI_Abstract extends JFrame {
         getContentPane().setBackground(UI_Config.BACKGROUND_COLOR);
         setIconImage(UI_Config.getShieldImage());
         initComponents();
+        applyDialogStyles();
         setResizable(false);
         setLocationRelativeTo(null);
     }
@@ -73,5 +74,17 @@ public abstract class UI_Abstract extends JFrame {
         button.setFocusPainted(false);
         button.addActionListener(action);
         return button;
+    }
+    
+    /**
+     * Applica le impostazioni di stile personalizzate ai dialoghi Swing.
+     */
+    private void applyDialogStyles() {
+        UIManager.put("OptionPane.background", UI_Config.BACKGROUND_COLOR);
+        UIManager.put("Panel.background", UI_Config.BACKGROUND_COLOR);
+        UIManager.put("Button.background", UI_Config.BUTTON_BASE_COLOR);
+        UIManager.put("Button.foreground", UI_Config.TEXT_COLOR);
+        UIManager.put("OptionPane.messageFont", UI_Config.getNormalFont().deriveFont(14f));
+        UIManager.put("OptionPane.messageForeground", UI_Config.TEXT_COLOR);
     }
 }

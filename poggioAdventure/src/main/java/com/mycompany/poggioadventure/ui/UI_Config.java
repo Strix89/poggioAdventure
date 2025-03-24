@@ -29,6 +29,7 @@ public final class UI_Config {
     public static final Color BACKGROUND_COLOR = new Color(45, 45, 45); // Colore di sfondo
     public static final Color BUTTON_BASE_COLOR = new Color(100, 100, 100); // Colore base dei pulsanti
     public static final Color BUTTON_HOVER_COLOR = new Color(130, 130, 130); // Colore dei pulsanti al passaggio del mouse
+    public static final Color BUTTON_PRESSED_COLOR = new Color(0, 82, 164);
     public static final Color BORDER_COLOR = new Color(150, 150, 150); // Colore dei bordi
     public static final Color TEXT_COLOR = Color.WHITE; // Colore del testo
 
@@ -69,7 +70,7 @@ public final class UI_Config {
     static {
         try {
             // Carica le risorse dell'interfaccia utente (immagini e font)
-            ResourceLoader.loadUIResources();
+            ResourceLoader.loadResources();
         } catch (IOException | FontFormatException ex) {
             // Se si verifica un errore durante il caricamento delle risorse, registra l'errore e termina il programma
             Logger.getLogger(UI_Config.class.getName()).log(Level.SEVERE, 

@@ -34,7 +34,7 @@ public class OpenObserver implements GameObserver {
         if (parserOutput.getCommand().getType() == CommandType.OPEN) {
             /*ATTENZIONE: quando un oggetto contenitore viene aperto, tutti gli oggetti contenuti
                 * vengongo inseriti nella stanza o nell'inventario a seconda di dove si trova l'oggetto contenitore.
-                * Potrebbe non esssere la soluzione ottimale.( Commento di PippoKill)
+                * Potrebbe non esssere la soluzione ottimale.( Commento di PippoKill )
              */
             if (parserOutput.getObject() == null && parserOutput.getInvObject() == null) { //controlla se l'oggetto è presente nella stanza o nell'inventario
                 msg.append("Non c'è niente da aprire qui."); 

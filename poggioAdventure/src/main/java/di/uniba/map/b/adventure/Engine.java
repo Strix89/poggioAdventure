@@ -10,31 +10,37 @@ import di.uniba.map.b.adventure.type.Room;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.IntStream;
 import javax.swing.JOptionPane;
 
 /**
  * L'Engine gestisce l'interazione con l'utente e il flusso di gioco.
  * Supporta caricamento e salvataggio delle partite.
  */
-public class Engine {
+public class Engine implements Serializable {
 
-    private final GameDescription game;
-    private Parser parser;
+    private final transient GameDescription game;
+    private transient Parser parser;
     private String playerName;
-    private TimeManager timeManager;
-    private final FlowOutput output;
+    private final transient TimeManager timeManager;
+    private final transient FlowOutput output;
     private boolean guiMode;
-
+    private String currentChapter = "Cap1";
     /**
      * Costruttore dell'Engine.
      *
      * @param game Istanza della classe che implementa GameDescription.
+     * @param playerName
+     * @param output
+     * @param guiMode
      */
     public Engine(GameDescription game, String playerName, FlowOutput output, boolean guiMode) {
         this.guiMode = guiMode;
@@ -52,6 +58,7 @@ public class Engine {
                 Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, 
                     "Errore critico caricamento dell'Engine", ex);
             }
+            getExitDefaultOp();
         }
 
         try {
@@ -70,7 +77,7 @@ public class Engine {
             }
             getExitDefaultOp(); // Termina il programma con codice di uscita 1
         }
-        output.writeln(game.getGameVersion(), ColorText.RED);
+        getGameColoredVersion();
         output.writeln(game.getWelcomeMsg(), ColorText.WHITE);
         output.write("\nTi trovi qui: ", ColorText.WHITE);
         output.writeln(game.getCurrentRoom().getName(), ColorText.BRIGHT_YELLOW);
@@ -93,17 +100,24 @@ public class Engine {
             game.getCurrentRoom().getObjects(), game.getInventory());
 
         if (p == null || p.getCommand() == null) {
-            output.writeln("Non capisco quello che mi vuoi dire.", ColorText.BRIGHT_RED);
+            output.writeln("Non capisco quello che mi vuoi dire.", ColorText.ERROR);
         } else {
-            game.nextMove(p, output);
+            // Controlla se il comando è per il salvataggio
+            if (p.getCommand().getType() == CommandType.SAVE) {
+                // Salva il gioco
+                saveGame();
+            } else {
+                // Gestione del movimento o altre azioni
+                game.nextMove(p, output);
 
-            // Gestione comandi speciali
-            if (p.getCommand().getType() == CommandType.END) {
-                output.writeln("Sei un fifone, addio!", ColorText.RED);
-                System.exit(0);
-            } else if (game.getCurrentRoom() == null) {
-                output.writeln("La tua avventura termina qui! Complimenti!", ColorText.YELLOW);
-                System.exit(0);
+                // Gestione dei comandi speciali (esempio, fine gioco)
+                if (p.getCommand().getType() == CommandType.END) {
+                    output.writeln("Sei un fifone, addio!", ColorText.ERROR);
+                    System.exit(0);
+                } else if (game.getCurrentRoom() == null) {
+                    output.writeln("La tua avventura termina qui! Complimenti!", ColorText.NEON_ORANGE);
+                    getExitDefaultOp();
+                }
             }
         }
         printCursor();
@@ -131,13 +145,6 @@ public class Engine {
             if (game.getCurrentRoom() == null) break;
         }
     }
-    /**
-     * Metodo per salvare il gioco.
-     */
-    private void saveGame() {
-        String chapter = "Capitolo1"; // Quando metteremo più capitoli, questo valore dovrà essere calcolato
-        SaveGame.saveGame(playerName, chapter, game.getCurrentRoom(), game.getInventory());
-    }
 
     public FlowOutput getOutput() {
         return output;
@@ -160,5 +167,68 @@ public class Engine {
         if (this.guiMode) output.write("", ColorText.WHITE);
         else output.write("\n?> ", ColorText.WHITE);
     }
+
+    private void getGameColoredVersion() {
+        String version = game.getGameVersion();
+
+        // Suddividi il messaggio in righe e rimuovi eventuali righe vuote
+        String[] lines = Arrays.stream(version.split("\n"))
+                               .filter(line -> !line.trim().isEmpty())
+                               .toArray(String[]::new);
+
+        // Itera con IntStream e applica i colori tramite lambda
+        IntStream.range(0, lines.length).forEach(idx -> {
+            String line = lines[idx];
+            ColorText color;
+
+            // Seleziona il colore in base all'indice
+            if (idx == 0 || idx == lines.length - 1) {
+                color = ColorText.NAVY; // Prima e ultima riga
+            } else if (idx == 1) {
+                color = ColorText.RED; // Seconda riga
+            } else {
+                color = ColorText.YELLOW; // Terza e quarta riga
+            }
+
+            // Stampa con il colore corrispondente
+            output.writeln(line, color);
+        });
+        output.writeln();
+    }
     
+    public void saveGame() {
+        SaveGame.saveGame(this, output);
+    }
+
+    public Parser getParser() {
+        return parser;
+    }
+
+    public void setParser(Parser parser) {
+        this.parser = parser;
+    }
+
+    public String getPlayerName() {
+        return playerName;
+    }
+
+    public void setPlayerName(String playerName) {
+        this.playerName = playerName;
+    }
+
+    public boolean isGuiMode() {
+        return guiMode;
+    }
+
+    public void setGuiMode(boolean guiMode) {
+        this.guiMode = guiMode;
+    }
+
+    public String getCurrentChapter() {
+        return currentChapter;
+    }
+
+    public void setCurrentChapter(String currentChapter) {
+        this.currentChapter = currentChapter;
+    }
 }

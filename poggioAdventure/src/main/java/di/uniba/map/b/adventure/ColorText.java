@@ -3,10 +3,6 @@ package di.uniba.map.b.adventure;
 import java.awt.Color;
 
 /**
- *
- * @author Strix89
- */
-/**
  * Enum per la gestione dei colori di testo in console (ANSI) e GUI (Swing).
  * @author Strix89
  */
@@ -33,6 +29,29 @@ public enum ColorText {
     BRIGHT_MAGENTA("\u001B[95m", new Color(255, 100, 255)),
     BRIGHT_CYAN("\u001B[96m", new Color(100, 255, 255)),
     BRIGHT_WHITE("\u001B[97m", new Color(255, 255, 255)),
+    
+    ORANGE("\u001B[38;2;255;165;0m", new Color(255, 165, 0)),            // Arancione standard
+    DARK_ORANGE("\u001B[38;2;255;140;0m", new Color(255, 140, 0)),       // Arancione scuro
+    LIGHT_ORANGE("\u001B[38;2;255;160;122m", new Color(255, 160, 122)),  // Arancione chiaro
+    BURNT_ORANGE("\u001B[38;2;177;73;7m", new Color(177, 73, 7)),        // Arancione bruciato
+    NEON_ORANGE("\u001B[38;2;255;127;39m", new Color(255, 127, 39)),     // Arancione neone
+    
+    CRIMSON("\u001B[38;2;220;20;60m", new Color(220, 20, 60)),       // Rosso sangue
+    MAROON("\u001B[38;2;128;0;0m", new Color(128, 0, 0)),            // Rosso scuro
+    FIREBRICK("\u001B[38;2;178;34;34m", new Color(178, 34, 34)),     // Rosso arancione
+    ROSE("\u001B[38;2;255;192;203m", new Color(255, 192, 203)),      // Rosso rosa
+
+    // Nuove sfumature di BLU
+    NAVY("\u001B[38;2;0;0;128m", new Color(0, 0, 128)),              // Blu navy
+    SKYBLUE("\u001B[38;2;135;206;235m", new Color(135, 206, 235)),   // Blu cielo
+    TURQUOISE("\u001B[38;2;64;224;208m", new Color(64, 224, 208)),   // Blu-verde acqua
+    INDIGO("\u001B[38;2;75;0;130m", new Color(75, 0, 130)),          // Blu violaceo
+
+    // Nuove sfumature di GIALLO
+    GOLD("\u001B[38;2;255;215;0m", new Color(255, 215, 0)),          // Giallo oro
+    LEMON("\u001B[38;2;255;250;205m", new Color(255, 250, 205)),     // Giallo limone chiaro
+    OLIVE("\u001B[38;2;128;128;0m", new Color(128, 128, 0)),         // Giallo oliva
+    SUNFLOWER("\u001B[38;2;244;213;64m", new Color(244, 213, 64)),   // Giallo girasole
     
     // Semantic colors (per il gioco)
     NPC("\u001B[36m", new Color(0, 255, 255)),       // Ciano (come prima)
