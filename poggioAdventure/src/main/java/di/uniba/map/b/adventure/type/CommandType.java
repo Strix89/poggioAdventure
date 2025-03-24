@@ -115,4 +115,35 @@ public enum CommandType {
      *
      */
     NONE;
+
+    /**
+     * Restituisce il comando opposto a quello corrente.
+     * 
+     * @return il comando opposto. Se il comando corrente è NORD, restituisce SOUTH.
+     *         Se il comando corrente è SOUTH, restituisce NORD. Se il comando 
+     *         corrente è EAST, restituisce WEST. Se il comando corrente è WEST, 
+     *         restituisce EAST. Se nessuno di questi casi è soddisfatto, 
+     *         restituisce NONE.
+     */
+    public CommandType getOpposite() {
+        switch(this) {
+            case NORD: return SOUTH;
+            case SOUTH: return NORD;
+            case EAST: return WEST;
+            case WEST: return EAST;
+            default: return NONE;
+        }
+    }
+
+    public boolean isDirection() {
+        return this == NORD || this == SOUTH || this == EAST || this == WEST;
+    }
+
+    /**
+     * Verifica se il comando rappresenta un movimento (direzioni + WALK_TO)
+     * @return true se è un comando di movimento
+     */
+    public boolean isMovement() {
+        return isDirection() || this == WALK_TO;
+    }
 }
