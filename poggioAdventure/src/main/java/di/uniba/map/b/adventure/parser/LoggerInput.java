@@ -28,17 +28,17 @@ public class LoggerInput {
      * Se il file <playerName>_Input.txt esiste, crea <playerName>2_Input.txt, <playerName>3_Input.txt, ecc.
     */
     private String generateUniqueFileName(String playerName) {
-        File directory = new File("userInput");
+        File directory = new File("./poggioAdventure/resources/userInput");
         if(!directory.exists()){
             directory.mkdirs();
         }
 
-        String baseName = "userInput/" + playerName + "_1" + "_Input.txt";
+        String baseName = "./poggioAdventure/resources/userInput/" + playerName + "_1" + "_Input.txt";
         File file = new File(baseName);
 
         int count = 2;
         while(file.exists()){
-            baseName = "userInput/" + playerName + "_" + count + "_Input.txt";
+            baseName = "./poggioAdventure/resources/userInput/" + playerName + "_" + count + "_Input.txt";
             file = new File(baseName);
             count++;
         }

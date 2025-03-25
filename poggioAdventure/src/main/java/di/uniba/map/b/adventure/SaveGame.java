@@ -11,7 +11,7 @@ import di.uniba.map.b.adventure.type.Room;
 
 public class SaveGame {
 
-    private static final String SAVE_DIR = "./poggioAdventure/save/";
+    private static final String SAVE_DIR = "./poggioAdventure/resources/save/";
 
     public static void saveGame(String playerName, String chapter, Room currentRoom, List<AdvObject> inventory) {
         try {
