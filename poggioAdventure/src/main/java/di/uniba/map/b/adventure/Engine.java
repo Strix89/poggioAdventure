@@ -46,7 +46,7 @@ public class Engine {
             System.err.println(ex);
         }
         // Inizializza TimeManager utilizzando i valori di default
-        timeManager = new TimeManager();
+        //timeManager = new TimeManager();
     }
 
     /**
@@ -59,14 +59,6 @@ public class Engine {
         }
 
         Scanner scanner = new Scanner(System.in);
-        
-        System.out.println();
-        System.out.println("================================");
-        System.out.println("* Adventure v. 0.5 - 2023-2024 *");
-        System.out.println("*         developed by         *");
-        System.out.println("*       Pierpaolo Basile       *");
-        System.out.println("================================");
-        System.out.println();
         
         // Chiedere all'utente il nome giocatore
         System.out.print("Inserisci il tuo nome: ");
@@ -103,7 +95,7 @@ public class Engine {
         System.out.println(game.getCurrentRoom().getDescription());
         System.out.println();
         System.out.print("?> ");
-        timeManager.start();
+        //timeManager.start();
 
         while (scanner.hasNextLine()) {
             String command = scanner.nextLine().trim();
@@ -180,7 +172,7 @@ public class Engine {
             
             System.out.print("?> ");
         }
-        timeManager.stop();
+        //timeManager.stop();
     }
 
     /**
