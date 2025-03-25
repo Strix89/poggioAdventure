@@ -6,15 +6,37 @@ import di.uniba.map.b.adventure.type.Command;
 
 import java.util.*;
 
+/**
+ * La classe Parser è responsabile per l'analisi (parsing) dei comandi immessi dall'utente.
+ * Essa si occupa di riconoscere i comandi, gli oggetti e le congiunzioni tra comandi, restituendo i relativi oggetti e comandi 
+ * che il motore del gioco può eseguire.
+ * 
+ * I comandi possono essere:
+ * - Un singolo comando con un oggetto
+ * - Più comandi concatenati con congiunzioni come "e", "poi", "dopo", "quindi", etc.
+ * - Oggetti multipli per ciascun comando
+ */
 public class Parser {
 
-    private final Set<String> stopwords;
+    private final Set<String> stopwords; // Insieme di parole da ignorare (es. articoli, preposizioni)
     private final Set<String> conjunctions = new HashSet<>(Arrays.asList("e", "poi", "dopo", "quindi", "inoltre", "successivamente"));
 
+    /**
+     * Costruttore della classe Parser. Inizializza il set di stopwords.
+     *
+     * @param stopwords Un insieme di parole da ignorare durante il parsing.
+     */
     public Parser(Set<String> stopwords) {
         this.stopwords = stopwords;
     }
 
+    /**
+     * Controlla se un token corrisponde ad un comando valido.
+     *
+     * @param token La parola da verificare.
+     * @param commands La lista di comandi disponibili nel gioco.
+     * @return L'indice del comando se trovato, altrimenti -1.
+     */
     private int checkForCommand(String token, List<Command> commands) {
         for (int i = 0; i < commands.size(); i++) {
             if (commands.get(i).getName().equals(token) || commands.get(i).getAlias().contains(token)) {
@@ -24,6 +46,13 @@ public class Parser {
         return -1;
     }
 
+    /**
+     * Controlla se un token corrisponde ad un oggetto valido nel gioco.
+     *
+     * @param token La parola da verificare.
+     * @param objects La lista di oggetti disponibili.
+     * @return L'indice dell'oggetto se trovato, altrimenti -1.
+     */
     private int checkForObject(String token, List<AdvObject> objects) {
         for (int i = 0; i < objects.size(); i++) {
             if (objects.get(i).getName().equals(token) || objects.get(i).getAlias().contains(token)) {
@@ -34,7 +63,12 @@ public class Parser {
     }
 
     /**
-     * Divide i token in più comandi solo se la congiunzione è seguita da un comando valido.
+     * Divide la lista di token in più comandi separati da congiunzioni.
+     * La congiunzione deve essere seguita da un comando valido per dividerli.
+     *
+     * @param tokens La lista di token derivante dal comando utente.
+     * @param commands La lista di comandi disponibili.
+     * @return Una lista di liste di token, ognuna contenente un comando separato.
      */
     private List<List<String>> splitCommands(List<String> tokens, List<Command> commands) {
         List<List<String>> result = new ArrayList<>();
@@ -66,6 +100,13 @@ public class Parser {
         return result;
     }
 
+    /**
+     * Cerca e restituisce gli oggetti trovati nella lista di token (sia nella stanza che nell'inventario).
+     *
+     * @param tokens La lista di token derivante dal comando utente.
+     * @param objects La lista di oggetti presenti nella stanza.
+     * @return Una lista di oggetti trovati.
+     */
     private List<AdvObject> findMultipleObjects(List<String> tokens, List<AdvObject> objects) {
         List<AdvObject> foundObjects = new ArrayList<>();
         for (int i = 1; i < tokens.size(); i++) {
@@ -77,6 +118,16 @@ public class Parser {
         return foundObjects;
     }
 
+
+    /**
+     * Analizza un singolo comando, cercando di associare un comando, un oggetto e un oggetto dell'inventario.
+     *
+     * @param tokens La lista di token derivante dal comando utente.
+     * @param commands La lista di comandi disponibili.
+     * @param objects La lista di oggetti presenti nella stanza.
+     * @param inventory La lista di oggetti nell'inventario del giocatore.
+     * @return Un oggetto ParserOutput contenente il comando e gli oggetti identificati.
+     */
     private ParserOutput parseSingleCommand(List<String> tokens, List<Command> commands,
                                             List<AdvObject> objects, List<AdvObject> inventory) {
         if (tokens.isEmpty()) {
@@ -104,8 +155,14 @@ public class Parser {
     }
 
     /**
-     * Analizza una stringa che può contenere più comandi separati da congiunzioni
-     * e oggetti multipli all'interno di ciascun comando.
+     * Analizza una stringa contenente uno o più comandi separati da congiunzioni.
+     * Ogni comando può avere uno o più oggetti associati.
+     *
+     * @param command La stringa di comando da parsare.
+     * @param commands La lista di comandi disponibili.
+     * @param objects La lista di oggetti nella stanza.
+     * @param inventory La lista di oggetti nell'inventario del giocatore.
+     * @return Una lista di ParserOutput, uno per ogni comando parsato.
      */
     public List<ParserOutput> parseMultiple(String command, List<Command> commands,
                                             List<AdvObject> objects, List<AdvObject> inventory) {
@@ -124,6 +181,15 @@ public class Parser {
         return outputs;
     }
 
+    /**
+     * Analizza una singola stringa di comando e restituisce il primo comando valido.
+     *
+     * @param command La stringa di comando da parsare.
+     * @param commands La lista di comandi disponibili.
+     * @param objects La lista di oggetti nella stanza.
+     * @param inventory La lista di oggetti nell'inventario del giocatore.
+     * @return Il primo ParserOutput valido.
+     */
     public ParserOutput parse(String command, List<Command> commands,
                               List<AdvObject> objects, List<AdvObject> inventory) {
         List<ParserOutput> outputs = parseMultiple(command, commands, objects, inventory);
