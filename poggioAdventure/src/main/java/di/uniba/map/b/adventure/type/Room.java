@@ -1,249 +1,150 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package di.uniba.map.b.adventure.type;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.io.Serializable;
 
-/* Classe Entity che definisce e costruisce le stanze che poi costituiranno la 
-    mappa di gioco. Ogni stanza ha un id, nome, descrizione, se all'inizio è buia 
-    o meno, le stanze collegate a nord, sud, est e ovest e l'eventuale lista di 
-    oggetti presenti nella stanza.
+/* Classe Room che definisce e costruisce le stanze che poi costituiranno la 
+    mappa di gioco. Ogni stanza ha un id, nome, descrizione, se è visibile o meno, 
+    le stanze collegate a nord, sud, est e ovest e l'eventuale lista di oggetti 
+    presenti nella stanza. È stato aggiunto un puntatore alla stanza su un altro piano.
 */
 
-/**
- *
- * @author pierpaolo
- */
 public class Room implements Serializable {
 
     private final int id;
-
     private String name;
-
     private String description;
-
     private String look;
-
     private boolean visible = true;
-
+    private CommandType linkedDirection = CommandType.NONE;
+    
+    // Riferimenti alle stanze collegate nello stesso piano
     private Room south = null;
-
     private Room north = null;
-
     private Room east = null;
-
     private Room west = null;
 
+    // Lista di oggetti presenti nella stanza
     private final List<AdvObject> objects = new ArrayList<>();
 
-    /**
-     *
-     * @param id
-     */
+    // Riferimento alla stanza su un altro piano (nuovo attributo)
+    private Room linkedRoom = null;  // Stanza collegata su un altro piano
+
     public Room(int id) {
         this.id = id;
     }
 
-    /**
-     *
-     * @param id
-     * @param name
-     * @param description
-     */
     public Room(int id, String name, String description) {
         this.id = id;
         this.name = name;
         this.description = description;
     }
 
-    /**
-     *
-     * @return
-     */
+    // Getter e Setter per il nome, la descrizione, la visibilità
     public String getName() {
         return name;
     }
 
-    /**
-     *
-     * @param name
-     */
     public void setName(String name) {
         this.name = name;
     }
 
-    /**
-     *
-     * @return
-     */
     public String getDescription() {
         return description;
     }
 
-    /**
-     *
-     * @param description
-     */
     public void setDescription(String description) {
         this.description = description;
     }
 
-    /**
-     *
-     * @return
-     */
     public boolean isVisible() {
         return visible;
     }
 
-    /**
-     *
-     * @param visible
-     */
     public void setVisible(boolean visible) {
         this.visible = visible;
     }
 
-    /**
-     *
-     * @return
-     */
+    // Getter e Setter per le stanze collegate (nord, sud, est, ovest)
     public Room getSouth() {
         return south;
     }
 
-    /**
-     *
-     * @param south
-     */
     public void setSouth(Room south) {
         this.south = south;
     }
 
-    /**
-     *
-     * @return
-     */
     public Room getNorth() {
         return north;
     }
 
-    /**
-     *
-     * @param north
-     */
     public void setNorth(Room north) {
         this.north = north;
     }
 
-    /**
-     *
-     * @return
-     */
     public Room getEast() {
         return east;
     }
 
-    /**
-     *
-     * @param east
-     */
     public void setEast(Room east) {
         this.east = east;
     }
 
-    /**
-     *
-     * @return
-     */
     public Room getWest() {
         return west;
     }
 
-    /**
-     *
-     * @param west
-     */
     public void setWest(Room west) {
         this.west = west;
     }
 
-    /**
-     *
-     * @return
-     */
+    // Aggiungere un metodo per gestire la stanza su un altro piano
+    public Room getLinkedRoom() {
+        return linkedRoom;
+    }
+
+    public void setLinkedRoom(Room linkedRoom, CommandType dir) {
+        this.linkedRoom = linkedRoom;  // Set della stanza su un altro 
+        this.linkedDirection = dir;
+    }
+
+    public CommandType getLinkedDirection() {
+        return linkedDirection;
+    }
+
+    // Getter per oggetti della stanza
     public List<AdvObject> getObjects() {
         return objects;
     }
 
-    /**
-     *
-     * @return
-     */
     public int getId() {
         return id;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
-        int hash = 3;
-        hash = 83 * hash + this.id;
-        return hash;
+        return 83 * id;
     }
 
-    /**
-     *
-     * @param obj
-     * @return
-     */
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final Room other = (Room) obj;
-        if (this.id != other.id) {
-            return false;
-        }
-        return true;
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Room other = (Room) obj;
+        return id == other.id;
     }
 
-    /**
-     *
-     * @return
-     */
+    // Getter e Setter per il look (descrizione per "guardare")
     public String getLook() {
         return look;
     }
 
-    /**
-     *
-     * @param look
-     */
     public void setLook(String look) {
         this.look = look;
     }
 
-    /**
-     *
-     * @param id
-     * @return
-     */
+    // Metodo per ottenere un oggetto dalla stanza (dato un id)
     public AdvObject getObject(int id) {
         for (AdvObject o : objects) {
             if (o.getId() == id) {
@@ -252,5 +153,4 @@ public class Room implements Serializable {
         }
         return null;
     }
-
 }
