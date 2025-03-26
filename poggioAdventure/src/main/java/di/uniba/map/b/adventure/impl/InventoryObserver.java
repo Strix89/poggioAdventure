@@ -9,12 +9,13 @@ import di.uniba.map.b.adventure.parser.ParserOutput;
 import di.uniba.map.b.adventure.type.AdvObject;
 import di.uniba.map.b.adventure.type.CommandType;
 import di.uniba.map.b.adventure.GameObserver;
+import java.io.Serializable;
 
 /**
  *
  * @author pierpaolo
  */
-public class InventoryObserver implements GameObserver {
+public class InventoryObserver implements GameObserver, Serializable {
 
     /**
      * Metodo che permette di visualizzare l'inventario del giocatore

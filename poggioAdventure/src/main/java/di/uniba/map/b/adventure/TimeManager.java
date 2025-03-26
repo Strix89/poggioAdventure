@@ -1,5 +1,7 @@
 package di.uniba.map.b.adventure;
 
+import java.io.Serializable;
+
 /**
  * La classe TimeManager gestisce il countdown del tempo di gioco utilizzando un thread separato.
  * Implementa Runnable per eseguire la logica di temporizzazione in un thread indipendente.
@@ -8,7 +10,7 @@ package di.uniba.map.b.adventure;
  *  - La logica di temporizzazione è incapsulata all'interno della classe, rendendo possibile l'estensione per diverse modalità di output
  *    (ad esempio, console, GUI, log su file, ecc.) tramite l'astrazione del meccanismo di aggiornamento.
  */
-public class TimeManager implements Runnable {
+public class TimeManager implements Runnable, Serializable {
 
     // Valore di default: 10 minuti in millisecondi (600.000 ms)
     private static final long TEMPO_TOTALE_DEFAULT = 600_000;

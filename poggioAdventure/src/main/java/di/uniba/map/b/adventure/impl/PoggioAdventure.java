@@ -1,7 +1,6 @@
 package di.uniba.map.b.adventure.impl;
 
 import di.uniba.map.b.adventure.ColorText;
-import di.uniba.map.b.adventure.FlowOutput;
 import di.uniba.map.b.adventure.GameDescription;
 import di.uniba.map.b.adventure.parser.ParserOutput;
 import di.uniba.map.b.adventure.type.AdvObject;
@@ -13,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import di.uniba.map.b.adventure.GameObservable;
 import di.uniba.map.b.adventure.GameObserver;
+import di.uniba.map.b.adventure.OutputHandler;
 
 /**
  * ATTENZIONE: La descrizione del gioco è fatta in modo che qualsiasi gioco
@@ -33,12 +33,12 @@ import di.uniba.map.b.adventure.GameObserver;
  * @author pierpaolo & Strix89
  */
 public class PoggioAdventure extends GameDescription implements GameObservable {
-
+    
     private final List<GameObserver> observer = new ArrayList<>();
 
     private ParserOutput parserOutput;
 
-    private final List<String> messages = new ArrayList<>();
+    private List<String> messages = new ArrayList<>();
 
     /**Metodo Init : inizializza il gioco
      * Questo metodo viene chiamato per inizializzare il gioco. 
@@ -182,7 +182,7 @@ public class PoggioAdventure extends GameDescription implements GameObservable {
      * @param out
      */
     @Override
-    public void nextMove(ParserOutput p, FlowOutput out) {
+    public void nextMove(ParserOutput p, OutputHandler out) {
         parserOutput = p;
         messages.clear();
         if (p.getCommand() == null) {
@@ -251,9 +251,9 @@ public class PoggioAdventure extends GameDescription implements GameObservable {
     public String getGameVersion() {
         return 
         "\t   ==================================================\n" +
-        "\t  *      PoggioAdventure .v0.1 - 2024-2025         *\n" +
-        "\t  *                 developed by:                  *\n" +
-        "\t  *      Strix89 | MikeRvsso | Elia-Valenza26      *\n" +
-        "\t  ==================================================\n";
+        "\t   *      PoggioAdventure .v0.1 - 2024-2025         *\n" +
+        "\t   *                 developed by:                  *\n" +
+        "\t   *      Strix89 | MikeRvsso | Elia-Valenza26      *\n" +
+        "\t   ==================================================\n";
     } 
 }

@@ -1,13 +1,15 @@
 package com.mycompany.poggioadventure.ui;
 
 import di.uniba.map.b.adventure.ResourceLoader;
+import di.uniba.map.b.adventure.Utils;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.Insets;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import static java.lang.System.exit;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -59,11 +61,11 @@ public final class UI_Config {
 
     // ### Percorsi delle risorse ###
 
-    private static final String SHIELD_IMAGE_PATH = "./resources/img/scudopoggiolevante.png"; // Percorso dell'immagine dello scudo
-    private static final String FONT_NORMAL_PATH = "./resources/fonts/BarlowCondensed-Medium.ttf"; // Percorso del font normale
-    private static final String FONT_BOLD_PATH = "./resources/fonts/BarlowCondensed-Bold.ttf"; // Percorso del font in grassetto
-    private static final String FONT_ITALIC_PATH = "./resources/fonts/BarlowCondensed-SemiBoldItalic.ttf"; // Percorso del font in corsivo
-    private static final String ASCII_FLIPPER_PATH = "./resources/img/flipper.jpg"; // Percorso dell'immagine ASCII del flipper
+    private static final Path SHIELD_IMAGE_PATH = Paths.get("resources", "img", "scudopoggiolevante.png");
+    private static final Path ASCII_FLIPPER_PATH = Paths.get("resources", "img", "flipper.jpg");
+    private static final Path FONT_NORMAL_PATH = Paths.get("resources", "fonts", "BarlowCondensed-Medium.ttf");
+    private static final Path FONT_BOLD_PATH = Paths.get("resources", "fonts", "BarlowCondensed-Bold.ttf");
+    private static final Path FONT_ITALIC_PATH = Paths.get("resources", "fonts", "BarlowCondensed-SemiBoldItalic.ttf");
 
     // ### Blocco di inizializzazione statico ###
 
@@ -75,7 +77,7 @@ public final class UI_Config {
             // Se si verifica un errore durante il caricamento delle risorse, registra l'errore e termina il programma
             Logger.getLogger(UI_Config.class.getName()).log(Level.SEVERE, 
                     "Errore caricamento risorse UI", ex);
-            getExitDefaultOp(); // Termina il programma con codice di uscita 1
+            Utils.exitApplication(Utils.EXIT_CODE_RESOURCE_ERROR);
         }
     }
 
@@ -180,7 +182,7 @@ public final class UI_Config {
      * @return Il percorso dell'immagine dello scudo.
      */
     public static String getSHIELD_IMAGE_PATH() {
-        return SHIELD_IMAGE_PATH;
+        return SHIELD_IMAGE_PATH.toString();
     }
 
     /**
@@ -188,7 +190,7 @@ public final class UI_Config {
      * @return Il percorso del font normale.
      */
     public static String getFONT_NORMAL_PATH() {
-        return FONT_NORMAL_PATH;
+        return FONT_NORMAL_PATH.toString();
     }
 
     /**
@@ -196,7 +198,7 @@ public final class UI_Config {
      * @return Il percorso del font in grassetto.
      */
     public static String getFONT_BOLD_PATH() {
-        return FONT_BOLD_PATH;
+        return FONT_BOLD_PATH.toString();
     }
 
     /**
@@ -204,7 +206,7 @@ public final class UI_Config {
      * @return Il percorso del font in corsivo.
      */
     public static String getFONT_ITALIC_PATH() {
-        return FONT_ITALIC_PATH;
+        return FONT_ITALIC_PATH.toString();
     }
 
     /**
@@ -212,16 +214,6 @@ public final class UI_Config {
      * @return Il percorso dell'immagine ASCII del flipper.
      */
     public static String getASCII_FLIPPER_PATH() {
-        return ASCII_FLIPPER_PATH;
-    }
-
-    // ### Metodo per la gestione degli errori ###
-
-    /**
-     * Termina il programma con un codice di uscita 1.
-     * Questo metodo viene chiamato in caso di errore irreversibile.
-     */
-    public static void getExitDefaultOp(){
-        exit(1);
+        return ASCII_FLIPPER_PATH.toString();
     }
 }

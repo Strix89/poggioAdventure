@@ -1,5 +1,7 @@
 package com.mycompany.poggioadventure.ui;
 
+import di.uniba.map.b.adventure.Utils;
+import di.uniba.map.b.adventure.impl.GUIErrorHandler;
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
@@ -210,10 +212,7 @@ public class UI_NewGame extends UI_Abstract {
     private void handleStartGame() {
         String playerName = nameField.getText().trim();  // Ottiene il nome inserito dall'utente
         if (playerName.isEmpty()) {
-            JOptionPane.showMessageDialog(this,
-                "Inserisci un nome valido!",
-                "Errore",
-                JOptionPane.WARNING_MESSAGE);  // Mostra un messaggio di errore
+            new GUIErrorHandler().handleRecoverableError("Inserisci un nome valido!");  // Mostra un messaggio di errore
             return;
         }
         if(parentFrame != null) parentFrame.dispose();
@@ -223,16 +222,14 @@ public class UI_NewGame extends UI_Abstract {
                 UI_Game game = new UI_Game(playerName);
                 game.setVisible(true);
             } catch (Exception e) {
-                JOptionPane.showMessageDialog(null,
-                    "Errore critico nell'avvio della partita: " + e.getMessage(),
-                    "Errore", JOptionPane.ERROR_MESSAGE);  // Mostra un messaggio di errore
+                new GUIErrorHandler().handleFatalError("Errore critico nell'avvio della partita: ", e);  // Mostra un messaggio di errore
             }
         });
     }
 
     /**
-     * Metodo main di esempio per testare l'interfaccia.
-     * Da rimuovere in produzione o utilizzare solo per scopi dimostrativi.
+     * Metodo main di esempio per testare l'interfaccia.Da rimuovere in produzione o utilizzare solo per scopi dimostrativi.
+     * @param args
      */
     public static void main(String[] args) {
         try {
@@ -241,10 +238,8 @@ public class UI_NewGame extends UI_Abstract {
                 mainWindow.setVisible(true);  // Rende la finestra visibile
             });
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(null,
-                "Errore critico nell'inizializzazione dell'interfaccia: " + ex.getMessage(),
-                "Errore", JOptionPane.ERROR_MESSAGE);  // Mostra un messaggio di errore
-            System.exit(1);  // Termina l'applicazione
+            new GUIErrorHandler().handleFatalError("Errore critico nell'inizializzazione dell'interfaccia: ", ex);  // Mostra un messaggio di errore
+            Utils.exitApplication(Utils.EXIT_CODE_CRITICAL);
         }
     }
     

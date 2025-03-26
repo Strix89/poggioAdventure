@@ -1,11 +1,18 @@
 package com.mycompany.poggioadventure.ui;
 
 import com.formdev.flatlaf.FlatLightLaf;
+import di.uniba.map.b.adventure.ErrorHandler;
+import di.uniba.map.b.adventure.SaveGame;
+import di.uniba.map.b.adventure.Utils;
+import di.uniba.map.b.adventure.impl.GUIErrorHandler;
+import di.uniba.map.b.adventure.impl.GUIInputHandler;
+import di.uniba.map.b.adventure.impl.GUIOutputHandler;
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.List;
 
 /**
  * Classe che rappresenta l'interfaccia utente per il caricamento di una partita salvata.
@@ -19,12 +26,7 @@ public class UI_LoadGame extends UI_Abstract {
     private JList<String> saveList;  // Lista dei salvataggi disponibili
     private JButton loadButton;      // Pulsante per caricare il salvataggio selezionato
     private JButton backButton;      // Pulsante per tornare indietro
-
-    // Dati fittizi per i salvataggi (da sostituire con dati reali)
-    private static String[] SAVE_SLOTS = {
-        "[AUTO] Salvataggio 1 - Lvl 3 - 10:30 01/06",
-        "[MANUALE] Salvataggio 3 - Lvl 5 - 18:45 31/05",
-    };
+    private List<String> saveSlots;
 
     /**
      * Costruttore della classe. Chiama il costruttore della superclasse UI_Abstract
@@ -81,8 +83,8 @@ public class UI_LoadGame extends UI_Abstract {
      * e i pulsanti di caricamento e indietro.
      */
     private void createComponents() {
-        // Lista dei salvataggi
-        saveList = new JList<>(SAVE_SLOTS);
+        saveSlots = SaveGame.getSaveList();
+        saveList = new JList<>(saveSlots.toArray(String[]::new));
         saveList.setFont(UI_Config.getNormalFont().deriveFont(
             getPreferredSize().height * UI_Config.BUTTON_FONT_RATIO * 0.8f));  // Scala il font
         saveList.setForeground(UI_Config.TEXT_COLOR);  // Colore del testo
@@ -209,12 +211,15 @@ public class UI_LoadGame extends UI_Abstract {
      */
     private void setupEventListeners() {
         loadButton.addActionListener(e -> handleLoad());  // Gestisce il caricamento del salvataggio
-        backButton.addActionListener(e -> dispose());  // Chiude la finestra
+        backButton.addActionListener(e -> {
+            (new UI_Init()).setVisible(true); 
+            dispose();
+        });  // Chiude la finestra
     }
 
     /**
-     * Metodo main di esempio per testare l'interfaccia.
-     * Da rimuovere in produzione o utilizzare solo per scopi dimostrativi.
+     * Metodo main di esempio per testare l'interfaccia.Da rimuovere in produzione o utilizzare solo per scopi dimostrativi.
+     * @param args
      */
     public static void main(String[] args) {
         try {
@@ -222,32 +227,11 @@ public class UI_LoadGame extends UI_Abstract {
             EventQueue.invokeLater(() -> {
                 UI_LoadGame selector = new UI_LoadGame();
                 selector.setVisible(true);
-
-                // Caricamento dati fittizio (simulazione salvataggi)
-                selector.SAVE_SLOTS = loadSaveData();  // Popola la lista dei salvataggi
             });
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(null,
-                "Errore critico nell'avvio dell'interfaccia:\n" + ex.getMessage(),
-                "Errore di sistema",
-                JOptionPane.ERROR_MESSAGE);  // Mostra un messaggio di errore
-            System.exit(1);  // Termina l'applicazione
+            new GUIErrorHandler().handleFatalError("Errore critico nell'avvio dell'interfaccia:\n", ex);  // Mostra un messaggio di errore
+            Utils.exitApplication(Utils.EXIT_CODE_CRITICAL);  // Termina l'applicazione
         }
-    }
-
-    /**
-     * Metodo dummy per il caricamento di dati fittizi.
-     * Da sostituire con una logica reale per caricare i salvataggi.
-     *
-     * @return String[] Array di stringhe rappresentanti i salvataggi
-     */
-    private static String[] loadSaveData() {
-        return new String[] {
-            "[AUTO] Salvataggio 1 - Lvl 3 - 10:30 01/06",
-            "Slot 2 - Nuovo gioco",
-            "[MANUALE] Salvataggio 3 - Lvl 5 - 18:45 31/05",
-            "Slot 4 - Nuovo gioco"
-        };
     }
 
     /**
@@ -255,19 +239,30 @@ public class UI_LoadGame extends UI_Abstract {
      * Se nessun salvataggio è selezionato, mostra un messaggio di errore.
      */
     private void handleLoad() {
-        int selectedIndex = saveList.getSelectedIndex();  // Ottiene l'indice del salvataggio selezionato
+        int selectedIndex = saveList.getSelectedIndex();  // Ottieni l'indice del salvataggio selezionato
         if (selectedIndex == -1) {
-            JOptionPane.showMessageDialog(this,
-                "Seleziona un salvataggio!",
-                "Errore",
-                JOptionPane.WARNING_MESSAGE);  // Mostra un messaggio di errore
+            new GUIErrorHandler().handleRecoverableError("Seleziona un salvataggio per caricarlo.");
             return;
         }
 
-        String selectedSave = SAVE_SLOTS[selectedIndex];  // Ottiene il salvataggio selezionato
-        // Logica per caricare il salvataggio (da implementare)
-        dispose();  // Chiude la finestra
-        //new UI_Game().setVisible(true);  // Avvia il gioco (esempio)
+        String saveName = saveSlots.get(selectedIndex);
+        ErrorHandler errorha = new GUIErrorHandler();
+        UI_Game guiGame = new UI_Game();
+        new GUIOutputHandler(guiGame.getGameOutputArea()).clear();
+        
+        // Carica il salvataggio
+        SaveGame.loadSave(saveName,
+            engine -> { // onSuccess
+                EventQueue.invokeLater(() -> {
+                    guiGame.setGameEngine(engine);
+                    guiGame.setVisible(true);
+                    dispose();
+                });
+            },
+            error -> { // onError
+                new GUIErrorHandler().handleRecoverableError(error);  // Mostra errore se il caricamento fallisce
+            }, errorha, new GUIInputHandler(guiGame.getCommandInput()), new GUIOutputHandler(guiGame.getGameOutputArea())
+        );
     }
 
     /**

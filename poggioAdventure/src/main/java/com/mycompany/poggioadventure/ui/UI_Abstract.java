@@ -1,6 +1,9 @@
 package com.mycompany.poggioadventure.ui;
 
 import com.formdev.flatlaf.FlatLightLaf;
+import di.uniba.map.b.adventure.ErrorHandler;
+import di.uniba.map.b.adventure.Utils;
+import di.uniba.map.b.adventure.impl.GUIErrorHandler;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
@@ -37,11 +40,9 @@ public abstract class UI_Abstract extends JFrame {
         try {
             FlatLightLaf.setup();  // Configura il tema FlatLaf light per l'interfaccia
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(null, 
-                "Errore nel caricamento dello stile UI", 
-                "Errore", 
-                JOptionPane.ERROR_MESSAGE);
-            UI_Config.getExitDefaultOp();
+            ErrorHandler errorHandler = new GUIErrorHandler();
+            errorHandler.handleFatalError("Errore nel caricamento dello stile UI", ex);
+            Utils.exitApplication(Utils.EXIT_CODE_CRITICAL);
         }
         setTitle(getWindowTitle());
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);

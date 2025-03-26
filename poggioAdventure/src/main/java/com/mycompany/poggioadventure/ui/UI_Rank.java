@@ -1,6 +1,8 @@
 package com.mycompany.poggioadventure.ui;
 
 import com.formdev.flatlaf.FlatLightLaf;
+import di.uniba.map.b.adventure.Utils;
+import di.uniba.map.b.adventure.impl.GUIErrorHandler;
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
@@ -163,11 +165,8 @@ public class UI_Rank extends UI_Abstract {
                 ranking.setVisible(true);  // Rende la finestra visibile
             });
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(null,
-                "Errore nell'apertura della classifica: " + ex.getMessage(),
-                "Errore",
-                JOptionPane.ERROR_MESSAGE);  // Mostra un messaggio di errore
-            System.exit(1);  // Termina l'applicazione
+            new GUIErrorHandler().handleFatalError("Errore nell'apertura della classifica: ", ex);  // Mostra un messaggio di errore
+            Utils.exitApplication(Utils.EXIT_CODE_CRITICAL);
         }
     }
 

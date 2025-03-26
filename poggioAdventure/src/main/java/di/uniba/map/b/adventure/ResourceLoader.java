@@ -7,6 +7,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
@@ -15,8 +17,8 @@ import javax.imageio.ImageIO;
 
 public class ResourceLoader {
     
-    public static final String STOPWORDS_PATH = "./resources/stopwords";
-    public static final String SAVES_DIRECTORY = "./sav/";
+     public static final Path STOPWORDS_PATH = Paths.get("resources", "stopwords").toAbsolutePath();
+    public static final Path SAVES_DIRECTORY = Paths.get("sav").toAbsolutePath();
 
     public static BufferedImage loadImage(String path) throws IOException {
         File imageFile = new File(path);
@@ -36,11 +38,11 @@ public class ResourceLoader {
     
     // Verifica e crea la cartella dei salvataggi se non esiste
     private static void checkSavesDirectory() {
-        File savesDir = new File(SAVES_DIRECTORY);
+        File savesDir = new File(SAVES_DIRECTORY.toString());
         if (!savesDir.exists()) {
             if (savesDir.mkdirs()) {
                 Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, 
-                    "Cartella dei salvataggi creata: " + SAVES_DIRECTORY);
+                    "Cartella dei salvataggi creata: " + savesDir.getAbsolutePath());
             } else {
                 Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, 
                     "Impossibile creare la cartella dei salvataggi: " + SAVES_DIRECTORY);

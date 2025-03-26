@@ -5,12 +5,7 @@
  */
 package di.uniba.map.b.adventure;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -18,7 +13,12 @@ import java.util.Set;
  *
  * @author pierpaolo
  */
-public class Utils {
+public class Utils {   
+    // Codici di uscita standard
+    public static final int EXIT_CODE_SUCCESS = 0;
+    public static final int EXIT_CODE_CRITICAL = 1;
+    public static final int EXIT_CODE_SAVE_ERROR = 2;
+    public static final int EXIT_CODE_RESOURCE_ERROR = 3;
     /**
      *
      * @param string
@@ -36,4 +36,13 @@ public class Utils {
         return tokens;
     }
 
+   // Metodo centralizzato per la terminazione
+    public static void exitApplication(int statusCode) {
+        System.exit(statusCode);
+    }
+    
+    // Metodo overload per uscita normale
+    public static void exitApplication() {
+        exitApplication(EXIT_CODE_SUCCESS);
+    }
 }

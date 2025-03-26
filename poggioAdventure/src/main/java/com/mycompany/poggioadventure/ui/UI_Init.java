@@ -1,5 +1,8 @@
 package com.mycompany.poggioadventure.ui;
 
+import di.uniba.map.b.adventure.MenuManager;
+import di.uniba.map.b.adventure.Utils;
+import di.uniba.map.b.adventure.impl.GUIErrorHandler;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -11,7 +14,7 @@ import javax.swing.border.Border;
  * caricare una partita esistente, visualizzare la classifica e uscire dal gioco.
  * Estende la classe astratta UI_Abstract per ereditare la struttura di base dell'interfaccia grafica.
  */
-public class UI_Init extends UI_Abstract {
+public class UI_Init extends UI_Abstract implements MenuManager{
     
     // Componenti dell'interfaccia utente
     private JButton newGameButton;  // Pulsante per iniziare una nuova partita
@@ -97,9 +100,8 @@ public class UI_Init extends UI_Abstract {
     private ImageIcon loadShieldImage() {
         BufferedImage image = UI_Config.getShieldImage();  // Ottiene l'immagine dalla configurazione
         if(image == null) {
-            JOptionPane.showMessageDialog(this, 
-                "Errore critico: immagine dello scudo non caricata!");  // Messaggio di errore
-            System.exit(1);  // Termina l'applicazione
+            new GUIErrorHandler().handleRecoverableError("Errore critico: immagine dello scudo non caricata!");  // Messaggio di errore
+            Utils.exitApplication(Utils.EXIT_CODE_RESOURCE_ERROR);  // Termina l'applicazione
         }
         return new ImageIcon(image);  // Restituisce l'icona dell'immagine
     }
@@ -225,7 +227,8 @@ public class UI_Init extends UI_Abstract {
     /**
      * Mostra la finestra della classifica.
      */
-    private void showRanking() {
+    @Override
+    public void showRanking() {
         JFrame ranking = new UI_Rank();  // Crea la finestra della classifica
         ranking.setLocationRelativeTo(this);  // Centra la finestra rispetto a questa
         ranking.setVisible(true);  // Rende la finestra visibile
@@ -234,7 +237,8 @@ public class UI_Init extends UI_Abstract {
     /**
      * Mostra la finestra per iniziare una nuova partita.
      */
-    private void showNewGame() {
+    @Override
+    public void showNewGame() {
         JFrame newGame = new UI_NewGame(this);  // Crea la finestra per una nuova partita
         newGame.setLocationRelativeTo(null);  // Centra la finestra rispetto a questa
         newGame.setVisible(true);  // Rende la finestra visibile
@@ -243,10 +247,18 @@ public class UI_Init extends UI_Abstract {
     /**
      * Mostra la finestra per caricare una partita esistente.
      */
-    private void showLoadGame() {
+    @Override
+    public void showLoadGame() {
         JFrame loadGame = new UI_LoadGame();  // Crea la finestra per caricare una partita
         loadGame.setLocationRelativeTo(this);  // Centra la finestra rispetto a questa
+        dispose();
         loadGame.setVisible(true);  // Rende la finestra visibile
+    }
+    
+    @Override
+    public void showMainMenu() {
+        // Già gestito dalla GUI, non necessario per CLI
+        setVisible(true);
     }
     
     /**
@@ -273,10 +285,21 @@ public class UI_Init extends UI_Abstract {
                 mainWindow.setVisible(true);  // Rende la finestra visibile
             });
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(null,
-                "Errore critico nell'inizializzazione dell'interfaccia: " + ex.getMessage(),
-                "Errore", JOptionPane.ERROR_MESSAGE);  // Mostra un messaggio di errore
-            System.exit(1);  // Termina l'applicazione
+            new GUIErrorHandler().handleRecoverableError(
+                "Errore critico nell'inizializzazione dell'interfaccia: " + ex.getMessage());  // Mostra un messaggio di errore
+            Utils.exitApplication(Utils.EXIT_CODE_CRITICAL);  // Termina l'applicazione
+        }
+    }
+    
+    @Override
+    public void exit() {
+        int confirm = JOptionPane.showConfirmDialog(this,
+            "Vuoi davvero uscire?",
+            "Conferma Uscita",
+            JOptionPane.YES_NO_OPTION);
+        
+        if(confirm == JOptionPane.YES_OPTION) {
+            Utils.exitApplication();
         }
     }
 

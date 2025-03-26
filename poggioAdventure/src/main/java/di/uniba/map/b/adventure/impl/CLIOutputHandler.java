@@ -1,16 +1,16 @@
 package di.uniba.map.b.adventure.impl;
 import di.uniba.map.b.adventure.ColorText;
-import di.uniba.map.b.adventure.FlowOutput;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import di.uniba.map.b.adventure.OutputHandler;
 
 /**
  *
  * @author Strix89
  */
-public class ConsoleOutput implements FlowOutput{
+public class CLIOutputHandler implements OutputHandler{
     static{
         System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out), true, StandardCharsets.UTF_8));
     }
@@ -27,5 +27,12 @@ public class ConsoleOutput implements FlowOutput{
     @Override
     public void writeln() {
         System.out.println();
+    }
+
+    @Override
+    public void clear() {
+        // Codice ANSI per pulire la console
+        System.out.print("\033[H\033[2J");
+        System.out.flush(); // Assicura l'output immediatos
     }
 }

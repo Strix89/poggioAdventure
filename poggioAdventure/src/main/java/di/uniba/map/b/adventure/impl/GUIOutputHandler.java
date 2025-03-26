@@ -1,7 +1,6 @@
 package di.uniba.map.b.adventure.impl;
 
 import di.uniba.map.b.adventure.ColorText;
-import di.uniba.map.b.adventure.FlowOutput;
 import javax.swing.JOptionPane;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
@@ -9,15 +8,16 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
+import di.uniba.map.b.adventure.OutputHandler;
 
 /**
  *
  * @author Strix89
  */
-public class GUIOutput implements FlowOutput{
+public class GUIOutputHandler implements OutputHandler{
    private final JTextPane outputPane;
 
-    public GUIOutput(JTextPane outputPane) {
+    public GUIOutputHandler(JTextPane outputPane) {
         this.outputPane = outputPane;
     }
 
@@ -45,5 +45,12 @@ public class GUIOutput implements FlowOutput{
     @Override
     public void writeln() {
         write("\n", ColorText.RESET);
+    }
+
+    @Override
+    public void clear() {
+        SwingUtilities.invokeLater(() -> {
+            outputPane.setText(""); // Cancella tutto il testo
+        });
     }
 }

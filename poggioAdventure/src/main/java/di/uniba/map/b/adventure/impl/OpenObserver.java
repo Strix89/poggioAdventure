@@ -11,12 +11,13 @@ import di.uniba.map.b.adventure.type.AdvObjectContainer;
 import di.uniba.map.b.adventure.type.CommandType;
 import java.util.Iterator;
 import di.uniba.map.b.adventure.GameObserver;
+import java.io.Serializable;
 
 /**
  *
  * @author pierpaolo
  */
-public class OpenObserver implements GameObserver {
+public class OpenObserver implements GameObserver, Serializable {
 
     /** 
      * La classe OpenObserver gestisce l'azione di apertura di oggetti nel gioco. 

@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package di.uniba.map.b.adventure.impl;
 
 import di.uniba.map.b.adventure.GameDescription;
@@ -9,12 +5,13 @@ import di.uniba.map.b.adventure.GameObserver;
 import di.uniba.map.b.adventure.GameUtils;
 import di.uniba.map.b.adventure.parser.ParserOutput;
 import di.uniba.map.b.adventure.type.CommandType;
+import java.io.Serializable;
 
 /**
  *
  * @author pierpaolo
  */
-public class UseObserver implements GameObserver {
+public class UseObserver implements GameObserver, Serializable {
 
     /**
      * La classe UseObserver gestisce le azioni del giocatore relative all'uso di oggetti nel gioco. 

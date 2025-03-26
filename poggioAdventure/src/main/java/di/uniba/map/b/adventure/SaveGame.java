@@ -3,88 +3,87 @@ package di.uniba.map.b.adventure;
 import java.io.*;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class SaveGame {
-    private static final String SAVE_DIR = ResourceLoader.SAVES_DIRECTORY;
+    private static final Path SAVE_DIR = ResourceLoader.SAVES_DIRECTORY;
+    private static final DateTimeFormatter DATE_FORMATTER = 
+        DateTimeFormatter.ofPattern("dd_MM_yyyy_HH-mm-ss");
+    
+    // Restituisce una lista di nomi file (senza estensione)
+    public static List<String> getSaveList() {
+        try {
+            Files.createDirectories(SAVE_DIR);
+            return Files.list(SAVE_DIR) // Lista tutti i file nella directory
+                .filter(p -> p.toString().endsWith(".dat")) // Filtra solo .dat
+                .map(p -> p.getFileName().toString().replace(".dat", "")) // Rimuovi estensione
+                .sorted(Comparator.reverseOrder()) // Ordina dal più recente
+                .collect(Collectors.toList());
+        } catch (IOException ex) {
+            return Collections.emptyList();
+        }
+    }
 
     // Metodo per salvare l'Engine
-    public static void saveGame(Engine engine, FlowOutput output) {
+    public static void saveGame(Engine engine, OutputHandler output) {
         try {
-            Files.createDirectories(Paths.get(SAVE_DIR));
-
-            DateTimeFormatter dt = DateTimeFormatter.ofPattern("dd_MM_yyyy_HH-mm-ss");
-            String fileName = engine.getPlayerName() + "_" + dt.format(LocalDateTime.now()) + ".dat";
-            File saveFile = new File(SAVE_DIR + fileName);
-
-            try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(saveFile))) {
-                out.writeObject(engine);
-            }
-
-            // Usa FlowOutput invece di System.out
-            output.writeln("\nGioco salvato con successo: " + fileName + "\n", ColorText.GREEN);
+            // Crea il nome del file con timestamp
+            String fileName = String.format("%s_%s.dat", 
+                engine.getPlayerName(), 
+                DATE_FORMATTER.format(LocalDateTime.now())
+            );
             
+            // Combina directory e nome file
+            Path savePath = SAVE_DIR.resolve(fileName);
+            
+            try (ObjectOutputStream out = new ObjectOutputStream(
+                Files.newOutputStream(savePath, StandardOpenOption.CREATE)
+            )) {
+                out.writeObject(engine.getPlayerName());
+                out.writeObject(engine.getGame());
+                out.writeObject(engine.getTimeManager());
+            }
+            
+            output.writeln("\nGioco salvato con successo!", ColorText.GREEN);
         } catch (IOException e) {
-            output.writeln("\nErrore durante il salvataggio: " + e.getMessage() + "\n", ColorText.ERROR);
+            output.writeln("\nErrore salvataggio: " + e.getMessage(), ColorText.ERROR);
         }
     }
 
-    // Metodo per caricare l'Engine
-    public static Engine loadGame(String playerName) {
-        try {
-            File folder = new File(SAVE_DIR);
-            if (!folder.exists()) {
-                System.out.println("Nessun salvataggio trovato per il giocatore: " + playerName);
-                return null;
-            }
-
-            // Filtra i file con estensione .dat e che iniziano con il nome del giocatore
-            File[] saveFiles = folder.listFiles((dir, name) -> name.startsWith(playerName) && name.endsWith(".dat"));
-            if (saveFiles == null || saveFiles.length == 0) {
-                System.out.println("Salvataggio non trovato.");
-                return null;
-            }
-
-            // Carica l'ultimo salvataggio disponibile per quel giocatore
-            File latestSaveFile = saveFiles[saveFiles.length - 1]; // Prendi l'ultimo salvataggio
-
-            try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(latestSaveFile))) {
-                Engine engine = (Engine) in.readObject();  // Carica l'Engine dal file
-                return engine;
-            }
-        } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Errore durante il caricamento del gioco: " + e.getMessage());
-            return null;
-        }
-    }
-
-    // Metodo per elencare i salvataggi disponibili
-    public static void listSaves() {
-        File folder = new File(SAVE_DIR);
-        if (!folder.exists() || folder.listFiles() == null) {
-            System.out.println("Nessun salvataggio trovato.");
+    public static void loadSave(
+        String saveName, 
+        Consumer<Engine> onSuccess, 
+        Consumer<String> onError, 
+        ErrorHandler errorHandler,
+        InputHandler input,
+        OutputHandler output
+    ) {
+        // Costruisci il percorso completo
+        Path savePath = SAVE_DIR.resolve(saveName + ".dat");
+        
+        if (!Files.exists(savePath)) {
+            onError.accept("Salvataggio non trovato: " + saveName);
             return;
         }
-
-        // Filtra i file con estensione .dat
-        File[] saveFiles = folder.listFiles((FilenameFilter) (dir, name) -> name.endsWith(".dat"));
-        if (saveFiles == null || saveFiles.length == 0) {
-            System.out.println("Nessun salvataggio trovato.");
-            return;
-        }
-
-        // Mostra tutti i salvataggi disponibili
-        System.out.println("\nSalvataggi disponibili:");
-        for (File file : saveFiles) {
-            // Estrai il nome del file (senza la parte di percorso) e visualizza la data di creazione
-            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-            String formattedDate = dateFormat.format(file.lastModified());
-            System.out.println("- " + file.getName() + " (Salvato il: " + formattedDate + ")");
+        
+        try (ObjectInputStream in = new ObjectInputStream(Files.newInputStream(savePath))) {
+            String playerName = (String) in.readObject();
+            GameDescription game = (GameDescription) in.readObject();
+            TimeManager timeManager = (TimeManager) in.readObject();
+            
+            Engine engine = EngineFactory.createFromSave(game, playerName, output, input, errorHandler);
+            engine.setTimeManager(timeManager);
+            onSuccess.accept(engine);
+        } catch (IOException | ClassNotFoundException ex) {
+            onError.accept("Errore caricamento: " + ex.getMessage());
         }
     }
 }

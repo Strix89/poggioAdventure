@@ -7,12 +7,13 @@ package di.uniba.map.b.adventure.parser;
 
 import di.uniba.map.b.adventure.type.AdvObject;
 import di.uniba.map.b.adventure.type.Command;
+import java.io.Serializable;
 
 /**
  *
  * @author pierpaolo
  */
-public class ParserOutput {
+public class ParserOutput implements Serializable {
 
     private Command command;
 

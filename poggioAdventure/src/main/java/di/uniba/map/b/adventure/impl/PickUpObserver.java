@@ -8,12 +8,13 @@ import di.uniba.map.b.adventure.GameDescription;
 import di.uniba.map.b.adventure.parser.ParserOutput;
 import di.uniba.map.b.adventure.type.CommandType;
 import di.uniba.map.b.adventure.GameObserver;
+import java.io.Serializable;
 
 /**
  *
  * @author pierpaolo
  */
-public class PickUpObserver implements GameObserver {
+public class PickUpObserver implements GameObserver, Serializable {
 
     /**
      * Observer che verifica il comando di raccoglimento di un oggetto

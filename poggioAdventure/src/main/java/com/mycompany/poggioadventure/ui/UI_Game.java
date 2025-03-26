@@ -1,10 +1,12 @@
 package com.mycompany.poggioadventure.ui;
 import di.uniba.map.b.adventure.ColorText;
 import di.uniba.map.b.adventure.Engine;
-import di.uniba.map.b.adventure.FlowOutput;
+import di.uniba.map.b.adventure.EngineFactory;
+import di.uniba.map.b.adventure.ErrorHandler;
+import di.uniba.map.b.adventure.InputHandler;
 import di.uniba.map.b.adventure.SaveGame;
-import di.uniba.map.b.adventure.impl.GUIOutput;
-import di.uniba.map.b.adventure.impl.PoggioAdventure;
+import di.uniba.map.b.adventure.impl.GUIErrorHandler;
+import di.uniba.map.b.adventure.impl.GUIOutputHandler;
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
@@ -15,6 +17,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
+import di.uniba.map.b.adventure.OutputHandler;
+import di.uniba.map.b.adventure.impl.GUIInputHandler;
 
 /**
  * Classe che rappresenta la finestra principale del gioco. Gestisce l'interfaccia utente,
@@ -92,8 +96,14 @@ public class UI_Game extends UI_Abstract {
     }
     
     private void initEngineAfterUI(String playerName) {
-        FlowOutput guiOutput = new GUIOutput(gameOutputArea);
-        this.gameEngine = new Engine(new PoggioAdventure(), playerName, guiOutput, true);
+        OutputHandler guiOutput = new GUIOutputHandler(gameOutputArea);
+        ErrorHandler errHandler = new GUIErrorHandler();
+        InputHandler inHandler = new GUIInputHandler(commandInput);
+        try {
+            this.gameEngine = EngineFactory.createNewGame(playerName, guiOutput, inHandler, errHandler);
+        } catch (Exception ex) {
+            errHandler.handleFatalError(UI_Game.class.getName() + ": Errore inizializzazione gioco, ",ex);
+        }
         playerNameLabel.setText(playerName);
         commandInput.addActionListener(e -> processCommand());
         sendButton.addActionListener(e -> processCommand());
@@ -170,7 +180,7 @@ public class UI_Game extends UI_Abstract {
 
        // Inizializza le etichette
        timeLabel = new JLabel("Tempo: 00:00:00");
-       countdownLabel = new JLabel("Countdown: --:--");
+       countdownLabel = new JLabel("Countdown: --:-- ##TODO");
        playerNameLabel = new JLabel("NONE"); 
        playerNameLabel.setFont(UI_Config.getBoldFont().deriveFont(20f));
        timeLabel.setFont(UI_Config.getNormalFont().deriveFont(16f));
@@ -393,7 +403,6 @@ public class UI_Game extends UI_Abstract {
                         JOptionPane.INFORMATION_MESSAGE
                     );
                 });
-
             } catch (Exception ex) {
                 SwingUtilities.invokeLater(() -> {
                     JOptionPane.showMessageDialog(
@@ -437,5 +446,30 @@ public class UI_Game extends UI_Abstract {
             gameScreen.startCountdown(300);  // Avvia un countdown di 5 minuti
             gameScreen.updateRoomImage("./resources/img/room1.jpg");  // Carica l'immagine iniziale
         });
+    }
+
+    public JTextPane getGameOutputArea() {
+        return gameOutputArea;
+    }
+
+    public JTextField getCommandInput() {
+        return commandInput;
+    }
+
+    public void setGameOutputArea(JTextPane gameOutputArea) {
+        this.gameOutputArea = gameOutputArea;
+    }
+
+    public void setCommandInput(JTextField commandInput) {
+        this.commandInput = commandInput;
+    }
+
+    private void setPlayerNameLabel(String text) {
+        this.playerNameLabel.setText(text);
+    }
+
+    public void setGameEngine(Engine gameEngine) {
+        setPlayerNameLabel(gameEngine.getPlayerName());
+        this.gameEngine = gameEngine;
     }
 }

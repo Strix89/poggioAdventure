@@ -8,12 +8,13 @@ import di.uniba.map.b.adventure.GameDescription;
 import di.uniba.map.b.adventure.parser.ParserOutput;
 import di.uniba.map.b.adventure.type.CommandType;
 import di.uniba.map.b.adventure.GameObserver;
+import java.io.Serializable;
 
 /**
  * Observer che permette di visualizzare la descrizione di un oggetto o di una stanza 
  * @author pierpaolo
  */
-public class LookAtObserver implements GameObserver {
+public class LookAtObserver implements GameObserver, Serializable {
 
     /**
      *
