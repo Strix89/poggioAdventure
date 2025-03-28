@@ -19,6 +19,7 @@ public class Utils {
     public static final int EXIT_CODE_CRITICAL = 1;
     public static final int EXIT_CODE_SAVE_ERROR = 2;
     public static final int EXIT_CODE_RESOURCE_ERROR = 3;
+    public static final int EXIT_CODE_LOG_ERROR = 4;
     /**
      *
      * @param string

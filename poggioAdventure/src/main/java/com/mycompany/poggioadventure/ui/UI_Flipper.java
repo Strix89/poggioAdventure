@@ -10,6 +10,8 @@ import java.awt.image.BufferedImage;
  * Mostra un'immagine ASCII scalata e include un campo di input con un pulsante
  * per inviare comandi. Estende la classe astratta UI_Abstract per ereditare
  * la struttura di base dell'interfaccia grafica.
+ * 
+ * @author Strix89
  */
 public class UI_Flipper extends UI_Abstract {
 

@@ -27,7 +27,9 @@ public class Engine {
     private InputHandler inputHandler;
     private ErrorHandler errorHandler;
     private TimeManager timeManager;
-
+    private LoggerInput logger;
+    private final StopWatch gameTime;
+    
     /**
      * Costruttore dell'Engine.
      * @param game
@@ -35,14 +37,15 @@ public class Engine {
      * @param output
      * @param input
      * @param errorHandler
+     * @param logger
      */
-    public Engine(GameDescription game, String playerName, OutputHandler output, InputHandler input, ErrorHandler errorHandler) {
+    public Engine(GameDescription game, String playerName, OutputHandler output, InputHandler input, ErrorHandler errorHandler, LoggerInput logger) {
         this.game = game;
         this.playerName = playerName;
         this.output = output;
         this.errorHandler = errorHandler;
         this.inputHandler = input;
-
+        this.logger = logger; 
         try {
             Set<String> stopWords = ResourceLoader.loadFileListInSet(new File(ResourceLoader.STOPWORDS_PATH.toString()));
             parser = new Parser(stopWords);
@@ -58,6 +61,8 @@ public class Engine {
         output.writeln(game.getCurrentRoom().getDescription(), ColorText.WHITE);
         printCursor();  // Chiamato dopo il set up iniziale
         timeManager = new TimeManager();
+        gameTime = StopWatch.getInstance();
+        gameTime.start();
     }
 
     /**
@@ -65,6 +70,7 @@ public class Engine {
      * @param command
      */
     public void processCommand(String command) {
+        logger.logInput(command);
         Room previousRoom = game.getCurrentRoom();
         List<AdvObject> previousInventory = new ArrayList<>(game.getInventory());
         List<AdvObject> previousObjInRoom = new ArrayList<>(game.getCurrentRoom().getObjects());
@@ -146,7 +152,9 @@ public class Engine {
     }
 
     public void saveGame() {
+        this.gameTime.stop();
         SaveGame.saveGame(this, output);
+        this.gameTime.start();
     }
 
     public Parser getParser() {
@@ -179,6 +187,22 @@ public class Engine {
     
     public void setErrorHandler(ErrorHandler error) {
         this.errorHandler = error;
+    }
+
+    public LoggerInput getLogger() {
+        return logger;
+    }
+    
+    public void setGameTime(long t){
+        this.gameTime.startFrom(t);
+    }
+    
+    public String getFormattedGameTime(){
+        return this.gameTime.getFormattedTime();
+    }
+    
+    public long getLongGameTime(){
+        return this.gameTime.getElapsedSeconds();
     }
 }
 

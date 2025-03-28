@@ -251,9 +251,9 @@ public class PoggioAdventure extends GameDescription implements GameObservable {
     public String getGameVersion() {
         return 
         "\t   ==================================================\n" +
-        "\t   *      PoggioAdventure .v0.1 - 2024-2025         *\n" +
-        "\t   *                 developed by:                  *\n" +
-        "\t   *      Strix89 | MikeRvsso | Elia-Valenza26      *\n" +
+        "\t           PoggioAdventure .v0.1 - 2024-2025           \n" +
+        "\t                      developed by:                    \n" +
+        "\t           Strix89 | MikeRvsso | Elia-Valenza26        \n" +
         "\t   ==================================================\n";
     } 
 }

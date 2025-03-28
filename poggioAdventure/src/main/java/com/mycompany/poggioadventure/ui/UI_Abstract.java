@@ -1,84 +1,92 @@
 package com.mycompany.poggioadventure.ui;
 
-import com.formdev.flatlaf.FlatLightLaf;
-import di.uniba.map.b.adventure.ErrorHandler;
-import di.uniba.map.b.adventure.Utils;
-import di.uniba.map.b.adventure.impl.GUIErrorHandler;
+import com.formdev.flatlaf.FlatLightLaf; // Libreria per il look moderno FlatLaf
+import di.uniba.map.b.adventure.ErrorHandler; // Gestione errori
+import di.uniba.map.b.adventure.Utils; // Utility generali
+import di.uniba.map.b.adventure.impl.GUIErrorHandler; // Gestione errori GUI-specifica
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
 
 /**
- * Classe astratta che rappresenta una finestra base dell'interfaccia grafica.
- * Definisce una struttura comune per l'inizializzazione dell'UI e metodi utility,
- * lasciando l'implementazione specifica di alcuni elementi alle sottoclassi.
+ * Classe astratta base per tutte le finestre GUI dell'applicazione.
+ * Implementa un template pattern per l'inizializzazione delle finestre,
+ * centralizzando la configurazione comune e delegando parti specifiche alle sottoclassi.
+ * 
+ * @author Strix89
  */
 public abstract class UI_Abstract extends JFrame {
 
     /**
-     * Costruttore principale che avvia l'inizializzazione dell'interfaccia grafica.
+     * Costruttore che avvia la catena di inizializzazione:
+     * 1. Configurazione tema UI
+     * 2. Impostazioni base della finestra
+     * 3. Inizializzazione componenti specifici (delegato alle sottoclassi)
      */
     public UI_Abstract() {
-        initUI();
+        initUI(); // Template method
     }
 
     /**
-     * Metodo astratto da implementare nelle sottoclassi per inizializzare
-     * i componenti specifici della finestra.
+     * Metodo astratto che forza le sottoclassi a implementare
+     * la logica di creazione dei componenti specifici.
      */
     protected abstract void initComponents();
 
     /**
-     * Inizializza i parametri base della finestra:
-     * - Titolo della finestra
-     * - Comportamento alla chiusura
-     * - Layout principale
-     * - Colore di sfondo
-     * - Altre proprietà generali
+     * Template method che definisce il flusso di inizializzazione:
+     * 1. Setup tema FlatLaf
+     * 2. Configurazione parametri JFrame
+     * 3. Inizializzazione componenti
+     * 4. Applicazione stili aggiuntivi
      */
     private void initUI() {
         try {
-            FlatLightLaf.setup();  // Configura il tema FlatLaf light per l'interfaccia
+            FlatLightLaf.setup(); // Configura il tema FlatLaf light
         } catch (Exception ex) {
+            // Gestione errori centralizzata con fallback grafico
             ErrorHandler errorHandler = new GUIErrorHandler();
             errorHandler.handleFatalError("Errore nel caricamento dello stile UI", ex);
             Utils.exitApplication(Utils.EXIT_CODE_CRITICAL);
         }
-        setTitle(getWindowTitle());
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        getContentPane().setLayout(new BorderLayout(10, 10));
-        getContentPane().setBackground(UI_Config.BACKGROUND_COLOR);
-        setIconImage(UI_Config.getShieldImage());
-        initComponents();
-        applyDialogStyles();
-        setResizable(false);
-        setLocationRelativeTo(null);
+        
+        // Configurazione base della finestra
+        setTitle(getWindowTitle()); // Titolo dinamico
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // Comportamento chiusura
+        getContentPane().setLayout(new BorderLayout(10, 10)); // Layout principale
+        getContentPane().setBackground(UI_Config.BACKGROUND_COLOR); // Colore sfondo
+        setIconImage(UI_Config.getShieldImage()); // Icona applicazione
+        initComponents(); // Hook per le sottoclassi
+        applyDialogStyles(); // Stili per i dialoghi
+        setResizable(false); // Finestra non ridimensionabile
+        setLocationRelativeTo(null); // Centra sullo schermo
     }
 
     /**
-     * Metodo astratto per ottenere il titolo della finestra.
-     * @return Stringa contenente il titolo da visualizzare
+     * Metodo astratto per ottenere il titolo dinamico della finestra.
+     * @return Stringa col titolo specifico della finestra
      */
     protected abstract String getWindowTitle();
 
     /**
-     * Crea un pulsante con lo stile visivo standard dell'applicazione.
-     * @param text Testo da visualizzare sul pulsante
-     * @param action ActionListener da associare al pulsante
-     * @return JButton configurato con lo stile comune
+     * Factory method per la creazione di pulsanti standardizzati.
+     * @param text Testo del pulsante
+     * @param action Listener per l'azione
+     * @return JButton configurato con lo stile dell'applicazione
      */
     protected JButton createCommonButton(String text, ActionListener action) {
         JButton button = new JButton(text);
-        button.setFont(UI_Config.getNormalFont().deriveFont(14f));
-        button.setForeground(UI_Config.TEXT_COLOR);
-        button.setBackground(UI_Config.BUTTON_BASE_COLOR);
-        button.setFocusPainted(false);
-        button.addActionListener(action);
+        button.setFont(UI_Config.getNormalFont().deriveFont(14f)); // Font personalizzato
+        button.setForeground(UI_Config.TEXT_COLOR); // Colore testo
+        button.setBackground(UI_Config.BUTTON_BASE_COLOR); // Colore sfondo
+        button.setFocusPainted(false); // Rimuove bordo focus
+        button.addActionListener(action); // Collegamento azione
         return button;
     }
     
     /**
-     * Applica le impostazioni di stile personalizzate ai dialoghi Swing.
+     * Applica stili globali ai componenti Swing tramite UIManager.
+     * Garantisce coerenza visiva in tutta l'applicazione.
      */
     private void applyDialogStyles() {
         UIManager.put("OptionPane.background", UI_Config.BACKGROUND_COLOR);

@@ -14,206 +14,200 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Classe statica di configurazione UI con caricamento risorse centralizzato.
- * Implementa il pattern Singleton per garantire un'unica istanza, senza instanziazione.
+ * Classe di configurazione centralizzata per l'interfaccia grafica.
+ * Contiene tutte le costanti UI, le risorse grafiche e i parametri di stile.
  * 
- * Questa classe è responsabile della gestione delle configurazioni dell'interfaccia utente (UI),
- * inclusi colori, dimensioni, font e immagini. Inoltre, carica le risorse necessarie
- * (come immagini e font) da file esterni e fornisce metodi per accedere a queste risorse.
+ * <p>Caratteristiche principali:
+ * <ul>
+ *   <li>Definisce la palette di colori dell'applicazione</li>
+ *   <li>Gestisce il caricamento di font e immagini</li>
+ *   <li>Fornisce rapporti dimensionali responsive</li>
+ *   <li>Configura spaziature e margini standard</li>
+ * </ul>
  * 
- * La classe è progettata come una classe di utilità (utility class) e non può essere istanziata.
+ * <p>Pattern: Utility Class (tutti membri statici, costruttore privato)
+ * 
+ * @author Strix89
  */
 public final class UI_Config {
 
-    // ### Costanti di configurazione ###
-
-    // Colori utilizzati nell'interfaccia utente
-    public static final Color BACKGROUND_COLOR = new Color(45, 45, 45); // Colore di sfondo
-    public static final Color BUTTON_BASE_COLOR = new Color(100, 100, 100); // Colore base dei pulsanti
-    public static final Color BUTTON_HOVER_COLOR = new Color(130, 130, 130); // Colore dei pulsanti al passaggio del mouse
+    // ==================== PALETTE COLORI ====================
+    
+    /** Colore di sfondo principale (grigio scuro - RGB 45,45,45) */
+    public static final Color BACKGROUND_COLOR = new Color(45, 45, 45);
+    
+    /** Colore base dei pulsanti (grigio medio - RGB 100,100,100) */
+    public static final Color BUTTON_BASE_COLOR = new Color(100, 100, 100);
+    
+    /** Colore al passaggio del mouse sui pulsanti (grigio chiaro - RGB 130,130,130) */
+    public static final Color BUTTON_HOVER_COLOR = new Color(130, 130, 130);
+    
+    /** Colore quando il pulsante è premuto (blu scuro - RGB 0,82,164) */
     public static final Color BUTTON_PRESSED_COLOR = new Color(0, 82, 164);
-    public static final Color BORDER_COLOR = new Color(150, 150, 150); // Colore dei bordi
-    public static final Color TEXT_COLOR = Color.WHITE; // Colore del testo
+    
+    /** Colore per bordi e separatori (grigio chiaro - RGB 150,150,150) */
+    public static final Color BORDER_COLOR = new Color(150, 150, 150);
+    
+    /** Colore principale per il testo (bianco) */
+    public static final Color TEXT_COLOR = Color.WHITE;
 
-    // Rapporti per le dimensioni dei font rispetto alla finestra
-    public static final float TITLE_FONT_RATIO = 0.07f; // Rapporto per il font del titolo
-    public static final float BUTTON_FONT_RATIO = 0.03f; // Rapporto per il font dei pulsanti
+    // ============== RAPPORTI DIMENSIONALI ==============
+    // Tutti i valori sono percentuali relative alla dimensione dello schermo
+    
+    /** Rapporto altezza font titoli (7% altezza finestra) */
+    public static final float TITLE_FONT_RATIO = 0.07f;
+    
+    /** Rapporto altezza font pulsanti (3% altezza finestra) */
+    public static final float BUTTON_FONT_RATIO = 0.03f;
+    
+    /** Rapporto larghezza finestra (35% larghezza schermo) */
+    public static final float WINDOW_WIDTH_RATIO = 0.35f;
+    
+    /** Rapporto altezza finestra (85% altezza schermo) */
+    public static final float WINDOW_HEIGHT_RATIO = 0.85f;
+    
+    /** Rapporto larghezza pulsanti (30% larghezza finestra) */
+    public static final float BUTTON_WIDTH_RATIO = 0.3f;
+    
+    /** Rapporto altezza pulsanti (7% altezza finestra) */
+    public static final float BUTTON_HEIGHT_RATIO = 0.07f;
+    
+    /** Rapporto dimensione immagine scudo (25% larghezza finestra) */
+    public static final float SHIELD_SIZE_RATIO = 0.25f;
 
-    // Rapporti per le dimensioni della finestra e dei componenti
-    public static final float WINDOW_WIDTH_RATIO = 0.35f; // Rapporto per la larghezza della finestra
-    public static final float WINDOW_HEIGHT_RATIO = 0.85f; // Rapporto per l'altezza della finestra
-    public static final float BUTTON_WIDTH_RATIO = 0.3f; // Rapporto per la larghezza dei pulsanti
-    public static final float BUTTON_HEIGHT_RATIO = 0.07f; // Rapporto per l'altezza dei pulsanti
-    public static final float SHIELD_SIZE_RATIO = 0.25f; // Rapporto per la dimensione dello scudo
+    // ============== MARGINI E SPAZIATURE ==============
+    
+    /** Margini standard per pulsanti (top:15, left:20, bottom:15, right:20) */
+    public static final Insets BUTTON_INSETS = new Insets(15, 20, 15, 20);
+    
+    /** Margini speciali per pulsante uscita (top:30, left:20, bottom:0, right:20) */
+    public static final Insets EXIT_BUTTON_INSETS = new Insets(30, 20, 0, 20);
+    
+    /** Rapporto margine superiore contenuti */
+    public static final int TOP_MARGIN_RATIO = 2;
 
-    // Margini e spaziature
-    public static final Insets BUTTON_INSETS = new Insets(15, 20, 15, 20); // Margini interni dei pulsanti
-    public static final Insets EXIT_BUTTON_INSETS = new Insets(30, 20, 0, 20); // Margini interni del pulsante di uscita
-    public static final int TOP_MARGIN_RATIO = 2; // Rapporto per il margine superiore
+    // ============== RISORSE GRAFICHE ==============
+    private static BufferedImage shieldImage;
+    private static BufferedImage asciiFlipper;
+    private static Font normalFont;
+    private static Font boldFont;
+    private static Font italicFont;
 
-    // ### Risorse caricate ###
-
-    private static BufferedImage shieldImage; // Immagine dello scudo
-    private static BufferedImage asciiFlipper; // Immagine ASCII del flipper
-    private static Font normalFont; // Font normale
-    private static Font boldFont; // Font in grassetto
-    private static Font italicFont; // Font in corsivo
-
-    // ### Percorsi delle risorse ###
-
+    // ============== PERCORSI RISORSE ==============
     private static final Path SHIELD_IMAGE_PATH = Paths.get("resources", "img", "scudopoggiolevante.png");
     private static final Path ASCII_FLIPPER_PATH = Paths.get("resources", "img", "flipper.jpg");
     private static final Path FONT_NORMAL_PATH = Paths.get("resources", "fonts", "BarlowCondensed-Medium.ttf");
     private static final Path FONT_BOLD_PATH = Paths.get("resources", "fonts", "BarlowCondensed-Bold.ttf");
     private static final Path FONT_ITALIC_PATH = Paths.get("resources", "fonts", "BarlowCondensed-SemiBoldItalic.ttf");
 
-    // ### Blocco di inizializzazione statico ###
-
+    // ============== INIZIALIZZAZIONE ==============
     static {
         try {
-            // Carica le risorse dell'interfaccia utente (immagini e font)
             ResourceLoader.loadResources();
         } catch (IOException | FontFormatException ex) {
-            // Se si verifica un errore durante il caricamento delle risorse, registra l'errore e termina il programma
-            Logger.getLogger(UI_Config.class.getName()).log(Level.SEVERE, 
-                    "Errore caricamento risorse UI", ex);
+            Logger.getLogger(UI_Config.class.getName()).log(
+                Level.SEVERE, 
+                "ERRORE: Caricamento risorse UI fallito", 
+                ex
+            );
             Utils.exitApplication(Utils.EXIT_CODE_RESOURCE_ERROR);
         }
     }
-
-    // ### Costruttore privato ###
-
+    
     /**
-     * Costruttore privato per impedire l'istanziazione della classe.
-     * Questa è una classe di utilità e non deve essere istanziata.
-     */
-    private UI_Config() {
-        throw new AssertionError("Classe di utilità, non istanziabile");
-    }
-
-    // ### Metodi getter per le risorse ###
-
-    /**
-     * Restituisce l'immagine dello scudo.
-     * @return L'immagine dello scudo.
+     * Restituisce l'immagine dello scudo
+     * @return BufferedImage o null se non caricata
      */
     public static BufferedImage getShieldImage() {
         return shieldImage;
     }
 
     /**
-     * Restituisce il font normale.
-     * @return Il font normale.
+     * Restituisce il font normale dell'applicazione
+     * @return Font caricato o null se errore
      */
     public static Font getNormalFont() {
         return normalFont;
     }
 
     /**
-     * Restituisce il font in grassetto.
-     * @return Il font in grassetto.
+     * Restituisce il font in grassetto
+     * @return Font caricato o null se errore
      */
     public static Font getBoldFont() {
         return boldFont;
     }
 
     /**
-     * Restituisce il font in corsivo.
-     * @return Il font in corsivo.
+     * Restituisce il font in corsivo
+     * @return Font caricato o null se errore
      */
     public static Font getItalicFont() {
         return italicFont;
     }
 
     /**
-     * Restituisce l'immagine ASCII del flipper.
-     * @return L'immagine ASCII del flipper.
+     * Restituisce l'immagine ASCII del flipper
+     * @return BufferedImage o null se non caricata
      */
-    public static BufferedImage getAsciiImage(){
+    public static BufferedImage getAsciiImage() {
         return asciiFlipper;
     }
 
-    // ### Metodi setter per le risorse ###
-
+    // ============== METODI DI CONFIGURAZIONE ==============
+    
     /**
-     * Imposta l'immagine dello scudo.
-     * @param shieldImage L'immagine dello scudo da impostare.
+     * Imposta l'immagine dello scudo (uso interno)
+     * @param shieldImage Immagine
      */
     public static void setShieldImage(BufferedImage shieldImage) {
         UI_Config.shieldImage = shieldImage;
     }
 
-    /**
-     * Imposta l'immagine ASCII del flipper.
-     * @param asciiFlipper L'immagine ASCII del flipper da impostare.
-     */
     public static void setAsciiFlipper(BufferedImage asciiFlipper) {
         UI_Config.asciiFlipper = asciiFlipper;
     }
 
-    /**
-     * Imposta il font normale.
-     * @param normalFont Il font normale da impostare.
-     */
     public static void setNormalFont(Font normalFont) {
         UI_Config.normalFont = normalFont;
     }
 
-    /**
-     * Imposta il font in grassetto.
-     * @param boldFont Il font in grassetto da impostare.
-     */
     public static void setBoldFont(Font boldFont) {
         UI_Config.boldFont = boldFont;
     }
 
-    /**
-     * Imposta il font in corsivo.
-     * @param italicFont Il font in corsivo da impostare.
-     */
     public static void setItalicFont(Font italicFont) {
         UI_Config.italicFont = italicFont;
     }
 
-    // ### Metodi getter per i percorsi delle risorse ###
-
+    // ============== PERCORSI ASSOLUTI ==============
+    
     /**
-     * Restituisce il percorso dell'immagine dello scudo.
-     * @return Il percorso dell'immagine dello scudo.
+     * Restituisce il percorso assoluto dell'immagine scudo
+     * @return percorso dello immagine Scudo di poggiolevante
      */
     public static String getSHIELD_IMAGE_PATH() {
         return SHIELD_IMAGE_PATH.toString();
     }
 
-    /**
-     * Restituisce il percorso del font normale.
-     * @return Il percorso del font normale.
-     */
     public static String getFONT_NORMAL_PATH() {
         return FONT_NORMAL_PATH.toString();
     }
 
-    /**
-     * Restituisce il percorso del font in grassetto.
-     * @return Il percorso del font in grassetto.
-     */
     public static String getFONT_BOLD_PATH() {
         return FONT_BOLD_PATH.toString();
     }
 
-    /**
-     * Restituisce il percorso del font in corsivo.
-     * @return Il percorso del font in corsivo.
-     */
     public static String getFONT_ITALIC_PATH() {
         return FONT_ITALIC_PATH.toString();
     }
 
-    /**
-     * Restituisce il percorso dell'immagine ASCII del flipper.
-     * @return Il percorso dell'immagine ASCII del flipper.
-     */
     public static String getASCII_FLIPPER_PATH() {
         return ASCII_FLIPPER_PATH.toString();
+    }
+
+    // ============== CONTROLLO INSTANZIAZIONE ==============
+    private UI_Config() {
+        throw new AssertionError("Classe di utilità non istanziabile");
     }
 }

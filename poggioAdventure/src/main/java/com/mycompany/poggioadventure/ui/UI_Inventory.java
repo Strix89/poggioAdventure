@@ -9,143 +9,209 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
 /**
- * Classe che rappresenta l'interfaccia utente per l'inventario del gioco PoggioAdventure.
- * Mostra una lista di oggetti, un'immagine e una descrizione dettagliata dell'oggetto selezionato.
- * Estende la classe astratta UI_Abstract per ereditare la struttura di base dell'interfaccia grafica.
+ * Interfaccia grafica per la gestione dell'inventario di gioco.
+ * 
+ * <p>Responsabilità principali:
+ * <ul>
+ *   <li>Visualizzazione lista oggetti posseduti</li>
+ *   <li>Mostra dettagli oggetti selezionati</li>
+ *   <li>Gestione interazione con gli oggetti</li>
+ * </ul>
+ * 
+ * <p>Caratteristiche:
+ * <ul>
+ *   <li>Layout diviso in due sezioni (lista/dettaglio)</li>
+ *   <li>Scroll automatico per liste lunghe</li>
+ *   <li>Visualizzazione immagini e descrizioni</li>
+ *   <li>Design responsive con dimensioni calcolate</li>
+ * </ul>
+ *
+ * @author Strix89
  */
 public class UI_Inventory extends UI_Abstract {
-    // Componenti dell'interfaccia utente
-    private JScrollPane objectsScroller;  // Pannello scrollabile per la lista degli oggetti
-    private JTextArea descriptionArea;   // Area di testo per la descrizione dell'oggetto
-    private JButton escButton;           // Pulsante per chiudere la finestra
-    private JPanel imageObjects;         // Pannello per visualizzare l'immagine dell'oggetto
+    
+    // ============== COMPONENTI UI ==============
+    private JScrollPane objectsScroller;  // Area scrollabile per la lista oggetti
+    private JTextArea descriptionArea;    // Area testo per la descrizione
+    private JButton escButton;            // Pulsante chiusura finestra
+    private JPanel imageObjects;          // Pannello visualizzazione immagine
 
+    // ============== COSTRUTTORE ==============
+    
     /**
-     * Costruttore della classe. Chiama il costruttore della superclasse UI_Abstract
-     * per inizializzare l'interfaccia grafica.
+     * Inizializza la finestra dell'inventario configurando:
+     * - Proprietà base della finestra
+     * - Layout principale
+     * - Componenti grafici
      */
     public UI_Inventory() {
         super();
     }
 
+    // ============== INIZIALIZZAZIONE ==============
+    
     /**
-     * Implementazione del metodo astratto initComponents() della superclasse UI_Abstract.
-     * Inizializza tutti i componenti dell'interfaccia utente, inclusi i pannelli, i pulsanti
-     * e le aree di testo.
+     * Configura l'interfaccia utente come richiesto da UI_Abstract.
+     * Crea e posiziona tutti i componenti grafici.
      */
     @Override
     protected void initComponents() {
-        // Configurazione generale della finestra
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);  // Chiude l'applicazione alla chiusura della finestra
-        setSize(650, 480);  // Dimensioni fisse della finestra
-        getContentPane().setBackground(UI_Config.BACKGROUND_COLOR);  // Colore di sfondo
-        setLayout(new BorderLayout(15, 15));  // Layout principale con spaziatura
-        ((JComponent) getContentPane()).setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));  // Aggiunge un padding interno
+        configureMainWindow();
+        createLeftPanel();
+        createRightPanel();
+    }
 
-        // 1. PANNELLO SINISTRA - LISTA OGGETTI
+    // ============== CONFIGURAZIONE FINESTRA ==============
+    
+    /**
+     * Imposta le proprietà base della finestra:
+     * - Dimensioni fisse
+     * - Comportamento chiusura
+     * - Sfondo e layout
+     */
+    private void configureMainWindow() {
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(650, 480);
+        getContentPane().setBackground(UI_Config.BACKGROUND_COLOR);
+        setLayout(new BorderLayout(15, 15));
+        ((JComponent) getContentPane()).setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+    }
+
+    // ============== PANNELLO SINISTRO (LISTA) ==============
+    
+    /**
+     * Crea il pannello sinistro contenente:
+     * - Titolo sezione
+     * - Area scrollabile per la lista oggetti
+     */
+    private void createLeftPanel() {
         JPanel listPanel = new JPanel(new BorderLayout());
-        listPanel.setBackground(new Color(70, 70, 70));  // Colore di sfondo del pannello
-        listPanel.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY, 2));  // Bordo del pannello
+        listPanel.setBackground(new Color(70, 70, 70));
+        listPanel.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY, 2));
 
-        // Titolo della lista degli oggetti
+        // Titolo sezione
         JLabel listTitle = new JLabel(getWindowTitle().toUpperCase());
-        listTitle.setFont(UI_Config.getBoldFont().deriveFont(18f));  // Font in grassetto
-        listTitle.setForeground(UI_Config.TEXT_COLOR);  // Colore del testo
-        listTitle.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));  // Padding interno
-        listPanel.add(listTitle, BorderLayout.NORTH);  // Aggiunge il titolo al pannello
+        listTitle.setFont(UI_Config.getBoldFont().deriveFont(18f));
+        listTitle.setForeground(UI_Config.TEXT_COLOR);
+        listTitle.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        listPanel.add(listTitle, BorderLayout.NORTH);
 
-        // Pannello scrollabile per la lista degli oggetti
+        // Area scrollabile
         objectsScroller = new JScrollPane();
-        objectsScroller.setBorder(null);  // Rimuove il bordo predefinito
-        objectsScroller.getViewport().setBackground(new Color(90, 90, 90));  // Colore di sfondo
-        listPanel.add(objectsScroller, BorderLayout.CENTER);  // Aggiunge il pannello scrollabile
-        add(listPanel, BorderLayout.WEST);  // Aggiunge il pannello alla finestra
+        objectsScroller.setBorder(null);
+        objectsScroller.getViewport().setBackground(new Color(90, 90, 90));
+        listPanel.add(objectsScroller, BorderLayout.CENTER);
+        
+        add(listPanel, BorderLayout.WEST);
+    }
 
-        // 2. PANNELLO DESTRA - IMMAGINE E DESCRIZIONE
+    // ============== PANNELLO DESTRO (DETTAGLI) ==============
+    
+    /**
+     * Crea il pannello destro contenente:
+     * - Visualizzazione immagine oggetto
+     * - Descrizione testuale
+     * - Pulsante chiusura
+     */
+    private void createRightPanel() {
         JPanel rightPanel = new JPanel(new GridBagLayout());
-        rightPanel.setBackground(UI_Config.BACKGROUND_COLOR);  // Colore di sfondo
+        rightPanel.setBackground(UI_Config.BACKGROUND_COLOR);
+        GridBagConstraints gbc = new GridBagConstraints();
 
-        GridBagConstraints gbc = new GridBagConstraints();  // Configura i vincoli del layout
+        createImagePanel(gbc, rightPanel);
+        createDescriptionPanel(gbc, rightPanel);
+        createExitButton(gbc, rightPanel);
 
-        // 2a. PANNELLO IMMAGINE
+        add(rightPanel, BorderLayout.CENTER);
+    }
+
+    /**
+     * Crea il pannello per la visualizzazione dell'immagine
+     */
+    private void createImagePanel(GridBagConstraints gbc, JPanel parent) {
         imageObjects = new JPanel(new BorderLayout());
-        imageObjects.setBackground(new Color(30, 30, 30));  // Colore di sfondo
+        imageObjects.setBackground(new Color(30, 30, 30));
         imageObjects.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(Color.DARK_GRAY, 2),  // Bordo esterno
-            BorderFactory.createEmptyBorder(5, 5, 5, 5)  // Padding interno
+            BorderFactory.createLineBorder(Color.DARK_GRAY, 2),
+            BorderFactory.createEmptyBorder(5, 5, 5, 5)
         ));
-        imageObjects.setPreferredSize(new Dimension(300, 250));  // Dimensione preferita
+        imageObjects.setPreferredSize(new Dimension(300, 250));
+        
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.weightx = 1;
         gbc.weighty = 0.6;
         gbc.fill = GridBagConstraints.BOTH;
-        rightPanel.add(imageObjects, gbc);  // Aggiunge il pannello immagine
-
-        // 2b. PANNELLO DESCRIZIONE
-        JPanel descPanel = new JPanel(new BorderLayout());
-        descPanel.setBackground(new Color(30, 30, 30));  // Colore di sfondo
-        descPanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(Color.DARK_GRAY, 2),  // Bordo esterno
-            BorderFactory.createEmptyBorder(5, 5, 5, 5)  // Padding interno
-        ));
-
-        // Area di testo per la descrizione
-        descriptionArea = new JTextArea();
-        descriptionArea.setBackground(new Color(60, 60, 60));  // Colore di sfondo
-        descriptionArea.setForeground(UI_Config.TEXT_COLOR);  // Colore del testo
-        descriptionArea.setFont(UI_Config.getNormalFont().deriveFont(14f));  // Font
-        descriptionArea.setEditable(false);  // Impedisce la modifica del testo
-        descriptionArea.setLineWrap(true);  // Abilita il ritorno a capo automatico
-        descriptionArea.setWrapStyleWord(true);  // Mantiene le parole intere
-
-        JScrollPane descScroll = new JScrollPane(descriptionArea);
-        descScroll.setBorder(null);  // Rimuove il bordo predefinito
-        descPanel.add(descScroll, BorderLayout.CENTER);  // Aggiunge l'area di testo al pannello
-        gbc.gridy = 1;
-        gbc.weighty = 0.4;
-        rightPanel.add(descPanel, gbc);  // Aggiunge il pannello descrizione
-
-        // 2c. PULSANTE ESCI
-        escButton = new JButton("ESCI");
-        escButton.setFont(UI_Config.getBoldFont().deriveFont(14f));  // Font in grassetto
-        escButton.setBackground(new Color(100, 100, 100));  // Colore di sfondo
-        escButton.setForeground(UI_Config.TEXT_COLOR);  // Colore del testo
-        escButton.setFocusPainted(false);  // Disabilita l'effetto di focus
-        escButton.setBorder(BorderFactory.createEmptyBorder(5, 15, 5, 15));  // Padding interno
-        escButton.addActionListener(e -> dispose());  // Chiude la finestra al click
-        gbc.gridy = 2;
-        gbc.weighty = 0;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(10, 0, 0, 0);  // Spaziatura superiore
-        rightPanel.add(escButton, gbc);  // Aggiunge il pulsante
-
-        add(rightPanel, BorderLayout.CENTER);  // Aggiunge il pannello destro alla finestra
+        parent.add(imageObjects, gbc);
     }
 
     /**
-     * Popola la lista degli oggetti nell'area scrollabile.
-     * Ogni oggetto è rappresentato da una JLabel cliccabile.
-     *
-     * @param objects Lista di AdvObject da visualizzare nell'inventario.
+     * Crea il pannello per la descrizione testuale
+     */
+    private void createDescriptionPanel(GridBagConstraints gbc, JPanel parent) {
+        JPanel descPanel = new JPanel(new BorderLayout());
+        descPanel.setBackground(new Color(30, 30, 30));
+        descPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(Color.DARK_GRAY, 2),
+            BorderFactory.createEmptyBorder(5, 5, 5, 5)
+        ));
+
+        descriptionArea = new JTextArea();
+        descriptionArea.setBackground(new Color(60, 60, 60));
+        descriptionArea.setForeground(UI_Config.TEXT_COLOR);
+        descriptionArea.setFont(UI_Config.getNormalFont().deriveFont(14f));
+        descriptionArea.setEditable(false);
+        descriptionArea.setLineWrap(true);
+        descriptionArea.setWrapStyleWord(true);
+
+        JScrollPane descScroll = new JScrollPane(descriptionArea);
+        descScroll.setBorder(null);
+        descPanel.add(descScroll, BorderLayout.CENTER);
+        
+        gbc.gridy = 1;
+        gbc.weighty = 0.4;
+        parent.add(descPanel, gbc);
+    }
+
+    /**
+     * Crea e configura il pulsante di chiusura
+     */
+    private void createExitButton(GridBagConstraints gbc, JPanel parent) {
+        escButton = new JButton("ESCI");
+        escButton.setFont(UI_Config.getBoldFont().deriveFont(14f));
+        escButton.setBackground(new Color(100, 100, 100));
+        escButton.setForeground(UI_Config.TEXT_COLOR);
+        escButton.setFocusPainted(false);
+        escButton.setBorder(BorderFactory.createEmptyBorder(5, 15, 5, 15));
+        escButton.addActionListener(e -> dispose());
+        
+        gbc.gridy = 2;
+        gbc.weighty = 0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(10, 0, 0, 0);
+        parent.add(escButton, gbc);
+    }
+
+    // ============== GESTIONE OGGETTI ==============
+    
+    /**
+     * Popola la lista degli oggetti nell'inventario.
+     * @param objects Lista degli oggetti da visualizzare
      */
     public void addObjectsToScroller(java.util.List<AdvObject> objects) {
         JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));  // Layout verticale
-        panel.setBackground(new Color(90, 90, 90));  // Colore di sfondo
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBackground(new Color(90, 90, 90));
 
-        // Calcola la larghezza massima del testo
+        // Calcola larghezza massima testo
         Font font = UI_Config.getNormalFont().deriveFont(12f);
         FontMetrics fontMetrics = getFontMetrics(font);
         int maxTextWidth = 0;
 
-        // Aggiunge ogni oggetto come JLabel cliccabile
+        // Crea elementi cliccabili per ogni oggetto
         for (AdvObject obj : objects) {
             String text = " • " + obj.getName();
-            int textWidth = fontMetrics.stringWidth(text);
-            if (textWidth > maxTextWidth) {
-                maxTextWidth = textWidth;
-            }
+            maxTextWidth = Math.max(maxTextWidth, fontMetrics.stringWidth(text));
 
             JLabel label = new JLabel(text);
             label.setFont(font);
@@ -154,84 +220,71 @@ public class UI_Inventory extends UI_Abstract {
             label.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    showObjectDetails(obj);  // Mostra i dettagli dell'oggetto al click
+                    showObjectDetails(obj);
                 }
             });
             panel.add(label);
         }
 
-        // Imposta la larghezza del pannello in base alla larghezza massima del testo
-        int padding = 30;  // Padding per evitare che il testo sia troppo vicino ai bordi
-        int panelWidth = maxTextWidth + padding;
+        // Imposta dimensioni ottimali
+        int panelWidth = maxTextWidth + 30;
         panel.setPreferredSize(new Dimension(panelWidth, panel.getPreferredSize().height));
-
-        objectsScroller.setViewportView(panel);  // Imposta il pannello come vista scrollabile
+        objectsScroller.setViewportView(panel);
         objectsScroller.setPreferredSize(new Dimension(panelWidth, objectsScroller.getPreferredSize().height));
     }
 
     /**
-     * Mostra i dettagli di un oggetto selezionato (immagine e descrizione).
-     *
-     * @param obj L'oggetto di cui visualizzare i dettagli.
+     * Mostra i dettagli di un oggetto selezionato.
+     * @param obj Oggetto di cui mostrare i dettagli
      */
     private void showObjectDetails(AdvObject obj) {
-        imageObjects.removeAll();  // Rimuove l'immagine precedente
+        imageObjects.removeAll();
         imageObjects.setLayout(new BorderLayout());
 
-        // Carica l'immagine dell'oggetto se disponibile
         if (obj.getImagePath() != null && obj.getImagePath().exists()) {
             ImageIcon icon = new ImageIcon(obj.getImagePath().getPath());
-            Image image = icon.getImage().getScaledInstance(280, 200, Image.SCALE_SMOOTH);  // Ridimensiona l'immagine
+            Image image = icon.getImage().getScaledInstance(280, 200, Image.SCALE_SMOOTH);
             JLabel imageLabel = new JLabel(new ImageIcon(image));
             imageLabel.setHorizontalAlignment(JLabel.CENTER);
             imageObjects.add(imageLabel, BorderLayout.CENTER);
         } else {
-            // Mostra un messaggio se l'immagine non è disponibile
             JLabel noImageLabel = new JLabel("Nessuna immagine disponibile");
             noImageLabel.setForeground(UI_Config.TEXT_COLOR);
             noImageLabel.setHorizontalAlignment(JLabel.CENTER);
             imageObjects.add(noImageLabel, BorderLayout.CENTER);
         }
 
-        descriptionArea.setText(obj.getDescription());  // Imposta la descrizione dell'oggetto
-        descriptionArea.setCaretPosition(0);  // Posiziona il cursore all'inizio del testo
-        revalidate();  // Aggiorna il layout
-        repaint();  // Ridisegna la finestra
+        descriptionArea.setText(obj.getDescription());
+        descriptionArea.setCaretPosition(0);
+        revalidate();
+        repaint();
     }
 
-    /**
-     * Metodo main di esempio per testare l'interfaccia.
-     * Da rimuovere in produzione o utilizzare solo per scopi dimostrativi.
-     */
+    // ============== METODI OVERRIDE ==============
+    
+    @Override
+    protected String getWindowTitle() {
+        return "PoggioAdventure - Inventario";
+    }
+
+    // ============== MAIN PER TEST ==============
     public static void main(String[] args) {
-        FlatLightLaf.setup();  // Configura il tema FlatLaf light
+        FlatLightLaf.setup();
         java.awt.EventQueue.invokeLater(() -> {
             UI_Inventory inventoryUI = new UI_Inventory();
             inventoryUI.setVisible(true);
 
-            // Esempio di dati (modifica con i tuoi percorsi reali)
+            // Dati di esempio
             java.util.List<AdvObject> objects = new ArrayList<>();
-            for (int i = 1; i <= 26; i++) {
+            for (int i = 1; i <= 10; i++) {
                 objects.add(new AdvObject(
                     i,
-                    "Oggetto fsefesfsefe" + i,
+                    "Oggetto " + i,
                     "./resources/img/none.png",
-                    "Descrizione dettagliata per l'oggetto " + i + ".\n\n" +
-                    "Materiale: Speciale\nPeso: " + (i % 10 + 1) + "kg\nRarità: " + (i % 5 + 1) + "/5"
+                    "Descrizione dettagliata per l'oggetto " + i
                 ));
             }
-            inventoryUI.addObjectsToScroller(objects);  // Popola la lista degli oggetti
+            inventoryUI.addObjectsToScroller(objects);
         });
-    }
-
-    /**
-     * Implementazione del metodo astratto getWindowTitle() della superclasse UI_Abstract.
-     * Restituisce il titolo della finestra.
-     *
-     * @return Stringa contenente il titolo della finestra
-     */
-    @Override
-    protected String getWindowTitle() {
-        return "PoggioAdventure - Inventario";
     }
 }

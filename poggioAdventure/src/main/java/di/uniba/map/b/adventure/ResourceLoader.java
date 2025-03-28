@@ -17,8 +17,9 @@ import javax.imageio.ImageIO;
 
 public class ResourceLoader {
     
-     public static final Path STOPWORDS_PATH = Paths.get("resources", "stopwords").toAbsolutePath();
+    public static final Path STOPWORDS_PATH = Paths.get("resources", "stopwords").toAbsolutePath();
     public static final Path SAVES_DIRECTORY = Paths.get("sav").toAbsolutePath();
+    public static final Path LOGS_DIRECTORY = Paths.get("resources","logs").toAbsolutePath();
 
     public static BufferedImage loadImage(String path) throws IOException {
         File imageFile = new File(path);
@@ -41,12 +42,18 @@ public class ResourceLoader {
         File savesDir = new File(SAVES_DIRECTORY.toString());
         if (!savesDir.exists()) {
             if (savesDir.mkdirs()) {
-                Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, 
-                    "Cartella dei salvataggi creata: " + savesDir.getAbsolutePath());
+                Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, "Cartella dei salvataggi creata: {0}", savesDir.getAbsolutePath());
             } else {
-                Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, 
-                    "Impossibile creare la cartella dei salvataggi: " + SAVES_DIRECTORY);
+                Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, "Impossibile creare la cartella dei salvataggi: {0}", SAVES_DIRECTORY);
+                Utils.exitApplication(Utils.EXIT_CODE_CRITICAL);
             }
+        }
+    }
+    
+    private static void checkLogsDirectory() {
+        File logsDir = new File(LOGS_DIRECTORY.toString());
+        if (!logsDir.exists()) {
+            logsDir.mkdirs();
         }
     }
 
@@ -69,6 +76,7 @@ public class ResourceLoader {
     // Carica tutte le risorse necessarie
     public static void loadResources() throws IOException, FontFormatException {
         checkSavesDirectory();
+        checkLogsDirectory();
         // Caricamento delle immagini
         UI_Config.setShieldImage(loadImage(UI_Config.getSHIELD_IMAGE_PATH()));
         UI_Config.setAsciiFlipper(loadImage(UI_Config.getASCII_FLIPPER_PATH()));

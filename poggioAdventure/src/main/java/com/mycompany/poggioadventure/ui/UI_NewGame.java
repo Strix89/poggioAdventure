@@ -9,248 +9,271 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 /**
- * Classe che rappresenta l'interfaccia utente per iniziare una nuova partita.
- * Permette all'utente di inserire il proprio nome e avviare il gioco.
- * Estende la classe astratta UI_Abstract per ereditare la struttura di base dell'interfaccia grafica.
+ * Interfaccia per la creazione di una nuova partita in PoggioAdventure.
+ * 
+ * <p>Responsabilità principali:
+ * <ul>
+ *   <li>Raccogliere il nome del giocatore</li>
+ *   <li>Validare l'input dell'utente</li>
+ *   <li>Avviare una nuova partita con i parametri specificati</li>
+ *   <li>Gestire la transizione alla schermata di gioco</li>
+ * </ul>
+ * 
+ * <p>Pattern utilizzati:
+ * <ul>
+ *   <li>Template Method (ereditando da UI_Abstract)</li>
+ *   <li>Observer (per gli eventi dei pulsanti)</li>
+ * </ul>
+ *
+ * @author Strix89
  */
 public class UI_NewGame extends UI_Abstract {
 
-    // Componenti dell'interfaccia utente
-    private JTextField nameField;  // Campo di testo per inserire il nome del giocatore
-    private JButton startButton;   // Pulsante per avviare la nuova partita
-    private JLabel titleLabel;     // Etichetta per il titolo della finestra
-    private JFrame parentFrame = null; 
+    // ============== COMPONENTI UI ==============
+    private JTextField nameField;    // Campo per l'inserimento nome
+    private JButton startButton;     // Pulsante di avvio partita
+    private JLabel titleLabel;       // Titolo della finestra
+    private JFrame parentFrame;      // Finestra parent (opzionale)
 
+    // ============== COSTRUTTORI ==============
+    
     /**
-     * Costruttore della classe.Chiama il costruttore della superclasse UI_Abstract
-     * per inizializzare l'interfaccia grafica.
-     * @param parent
+     * Costruttore con finestra parent.
+     * @param parent Finestra da chiudere al lancio del gioco
      */
     public UI_NewGame(JFrame parent) {
         super();
         this.parentFrame = parent;
     }
     
+    /**
+     * Costruttore senza parent (per testing).
+     */
     public UI_NewGame() {
         super();
     }
 
+    // ============== INIZIALIZZAZIONE ==============
+    
     /**
-     * Implementazione del metodo astratto initComponents() della superclasse UI_Abstract.
-     * Inizializza tutti i componenti dell'interfaccia utente, inclusi il campo di testo,
-     * il pulsante di avvio e il titolo.
+     * Configura l'interfaccia utente come richiesto da UI_Abstract.
+     * Crea e posiziona tutti i componenti grafici.
      */
     @Override
     protected void initComponents() {
-        configureFrame();          // Configura la finestra principale
-        createComponents();        // Crea i componenti dell'interfaccia
-        setupLayout();             // Configura il layout della finestra
-        setupEventListeners();     // Imposta gli eventi dei pulsanti
-        pack();                    // Ridimensiona la finestra per adattarsi ai componenti
+        configureFrame();
+        createComponents();
+        setupLayout();
+        setupEventListeners();
+        pack();
     }
 
+    // ============== CONFIGURAZIONE FINESTRA ==============
+    
     /**
-     * Configura la finestra principale con le impostazioni di base:
-     * - Dimensioni preferite
-     * - Comportamento alla chiusura
-     * - Colore di sfondo
-     * - Layout principale
+     * Imposta le proprietà base della finestra:
+     * - Dimensioni responsive
+     * - Comportamento chiusura
+     * - Sfondo e layout
      */
     private void configureFrame() {
-        setPreferredSize(calculateWindowSize());  // Imposta le dimensioni della finestra
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);  // Chiude solo questa finestra
-        getContentPane().setBackground(UI_Config.BACKGROUND_COLOR);  // Colore di sfondo
-        getContentPane().setLayout(new BorderLayout());  // Layout principale
+        setPreferredSize(calculateWindowSize());
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        getContentPane().setBackground(UI_Config.BACKGROUND_COLOR);
+        getContentPane().setLayout(new BorderLayout());
     }
 
     /**
-     * Calcola le dimensioni della finestra in base alle dimensioni dello schermo
-     * e ai rapporti definiti in UI_Config.
-     *
-     * @return Dimension Oggetto Dimension che rappresenta le dimensioni della finestra
+     * Calcola dimensioni in base allo schermo:
+     * - 80% della larghezza standard
+     * - 60% dell'altezza standard
      */
     private Dimension calculateWindowSize() {
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();  // Ottiene le dimensioni dello schermo
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         return new Dimension(
-            (int)(screenSize.width * UI_Config.WINDOW_WIDTH_RATIO * 0.8),  // Larghezza ridotta dell'80%
-            (int)(screenSize.height * UI_Config.WINDOW_HEIGHT_RATIO * 0.6)  // Altezza ridotta del 60%
+            (int)(screenSize.width * UI_Config.WINDOW_WIDTH_RATIO * 0.8),
+            (int)(screenSize.height * UI_Config.WINDOW_HEIGHT_RATIO * 0.6)
         );
     }
 
+    // ============== CREAZIONE COMPONENTI ==============
+    
     /**
-     * Crea i componenti dell'interfaccia utente, inclusi il titolo, il campo di testo
-     * e il pulsante di avvio.
+     * Crea e configura i componenti principali:
+     * - Titolo
+     * - Campo nome giocatore
+     * - Pulsante start
      */
     private void createComponents() {
         // Titolo
         titleLabel = new JLabel("INSERISCI IL TUO NOME");
         titleLabel.setFont(UI_Config.getBoldFont().deriveFont(
-            getPreferredSize().height * UI_Config.TITLE_FONT_RATIO * 0.7f));  // Scala il font
-        titleLabel.setForeground(UI_Config.TEXT_COLOR);  // Colore del testo
-        titleLabel.setHorizontalAlignment(SwingConstants.CENTER);  // Allinea il testo al centro
+            getPreferredSize().height * UI_Config.TITLE_FONT_RATIO * 0.7f));
+        titleLabel.setForeground(UI_Config.TEXT_COLOR);
+        titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
-        // Campo di testo
+        // Campo nome
         nameField = new JTextField();
         nameField.setFont(UI_Config.getNormalFont().deriveFont(
-            getPreferredSize().height * UI_Config.BUTTON_FONT_RATIO));  // Scala il font
-        nameField.setForeground(UI_Config.TEXT_COLOR);  // Colore del testo
-        nameField.setBackground(UI_Config.BUTTON_BASE_COLOR);  // Colore di sfondo
-        nameField.setCaretColor(UI_Config.TEXT_COLOR);  // Colore del cursore
-        nameField.setBorder(createTextFieldBorder());  // Bordo personalizzato
-        nameField.setHorizontalAlignment(SwingConstants.CENTER);  // Allinea il testo al centro
+            getPreferredSize().height * UI_Config.BUTTON_FONT_RATIO));
+        nameField.setForeground(UI_Config.TEXT_COLOR);
+        nameField.setBackground(UI_Config.BUTTON_BASE_COLOR);
+        nameField.setCaretColor(UI_Config.TEXT_COLOR);
+        nameField.setBorder(createTextFieldBorder());
+        nameField.setHorizontalAlignment(SwingConstants.CENTER);
 
         // Pulsante Start
         startButton = new JButton("START");
         startButton.setFont(UI_Config.getBoldFont().deriveFont(
-            getPreferredSize().height * UI_Config.BUTTON_FONT_RATIO));  // Scala il font
-        startButton.setForeground(UI_Config.TEXT_COLOR);  // Colore del testo
-        startButton.setBackground(UI_Config.BUTTON_BASE_COLOR);  // Colore di sfondo
-        startButton.setBorder(createButtonBorder());  // Bordo personalizzato
-        startButton.setFocusPainted(false);  // Disabilita l'effetto di focus
-        startButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));  // Cambia il cursore al passaggio del mouse
-        addButtonHoverEffect(startButton);  // Aggiunge l'effetto hover
+            getPreferredSize().height * UI_Config.BUTTON_FONT_RATIO));
+        startButton.setForeground(UI_Config.TEXT_COLOR);
+        startButton.setBackground(UI_Config.BUTTON_BASE_COLOR);
+        startButton.setBorder(createButtonBorder());
+        startButton.setFocusPainted(false);
+        startButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        addButtonHoverEffect(startButton);
     }
 
+    // ============== LAYOUT ==============
+    
     /**
-     * Configura il layout della finestra, posizionando i componenti nei pannelli appropriati.
+     * Configura il layout con:
+     * - Titolo in alto
+     * - Campo nome al centro
+     * - Pulsante start in basso
      */
     private void setupLayout() {
-        JPanel mainPanel = new JPanel(new GridBagLayout());  // Pannello principale
-        mainPanel.setOpaque(false);  // Rende il pannello trasparente
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));  // Aggiunge un padding interno
+        JPanel mainPanel = new JPanel(new GridBagLayout());
+        mainPanel.setOpaque(false);
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        GridBagConstraints gbc = new GridBagConstraints();  // Configura i vincoli del layout
-        gbc.insets = new Insets(15, 15, 15, 15);  // Imposta i margini tra i componenti
-        gbc.weightx = 1;  // Distribuisce lo spazio orizzontalmente
-        gbc.fill = GridBagConstraints.HORIZONTAL;  // Riempi orizzontalmente i componenti
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(15, 15, 15, 15);
+        gbc.weightx = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
         // Titolo
-        gbc.gridy = 0;  // Posizione nella griglia (riga 0)
-        gbc.anchor = GridBagConstraints.CENTER;  // Allinea al centro
-        mainPanel.add(titleLabel, gbc);  // Aggiunge il titolo al pannello
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.CENTER;
+        mainPanel.add(titleLabel, gbc);
 
-        // Campo di testo
-        gbc.gridy = 1;  // Posizione nella griglia (riga 1)
-        gbc.ipady = 20;  // Aumenta l'altezza interna del componente
+        // Campo nome
+        gbc.gridy = 1;
+        gbc.ipady = 20;
         nameField.setPreferredSize(new Dimension(
-            (int)(getPreferredSize().width * 0.7),  // Larghezza del campo di testo
-            (int)(getPreferredSize().height * 0.1)  // Altezza del campo di testo
+            (int)(getPreferredSize().width * 0.7),
+            (int)(getPreferredSize().height * 0.1)
         ));
         nameField.setFont(UI_Config.getBoldFont().deriveFont(22f));
-        mainPanel.add(nameField, gbc);  // Aggiunge il campo di testo al pannello
+        mainPanel.add(nameField, gbc);
 
         // Pulsante Start
-        gbc.gridy = 2;  // Posizione nella griglia (riga 2)
-        gbc.ipady = 0;  // Ripristina l'altezza interna
-        gbc.fill = GridBagConstraints.NONE;  // Non riempire lo spazio
+        gbc.gridy = 2;
+        gbc.ipady = 0;
+        gbc.fill = GridBagConstraints.NONE;
         startButton.setPreferredSize(new Dimension(
-            (int)(getPreferredSize().width * (UI_Config.BUTTON_WIDTH_RATIO + 0.1)),  // Larghezza del pulsante
-            (int)(getPreferredSize().height * (UI_Config.BUTTON_HEIGHT_RATIO + 0.05))  // Altezza del pulsante
+            (int)(getPreferredSize().width * (UI_Config.BUTTON_WIDTH_RATIO + 0.1)),
+            (int)(getPreferredSize().height * (UI_Config.BUTTON_HEIGHT_RATIO + 0.05))
         ));
         startButton.setFont(UI_Config.getBoldFont().deriveFont(22f));
-        mainPanel.add(startButton, gbc);  // Aggiunge il pulsante al pannello
+        mainPanel.add(startButton, gbc);
 
-        add(mainPanel, BorderLayout.CENTER);  // Aggiunge il pannello principale alla finestra
+        add(mainPanel, BorderLayout.CENTER);
     }
 
+    // ============== STILE COMPONENTI ==============
+    
     /**
-     * Crea un bordo personalizzato per il campo di testo.
-     *
-     * @return Border Bordo configurato
+     * Crea bordo per il campo testo.
      */
     private Border createTextFieldBorder() {
         return BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(UI_Config.BORDER_COLOR, 2),  // Bordo esterno
-            BorderFactory.createEmptyBorder(10, 15, 10, 15)  // Padding interno
+            BorderFactory.createLineBorder(UI_Config.BORDER_COLOR, 2),
+            BorderFactory.createEmptyBorder(10, 15, 10, 15)
         );
     }
 
     /**
-     * Crea un bordo personalizzato per i pulsanti.
-     *
-     * @return Border Bordo configurato
+     * Crea bordo per i pulsanti.
      */
     private Border createButtonBorder() {
         return BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(UI_Config.BORDER_COLOR, 2),  // Bordo esterno
-            BorderFactory.createEmptyBorder(5, 25, 5, 25)  // Padding interno
+            BorderFactory.createLineBorder(UI_Config.BORDER_COLOR, 2),
+            BorderFactory.createEmptyBorder(5, 25, 5, 25)
         );
     }
 
     /**
-     * Aggiunge un effetto hover ai pulsanti, cambiando il colore di sfondo
-     * quando il mouse passa sopra di essi.
-     *
-     * @param button Pulsante a cui aggiungere l'effetto
+     * Aggiunge effetto hover ai pulsanti.
      */
     private void addButtonHoverEffect(JButton button) {
         button.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                button.setBackground(UI_Config.BUTTON_HOVER_COLOR);  // Cambia colore al passaggio del mouse
+                button.setBackground(UI_Config.BUTTON_HOVER_COLOR);
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                button.setBackground(UI_Config.BUTTON_BASE_COLOR);  // Ripristina il colore originale
+                button.setBackground(UI_Config.BUTTON_BASE_COLOR);
             }
         });
     }
 
+    // ============== GESTIONE EVENTI ==============
+    
     /**
-     * Configura gli eventi dei pulsanti:
-     * - "START" avvia il gioco se il nome è valido.
+     * Configura gli eventi per:
+     * - Avvio partita (pulsante o invio)
      */
     private void setupEventListeners() {
-        startButton.addActionListener(e -> handleStartGame());  // Gestisce l'avvio del gioco
+        startButton.addActionListener(e -> handleStartGame());
         nameField.addActionListener(e -> handleStartGame());
     }
 
+    // ============== LOGICA APPLICATIVA ==============
+    
     /**
-     * Gestisce l'avvio del gioco, verificando che il nome del giocatore sia valido.
+     * Gestisce l'avvio di una nuova partita:
+     * - Valida l'input
+     * - Chiude le finestre parent
+     * - Avvia la schermata di gioco
      */
     private void handleStartGame() {
-        String playerName = nameField.getText().trim();  // Ottiene il nome inserito dall'utente
+        String playerName = nameField.getText().trim();
         if (playerName.isEmpty()) {
-            new GUIErrorHandler().handleRecoverableError("Inserisci un nome valido!");  // Mostra un messaggio di errore
+            new GUIErrorHandler().handleRecoverableError("Inserisci un nome valido!");
             return;
         }
+        
         if(parentFrame != null) parentFrame.dispose();
-        dispose(); // Chiude UI_NewGame
+        dispose();
+        
         EventQueue.invokeLater(() -> {
             try {
-                UI_Game game = new UI_Game(playerName);
-                game.setVisible(true);
+                new UI_Game(playerName).setVisible(true);
             } catch (Exception e) {
-                new GUIErrorHandler().handleFatalError("Errore critico nell'avvio della partita: ", e);  // Mostra un messaggio di errore
+                new GUIErrorHandler().handleFatalError("Errore avvio partita: ", e);
             }
         });
     }
 
-    /**
-     * Metodo main di esempio per testare l'interfaccia.Da rimuovere in produzione o utilizzare solo per scopi dimostrativi.
-     * @param args
-     */
-    public static void main(String[] args) {
-        try {
-            EventQueue.invokeLater(() -> {
-                UI_NewGame mainWindow = new UI_NewGame();  // Crea la finestra principale
-                mainWindow.setVisible(true);  // Rende la finestra visibile
-            });
-        } catch (Exception ex) {
-            new GUIErrorHandler().handleFatalError("Errore critico nell'inizializzazione dell'interfaccia: ", ex);  // Mostra un messaggio di errore
-            Utils.exitApplication(Utils.EXIT_CODE_CRITICAL);
-        }
-    }
+    // ============== METODI OVERRIDE ==============
     
-    /**
-     * Implementazione del metodo astratto getWindowTitle() della superclasse UI_Abstract.
-     * Restituisce il titolo della finestra.
-     *
-     * @return Stringa contenente il titolo della finestra
-     */
     @Override
     protected String getWindowTitle() {
         return "Nuova Partita - PoggioAdventure";
+    }
+
+    // ============== MAIN PER TEST ==============
+    public static void main(String[] args) {
+        try {
+            EventQueue.invokeLater(() -> {
+                new UI_NewGame().setVisible(true);
+            });
+        } catch (Exception ex) {
+            new GUIErrorHandler().handleFatalError("Errore inizializzazione:", ex);
+            Utils.exitApplication(Utils.EXIT_CODE_CRITICAL);
+        }
     }
 }

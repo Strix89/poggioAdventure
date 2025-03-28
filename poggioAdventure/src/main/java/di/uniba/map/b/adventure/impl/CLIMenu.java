@@ -8,6 +8,7 @@ import di.uniba.map.b.adventure.InputHandler;
 import di.uniba.map.b.adventure.SaveGame;
 import di.uniba.map.b.adventure.MenuManager;
 import di.uniba.map.b.adventure.Utils;
+import di.uniba.map.b.adventure.parser.LoggerInput;
 import java.util.List;
 
 public class CLIMenu implements MenuManager {
@@ -50,7 +51,7 @@ public class CLIMenu implements MenuManager {
         CLIErrorHandler error = new CLIErrorHandler();
         try {
             Engine engine;
-            engine = EngineFactory.createNewGame(name, output, scanner, error);
+            engine = EngineFactory.createNewGame(name, output, scanner, error, new LoggerInput(error));
             // Avviare il ciclo di gioco
             engine.startGameLoop();
         } catch (Exception ex) {

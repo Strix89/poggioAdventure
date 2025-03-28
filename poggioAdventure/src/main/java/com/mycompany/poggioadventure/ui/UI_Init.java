@@ -9,182 +9,212 @@ import java.awt.image.BufferedImage;
 import javax.swing.border.Border;
 
 /**
- * Classe principale per l'interfaccia utente del gioco PoggioAdventure.
- * Gestisce la schermata iniziale del gioco, con pulsanti per iniziare una nuova partita,
- * caricare una partita esistente, visualizzare la classifica e uscire dal gioco.
- * Estende la classe astratta UI_Abstract per ereditare la struttura di base dell'interfaccia grafica.
+ * Schermata principale dell'applicazione PoggioAdventure.
+ * 
+ * <p>Responsabilità principali:
+ * <ul>
+ *   <li>Visualizzazione del menu principale</li>
+ *   <li>Gestione della navigazione tra diverse schermate</li>
+ *   <li>Caricamento e visualizzazione delle risorse grafiche</li>
+ *   <li>Implementazione dell'interfaccia MenuManager</li>
+ * </ul>
+ * 
+ * <p>Pattern utilizzati:
+ * <ul>
+ *   <li>Template Method (ereditando da UI_Abstract)</li>
+ *   <li>Strategy (tramite MenuManager)</li>
+ * </ul>
+ * 
+ * @author Strix89
  */
-public class UI_Init extends UI_Abstract implements MenuManager{
+public class UI_Init extends UI_Abstract implements MenuManager {
     
-    // Componenti dell'interfaccia utente
-    private JButton newGameButton;  // Pulsante per iniziare una nuova partita
-    private JButton loadGameButton; // Pulsante per caricare una partita esistente
-    private JButton rankingButton;  // Pulsante per visualizzare la classifica
-    private JButton exitButton;     // Pulsante per uscire dal gioco
-    private JLabel shieldCenter;    // Etichetta per visualizzare l'immagine dello scudo
+    // ============== COMPONENTI UI ==============
+    private JButton newGameButton;
+    private JButton loadGameButton;
+    private JButton rankingButton;
+    private JButton exitButton;
+    private JLabel shieldCenter;
 
+    // ============== COSTRUTTORE ==============
+    
     /**
-     * Costruttore della classe. Chiama il costruttore della superclasse UI_Abstract
-     * per inizializzare l'interfaccia grafica.
+     * Inizializza la schermata principale configurando:
+     * - Layout della finestra
+     * - Componenti grafici
+     * - Gestori eventi
      */
     public UI_Init() {
-        super();
+        super(); // Chiama il costruttore della superclasse UI_Abstract
     }
 
+    // ============== INIZIALIZZAZIONE ==============
+    
     /**
-     * Implementazione del metodo astratto initComponents() della superclasse UI_Abstract.
-     * Inizializza tutti i componenti dell'interfaccia utente, inclusi i pulsanti,
-     * l'immagine dello scudo e il titolo del gioco.
+     * Implementazione del metodo astratto di UI_Abstract.
+     * Configura l'interfaccia utente con:
+     * - Frame principale
+     * - Immagine logo
+     * - Pulsanti di navigazione
+     * - Gestori eventi
      */
     @Override
     protected void initComponents() {
-        configureMainFrame();          // Configura la finestra principale
-        addShieldComponent();          // Aggiunge l'immagine dello scudo
-        addMainContentComponents();    // Aggiunge i pulsanti e il titolo
-        setupEventListeners();         // Configura gli eventi dei pulsanti
-        pack();                        // Ridimensiona la finestra per adattarsi ai componenti
+        configureMainFrame();
+        addShieldComponent();
+        addMainContentComponents();
+        setupEventListeners();
+        pack(); // Adatta la finestra al contenuto
     }
 
+    // ============== CONFIGURAZIONE FINESTRA ==============
+    
     /**
-     * Configura la finestra principale con le impostazioni di base:
-     * - Comportamento alla chiusura
-     * - Dimensioni preferite
-     * - Colore di sfondo
-     * - Layout principale
+     * Configura le proprietà base del JFrame:
+     * - Comportamento chiusura
+     * - Dimensioni responsive
+     * - Sfondo e layout
      */
     private void configureMainFrame() {
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);  // Chiude l'applicazione alla chiusura della finestra
-        setPreferredSize(calculateWindowSize());         // Imposta le dimensioni della finestra
-        getContentPane().setBackground(UI_Config.BACKGROUND_COLOR);  // Colore di sfondo
-        getContentPane().setLayout(new BorderLayout());  // Layout principale
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setPreferredSize(calculateWindowSize());
+        getContentPane().setBackground(UI_Config.BACKGROUND_COLOR);
+        getContentPane().setLayout(new BorderLayout());
     }
 
     /**
-     * Calcola le dimensioni della finestra in base alle dimensioni dello schermo
-     * e ai rapporti definiti in UI_Config.
-     *
-     * @return Dimension Oggetto Dimension che rappresenta le dimensioni della finestra
+     * Calcola dimensioni responsive basate sullo schermo:
+     * - Utilizza i rapporti definiti in UI_Config
+     * - Adatta a diverse risoluzioni
      */
     private Dimension calculateWindowSize() {
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();  // Ottiene le dimensioni dello schermo
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         return new Dimension(
-            (int)(screenSize.width * UI_Config.WINDOW_WIDTH_RATIO),  // Larghezza in base al rapporto
-            (int)(screenSize.height * UI_Config.WINDOW_HEIGHT_RATIO)  // Altezza in base al rapporto
+            (int)(screenSize.width * UI_Config.WINDOW_WIDTH_RATIO),
+            (int)(screenSize.height * UI_Config.WINDOW_HEIGHT_RATIO)
         );
     }
 
+    // ============== COMPONENTI GRAFICI ==============
+    
     /**
-     * Aggiunge l'immagine dello scudo nella parte superiore della finestra.
-     * L'immagine viene scalata in base alle dimensioni della finestra.
+     * Aggiunge l'immagine del logo con:
+     * - Ridimensionamento proporzionale
+     * - Margini corretti
+     * - Posizionamento in alto
      */
     private void addShieldComponent() {
-        ImageIcon shieldIcon = loadShieldImage();  // Carica l'immagine dello scudo
-        shieldCenter = new JLabel(scaleImage(shieldIcon, UI_Config.SHIELD_SIZE_RATIO));  // Scala l'immagine
+        ImageIcon shieldIcon = loadShieldImage();
+        shieldCenter = new JLabel(scaleImage(shieldIcon, UI_Config.SHIELD_SIZE_RATIO));
 
-        JPanel shieldPanel = new JPanel(new BorderLayout());  // Crea un pannello per l'immagine
-        shieldPanel.setOpaque(false);  // Rende il pannello trasparente
+        JPanel shieldPanel = new JPanel(new BorderLayout());
+        shieldPanel.setOpaque(false);
         shieldPanel.setBorder(BorderFactory.createEmptyBorder(
-            (int)(getPreferredSize().height * UI_Config.TOP_MARGIN_RATIO / 100f),  // Margine superiore
+            (int)(getPreferredSize().height * UI_Config.TOP_MARGIN_RATIO / 100f),
             0, 0, 0
         ));
-        shieldPanel.add(shieldCenter, BorderLayout.CENTER);  // Aggiunge l'immagine al pannello
-        add(shieldPanel, BorderLayout.NORTH);  // Aggiunge il pannello alla finestra
+        shieldPanel.add(shieldCenter, BorderLayout.CENTER);
+        add(shieldPanel, BorderLayout.NORTH);
     }
 
     /**
-     * Carica l'immagine dello scudo dalla configurazione.
-     * Se l'immagine non viene caricata, mostra un messaggio di errore e termina l'applicazione.
-     *
-     * @return ImageIcon Icona dell'immagine dello scudo
+     * Carica l'immagine dello scudo con gestione errori:
+     * - Fallback a messaggio di errore
+     * - Chiusura pulita in caso di fallimento
      */
     private ImageIcon loadShieldImage() {
-        BufferedImage image = UI_Config.getShieldImage();  // Ottiene l'immagine dalla configurazione
+        BufferedImage image = UI_Config.getShieldImage();
         if(image == null) {
-            new GUIErrorHandler().handleRecoverableError("Errore critico: immagine dello scudo non caricata!");  // Messaggio di errore
-            Utils.exitApplication(Utils.EXIT_CODE_RESOURCE_ERROR);  // Termina l'applicazione
+            new GUIErrorHandler().handleRecoverableError("Immagine dello scudo non caricata!");
+            Utils.exitApplication(Utils.EXIT_CODE_RESOURCE_ERROR);
         }
-        return new ImageIcon(image);  // Restituisce l'icona dell'immagine
+        return new ImageIcon(image);
     }
 
     /**
-     * Scala un'immagine in base alle dimensioni della finestra e a un rapporto specificato.
-     *
-     * @param icon Icona da scalare
-     * @param ratio Rapporto di ridimensionamento
-     * @return ImageIcon Icona scalata
+     * Ridimensiona immagini mantenendo le proporzioni:
+     * - Utilizza algoritmo SCALE_SMOOTH per qualità
+     * - Basato su percentuali dello schermo
      */
     private ImageIcon scaleImage(ImageIcon icon, float ratio) {
-        Dimension windowSize = getPreferredSize();  // Ottiene le dimensioni della finestra
+        Dimension windowSize = getPreferredSize();
         Image scaled = icon.getImage().getScaledInstance(
-            (int)(windowSize.width * ratio),  // Larghezza scalata
-            (int)(windowSize.height * ratio), // Altezza scalata
-            Image.SCALE_SMOOTH  // Algoritmo di ridimensionamento ad alta qualità
+            (int)(windowSize.width * ratio),
+            (int)(windowSize.height * ratio),
+            Image.SCALE_SMOOTH
         );
-        return new ImageIcon(scaled);  // Restituisce l'icona scalata
+        return new ImageIcon(scaled);
     }
 
+    // ============== CONTENUTO PRINCIPALE ==============
+    
     /**
-     * Aggiunge i componenti principali della finestra, inclusi il titolo e i pulsanti.
+     * Crea e posiziona i componenti centrali:
+     * - Titolo del gioco
+     * - Pulsanti di navigazione
+     * - Layout a griglia con vincoli
      */
     private void addMainContentComponents() {
-        JPanel contentPanel = new JPanel(new GridBagLayout());  // Crea un pannello per il contenuto
-        contentPanel.setOpaque(false);  // Rende il pannello trasparente
+        JPanel contentPanel = new JPanel(new GridBagLayout());
+        contentPanel.setOpaque(false);
 
-        GridBagConstraints gbc = new GridBagConstraints();  // Configura i vincoli del layout
-        gbc.gridwidth = GridBagConstraints.REMAINDER;  // Ogni componente occupa una riga intera
-        gbc.anchor = GridBagConstraints.CENTER;  // Allinea i componenti al centro
-        gbc.insets = UI_Config.BUTTON_INSETS;  // Imposta i margini tra i componenti
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.insets = UI_Config.BUTTON_INSETS;
 
-        contentPanel.add(createTitleLabel(), gbc);  // Aggiunge il titolo al pannello
+        contentPanel.add(createTitleLabel(), gbc);
 
-        gbc.fill = GridBagConstraints.HORIZONTAL;  // Riempi orizzontalmente i componenti
-        newGameButton = createButton("NUOVA PARTITA");  // Crea il pulsante "Nuova Partita"
-        loadGameButton = createButton("CARICA PARTITA");  // Crea il pulsante "Carica Partita"
-        rankingButton = createButton("CLASSIFICA");  // Crea il pulsante "Classifica"
-        exitButton = createButton("ESCI");  // Crea il pulsante "Esci"
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        newGameButton = createButton("NUOVA PARTITA");
+        loadGameButton = createButton("CARICA PARTITA");
+        rankingButton = createButton("CLASSIFICA");
+        exitButton = createButton("ESCI");
 
-        contentPanel.add(newGameButton, gbc);  // Aggiunge i pulsanti al pannello
+        contentPanel.add(newGameButton, gbc);
         contentPanel.add(loadGameButton, gbc);
         contentPanel.add(rankingButton, gbc);
 
-        gbc.insets = UI_Config.EXIT_BUTTON_INSETS;  // Imposta margini specifici per il pulsante "Esci"
+        gbc.insets = UI_Config.EXIT_BUTTON_INSETS;
         contentPanel.add(exitButton, gbc);
 
-        add(contentPanel, BorderLayout.CENTER);  // Aggiunge il pannello alla finestra
+        add(contentPanel, BorderLayout.CENTER);
     }
 
     /**
-     * Crea e configura l'etichetta del titolo del gioco.
-     *
-     * @return JLabel Etichetta del titolo
+     * Crea il titolo con stile personalizzato:
+     * - Font scalato responsivo
+     * - Colore dal tema UI
+     * - Stile corsivo
      */
     private JLabel createTitleLabel() {
-        JLabel label = new JLabel("PoggioAdventure");  // Crea l'etichetta con il titolo
-        label.setFont(scaleFont(UI_Config.getItalicFont(), UI_Config.TITLE_FONT_RATIO));  // Scala il font
-        label.setForeground(UI_Config.TEXT_COLOR);  // Imposta il colore del testo
+        JLabel label = new JLabel("PoggioAdventure");
+        label.setFont(scaleFont(UI_Config.getItalicFont(), UI_Config.TITLE_FONT_RATIO));
+        label.setForeground(UI_Config.TEXT_COLOR);
         return label;
     }
 
+    // ============== GESTIONE PULSANTI ==============
+    
     /**
-     * Crea e configura un pulsante con stile personalizzato.
-     *
-     * @param text Testo del pulsante
-     * @return JButton Pulsante configurato
+     * Crea pulsanti con stile coerente:
+     * - Effetti hover
+     * - Dimensioni responsive
+     * - Stile visivo uniforme
      */
     private JButton createButton(String text) {
-        JButton button = new JButton(text);  // Crea il pulsante
-        button.setFont(scaleFont(UI_Config.getNormalFont(), UI_Config.BUTTON_FONT_RATIO));  // Scala il font
-        button.setForeground(UI_Config.TEXT_COLOR);  // Imposta il colore del testo
-        button.setBackground(UI_Config.BUTTON_BASE_COLOR);  // Imposta il colore di sfondo
-        button.setFocusPainted(false);  // Disabilita l'effetto di focus
-        button.setBorder(createButtonBorder());  // Imposta il bordo personalizzato
+        JButton button = new JButton(text);
+        button.setFont(scaleFont(UI_Config.getNormalFont(), UI_Config.BUTTON_FONT_RATIO));
+        button.setForeground(UI_Config.TEXT_COLOR);
+        button.setBackground(UI_Config.BUTTON_BASE_COLOR);
+        button.setFocusPainted(false);
+        button.setBorder(createButtonBorder());
         button.setPreferredSize(new Dimension(
-            (int)(getPreferredSize().width * UI_Config.BUTTON_WIDTH_RATIO),  // Larghezza del pulsante
-            (int)(getPreferredSize().height * UI_Config.BUTTON_HEIGHT_RATIO)  // Altezza del pulsante
+            (int)(getPreferredSize().width * UI_Config.BUTTON_WIDTH_RATIO),
+            (int)(getPreferredSize().height * UI_Config.BUTTON_HEIGHT_RATIO)
         ));
-        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));  // Cambia il cursore al passaggio del mouse
+        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         
-        // Effetto hover: cambia colore quando il mouse passa sopra il pulsante
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseEntered(java.awt.event.MouseEvent evt) {
@@ -200,95 +230,54 @@ public class UI_Init extends UI_Abstract implements MenuManager{
     }
 
     /**
-     * Scala un font in base alle dimensioni della finestra e a un rapporto specificato.
-     *
-     * @param baseFont Font di base
-     * @param ratio Rapporto di ridimensionamento
-     * @return Font Font scalato
+     * Scala i font in base alle dimensioni dello schermo
+     * mantenendo leggibilità su diverse risoluzioni
      */
     private Font scaleFont(Font baseFont, float ratio) {
-        return baseFont.deriveFont(getPreferredSize().height * ratio);  // Scala il font
+        return baseFont.deriveFont(getPreferredSize().height * ratio);
     }
 
+    // ============== GESTIONE EVENTI ==============
+    
     /**
-     * Configura gli eventi dei pulsanti:
-     * - "Esci" chiude l'applicazione.
-     * - "Classifica" apre la finestra della classifica.
-     * - "Nuova Partita" apre la finestra per una nuova partita.
-     * - "Carica Partita" apre la finestra per caricare una partita esistente.
+     * Collega le azioni ai pulsanti:
+     * - Navigazione tra schermate
+     * - Gestione chiusura
      */
     private void setupEventListeners() {
-        exitButton.addActionListener(e -> System.exit(0));  // Chiude l'applicazione
-        rankingButton.addActionListener(e -> showRanking());  // Mostra la classifica
-        newGameButton.addActionListener(e -> showNewGame());  // Avvia una nuova partita
-        loadGameButton.addActionListener(e -> showLoadGame());  // Carica una partita esistente
+        exitButton.addActionListener(e -> exit());
+        rankingButton.addActionListener(e -> showRanking());
+        newGameButton.addActionListener(e -> showNewGame());
+        loadGameButton.addActionListener(e -> showLoadGame());
     }
 
-    /**
-     * Mostra la finestra della classifica.
-     */
+    // ============== IMPLEMENTAZIONE MENU MANAGER ==============
+    
     @Override
     public void showRanking() {
-        JFrame ranking = new UI_Rank();  // Crea la finestra della classifica
-        ranking.setLocationRelativeTo(this);  // Centra la finestra rispetto a questa
-        ranking.setVisible(true);  // Rende la finestra visibile
+        JFrame ranking = new UI_Rank();
+        ranking.setLocationRelativeTo(this);
+        ranking.setVisible(true);
     }
 
-    /**
-     * Mostra la finestra per iniziare una nuova partita.
-     */
     @Override
     public void showNewGame() {
-        JFrame newGame = new UI_NewGame(this);  // Crea la finestra per una nuova partita
-        newGame.setLocationRelativeTo(null);  // Centra la finestra rispetto a questa
-        newGame.setVisible(true);  // Rende la finestra visibile
+        JFrame newGame = new UI_NewGame(this);
+        newGame.setLocationRelativeTo(null);
+        newGame.setVisible(true);
     }
 
-    /**
-     * Mostra la finestra per caricare una partita esistente.
-     */
     @Override
     public void showLoadGame() {
-        JFrame loadGame = new UI_LoadGame();  // Crea la finestra per caricare una partita
-        loadGame.setLocationRelativeTo(this);  // Centra la finestra rispetto a questa
+        JFrame loadGame = new UI_LoadGame();
+        loadGame.setLocationRelativeTo(this);
         dispose();
-        loadGame.setVisible(true);  // Rende la finestra visibile
+        loadGame.setVisible(true);
     }
     
     @Override
     public void showMainMenu() {
-        // Già gestito dalla GUI, non necessario per CLI
         setVisible(true);
-    }
-    
-    /**
-     * Crea un bordo personalizzato per i pulsanti.
-     *
-     * @return Border Bordo configurato
-     */
-    public Border createButtonBorder() {
-        return BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(UI_Config.BORDER_COLOR, 2),  // Bordo esterno
-            BorderFactory.createEmptyBorder(5, 15, 5, 15)  // Padding interno
-        );
-    }
-
-    /**
-     * Metodo main per avviare l'applicazione.
-     *
-     * @param args Argomenti della riga di comando (non utilizzati)
-     */
-    public static void main(String[] args) {
-        try {
-            EventQueue.invokeLater(() -> {
-                UI_Init mainWindow = new UI_Init();  // Crea la finestra principale
-                mainWindow.setVisible(true);  // Rende la finestra visibile
-            });
-        } catch (Exception ex) {
-            new GUIErrorHandler().handleRecoverableError(
-                "Errore critico nell'inizializzazione dell'interfaccia: " + ex.getMessage());  // Mostra un messaggio di errore
-            Utils.exitApplication(Utils.EXIT_CODE_CRITICAL);  // Termina l'applicazione
-        }
     }
     
     @Override
@@ -303,14 +292,39 @@ public class UI_Init extends UI_Abstract implements MenuManager{
         }
     }
 
+    // ============== UTILITY ==============
+    
     /**
-     * Implementazione del metodo astratto getWindowTitle() della superclasse UI_Abstract.
-     * Restituisce il titolo della finestra.
-     *
-     * @return Stringa contenente il titolo della finestra
+     * Crea bordi personalizzati per pulsanti:
+     * - Linea esterna con colore dal tema
+     * - Padding interno per migliore leggibilità
+     * @return tipo di Bordo
      */
+    public Border createButtonBorder() {
+        return BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(UI_Config.BORDER_COLOR, 2),
+            BorderFactory.createEmptyBorder(5, 15, 5, 15)
+        );
+    }
+
+    // ============== METODI OVERRIDE ==============
+    
     @Override
     protected String getWindowTitle() {
         return "PoggioAdventure";
+    }
+
+    // ============== MAIN PER TEST ==============
+    public static void main(String[] args) {
+        try {
+            EventQueue.invokeLater(() -> {
+                UI_Init mainWindow = new UI_Init();
+                mainWindow.setVisible(true);
+            });
+        } catch (Exception ex) {
+            new GUIErrorHandler().handleRecoverableError(
+                "Errore inizializzazione interfaccia: " + ex.getMessage());
+            Utils.exitApplication(Utils.EXIT_CODE_CRITICAL);
+        }
     }
 }
