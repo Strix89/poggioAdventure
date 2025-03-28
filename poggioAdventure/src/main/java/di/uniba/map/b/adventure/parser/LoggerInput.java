@@ -17,31 +17,66 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
- * Classe che registra gli input validi dell'utente in file di log univoci.
- * Utilizza UUID per evitare conflitti e salva nella directory dedicata definita in ResourceLoader.
+ * Gestisce la registrazione e il recupero degli input utente in file di log cifrati.
+ * 
+ * <p>Caratteristiche principali:
+ * <ul>
+ *   <li>Genera file di log con nomi univoci basati su UUID</li>
+ *   <li>Registra gli input in formato Base64 per maggiore sicurezza</li>
+ *   <li>Supporta operazioni di lettura/scrittura/eliminazione</li>
+ *   <li>Integra gestione degli errori tramite ErrorHandler</li>
+ *   <li>Utilizza la directory dei log definita in ResourceLoader</li>
+ * </ul>
+ * 
+ * @author Strix89
  */
 public class LoggerInput {
+    /**
+     * Percorso completo del file di log corrente.
+     * Viene generato automaticamente o impostato durante il caricamento.
+     */
     private String fileName;
+    
+    /**
+     * Gestore degli errori per la segnalazione di problemi.
+     */
     private final ErrorHandler errorHandler;
 
     /**
-     * Costruttore principale.
-     * @param errorHandler Per la gestione degli errori
+     * Costruttore principale che inizializza un nuovo file di log.
+     * 
+     * @param errorHandler Gestore degli errori (non può essere null)
+     * @throws IllegalArgumentException Se errorHandler è null
      */
     public LoggerInput(ErrorHandler errorHandler) {
+        if (errorHandler == null) {
+            throw new IllegalArgumentException("ErrorHandler non può essere null");
+        }
         this.errorHandler = errorHandler;
         this.fileName = generateUniqueFileName();
         createLogFile();
     }
     
+    /**
+     * Costruttore per il caricamento di un file di log esistente.
+     * 
+     * @param errorHandler Gestore degli errori (non può essere null)
+     * @param fileName Nome del file di log da caricare
+     * @throws IllegalArgumentException Se errorHandler è null
+     */
     public LoggerInput(ErrorHandler errorHandler, String fileName) {
+        if (errorHandler == null) {
+            throw new IllegalArgumentException("ErrorHandler non può essere null");
+        }
         this.errorHandler = errorHandler;
         this.fileName = ResourceLoader.LOGS_DIRECTORY.resolve(fileName).toString();
     }
 
     /**
-     * Genera un nome file univoco con UUID.
-     * Esempio: "a3d8f7b0-2e4a-4fcd-8f9a-1b7c6d3e5f2a_Input.txt"
+     * Genera un nome file univoco nella directory dei log.
+     * 
+     * @return Percorso completo del nuovo file
+     * @throws IllegalStateException Se la directory dei log non può essere creata
      */
     private String generateUniqueFileName() {
         try {
@@ -51,19 +86,18 @@ public class LoggerInput {
         } catch (IOException ex) {
             errorHandler.handleFatalError("Impossibile creare la cartella dei log", ex);
             Utils.exitApplication(Utils.EXIT_CODE_LOG_ERROR);
-            return null;
+            throw new IllegalStateException("Impossibile generare nome file", ex);
         }
     }
 
     /**
-     * Crea il file di log fisico sul filesystem.
+     * Crea fisicamente il file di log sul filesystem.
      */
     private void createLogFile() {
         if (fileName == null) return;
 
-        File file = new File(fileName);
         try {
-            file.createNewFile();
+            new File(fileName).createNewFile();
         } catch (IOException ex) {
             errorHandler.handleFatalError("Errore durante la creazione del file di log", ex);
             Utils.exitApplication(Utils.EXIT_CODE_LOG_ERROR);
@@ -71,16 +105,9 @@ public class LoggerInput {
     }
 
     /**
-     * Imposta un nome file specifico (usato durante il caricamento di un salvataggio).
-     * @param fileName Percorso completo del file
-     */
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
-
-    /**
-     * Registra un input valido nel file di log in formato Base64.
-     * @param input Comando inserito dall'utente
+     * Registra un input utente nel log in formato Base64.
+     * 
+     * @param input Comando da registrare (ignorato se null o vuoto)
      */
     public void logInput(String input) {
         if (fileName == null || input == null || input.trim().isEmpty()) return;
@@ -96,33 +123,43 @@ public class LoggerInput {
     }
     
     /**
-     * Metodo statico per leggere e decodificare il contenuto di un file di log.
-     * @param fileName Percorso completo del file
-     * @return Lista di stringhe decodificate
+     * Legge e decodifica il contenuto di un file di log.
+     * 
+     * @param fileName Percorso completo del file da leggere
+     * @return Lista di comandi decodificati (lista vuota se file non esiste)
      * @throws IOException Se si verifica un errore di lettura
+     * @throws IllegalArgumentException Se fileName è null
      */
     public static List<String> readAndDecodeLogFile(String fileName) throws IOException {
+        if (fileName == null) {
+            throw new IllegalArgumentException("Nome file non può essere null");
+        }
+        
         if (!Files.exists(Paths.get(fileName))) {
             return Collections.emptyList();
         }
         
-        List<String> encodedLines = Files.readAllLines(Paths.get(fileName));
-        return encodedLines.stream()
+        return Files.readAllLines(Paths.get(fileName))
+                .stream()
                 .map(encoded -> new String(Base64.getDecoder().decode(encoded)))
                 .collect(Collectors.toList());
     }
     
     /**
-     * Elimina un file di log se esiste nella directory dedicata.
+     * Elimina un file di log in modo sicuro.
+     * 
      * @param fileName Percorso completo del file da eliminare
-     * @return true se il file è stato eliminato con successo, false altrimenti
+     * @return true se eliminato con successo, false altrimenti
+     * @throws SecurityException Se si tenta di eliminare file al di fuori della directory dei log
      */
     public static boolean deleteLogFile(String fileName) {
+        if (fileName == null) return false;
+        
         Path path = Paths.get(fileName);
         
-        // Verifica che il file sia nella cartella dei log autorizzata
+        // Verifica sicurezza: solo file nella directory dei log
         if (!path.startsWith(ResourceLoader.LOGS_DIRECTORY)) {
-            return false;
+            throw new SecurityException("Tentativo di eliminare file non autorizzato");
         }
         
         try {
@@ -132,8 +169,25 @@ public class LoggerInput {
         }
     }
 
-    // Getter per il nome del file (usato durante il salvataggio)
+    /**
+     * Restituisce il nome del file di log corrente.
+     * 
+     * @return Percorso completo del file di log
+     */
     public String getFileName() {
         return fileName;
+    }
+    
+    /**
+     * Imposta un nuovo file di log.
+     * 
+     * @param fileName Percorso completo del nuovo file
+     * @throws IllegalArgumentException Se fileName è null
+     */
+    public void setFileName(String fileName) {
+        if (fileName == null) {
+            throw new IllegalArgumentException("Nome file non può essere null");
+        }
+        this.fileName = fileName;
     }
 }

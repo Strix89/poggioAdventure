@@ -282,14 +282,7 @@ public class UI_Init extends UI_Abstract implements MenuManager {
     
     @Override
     public void exit() {
-        int confirm = JOptionPane.showConfirmDialog(this,
-            "Vuoi davvero uscire?",
-            "Conferma Uscita",
-            JOptionPane.YES_NO_OPTION);
-        
-        if(confirm == JOptionPane.YES_OPTION) {
-            Utils.exitApplication();
-        }
+        Utils.exitApplication();
     }
 
     // ============== UTILITY ==============

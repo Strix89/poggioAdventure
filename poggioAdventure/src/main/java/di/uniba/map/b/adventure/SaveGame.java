@@ -15,27 +15,54 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+/**
+ * Classe per la gestione dei salvataggi del gioco.
+ * Offre funzionalità per salvare, caricare, elencare ed eliminare salvataggi.
+ * I salvataggi vengono gestiti con un sistema di timestamp e pulizia automatica
+ * dei salvataggi vecchi nella stessa finestra temporale.
+ * 
+ * @author Strix89 | Elia-Valenza26
+ */
 public class SaveGame {
+    // Directory dove vengono salvati i file di salvataggio
     private static final Path SAVE_DIR = ResourceLoader.SAVES_DIRECTORY;
+    
+    // Formattatore per la data/ora nei nomi dei file di salvataggio
     private static final DateTimeFormatter DATE_FORMATTER = 
         DateTimeFormatter.ofPattern("dd_MM_yyyy_HH-mm-ss");
-    protected static final int SAVE_WINDOW_HOURS = 2; // Finestra temporale in ore
     
-    // Restituisce una lista di nomi file (senza estensione)
+    // Finestra temporale in ore entro cui eliminare i salvataggi precedenti
+    protected static final int SAVE_WINDOW_HOURS = 2;
+
+    /**
+     * Restituisce la lista dei salvataggi disponibili.
+     * I file sono ordinati dal più recente al più vecchio.
+     * 
+     * @return Lista di nomi di file senza estensione
+     */
     public static List<String> getSaveList() {
         try {
+            // Crea la directory se non esiste
             Files.createDirectories(SAVE_DIR);
+            
             return Files.list(SAVE_DIR) // Lista tutti i file nella directory
-                .filter(p -> p.toString().endsWith(".dat")) // Filtra solo .dat
+                .filter(p -> p.toString().endsWith(".dat")) // Filtra solo file .dat
                 .map(p -> p.getFileName().toString().replace(".dat", "")) // Rimuovi estensione
                 .sorted(Comparator.reverseOrder()) // Ordina dal più recente
                 .collect(Collectors.toList());
         } catch (IOException ex) {
+            // In caso di errore, restituisce una lista vuota
             return Collections.emptyList();
         }
     }
 
-   // Metodo per salvare l'Engine
+    /**
+     * Salva lo stato corrente del gioco.
+     * Elimina eventuali salvataggi precedenti nella stessa finestra temporale.
+     * 
+     * @param engine Istanza del motore di gioco da salvare
+     * @param output Handler per l'output dei messaggi
+     */
     public static void saveGame(Engine engine, OutputHandler output) {
         try {
             String playerName = engine.getPlayerName();
@@ -62,11 +89,12 @@ public class SaveGame {
                         LocalDateTime saveDate = LocalDateTime.parse(datePart, DATE_FORMATTER);
                         Duration duration = Duration.between(saveDate, now);
                         
+                        // Elimina se il salvataggio è nella finestra temporale
                         if (duration.toHours() <= SAVE_WINDOW_HOURS) {
                             Files.delete(saveFile);
                         }
                     } catch (DateTimeParseException e) {
-                        // Formato data non valido, ignora
+                        // Ignora file con formato data non valido
                     } catch (IOException e) {
                         output.writeln("\nErrore cancellazione salvataggio: " + e.getMessage(), ColorText.ERROR);
                     }
@@ -75,7 +103,7 @@ public class SaveGame {
                 output.writeln("\nErrore accesso salvataggi: " + e.getMessage(), ColorText.ERROR);
             }
             
-            // Crea il nome del file con timestamp
+            // Crea nome file con formato: nomeGiocatore_dataOra.dat
             String fileName = String.format("%s_%s.dat", 
                 playerName, 
                 DATE_FORMATTER.format(now)
@@ -83,6 +111,7 @@ public class SaveGame {
             
             Path savePath = SAVE_DIR.resolve(fileName);
             
+            // Serializza i dati del gioco
             try (ObjectOutputStream out = new ObjectOutputStream(
                 Files.newOutputStream(savePath, StandardOpenOption.CREATE)
             )) {
@@ -99,6 +128,16 @@ public class SaveGame {
         }
     }
 
+    /**
+     * Carica un salvataggio esistente.
+     * 
+     * @param saveName Nome del salvataggio da caricare (senza estensione)
+     * @param onSuccess Callback chiamata in caso di successo
+     * @param onError Callback chiamata in caso di errore
+     * @param errorHandler Gestore degli errori
+     * @param input Handler per l'input
+     * @param output Handler per l'output
+     */
     public static void loadSave(
         String saveName, 
         Consumer<Engine> onSuccess, 
@@ -116,19 +155,32 @@ public class SaveGame {
         }
         
         try (ObjectInputStream in = new ObjectInputStream(Files.newInputStream(savePath))) {
+            // Deserializza i dati del gioco
             String playerName = (String) in.readObject();
             GameDescription game = (GameDescription) in.readObject();
             TimeManager timeManager = (TimeManager) in.readObject();
             long gameTime = (long) in.readObject();
             String logFileName = (String) in.readObject(); 
             
-            Engine engine = EngineFactory.createFromSave(game, playerName, output, input, errorHandler, new LoggerInput(errorHandler, logFileName), timeManager, gameTime);
+            // Ricrea l'istanza del motore di gioco
+            Engine engine = EngineFactory.createFromSave(
+                game, playerName, output, input, 
+                errorHandler, new LoggerInput(errorHandler, logFileName), 
+                timeManager, gameTime
+            );
+            
             onSuccess.accept(engine);
         } catch (IOException | ClassNotFoundException ex) {
             onError.accept("Errore caricamento: " + ex.getMessage());
         }
     }
     
+    /**
+     * Elimina un salvataggio esistente.
+     * 
+     * @param saveName Nome del salvataggio da eliminare (senza estensione)
+     * @return true se il salvataggio è stato eliminato, false altrimenti
+     */
     public static boolean deleteSave(String saveName) {
         Path savePath = SAVE_DIR.resolve(saveName + ".dat");
         try {
@@ -138,4 +190,3 @@ public class SaveGame {
         }
     }
 }
-

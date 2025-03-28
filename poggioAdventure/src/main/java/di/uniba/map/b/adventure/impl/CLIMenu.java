@@ -1,25 +1,45 @@
 package di.uniba.map.b.adventure.impl;
 
-import di.uniba.map.b.adventure.ColorText;
-import di.uniba.map.b.adventure.Engine;
-import di.uniba.map.b.adventure.EngineFactory;
-import di.uniba.map.b.adventure.OutputHandler;
-import di.uniba.map.b.adventure.InputHandler;
-import di.uniba.map.b.adventure.SaveGame;
-import di.uniba.map.b.adventure.MenuManager;
-import di.uniba.map.b.adventure.Utils;
+import di.uniba.map.b.adventure.*;
 import di.uniba.map.b.adventure.parser.LoggerInput;
 import java.util.List;
 
+/**
+ * Implementazione CLI del gestore dei menu del gioco.
+ * Gestisce tutte le interazioni a menu tramite interfaccia a riga di comando,
+ * inclusi menu principale, nuova partita, caricamento e classifica.
+ * 
+ * @author Strix89
+ */
 public class CLIMenu implements MenuManager {
+    
+    /**
+     * Handler per l'output a console
+     */
     private final OutputHandler output;
+    
+    /**
+     * Handler per l'input da console
+     */
     private final InputHandler scanner;
 
+    /**
+     * Costruttore che inizializza gli handler per input/output CLI
+     */
     public CLIMenu() {
         this.output = new CLIOutputHandler();
         this.scanner = new CLIInputHandler();
     }
 
+    /**
+     * Mostra il menu principale con opzioni per:
+     * - Nuova partita
+     * - Carica partita
+     * - Classifica
+     * - Uscita
+     * 
+     * Il menu viene visualizzato in loop fino alla selezione di uscita
+     */
     @Override
     public void showMainMenu() {
         output.writeln("\n=== POGGIO ADVENTURE ===", ColorText.NAVY);
@@ -43,6 +63,10 @@ public class CLIMenu implements MenuManager {
         }
     }
 
+    /**
+     * Gestisce la creazione di una nuova partita.
+     * Richiede il nome del giocatore e inizializza il motore di gioco.
+     */
     @Override
     public void showNewGame() {
         output.write("\nInserisci nome giocatore: ", ColorText.WHITE);
@@ -50,15 +74,25 @@ public class CLIMenu implements MenuManager {
         
         CLIErrorHandler error = new CLIErrorHandler();
         try {
-            Engine engine;
-            engine = EngineFactory.createNewGame(name, output, scanner, error, new LoggerInput(error));
-            // Avviare il ciclo di gioco
+            Engine engine = EngineFactory.createNewGame(
+                name, 
+                output, 
+                scanner, 
+                error, 
+                new LoggerInput(error)
+            );
             engine.startGameLoop();
         } catch (Exception ex) {
             error.handleFatalError("Errore critico durante l'inizializzazione della partita", ex);
         }
     }
 
+    /**
+     * Mostra la lista dei salvataggi disponibili e gestisce:
+     * - Selezione salvataggio da caricare
+     * - Eliminazione salvataggi (con prefisso !)
+     * - Messaggi di errore per input non validi
+     */
     @Override
     public void showLoadGame() {
         List<String> saves = SaveGame.getSaveList();
@@ -95,10 +129,14 @@ public class CLIMenu implements MenuManager {
                 // Modalità caricamento normale
                 int selectedIndex = Integer.parseInt(input) - 1;
                 if (selectedIndex >= 0 && selectedIndex < saves.size()) {
-                    SaveGame.loadSave(saves.get(selectedIndex), 
+                    SaveGame.loadSave(
+                        saves.get(selectedIndex), 
                         engine -> engine.startGameLoop(),
                         error -> output.writeln(error, ColorText.ERROR),
-                        new CLIErrorHandler(), scanner, output);
+                        new CLIErrorHandler(), 
+                        scanner, 
+                        output
+                    );
                 } else {
                     output.writeln("Numero non valido", ColorText.ERROR);
                 }
@@ -108,14 +146,18 @@ public class CLIMenu implements MenuManager {
         }
     }
 
-
+    /**
+     * Mostra la classifica (attualmente in sviluppo)
+     */
     @Override
     public void showRanking() {
-        // Implementa logica classifica
         output.writeln("\n=== CLASSIFICA ===", ColorText.YELLOW);
         output.writeln("Funzionalità in sviluppo...", ColorText.ORANGE);
     }
 
+    /**
+     * Chiude l'applicazione
+     */
     @Override
     public void exit() {
         Utils.exitApplication();
