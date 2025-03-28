@@ -86,5 +86,14 @@ public class SaveGame {
             onError.accept("Errore caricamento: " + ex.getMessage());
         }
     }
+    
+    public static boolean deleteSave(String saveName) {
+        Path savePath = SAVE_DIR.resolve(saveName + ".dat");
+        try {
+            return Files.deleteIfExists(savePath);
+        } catch (IOException ex) {
+            return false;
+        }
+    }
 }
 

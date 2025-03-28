@@ -10,6 +10,8 @@ import di.uniba.map.b.adventure.impl.GUIOutputHandler;
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
@@ -85,21 +87,52 @@ public class UI_LoadGame extends UI_Abstract {
     private void createComponents() {
         saveSlots = SaveGame.getSaveList();
         saveList = new JList<>(saveSlots.toArray(String[]::new));
-        saveList.setFont(UI_Config.getNormalFont().deriveFont(
-            getPreferredSize().height * UI_Config.BUTTON_FONT_RATIO * 0.8f));  // Scala il font
+        saveList.setFont(UI_Config.getNormalFont().deriveFont(18f));  // Scala il font
         saveList.setForeground(UI_Config.TEXT_COLOR);  // Colore del testo
         saveList.setBackground(UI_Config.BUTTON_BASE_COLOR);  // Colore di sfondo
         saveList.setSelectionBackground(UI_Config.BUTTON_HOVER_COLOR);  // Colore di selezione
         saveList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);  // Selezione singola
         saveList.setBorder(createListBorder());  // Bordo personalizzato
+        
+        saveList.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_DELETE || e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+                    handleDelete();
+                }
+            }
+        });
 
         // Pulsante Carica
         loadButton = new JButton("CARICA");
         styleButton(loadButton);  // Applica lo stile al pulsante
+        
 
         // Pulsante Indietro
         backButton = new JButton("INDIETRO");
         styleButton(backButton);  // Applica lo stile al pulsante
+    }
+    
+    private void handleDelete() {
+        int selectedIndex = saveList.getSelectedIndex();
+        if (selectedIndex == -1) return;
+
+        String saveName = saveSlots.get(selectedIndex);
+
+        int confirm = JOptionPane.showConfirmDialog(this,
+            "Eliminare il salvataggio '" + saveName + "'?",
+            "Conferma eliminazione",
+            JOptionPane.YES_NO_OPTION);
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            if (SaveGame.deleteSave(saveName)) {
+                saveSlots = SaveGame.getSaveList();
+                saveList.setListData(saveSlots.toArray(new String[0]));
+                JOptionPane.showMessageDialog(this, "Salvataggio eliminato!");
+            } else {
+                new GUIErrorHandler().handleRecoverableError("Errore eliminazione");
+            }
+        }
     }
 
     /**
@@ -108,8 +141,7 @@ public class UI_LoadGame extends UI_Abstract {
      * @param button Pulsante da personalizzare
      */
     private void styleButton(JButton button) {
-        button.setFont(UI_Config.getBoldFont().deriveFont(
-            getPreferredSize().height * UI_Config.BUTTON_FONT_RATIO));  // Scala il font
+        button.setFont(UI_Config.getBoldFont().deriveFont(20f));  // Scala il font
         button.setForeground(UI_Config.TEXT_COLOR);  // Colore del testo
         button.setBackground(UI_Config.BUTTON_BASE_COLOR);  // Colore di sfondo
         button.setBorder(createButtonBorder());  // Bordo personalizzato

@@ -9,7 +9,6 @@ import di.uniba.map.b.adventure.SaveGame;
 import di.uniba.map.b.adventure.MenuManager;
 import di.uniba.map.b.adventure.Utils;
 import java.util.List;
-import java.util.logging.Level;
 
 public class CLIMenu implements MenuManager {
     private final OutputHandler output;
@@ -68,39 +67,43 @@ public class CLIMenu implements MenuManager {
             return;
         }
 
-        // Visualizza i salvataggi disponibili con un numero
         output.writeln("\n=== SALVATAGGI DISPONIBILI ===", ColorText.YELLOW);
         for (int i = 0; i < saves.size(); i++) {
-            // Assegna un numero al salvataggio
             output.writeln((i + 1) + ") " + saves.get(i), ColorText.WHITE);
         }
 
-        output.write("\nSeleziona il numero del salvataggio da caricare: ", ColorText.WHITE);
+        output.write("\nSeleziona salvataggio (es: 2) o !numero per eliminare (es: !2): ", ColorText.WHITE);
         String input = scanner.getInput().trim();
 
         try {
-            // Converte l'input dell'utente in un numero
-            int selectedIndex = Integer.parseInt(input) - 1;  // Sottrai 1 per avere un indice a partire da 0
-            if (selectedIndex >= 0 && selectedIndex < saves.size()) {
-                String saveName = saves.get(selectedIndex);  // Ottieni il nome del salvataggio
-
-                // Utilizza il metodo loadSave con callback
-                SaveGame.loadSave(saveName, 
-                    // Success callback
-                    engine -> {
-                        if (engine != null) {
-                            engine.startGameLoop();  // Avvia il ciclo di gioco per il salvataggio caricato
-                        }
-                    }, 
-                    // Error callback
-                    error -> {
-                        output.writeln(error, ColorText.ERROR);  // Mostra un errore in caso di problemi nel caricamento
-                    }, new CLIErrorHandler(), scanner, output);
+            if (input.startsWith("!")) {
+                // Modalità eliminazione
+                int selectedIndex = Integer.parseInt(input.substring(1)) - 1;
+                if (selectedIndex >= 0 && selectedIndex < saves.size()) {
+                    String saveName = saves.get(selectedIndex);
+                    if (SaveGame.deleteSave(saveName)) {
+                        output.writeln("Salvataggio eliminato: " + saveName, ColorText.GREEN);
+                        showLoadGame(); // Ricarica la lista
+                    } else {
+                        output.writeln("Errore eliminazione", ColorText.ERROR);
+                    }
+                } else {
+                    output.writeln("Numero non valido", ColorText.ERROR);
+                }
             } else {
-                output.writeln("Numero di salvataggio non valido.", ColorText.ERROR);
+                // Modalità caricamento normale
+                int selectedIndex = Integer.parseInt(input) - 1;
+                if (selectedIndex >= 0 && selectedIndex < saves.size()) {
+                    SaveGame.loadSave(saves.get(selectedIndex), 
+                        engine -> engine.startGameLoop(),
+                        error -> output.writeln(error, ColorText.ERROR),
+                        new CLIErrorHandler(), scanner, output);
+                } else {
+                    output.writeln("Numero non valido", ColorText.ERROR);
+                }
             }
         } catch (NumberFormatException e) {
-            output.writeln("Inserisci un numero valido.", ColorText.ERROR);
+            output.writeln("Errore input non valido", ColorText.ERROR);
         }
     }
 
