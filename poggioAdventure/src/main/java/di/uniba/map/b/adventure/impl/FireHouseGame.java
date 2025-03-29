@@ -88,6 +88,86 @@ public class FireHouseGame extends GameDescription implements GameObservable {
         save.setAlias(new String[] { "salvataggio" });
         getCommands().add(save);
 
+        //Rooms
+        /*
+         * Room è un attributo della classe GameDescription. Ogni stanza ha un id, un nome e una descrizione.
+         * Ogni stanza ha un metodo setLook che permette di visualizzare la stanza e i collegamenti con le altre stanze.
+         * L'inizializzazione delle stanze avviene tramite il costruttore della classe Room.
+         */
+        Room hall = new Room(0, "Corridoio", "Sei nel corridoio della vecchia casa.\nOrmai non abiti più qui da anni!\nTi ricorderai come raggiungere le innumerevoli stanze?");
+        hall.setLook("Sei nel corridoio, a nord vedi il bagno, a sud il soggiorno e ad ovest la tua cameretta.\nForse il gioco sarà lì?");
+        Room livingRoom = new Room(1, "Soggiorno", "Ti trovi nel soggiorno.\nCi sono quei mobili marrone scuro che hai sempre odiato e delle orribili sedie.");
+        livingRoom.setLook("Non c'è nulla di interessante qui.");
+        Room kitchen = new Room(2, "Cucina", "Ti trovi nella solita cucina.\nMobili bianchi, maniglie azzurre, quello strano lampadario che adoravi tanto quando eri piccolo.\n"
+                + "C'è un tavolo con un bel portafrutta e una finestra.");
+        kitchen.setLook("La solita cucina, ma noti una chiave vicino al portafrutta.");
+        Room bathroom = new Room(3, "Bagno", "Sei nel bagno.\nQuanto tempo passato qui dentro...meglio non pensarci...");
+        bathroom.setLook("Vedo delle batterie sul mobile alla destra del lavandino.");
+        Room yourRoom = new Room(4, "La tua cameratta", "Finalmente la tua cameretta!\nQuesto luogo ti è così famigliare...ma non ricordi dove hai messo il nuovo regalo di zia Lina.");
+        yourRoom.setLook("C'è un armadio bianco, di solito ci conservi i tuoi giochi.");
+        //map
+        /**
+         * I metodi sottostanti definiscono la mappa del gioco. Ogni stanza ha un nome e una descrizione.
+         */
+        kitchen.setEast(livingRoom); //collega la cucina al soggiorno
+        livingRoom.setNorth(hall); //collega il soggiorno al corridoio 
+        livingRoom.setWest(kitchen); // collega il soggiorno alla cucina
+        hall.setSouth(livingRoom); // collega il corridoio al soggiorno
+        hall.setWest(yourRoom); // collega il corridoio alla tua cameretta
+        hall.setNorth(bathroom); // collega il corridoio al bagno
+        bathroom.setSouth(hall); // collega il bagno al corridoio
+        yourRoom.setEast(hall);  // collega la tua cameretta al corridoio
+        /*
+         * Questi comandi aggiungono le stanze (kitchen, livingRoom, hall, bathroom, yourRoom) alla lista delle stanze del gioco
+         * che si trovano nella classe GameDescription
+         */
+        getRooms().add(kitchen);  
+        getRooms().add(livingRoom);
+        getRooms().add(hall);
+        getRooms().add(bathroom);
+        getRooms().add(yourRoom);
+        //obejcts
+        /*
+         * Permette di definire gli oggetti presenti nelle stanze.
+         * Ogni AdvObject crea un oggetto con un id, un nome e una descrizione.
+         */
+        AdvObject battery = new AdvObject(1, "batteria", "Un pacco di batterie, chissà se sono cariche.");
+        battery.setAlias(new String[]{"batterie", "pile", "pila"});
+        battery.setPushable(true); //metodo che setta la batteria come non spingibile
+        bathroom.getObjects().add(battery);
+        AdvObject scopettino = new AdvObject(5, "scopettino", "Uno scopettino per pulire il cesso.");
+        scopettino.setAlias(new String[]{"scopa", "spazzolino", "scopettino"});
+        scopettino.setPushable(true);
+        bathroom.getObjects().add(scopettino);
+        AdvObjectContainer armadietto = new AdvObjectContainer(6, "armadietto", "Un piccolo armadietto da bagno");
+        armadietto.setAlias(new String[]{"mobiletto", "cassettiera"});
+        armadietto.setOpenable(true);
+        bathroom.getObjects().add(armadietto);
+        armadietto.add(battery);
+
+
+        AdvObjectContainer wardrobe = new AdvObjectContainer(2, "armadio", "Un semplice armadio.");
+        wardrobe.setAlias(new String[]{"guardaroba", "vestiario"});
+        wardrobe.setOpenable(false); //metodo che setta l'armadio come non apribile
+        wardrobe.setPickupable(false); //metodo che setta l'armadio come non raccoglibile
+        wardrobe.setOpen(false); //metodo che setta l'armadio come chiuso
+        yourRoom.getObjects().add(wardrobe); 
+        AdvObject toy = new AdvObject(3, "giocattolo", "Il gioco che ti ha regalato zia Lina.");
+        toy.setAlias(new String[]{"gioco", "robot"});
+        toy.setPushable(false);
+        toy.setPush(false); 
+        wardrobe.add(toy);
+        AdvObject kkey = new AdvObject(4, "chiave", "Usa semplice chiave come tante altre.");
+        kkey.setAlias(new String[]{"key"});
+        kkey.setPushable(false);
+        kkey.setPush(false);
+        kitchen.getObjects().add(kkey);
+        //Observer
+        /*
+         * Viene utilizzato GameObserver per notificare gli observer quando avviene un'azione.
+         * I vari observer sottostanti creano un'istanza di GameObserver e monitorano le azioni del giocatore
+         * 
+         */
         GameObserver moveObserver = new MoveObserver(); // si uccuperà di gestire il movimento del giocatore
         this.attach(moveObserver);
         GameObserver invObserver = new InventoryObserver(); // si occuperà di gestire l'inventario del giocatore
@@ -115,40 +195,45 @@ public class FireHouseGame extends GameDescription implements GameObservable {
      * @param out
      */
     @Override
-    public void nextMove(ParserOutput p, PrintStream out) {
-        parserOutput = p;
+    public void nextMove(List<ParserOutput> list, PrintStream out) {
+
         messages.clear();
 
-        // Controllo se il comando è valido
-        if (p.getCommand() == null) {
-            out.println("Non ho capito cosa devo fare! Prova con un altro comando.");
-        } else {
-            // Salva la stanza corrente prima del movimento
-            Room cr = getCurrentRoom();
+        Room initialRoom = getCurrentRoom(); // Salva la stanza iniziale
 
-            // Notifica gli osservatori, incluso il MoveObserver
+        for (ParserOutput p : list) {
+            this.parserOutput = p;
+            if (p.getCommand() == null) {
+                out.println("Non ho capito cosa devo fare! Prova con un altro comando.");
+                continue;
+            }
+
             notifyObservers();
 
-            // Verifica se la stanza è cambiata (se il giocatore si è spostato)
-            boolean move = !cr.equals(getCurrentRoom()) && getCurrentRoom() != null;
-
-            // Se ci sono messaggi generati dagli osservatori, li stampiamo
             if (!messages.isEmpty()) {
                 for (String m : messages) {
-                    if (m.length() > 0) {
+                    if (!m.trim().isEmpty()) {
                         out.println(m);
                     }
                 }
+                messages.clear();
             }
 
-            // Se c'è stato un movimento, aggiorna e mostra la nuova stanza
-            if (move) {
-                out.println(getCurrentRoom().getName()); // Nome della stanza corrente
-                out.println("================================================");
-                out.println(getCurrentRoom().getDescription()); // Descrizione della stanza corrente
+            // Se il gioco termina (es. stanza == null), esci subito
+            if (getCurrentRoom() == null) {
+                return;
             }
+
+        }
+
+        // Se alla fine del ciclo la stanza è cambiata, stampala una sola volta
+        if (!getCurrentRoom().equals(initialRoom)) {
+            out.println(getCurrentRoom().getName());
+            out.println("================================================");
+            out.println(getCurrentRoom().getDescription());
         }
     }
+
 
     /**
      * Metodo che permette di aggiungere un observer
