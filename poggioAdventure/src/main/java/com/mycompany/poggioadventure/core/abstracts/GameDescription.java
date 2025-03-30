@@ -1,0 +1,103 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.mycompany.poggioadventure.core.abstracts;
+
+import com.mycompany.poggioadventure.ui.OutputHandler;
+import com.mycompany.poggioadventure.parser.ParserOutput;
+import com.mycompany.poggioadventure.model.AdvObject;
+import com.mycompany.poggioadventure.parser.Command;
+import com.mycompany.poggioadventure.model.Room;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ *
+ * @author pierpaolo
+ */
+public abstract class GameDescription implements Serializable {
+    private static final long serialVersionUID = 537489926633277910L;
+    
+    private final List<Room> rooms = new ArrayList<>();
+
+    private final List<Command> commands = new ArrayList<>();
+
+    private final List<AdvObject> inventory = new ArrayList<>();
+
+    private Room currentRoom;
+    
+    private String currentChapter;
+
+    /**
+     *
+     * @return
+     */
+    public List<Room> getRooms() {
+        return rooms;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public List<Command> getCommands() {
+        return commands;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public Room getCurrentRoom() {
+        return currentRoom;
+    }
+
+    /**
+     *
+     * @param currentRoom
+     */
+    public void setCurrentRoom(Room currentRoom) {
+        this.currentRoom = currentRoom;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public List<AdvObject> getInventory() {
+        return inventory;
+    }
+
+    /**
+     *
+     * @throws Exception
+     */
+    public abstract void init() throws Exception;
+
+    /**
+     *
+     * @param list
+     * @param out
+     */
+    public abstract void nextMove(List<ParserOutput> list, OutputHandler out);
+    
+    public String getCurrentChapter(){
+        return currentChapter;
+    }
+    
+    public void setCurrentChapeter(String cp){
+       currentChapter = cp;
+    }
+    
+    /**
+     *
+     * @return
+     */
+    public abstract String getWelcomeMsg();
+    
+    public abstract String getGameVersion();
+    
+}

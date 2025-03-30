@@ -1,9 +1,10 @@
 package com.mycompany.poggioadventure.ui;
 
+import com.mycompany.poggioadventure.ui.gui.views.UI_Config;
 import com.formdev.flatlaf.FlatLightLaf; // Libreria per il look moderno FlatLaf
 import di.uniba.map.b.adventure.ErrorHandler; // Gestione errori
-import di.uniba.map.b.adventure.Utils; // Utility generali
-import di.uniba.map.b.adventure.impl.GUIErrorHandler; // Gestione errori GUI-specifica
+import com.mycompany.poggioadventure.core.utils.Utils; // Utility generali
+import com.mycompany.poggioadventure.ui.gui.GUIErrorHandler; // Gestione errori GUI-specifica
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;

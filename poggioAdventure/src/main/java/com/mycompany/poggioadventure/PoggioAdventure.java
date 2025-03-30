@@ -1,9 +1,9 @@
 package com.mycompany.poggioadventure;
 
-import com.mycompany.poggioadventure.ui.UI_Init;
-import di.uniba.map.b.adventure.ColorText;
-import di.uniba.map.b.adventure.impl.CLIMenu;
-import di.uniba.map.b.adventure.impl.CLIOutputHandler;
+import com.mycompany.poggioadventure.ui.gui.views.UI_Init;
+import com.mycompany.poggioadventure.ui.ColorText;
+import com.mycompany.poggioadventure.ui.cli.CLIMenu;
+import com.mycompany.poggioadventure.ui.cli.CLIOutputHandler;
 import java.util.Arrays;
 
 /**
