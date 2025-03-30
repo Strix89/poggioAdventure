@@ -16,7 +16,7 @@ import java.util.stream.IntStream;
 
 /**
  * L'Engine gestisce l'interazione con l'utente e il flusso di gioco.
- * Supporta caricamento e salvataggio delle partite.
+ * Supporta caricamento e salvataggio delle partite e l'esecuzione di comandi multipli.
  */
 public class Engine {
 
@@ -29,6 +29,7 @@ public class Engine {
     private TimeManager timeManager;
     private LoggerInput logger;
     private final StopWatch gameTime;
+    private List<String> logTemp;
     
     /**
      * Costruttore dell'Engine.
@@ -46,6 +47,7 @@ public class Engine {
         this.errorHandler = errorHandler;
         this.inputHandler = input;
         this.logger = logger; 
+        this.logTemp = new ArrayList<>();
         try {
             Set<String> stopWords = ResourceLoader.loadFileListInSet(new File(ResourceLoader.STOPWORDS_PATH.toString()));
             parser = new Parser(stopWords);
@@ -53,7 +55,6 @@ public class Engine {
             this.errorHandler.handleFatalError("Caricamento risorse fallito", ex);
             Utils.exitApplication(Utils.EXIT_CODE_RESOURCE_ERROR);
         }
-
         getGameColoredVersion();
         output.writeln(game.getWelcomeMsg(), ColorText.WHITE);
         output.write("\nTi trovi qui: ", ColorText.WHITE);
@@ -69,36 +70,53 @@ public class Engine {
      * Metodo per processare il comando ricevuto.
      * @param command
      */
-    public void processCommand(String command) {
-        logger.logInput(command);
+public void processCommand(String command) {
+        logTemp.add(command);
         Room previousRoom = game.getCurrentRoom();
         List<AdvObject> previousInventory = new ArrayList<>(game.getInventory());
         List<AdvObject> previousObjInRoom = new ArrayList<>(game.getCurrentRoom().getObjects());
 
-        ParserOutput p = parser.parse(command, game.getCommands(), 
+        // Modifica: supporto per comandi multipli
+        List<ParserOutput> outputs = parser.parseMultiple(command, game.getCommands(), 
             game.getCurrentRoom().getObjects(), game.getInventory());
 
-        if (p == null || p.getCommand() == null) {
+        if (outputs.isEmpty()) {
             output.writeln("Non capisco quello che mi vuoi dire.", ColorText.ERROR);
         } else {
-            if (p.getCommand().getType() == CommandType.SAVE) {
-                // Salva il gioco
-                saveGame();
-            } else {
-                // Gestione del movimento o altre azioni
-                game.nextMove(p, output);
+            boolean commandExecuted = false;
+            for (ParserOutput p : outputs) {
+                if (p == null || p.getCommand() == null) continue;
 
-                // Gestione dei comandi speciali (esempio, fine gioco)
+                commandExecuted = true;
+
+                if (p.getCommand().getType() == CommandType.SAVE) {
+                    saveGame();
+                } else {
+                    game.nextMove(List.of(p), output);
+                }
+
+                // Gestione uscita dal gioco
                 if (p.getCommand().getType() == CommandType.END) {
                     output.writeln("Sei un fifone, addio!", ColorText.ERROR);
-                    Utils.exitApplication();
+                    Utils.exitApplication(Utils.EXIT_CODE_SUCCESS);
                 } else if (game.getCurrentRoom() == null) {
                     output.writeln("La tua avventura termina qui! Complimenti!", ColorText.NEON_ORANGE);
-                    Utils.exitApplication();
+                    Utils.exitApplication(Utils.EXIT_CODE_SUCCESS);
                 }
             }
+
+            if (!commandExecuted) {
+                output.writeln("Non capisco quello che mi vuoi dire.", ColorText.ERROR);
+            }
+
+            // Logging avanzato da origin/main
+            boolean roomChanged = !previousRoom.equals(game.getCurrentRoom());
+            boolean inventoryChanged = !previousInventory.equals(game.getInventory());
+            boolean objectsChanged = !previousObjInRoom.equals(game.getCurrentRoom().getObjects());
+            boolean isLookCommand = outputs.stream()
+                .anyMatch(p -> p.getCommand() != null && p.getCommand().getType() == CommandType.LOOK_AT);
         }
-        printCursor();  // Stampiamo il cursore se necessario
+        printCursor();
     }
 
     /**
@@ -154,6 +172,10 @@ public class Engine {
     public void saveGame() {
         this.gameTime.stop();
         SaveGame.saveGame(this, output);
+        for (String log : logTemp) {
+            logger.logInput(log); 
+        }
+        this.logTemp.clear();
         this.gameTime.start();
     }
 
@@ -205,4 +227,3 @@ public class Engine {
         return this.gameTime.getElapsedSeconds();
     }
 }
-

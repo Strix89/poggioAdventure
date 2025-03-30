@@ -160,7 +160,11 @@ public class SaveGame {
             GameDescription game = (GameDescription) in.readObject();
             TimeManager timeManager = (TimeManager) in.readObject();
             long gameTime = (long) in.readObject();
-            String logFileName = (String) in.readObject(); 
+            String logFileName = (String) in.readObject();
+            
+            if (!LoggerInput.checkLog(logFileName)){
+                throw new IOException("Il file di log associato al salvataggio non esiste");
+            }
             
             // Ricrea l'istanza del motore di gioco
             Engine engine = EngineFactory.createFromSave(
@@ -176,17 +180,37 @@ public class SaveGame {
     }
     
     /**
-     * Elimina un salvataggio esistente.
-     * 
-     * @param saveName Nome del salvataggio da eliminare (senza estensione)
-     * @return true se il salvataggio è stato eliminato, false altrimenti
-     */
-    public static boolean deleteSave(String saveName) {
-        Path savePath = SAVE_DIR.resolve(saveName + ".dat");
-        try {
-            return Files.deleteIfExists(savePath);
-        } catch (IOException ex) {
-            return false;
-        }
-    }
+    * Elimina un salvataggio esistente e il relativo file di log associato.
+    * 
+    * @param saveName Nome del salvataggio da eliminare (senza estensione)
+    * @return true se il salvataggio è stato eliminato, false altrimenti
+    */
+   public static boolean deleteSave(String saveName) {
+       Path savePath = SAVE_DIR.resolve(saveName + ".dat");
+       try {
+           String logFileName = null;
+           // Legge il file di salvataggio per ottenere il nome del log
+           if (Files.exists(savePath)) {
+               try (ObjectInputStream in = new ObjectInputStream(Files.newInputStream(savePath))) {
+                   in.readObject(); // Player name
+                   in.readObject(); // Game
+                   in.readObject(); // TimeManager
+                   in.readObject(); // Game time
+                   logFileName = (String) in.readObject(); // Log file name
+               } catch (IOException | ClassNotFoundException | ClassCastException e) {
+                   // Ignora errori di lettura e procedi
+               }
+           }
+
+           // Elimina il file di log associato se presente
+           if (logFileName != null) {
+               LoggerInput.deleteLogFile(logFileName);
+           }
+
+           // Elimina il file di salvataggio
+           return Files.deleteIfExists(savePath);
+       } catch (IOException ex) {
+           return false;
+       }
+   }
 }

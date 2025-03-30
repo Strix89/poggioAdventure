@@ -78,10 +78,10 @@ public abstract class GameDescription implements Serializable {
 
     /**
      *
-     * @param p
+     * @param list
      * @param out
      */
-    public abstract void nextMove(ParserOutput p, OutputHandler out);
+    public abstract void nextMove(List<ParserOutput> list, OutputHandler out);
     
     public String getCurrentChapter(){
         return currentChapter;

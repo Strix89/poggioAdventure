@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package di.uniba.map.b.adventure.impl;
 
 import di.uniba.map.b.adventure.GameDescription;
@@ -9,6 +5,7 @@ import di.uniba.map.b.adventure.parser.ParserOutput;
 import di.uniba.map.b.adventure.type.CommandType;
 import di.uniba.map.b.adventure.GameObserver;
 import java.io.Serializable;
+import di.uniba.map.b.adventure.type.Room;
 
 /**
  *
@@ -25,40 +22,44 @@ public class MoveObserver implements GameObserver, Serializable {
      */
     @Override
     public String update(GameDescription description, ParserOutput parserOutput) {
-        if (null != parserOutput.getCommand().getType()) switch (parserOutput.getCommand().getType()) {
-            case NORD -> {
-                // controlla il comando inserito
-                if (description.getCurrentRoom().getNorth() != null) { // controlla se la stanza a nord esiste
-                    description.setCurrentRoom(description.getCurrentRoom().getNorth()); // se esiste, la stanza corrente diventa quella a nord , ugualmente per gli altri casi
-                } else {
-                    return "\nDa quella parte non si può andare c'è un muro!\nNon hai ancora acquisito i poteri per oltrepassare i muri...";
-                }
-            }
-            case SOUTH -> {
-                if (description.getCurrentRoom().getSouth() != null) {
-                    description.setCurrentRoom(description.getCurrentRoom().getSouth());
-                } else {
-                    return "\nDa quella parte non si può andare c'è un muro!\nNon hai ancora acquisito i poteri per oltrepassare i muri...";
-                }
-            }
-            case EAST -> {
-                if (description.getCurrentRoom().getEast() != null) {
-                    description.setCurrentRoom(description.getCurrentRoom().getEast());
-                } else {
-                    return "\nDa quella parte non si può andare c'è un muro!\nNon hai ancora acquisito i poteri per oltrepassare i muri...";
-                }
-            }
-            case WEST -> {
-                if (description.getCurrentRoom().getWest() != null) {
-                    description.setCurrentRoom(description.getCurrentRoom().getWest());
-                } else {
-                    return "\nDa quella parte non si può andare c'è un muro!\nNon hai ancora acquisito i poteri per oltrepassare i muri...";
-                }
-            }
-            default -> {
-            }
+        CommandType direction = parserOutput.getCommand().getType();
+        // Controlla se il comando è effettivamente una direzione
+        if (!direction.isDirection()) {
+            return ""; // Ignora comandi non di movimento
         }
-        return "";
+        Room currentRoom = description.getCurrentRoom();
+        
+        // 1. Controlla prima le direzioni normali
+        Room nextRoom = getRoomInDirection(currentRoom, direction);
+
+        if(nextRoom != null) {
+            description.setCurrentRoom(nextRoom);
+            return "Ti sei spostato a " + nextRoom.getName() + ".";
+        }
+        
+        // 2. Controlla i collegamenti tra piani SOLO se:
+        //    - È una direzione
+        //    - C'è un collegamento
+        //    - La direzione corrisponde
+        if(direction.isDirection() && 
+           currentRoom.getLinkedRoom() != null && 
+           currentRoom.getLinkedDirection() == direction) {
+            
+            description.setCurrentRoom(currentRoom.getLinkedRoom());
+            return "Hai cambiato piano! Sei ora in: " + currentRoom.getLinkedRoom().getName();
+        }      
+        return "\nNon puoi andare in quella direzione (" + parserOutput.getCommand().getName() + ")!\nSoffri in silenzio...";
     }
 
+    private Room getRoomInDirection(Room room, CommandType dir) {
+        if (!dir.isDirection()) return null;
+        
+        return switch (dir) {
+            case NORD -> room.getNorth();
+            case SOUTH -> room.getSouth();
+            case EAST -> room.getEast();
+            case WEST -> room.getWest();
+            default -> null;
+        };
+    }
 }

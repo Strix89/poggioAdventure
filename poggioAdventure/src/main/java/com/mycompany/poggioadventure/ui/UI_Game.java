@@ -370,8 +370,7 @@ public class UI_Game extends UI_Abstract {
     private void saveGame() {
         new Thread(() -> {
             try {
-                SaveGame.saveGame(gameEngine, gameEngine.getOutput());
-                
+                this.gameEngine.saveGame();
                 SwingUtilities.invokeLater(() -> {
                     JOptionPane.showMessageDialog(
                         UI_Game.this, 

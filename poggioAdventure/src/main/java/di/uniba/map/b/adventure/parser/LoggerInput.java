@@ -58,8 +58,6 @@ public class LoggerInput {
     }
     
     /**
-     * Costruttore per il caricamento di un file di log esistente.
-     * 
      * @param errorHandler Gestore degli errori (non può essere null)
      * @param fileName Nome del file di log da caricare
      * @throws IllegalArgumentException Se errorHandler è null
@@ -168,6 +166,26 @@ public class LoggerInput {
             return false;
         }
     }
+    
+    /**
+    * Verifica l'esistenza di un file di log e controlla se contiene comandi.
+    * 
+    * @param fileName Percorso completo del file da verificare
+    * @return true se il file esiste e contiene comandi, false altrimenti
+    * @throws SecurityException Se si tenta di accedere a file non nella directory dei log
+    */
+   public static boolean checkLog(String fileName) {
+       if (fileName == null) return false;
+
+       Path path = Paths.get(fileName);
+
+       // Controllo sicurezza
+       if (!path.startsWith(ResourceLoader.LOGS_DIRECTORY)) {
+           throw new SecurityException("Accesso non autorizzato alla directory dei log");
+       }
+       
+       return Files.exists(path);
+   }
 
     /**
      * Restituisce il nome del file di log corrente.

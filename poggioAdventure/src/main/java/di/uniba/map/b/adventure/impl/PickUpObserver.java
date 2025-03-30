@@ -4,8 +4,11 @@
  */
 package di.uniba.map.b.adventure.impl;
 
+import java.util.List;
+
 import di.uniba.map.b.adventure.GameDescription;
 import di.uniba.map.b.adventure.parser.ParserOutput;
+import di.uniba.map.b.adventure.type.AdvObject;
 import di.uniba.map.b.adventure.type.CommandType;
 import di.uniba.map.b.adventure.GameObserver;
 import java.io.Serializable;
@@ -29,26 +32,33 @@ public class PickUpObserver implements GameObserver, Serializable {
      */
     @Override
     public String update(GameDescription description, ParserOutput parserOutput) {
-        StringBuilder msg = new StringBuilder(); // crea un nuovo oggetto StringBuilder
-        if (parserOutput.getCommand().getType() == CommandType.PICK_UP) { // controlla il comando inserito 
-            if (parserOutput.getObject() != null) { // controlla se l'oggetto è presente nella stanza
-                if (parserOutput.getObject().isPickupable()) { // controlla se l'oggetto è raccoglibile
-                    description.getInventory().add(parserOutput.getObject()); // aggiunge l'oggetto all'inventario
-                    description.getCurrentRoom().getObjects().remove(parserOutput.getObject()); // rimuove l'oggetto dalla stanza
-                    msg.append("Hai raccolto: ").append(parserOutput.getObject().getDescription()); // messaggio di conferma
-                    if (description.getCurrentRoom().getId() == 2) { // controlla se la stanza corrente è la cucina
-                        description.getCurrentRoom().setLook("La solita cucina..."); // aggiorna la descrizione della stanza
-                    } else if (description.getCurrentRoom().getId() == 3) { // controlla se la stanza corrente è la camera da letto
-                        description.getCurrentRoom().setLook("Non c'è nulla di interessante qui.");
-                    }
-                } else {
-                    msg.append("Non puoi raccogliere questo oggetto.");
-                }
-            } else {
+        StringBuilder msg = new StringBuilder();
+
+        if (parserOutput.getCommand().getType() == CommandType.PICK_UP) {
+            List<AdvObject> objectsToPick = parserOutput.getObjects();
+
+            if (objectsToPick == null || objectsToPick.isEmpty()) {
                 msg.append("Non c'è niente da raccogliere qui.");
+            } else {
+                for (AdvObject obj : objectsToPick) {
+                    if (obj.isPickupable()) {
+                        description.getInventory().add(obj);
+                        description.getCurrentRoom().getObjects().remove(obj);
+                        msg.append("Hai raccolto: ").append(obj.getDescription()).append("\n");
+
+                        if (description.getCurrentRoom().getId() == 2) {
+                            description.getCurrentRoom().setLook("La solita cucina...");
+                        } else if (description.getCurrentRoom().getId() == 3) {
+                            description.getCurrentRoom().setLook("Non c'è nulla di interessante qui.");
+                        }
+                    } else {
+                        msg.append("Non puoi raccogliere questo oggetto: ").append(obj.getName()).append("\n");
+                    }
+                }
             }
         }
-        return msg.toString(); // restituisce il messaggio
+
+        return msg.toString();
     }
 
 }

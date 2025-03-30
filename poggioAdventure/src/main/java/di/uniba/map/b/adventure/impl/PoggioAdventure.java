@@ -2,6 +2,7 @@ package di.uniba.map.b.adventure.impl;
 
 import di.uniba.map.b.adventure.ColorText;
 import di.uniba.map.b.adventure.GameDescription;
+import di.uniba.map.b.adventure.GameMap;
 import di.uniba.map.b.adventure.parser.ParserOutput;
 import di.uniba.map.b.adventure.type.AdvObject;
 import di.uniba.map.b.adventure.type.AdvObjectContainer;
@@ -35,61 +36,75 @@ import di.uniba.map.b.adventure.OutputHandler;
 public class PoggioAdventure extends GameDescription implements GameObservable {
     
     private final List<GameObserver> observer = new ArrayList<>();
-
     private ParserOutput parserOutput;
+    private final List<String> messages = new ArrayList<>();
 
-    private List<String> messages = new ArrayList<>();
+    // Aggiungi un'istanza di GameMap per gestire le stanze e i loro collegamenti
+    private GameMap gameMap;
 
-    /**Metodo Init : inizializza il gioco
-     * Questo metodo viene chiamato per inizializzare il gioco. 
-     * Vengono definite le stanze, gli oggetti e i comandi che il giocatore può usare
-     *
-     * @throws Exception
+    /**
+     * Metodo Init : inizializza il gioco
+     * Questo metodo viene chiamato per inizializzare il gioco.
+     * Vengono definite le stanze, gli oggetti e i comandi che il giocatore può
+     * usare.
      */
     @Override
     public void init() throws Exception {
         messages.clear();
-        //Commands
-        /*
-         * Command è un attributo della classe GameDescription. Ogni comando ha un tipo e un nome.
-         * Permette di definire i comandi che il giocatore può usare.
-         */
+        // Inizializza la mappa del gioco
+        gameMap = new GameMap(); // Crea un'istanza della GameMap
+        gameMap.addRoomsToGameDescription(); // Aggiungi tutte le stanze alla mappa del gioco
+
+        // Comandi del gioco
         Command nord = new Command(CommandType.NORD, "nord");
-        nord.setAlias(new String[]{"n", "N", "Nord", "NORD"}); //aggiunge degli alias al comando nord , lo stesso per gli altri comandi
-        getCommands().add(nord); //aggiunge il comando nord alla lista dei comandi disponibili, lo stesso per gli altri comandi
+        nord.setAlias(new String[] { "n", "N", "Nord", "NORD" });
+        getCommands().add(nord);
+
         Command iventory = new Command(CommandType.INVENTORY, "inventario");
-        iventory.setAlias(new String[]{"inv"});
+        iventory.setAlias(new String[] { "inv" });
         getCommands().add(iventory);
+
         Command sud = new Command(CommandType.SOUTH, "sud");
-        sud.setAlias(new String[]{"s", "S", "Sud", "SUD"});
+        sud.setAlias(new String[] { "s", "S", "Sud", "SUD" });
         getCommands().add(sud);
+
         Command est = new Command(CommandType.EAST, "est");
-        est.setAlias(new String[]{"e", "E", "Est", "EST"});
+        est.setAlias(new String[] { "e", "E", "Est", "EST" });
         getCommands().add(est);
+
         Command ovest = new Command(CommandType.WEST, "ovest");
-        ovest.setAlias(new String[]{"o", "O", "Ovest", "OVEST"});
+        ovest.setAlias(new String[] { "o", "O", "Ovest", "OVEST" });
         getCommands().add(ovest);
+
         Command end = new Command(CommandType.END, "end");
-        end.setAlias(new String[]{"end", "fine", "esci", "muori", "ammazzati", "ucciditi", "suicidati", "exit", "basta"});
+        end.setAlias(
+                new String[] { "end", "fine", "esci", "muori", "ammazzati", "ucciditi", "suicidati", "exit", "basta" });
         getCommands().add(end);
+
         Command look = new Command(CommandType.LOOK_AT, "osserva");
-        look.setAlias(new String[]{"guarda", "vedi", "trova", "cerca", "descrivi"});
+        look.setAlias(new String[] { "guarda", "vedi", "trova", "cerca", "descrivi" });
         getCommands().add(look);
+
         Command pickup = new Command(CommandType.PICK_UP, "raccogli");
-        pickup.setAlias(new String[]{"prendi"});
+        pickup.setAlias(new String[] { "prendi" });
         getCommands().add(pickup);
+
         Command open = new Command(CommandType.OPEN, "apri");
-        open.setAlias(new String[]{});
+        open.setAlias(new String[] {});
         getCommands().add(open);
+
         Command push = new Command(CommandType.PUSH, "premi");
-        push.setAlias(new String[]{"spingi", "attiva"});
+        push.setAlias(new String[] { "spingi", "attiva" });
         getCommands().add(push);
+
         Command use = new Command(CommandType.USE, "usa");
-        use.setAlias(new String[]{"utilizza", "combina"});
+        use.setAlias(new String[] { "utilizza", "combina" });
         getCommands().add(use);
+
         Command save = new Command(CommandType.SAVE, "salva");
         save.setAlias(new String[]{"salva"});
         getCommands().add(save);
+
         //Rooms
         /*
          * Room è un attributo della classe GameDescription. Ogni stanza ha un id, un nome e una descrizione.
@@ -135,7 +150,19 @@ public class PoggioAdventure extends GameDescription implements GameObservable {
          */
         AdvObject battery = new AdvObject(1, "batteria", "Un pacco di batterie, chissà se sono cariche.");
         battery.setAlias(new String[]{"batterie", "pile", "pila"});
+        battery.setPushable(true); //metodo che setta la batteria come non spingibile
         bathroom.getObjects().add(battery);
+        AdvObject scopettino = new AdvObject(5, "scopettino", "Uno scopettino per pulire il cesso.");
+        scopettino.setAlias(new String[]{"scopa", "spazzolino", "scopettino"});
+        scopettino.setPushable(true);
+        bathroom.getObjects().add(scopettino);
+        AdvObjectContainer armadietto = new AdvObjectContainer(6, "armadietto", "Un piccolo armadietto da bagno");
+        armadietto.setAlias(new String[]{"mobiletto", "cassettiera"});
+        armadietto.setOpenable(true);
+        bathroom.getObjects().add(armadietto);
+        armadietto.add(battery);
+
+
         AdvObjectContainer wardrobe = new AdvObjectContainer(2, "armadio", "Un semplice armadio.");
         wardrobe.setAlias(new String[]{"guardaroba", "vestiario"});
         wardrobe.setOpenable(false); //metodo che setta l'armadio come non apribile
@@ -165,38 +192,42 @@ public class PoggioAdventure extends GameDescription implements GameObservable {
         GameObserver pushObserver = new PushObserver(); // si occuperà di gestire l'azione di premere
         this.attach(pushObserver);
         GameObserver lookatObserver = new LookAtObserver(); // si occuperà di gestire l'azione di osservare
-        this.attach(lookatObserver); 
-        GameObserver pickupObserver = new PickUpObserver();  // si occuperà di gestire l'azione di raccogliere
+        this.attach(lookatObserver);
+        GameObserver pickupObserver = new PickUpObserver(); // si occuperà di gestire l'azione di raccogliere
         this.attach(pickupObserver);
         GameObserver openObserver = new OpenObserver(); // si occuperà di gestire l'azione di aprire
         this.attach(openObserver);
         GameObserver useObserver = new UseObserver(); // si occuperà di gestire l'azione di usare
         this.attach(useObserver);
-        //set starting room
-        setCurrentRoom(hall); //setta la stanza iniziale del giocatore (nel  nostro caso sarà ingresso)
+
+        // Inizializza la stanza iniziale del gioco (ora la stanza iniziale viene
+        // recuperata dalla GameMap)
+        setCurrentRoom(gameMap.getStartingRoom()); // Imposta la stanza iniziale come la prima stanza del primo piano
     }
 
     /**
      * Metodo che gestisce il comando successivo
-     * @param p
+     * 
      * @param out
      */
     @Override
-    public void nextMove(ParserOutput p, OutputHandler out) {
-        parserOutput = p;
-        messages.clear();
-        if (p.getCommand() == null) {
-            out.writeln("Non ho capito cosa devo fare! Prova con un altro comando.", ColorText.BRIGHT_RED);
-        } else {
+    public void nextMove(List<ParserOutput> list, OutputHandler out) {
+        for (ParserOutput p : list) {
+            this.parserOutput = p;
+            if (p.getCommand() == null) {
+                out.writeln("Non ho capito cosa devo fare! Prova con un altro comando.", ColorText.RED);
+                continue;
+            }
             Room cr = getCurrentRoom();
             notifyObservers();
             boolean move = !cr.equals(getCurrentRoom()) && getCurrentRoom() != null;
             if (!messages.isEmpty()) {
                 for (String m : messages) {
-                    if (m.length() > 0) {
+                    if (!m.trim().isEmpty()) {
                         out.writeln(m, ColorText.WHITE);
                     }
                 }
+                messages.clear();
             }
             if (move) {
                 out.writeln("\n" + getCurrentRoom().getName(), ColorText.YELLOW);
@@ -206,8 +237,8 @@ public class PoggioAdventure extends GameDescription implements GameObservable {
         }
     }
 
-    /** 
-     *Metodo che permette di aggiungere un observer
+    /**
+     * Metodo che permette di aggiungere un observer
      * 
      * @param o
      */
@@ -220,6 +251,7 @@ public class PoggioAdventure extends GameDescription implements GameObservable {
 
     /**
      * Metodo che permette di rimuovere un observer
+     * 
      * @param o
      */
     @Override
@@ -228,7 +260,7 @@ public class PoggioAdventure extends GameDescription implements GameObservable {
     }
 
     /**
-     *Metodo che permette di notificare gli observer
+     * Metodo che permette di notificare gli observer
      */
     @Override
     public void notifyObservers() {
@@ -237,23 +269,25 @@ public class PoggioAdventure extends GameDescription implements GameObservable {
         }
     }
 
-    /**
-     *Metodo che restituisce il messaggio di benvenuto
-     * @return
-     */
     @Override
     public String getWelcomeMsg() {
-        return "Sei appena tornato a casa e non sai cosa fare.\nTi ricordi che non hai ancora utilizzato quel fantastico regalo di tua zia Lina.\n"
-                + "Sarà il caso di cercarlo e di giocarci!\n";
+        return ""
+                + "====================================================================\n"
+                + "*      BENVENUTO NEL COLLEGIO TECNOMAGICO DI SAN JOSE MARIA *\n"
+                + "====================================================================\n"
+                + "\n"
+                + "Sei una matricola in cerca di ammissione a questo prestigioso collegio,\n"
+                + "dove solo i più brillanti superano le prove iniziatiche.\n"
+                + "====================================================================";
     }
 
     @Override
     public String getGameVersion() {
         return 
-        "\t   ==================================================\n" +
-        "\t           PoggioAdventure .v0.1 - 2024-2025           \n" +
-        "\t                      developed by:                    \n" +
-        "\t           Strix89 | MikeRvsso | Elia-Valenza26        \n" +
-        "\t   ==================================================\n";
+        "\t           ==================================================\n" +
+        "\t                           PoggioAdventure .v0.1 - 2024-2025           \n" +
+        "\t                                      developed by:                    \n" +
+        "\t                           Strix89 | MikeRvsso | Elia-Valenza26        \n" +
+        "\t           ==================================================\n";
     } 
 }

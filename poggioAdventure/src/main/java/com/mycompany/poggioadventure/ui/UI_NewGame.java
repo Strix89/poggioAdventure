@@ -7,6 +7,8 @@ import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 /**
  * Interfaccia per la creazione di una nuova partita in PoggioAdventure.
@@ -44,6 +46,9 @@ public class UI_NewGame extends UI_Abstract {
     public UI_NewGame(JFrame parent) {
         super();
         this.parentFrame = parent;
+        if (parent != null) {
+            parent.setEnabled(false); // Nasconde il parent quando UI_NewGame viene aperto
+        }
     }
     
     /**
@@ -81,6 +86,14 @@ public class UI_NewGame extends UI_Abstract {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         getContentPane().setBackground(UI_Config.BACKGROUND_COLOR);
         getContentPane().setLayout(new BorderLayout());
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+                if (parentFrame != null && parentFrame.isDisplayable()) {
+                    parentFrame.setEnabled(true); // Riabilita il parent quando UI_NewGame viene chiuso
+                }
+            }
+        });
     }
 
     /**
