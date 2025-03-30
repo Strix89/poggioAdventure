@@ -7,9 +7,13 @@ import di.uniba.map.b.adventure.type.AdvObjectContainer;
 import di.uniba.map.b.adventure.type.CommandType;
 import java.util.List;
 import di.uniba.map.b.adventure.GameObserver;
+import java.io.Serializable;
 
-public class OpenObserver implements GameObserver {
-
+/**
+ *
+ * @author pierpaolo
+ */
+public class OpenObserver implements GameObserver, Serializable {
     /**
      * La classe OpenObserver gestisce l'apertura di oggetti, supportando:
      * - Più oggetti contemporaneamente (comandi multipli)
@@ -71,10 +75,6 @@ public class OpenObserver implements GameObserver {
                         }
                         msg.append("Puoi ora raccogliere questi oggetti se lo desideri.\n");
                     }
-
-                    // MIGLIORAMENTO:
-                    // Prima: tutti gli oggetti venivano rimossi dal contenitore e spostati nella stanza/inventario
-                    // Ora: gli oggetti restano nel contenitore e devono essere raccolti manualmente
                 }
 
                 interacted = true;

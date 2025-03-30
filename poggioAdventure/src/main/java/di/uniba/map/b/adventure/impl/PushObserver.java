@@ -6,10 +6,14 @@ import di.uniba.map.b.adventure.type.AdvObject;
 import di.uniba.map.b.adventure.type.CommandType;
 import di.uniba.map.b.adventure.GameObserver;
 import di.uniba.map.b.adventure.GameUtils;
-
+import java.io.Serializable;
 import java.util.List;
 
-public class PushObserver implements GameObserver {
+/**
+ *
+ * @author pierpaolo
+ */
+public class PushObserver implements GameObserver, Serializable {
 
     @Override
     public String update(GameDescription description, ParserOutput parserOutput) {

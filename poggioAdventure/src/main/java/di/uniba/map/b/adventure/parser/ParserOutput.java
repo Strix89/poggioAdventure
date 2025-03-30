@@ -2,6 +2,7 @@ package di.uniba.map.b.adventure.parser;
 
 import di.uniba.map.b.adventure.type.AdvObject;
 import di.uniba.map.b.adventure.type.Command;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +12,7 @@ import java.util.List;
  *
  * @author pierpaolo
  */
-public class ParserOutput {
+public class ParserOutput implements Serializable {
 
     private Command command;
     private AdvObject object;

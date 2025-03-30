@@ -1,16 +1,18 @@
 package di.uniba.map.b.adventure;
 
-import di.uniba.map.b.adventure.impl.FireHouseGame;
+import di.uniba.map.b.adventure.impl.CLIInputHandler;
 import di.uniba.map.b.adventure.parser.*;
 import di.uniba.map.b.adventure.type.AdvObject;
 import di.uniba.map.b.adventure.type.CommandType;
 import di.uniba.map.b.adventure.type.Room;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Scanner;
 import java.util.Set;
+import java.util.stream.IntStream;
 
 /**
  * L'Engine gestisce l'interazione con l'utente e il flusso di gioco.
@@ -21,173 +23,207 @@ public class Engine {
     private final GameDescription game;
     private Parser parser;
     private String playerName;
+    private OutputHandler output;
+    private InputHandler inputHandler;
+    private ErrorHandler errorHandler;
     private TimeManager timeManager;
-
+    private LoggerInput logger;
+    private final StopWatch gameTime;
+    private List<String> logTemp;
+    
     /**
      * Costruttore dell'Engine.
-     *
-     * @param game Istanza della classe che implementa GameDescription.
+     * @param game
+     * @param playerName
+     * @param output
+     * @param input
+     * @param errorHandler
+     * @param logger
      */
-    public Engine(GameDescription game) {
-        
+    public Engine(GameDescription game, String playerName, OutputHandler output, InputHandler input, ErrorHandler errorHandler, LoggerInput logger) {
         this.game = game;
-        
+        this.playerName = playerName;
+        this.output = output;
+        this.errorHandler = errorHandler;
+        this.inputHandler = input;
+        this.logger = logger; 
+        this.logTemp = new ArrayList<>();
         try {
-            this.game.init();
-        } catch (Exception ex) {
-            System.err.println(ex);
-        }
-
-        try {
-            Set<String> stopWords = Utils.loadFileListInSet(new File("./poggioAdventure/resources/stopwords"));
+            Set<String> stopWords = ResourceLoader.loadFileListInSet(new File(ResourceLoader.STOPWORDS_PATH.toString()));
             parser = new Parser(stopWords);
-            
-        } catch (Exception ex) {
-            System.err.println(ex);
+        } catch (IOException ex) {
+            this.errorHandler.handleFatalError("Caricamento risorse fallito", ex);
+            Utils.exitApplication(Utils.EXIT_CODE_RESOURCE_ERROR);
         }
-        // Inizializza TimeManager utilizzando i valori di default
-        //timeManager = new TimeManager();
+        getGameColoredVersion();
+        output.writeln(game.getWelcomeMsg(), ColorText.WHITE);
+        output.write("\nTi trovi qui: ", ColorText.WHITE);
+        output.writeln(game.getCurrentRoom().getName(), ColorText.BRIGHT_YELLOW);
+        output.writeln(game.getCurrentRoom().getDescription(), ColorText.WHITE);
+        printCursor();  // Chiamato dopo il set up iniziale
+        timeManager = new TimeManager();
+        gameTime = StopWatch.getInstance();
+        gameTime.start();
     }
 
     /**
-     * Metodo che avvia l'esecuzione del gioco.
+     * Metodo per processare il comando ricevuto.
+     * @param command
      */
-    public void execute() {
-        if (parser == null) {
-            System.err.println("Errore critico: il parser non è stato inizializzato correttamente. Impossibile eseguire il gioco.");
-            return;
-        }
+public void processCommand(String command) {
+        logTemp.add(command);
+        Room previousRoom = game.getCurrentRoom();
+        List<AdvObject> previousInventory = new ArrayList<>(game.getInventory());
+        List<AdvObject> previousObjInRoom = new ArrayList<>(game.getCurrentRoom().getObjects());
 
-        Scanner scanner = new Scanner(System.in);
-        
-        // Chiedere all'utente il nome giocatore
-        System.out.print("Inserisci il tuo nome: ");
-        playerName = scanner.nextLine().trim();
+        // Modifica: supporto per comandi multipli
+        List<ParserOutput> outputs = parser.parseMultiple(command, game.getCommands(), 
+            game.getCurrentRoom().getObjects(), game.getInventory());
 
-        LoggerInput logger = new LoggerInput(playerName); 
-
-        // Mostra i salvataggi disponibili
-        SaveGame.listSaves();
-
-        // Chiedere se si vuole caricare una partita salvata
-        System.out.print("\nVuoi caricare una partita salvata? (si/no): ");
-        String choice = scanner.nextLine().trim().toLowerCase();
-
-        if (choice.equals("si")) {
-            System.out.print("Inserisci il nome del file di salvataggio: ");
-            String fileName = scanner.nextLine().trim();
-
-            GameState loadedState = SaveGame.loadGame(fileName);
-            if (loadedState != null) {
-                game.setCurrentRoom(loadedState.getCurrentRoom());
-                game.getInventory().clear();
-                game.getInventory().addAll(loadedState.getInventory());
-                System.out.println("\nPartita caricata con successo!");
-            } else {
-                System.out.println("\nCaricamento fallito. Inizio una nuova partita.");
-            }
-        }
-
-        // Avvio del gioco
-        System.out.println("\n" + game.getWelcomeMsg());
-        System.out.println("Ti trovi qui: " + game.getCurrentRoom().getName());
-        System.out.println();
-        System.out.println(game.getCurrentRoom().getDescription());
-        System.out.println();
-        System.out.print("?> ");
-        //timeManager.start();
-
-        while (scanner.hasNextLine()) {
-            String command = scanner.nextLine().trim();
-            
-            //utilizzo del parser per ottenere una lista di comandi
-            List<ParserOutput> outputs = parser.parseMultiple(command, game.getCommands(), 
-                                                         game.getCurrentRoom().getObjects(), 
-                                                         game.getInventory());
-            
-            // Salvataggio dello stato precedente del gioco
-            Room previousRoom = game.getCurrentRoom();
-            List<AdvObject> previousInventory = new ArrayList<>(game.getInventory());
-            List<AdvObject> previousObjInRoom = new ArrayList<>(game.getCurrentRoom().getObjects());
-            
+        if (outputs.isEmpty()) {
+            output.writeln("Non capisco quello che mi vuoi dire.", ColorText.ERROR);
+        } else {
             boolean commandExecuted = false;
-            boolean shouldExit = false;
-            
-            if (outputs.isEmpty()) {
-                System.out.println("Non capisco quello che mi vuoi dire.");
-            } else {
-                // Esegue tutti i comandi in sequenza
-                for (ParserOutput p : outputs) {
-                    if (p != null && p.getCommand() != null) {
-                        commandExecuted = true;
-                        
-                        // Esegue il comando
-                        game.nextMove(List.of(p), System.out);
-                        
-                        // Controlla se il gioco deve terminare
-                        if (p.getCommand().getType() == CommandType.END) {
-                            System.out.println("Sei un fifone, addio!");
-                            shouldExit = true;
-                            break;
-                        } else if (p.getCommand().getType() == CommandType.SAVE) {
-                            saveGame();
-                            System.out.println("Ci rivediamo presto per continuare la tua avventura!");
-                            scanner.close();
-                            System.exit(0);
-                        } else if (game.getCurrentRoom() == null) {
-                            System.out.println("La tua avventura termina qui! Complimenti!");
-                            System.exit(0);
-                        }
-                    }
+            for (ParserOutput p : outputs) {
+                if (p == null || p.getCommand() == null) continue;
+
+                commandExecuted = true;
+
+                if (p.getCommand().getType() == CommandType.SAVE) {
+                    saveGame();
+                } else {
+                    game.nextMove(List.of(p), output);
                 }
-                
-                if (!commandExecuted) {
-                    System.out.println("Non capisco quello che mi vuoi dire.");
-                }
-                
-                if (shouldExit) {
-                    scanner.close();
-                    break;
-                }
-                
-                // Controlla se lo stato del gioco è cambiato
-                boolean roomChanged = !previousRoom.equals(game.getCurrentRoom()); // Se la stanza è cambiata
-                boolean inventoryChanged = !previousInventory.equals(game.getInventory()); // Se l'inventario è cambiato
-                boolean objectsInRoomChanged = !previousObjInRoom.equals(game.getCurrentRoom().getObjects()); // Se gli oggetti nella stanza sono cambiati
-                boolean isLookAtCommand = false;
-                
-                // Verifica se uno dei comandi è di tipo LOOK_AT
-                for (ParserOutput p : outputs) {
-                    if (p.getCommand() != null && p.getCommand().getType() == CommandType.LOOK_AT) {
-                        isLookAtCommand = true;
-                        break;
-                    }
-                }
-                
-                // Registra il comando solo se ha prodotto un cambiamento di stato
-                if (roomChanged || inventoryChanged || objectsInRoomChanged || isLookAtCommand) {
-                    logger.logInput(command);
+
+                // Gestione uscita dal gioco
+                if (p.getCommand().getType() == CommandType.END) {
+                    output.writeln("Sei un fifone, addio!", ColorText.ERROR);
+                    Utils.exitApplication(Utils.EXIT_CODE_SUCCESS);
+                } else if (game.getCurrentRoom() == null) {
+                    output.writeln("La tua avventura termina qui! Complimenti!", ColorText.NEON_ORANGE);
+                    Utils.exitApplication(Utils.EXIT_CODE_SUCCESS);
                 }
             }
-            
-            System.out.print("?> ");
+
+            if (!commandExecuted) {
+                output.writeln("Non capisco quello che mi vuoi dire.", ColorText.ERROR);
+            }
+
+            // Logging avanzato da origin/main
+            boolean roomChanged = !previousRoom.equals(game.getCurrentRoom());
+            boolean inventoryChanged = !previousInventory.equals(game.getInventory());
+            boolean objectsChanged = !previousObjInRoom.equals(game.getCurrentRoom().getObjects());
+            boolean isLookCommand = outputs.stream()
+                .anyMatch(p -> p.getCommand() != null && p.getCommand().getType() == CommandType.LOOK_AT);
         }
-        //timeManager.stop();
+        printCursor();
     }
 
     /**
-     * Metodo per salvare il gioco.
+     * Ciclo di gioco generico che si occupa di ricevere input
+     * e passarlo al metodo processCommand per l'elaborazione.
      */
-    private void saveGame() {
-        String chapter = "Capitolo1"; // Quando metteremo più capitoli, questo valore dovrà essere calcolato
-        SaveGame.saveGame(playerName, chapter, game.getCurrentRoom(), game.getInventory());
+    public void startGameLoop() {
+        while (game.getCurrentRoom() != null) {
+            String command = inputHandler.getInput();  // Ottieni l'input tramite l'input handler
+            processCommand(command);
+        }
+    }
+
+    public OutputHandler getOutput() {
+        return output;
     }
 
     /**
-     * Metodo main per avviare il gioco.
+     * Metodo per stampare il cursore.
+     * Stampiamo il cursore solo se siamo in modalità CLI (cioè se inputHandler è un CLIInputHandler).
      */
-    public static void main(String[] args) {
-        Engine engine = new Engine(new FireHouseGame());
-        engine.execute();
+    private void printCursor(){
+        // Verifica se l'inputHandler è un'istanza di CLIInputHandler
+        if (inputHandler instanceof CLIInputHandler) {
+            output.write("\n?> ", ColorText.WHITE);  // Mostra il cursore solo in modalità CLI
+        }
+    }
+
+    private void getGameColoredVersion() {
+        String version = game.getGameVersion();
+
+        String[] lines = Arrays.stream(version.split("\n"))
+                               .filter(line -> !line.trim().isEmpty())
+                               .toArray(String[]::new);
+
+        IntStream.range(0, lines.length).forEach(idx -> {
+            String line = lines[idx];
+            ColorText color;
+
+            if (idx == 0 || idx == lines.length - 1) {
+                color = ColorText.NAVY;
+            } else if (idx == 1) {
+                color = ColorText.RED;
+            } else {
+                color = ColorText.YELLOW;
+            }
+
+            output.writeln(line, color);
+        });
+        output.writeln();
+    }
+
+    public void saveGame() {
+        this.gameTime.stop();
+        SaveGame.saveGame(this, output);
+        for (String log : logTemp) {
+            logger.logInput(log); 
+        }
+        this.logTemp.clear();
+        this.gameTime.start();
+    }
+
+    public Parser getParser() {
+        return parser;
+    }
+
+    public String getPlayerName() {
+        return playerName;
+    }
+    
+    public GameDescription getGame(){
+        return game;
+    }
+    
+    public void setTimeManager(TimeManager t){
+        this.timeManager = t;
+    }
+    
+    public TimeManager getTimeManager(){
+        return timeManager;
+    }
+    
+    public void setOutputHandler(OutputHandler output) {
+        this.output = output;
+    }
+    
+    public void setInputHandler(InputHandler input) {
+        this.inputHandler = input;
+    }
+    
+    public void setErrorHandler(ErrorHandler error) {
+        this.errorHandler = error;
+    }
+
+    public LoggerInput getLogger() {
+        return logger;
+    }
+    
+    public void setGameTime(long t){
+        this.gameTime.startFrom(t);
+    }
+    
+    public String getFormattedGameTime(){
+        return this.gameTime.getFormattedTime();
+    }
+    
+    public long getLongGameTime(){
+        return this.gameTime.getElapsedSeconds();
     }
 }

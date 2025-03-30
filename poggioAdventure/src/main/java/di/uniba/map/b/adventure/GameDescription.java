@@ -9,7 +9,7 @@ import di.uniba.map.b.adventure.parser.ParserOutput;
 import di.uniba.map.b.adventure.type.AdvObject;
 import di.uniba.map.b.adventure.type.Command;
 import di.uniba.map.b.adventure.type.Room;
-import java.io.PrintStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,8 +17,9 @@ import java.util.List;
  *
  * @author pierpaolo
  */
-public abstract class GameDescription {
-
+public abstract class GameDescription implements Serializable {
+    private static final long serialVersionUID = 537489926633277910L;
+    
     private final List<Room> rooms = new ArrayList<>();
 
     private final List<Command> commands = new ArrayList<>();
@@ -26,6 +27,8 @@ public abstract class GameDescription {
     private final List<AdvObject> inventory = new ArrayList<>();
 
     private Room currentRoom;
+    
+    private String currentChapter;
 
     /**
      *
@@ -78,13 +81,22 @@ public abstract class GameDescription {
      * @param list
      * @param out
      */
-    public abstract void nextMove(List<ParserOutput> list, PrintStream out);
-
+    public abstract void nextMove(List<ParserOutput> list, OutputHandler out);
+    
+    public String getCurrentChapter(){
+        return currentChapter;
+    }
+    
+    public void setCurrentChapeter(String cp){
+       currentChapter = cp;
+    }
     
     /**
      *
      * @return
      */
     public abstract String getWelcomeMsg();
-
+    
+    public abstract String getGameVersion();
+    
 }

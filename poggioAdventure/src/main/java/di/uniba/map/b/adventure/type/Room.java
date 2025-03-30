@@ -11,6 +11,8 @@ import java.io.Serializable;
 */
 
 public class Room implements Serializable {
+    
+    private static final long serialVersionUID = 123456789L;
 
     private final int id;
     private String name;

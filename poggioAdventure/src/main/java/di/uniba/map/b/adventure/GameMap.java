@@ -2,10 +2,11 @@ package di.uniba.map.b.adventure;
 
 import di.uniba.map.b.adventure.type.Room;
 import di.uniba.map.b.adventure.type.CommandType;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GameMap {
+public class GameMap implements Serializable{
     private final List<List<Room>> allFloors = new ArrayList<>(); // Lista di piani
 
     public GameMap() {
