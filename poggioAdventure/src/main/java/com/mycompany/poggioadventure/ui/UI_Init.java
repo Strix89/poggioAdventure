@@ -263,7 +263,7 @@ public class UI_Init extends UI_Abstract implements MenuManager {
     @Override
     public void showNewGame() {
         JFrame newGame = new UI_NewGame(this);
-        newGame.setLocationRelativeTo(null);
+        newGame.setLocationRelativeTo(this);
         newGame.setVisible(true);
     }
 
