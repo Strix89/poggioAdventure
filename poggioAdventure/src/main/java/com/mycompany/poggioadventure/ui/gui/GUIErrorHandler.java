@@ -1,6 +1,6 @@
 package com.mycompany.poggioadventure.ui.gui;
 
-import di.uniba.map.b.adventure.ErrorHandler;
+import com.mycompany.poggioadventure.ui.ErrorHandler;
 import javax.swing.JOptionPane;
 
 /**

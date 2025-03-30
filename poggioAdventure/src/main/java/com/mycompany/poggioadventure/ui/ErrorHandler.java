@@ -1,4 +1,4 @@
-package di.uniba.map.b.adventure;
+package com.mycompany.poggioadventure.ui;
 
 /**
  * Interfaccia per la gestione degli errori nel motore di gioco.

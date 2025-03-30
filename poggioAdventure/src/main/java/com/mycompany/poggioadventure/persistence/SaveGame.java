@@ -7,7 +7,7 @@ import com.mycompany.poggioadventure.core.utils.EngineFactory;
 import com.mycompany.poggioadventure.ui.InputHandler;
 import com.mycompany.poggioadventure.ui.OutputHandler;
 import com.mycompany.poggioadventure.ui.ColorText;
-import di.uniba.map.b.adventure.ErrorHandler;
+import com.mycompany.poggioadventure.ui.ErrorHandler;
 import com.mycompany.poggioadventure.persistence.LoggerInput;
 import java.io.*;
 import java.time.*;

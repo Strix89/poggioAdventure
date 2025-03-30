@@ -5,7 +5,7 @@ import com.mycompany.poggioadventure.core.abstracts.GameDescription;
 import com.mycompany.poggioadventure.core.utils.TimeManager;
 import com.mycompany.poggioadventure.ui.InputHandler;
 import com.mycompany.poggioadventure.ui.OutputHandler;
-import di.uniba.map.b.adventure.ErrorHandler;
+import com.mycompany.poggioadventure.ui.ErrorHandler;
 import com.mycompany.poggioadventure.core.PoggioAdventureDesc;
 import com.mycompany.poggioadventure.persistence.LoggerInput;
 

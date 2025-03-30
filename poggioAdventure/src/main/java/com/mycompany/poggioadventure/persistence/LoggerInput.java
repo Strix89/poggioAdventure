@@ -1,6 +1,6 @@
 package com.mycompany.poggioadventure.persistence;
 
-import di.uniba.map.b.adventure.ErrorHandler;
+import com.mycompany.poggioadventure.ui.ErrorHandler;
 import com.mycompany.poggioadventure.persistence.ResourceLoader;
 import com.mycompany.poggioadventure.core.utils.Utils;
 import java.io.BufferedWriter;

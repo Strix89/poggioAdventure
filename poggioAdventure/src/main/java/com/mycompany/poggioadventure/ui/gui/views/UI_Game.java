@@ -1,5 +1,6 @@
 package com.mycompany.poggioadventure.ui.gui.views;
 
+import com.mycompany.poggioadventure.ui.ErrorHandler;
 import com.mycompany.poggioadventure.ui.ColorText;
 import com.mycompany.poggioadventure.core.Engine;
 import com.mycompany.poggioadventure.core.utils.EngineFactory;
@@ -9,7 +10,6 @@ import com.mycompany.poggioadventure.ui.UI_Abstract;
 import com.mycompany.poggioadventure.ui.gui.GUIOutputHandler;
 import com.mycompany.poggioadventure.ui.gui.GUIErrorHandler;
 import com.mycompany.poggioadventure.ui.gui.GUIInputHandler;
-import di.uniba.map.b.adventure.*;
 import com.mycompany.poggioadventure.persistence.LoggerInput;
 import javax.swing.*;
 import javax.swing.border.Border;

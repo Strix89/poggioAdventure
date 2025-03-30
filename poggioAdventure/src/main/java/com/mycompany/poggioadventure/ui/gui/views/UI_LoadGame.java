@@ -2,7 +2,7 @@ package com.mycompany.poggioadventure.ui.gui.views;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import com.mycompany.poggioadventure.ui.UI_Abstract;
-import di.uniba.map.b.adventure.ErrorHandler;
+import com.mycompany.poggioadventure.ui.ErrorHandler;
 import com.mycompany.poggioadventure.persistence.SaveGame;
 import com.mycompany.poggioadventure.core.utils.Utils;
 import com.mycompany.poggioadventure.ui.gui.GUIErrorHandler;

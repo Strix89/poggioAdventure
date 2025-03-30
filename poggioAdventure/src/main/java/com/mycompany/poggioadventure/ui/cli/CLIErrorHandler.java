@@ -1,6 +1,6 @@
 package com.mycompany.poggioadventure.ui.cli;
 
-import di.uniba.map.b.adventure.ErrorHandler;
+import com.mycompany.poggioadventure.ui.ErrorHandler;
 import java.util.logging.Logger;
 
 /**

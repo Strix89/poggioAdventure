@@ -10,7 +10,7 @@ import com.mycompany.poggioadventure.ui.InputHandler;
 import com.mycompany.poggioadventure.ui.OutputHandler;
 import com.mycompany.poggioadventure.ui.cli.CLIInputHandler;
 import com.mycompany.poggioadventure.ui.ColorText;
-import di.uniba.map.b.adventure.ErrorHandler;
+import com.mycompany.poggioadventure.ui.ErrorHandler;
 import com.mycompany.poggioadventure.persistence.ResourceLoader;
 import com.mycompany.poggioadventure.persistence.SaveGame;
 import com.mycompany.poggioadventure.core.utils.Utils;
