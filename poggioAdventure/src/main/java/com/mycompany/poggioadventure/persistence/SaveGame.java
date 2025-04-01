@@ -23,25 +23,61 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
- * Classe per la gestione dei salvataggi del gioco.
- * Offre funzionalità per salvare, caricare, elencare ed eliminare salvataggi.
- * I salvataggi vengono gestiti con un sistema di timestamp e pulizia automatica
- * dei salvataggi vecchi nella stessa finestra temporale.
+ * Gestisce il ciclo di vita completo dei salvataggi del gioco.
+ * 
+ * <p>Responsabilità principali:
+ * <ul>
+ *   <li>Serializzazione/deserializzazione dello stato di gioco</li>
+ *   <li>Gestione dei file di salvataggio (.dat) e log associati</li>
+ *   <li>Pulizia automatica dei salvataggi duplicati</li>
+ *   <li>Validazione dell'integrità dei salvataggi</li>
+ * </ul>
+ * 
+ * <p>Caratteristiche:
+ * <ul>
+ *   <li>Salvataggi basati su timestamp con formato: [username]_[data_ora].dat</li>
+ *   <li>Associazione 1:1 tra salvataggi e file di log</li>
+ *   <li>Gestione thread-safe delle operazioni I/O</li>
+ *   <li>Supporto per callback di successo/errore</li>
+ * </ul>
+ * 
+ * <p>Pattern utilizzati:
+ * <ul>
+ *   <li>Factory Method per la ricostruzione dell'engine</li>
+ *   <li>Callback per gestione asincrona</li>
+ *   <li>Serializzazione custom per ottimizzazione spazio</li>
+ * </ul>
  * 
  * @author Strix89 | Elia-Valenza26
+ * @version 1.2
  */
 public class SaveGame {
-    // Directory dove vengono salvati i file di salvataggio
+    /**
+     * Directory base per il salvataggio dei file di gioco.
+     * <p>Percorso assoluto definito in {@link ResourceLoader#SAVES_DIRECTORY}
+     */
     private static final Path SAVE_DIR = ResourceLoader.SAVES_DIRECTORY;
     
-    // Formattatore per la data/ora nei nomi dei file di salvataggio
+    /**
+     * Formattatore per i timestamp nei nomi file.
+     * <p>Formato: giorno_mese_anno_ora-minuti-secondi
+     */
     private static final DateTimeFormatter DATE_FORMATTER = 
         DateTimeFormatter.ofPattern("dd_MM_yyyy_HH-mm-ss");
+    
     /**
-     * Restituisce la lista dei salvataggi disponibili.
-     * I file sono ordinati dal più recente al più vecchio.
+     * Recupera la lista dei salvataggi disponibili ordinati per data.
      * 
-     * @return Lista di nomi di file senza estensione
+     * <p>Operazioni eseguite:
+     * <ol>
+     *   <li>Crea la directory se non esiste</li>
+     *   <li>Filtra solo i file con estensione .dat</li>
+     *   <li>Rimuove l'estensione dai nomi file</li>
+     *   <li>Ordina in ordine cronologico inverso (dal più recente)</li>
+     * </ol>
+     * 
+     * @return Lista non modificabile di nomi file senza estensione
+     *         Lista vuota in caso di errore I/O
      */
     public static List<String> getSaveList() {
         try {
@@ -59,12 +95,27 @@ public class SaveGame {
         }
     }
 
-     /**
-     * Salva lo stato corrente del gioco.
-     * Elimina tutti i salvataggi precedenti con lo stesso username.
+    /**
+     * Serializza lo stato corrente del gioco in un file.
      * 
-     * @param engine Istanza del motore di gioco da salvare
-     * @param output Handler per l'output dei messaggi
+     * <p>Operazioni eseguite:
+     * <ol>
+     *   <li>Elimina eventuali salvataggi precedenti dello stesso giocatore</li>
+     *   <li>Genera nome file con username e timestamp</li>
+     *   <li>Serializza i componenti critici dell'engine</li>
+     * </ol>
+     * 
+     * <p>Componenti salvati:
+     * <ul>
+     *   <li>Nome giocatore</li>
+     *   <li>Stato del gioco (GameDescription)</li>
+     *   <li>Gestore del tempo (TimeManager)</li>
+     *   <li>Tempo di gioco totale</li>
+     *   <li>Percorso del file di log associato</li>
+     * </ul>
+     * 
+     * @param engine Istanza del motore di gioco da serializzare
+     * @param output Handler per la visualizzazione dei messaggi
      */
     public static void saveGame(Engine engine, OutputHandler output) {
         try {
@@ -117,14 +168,22 @@ public class SaveGame {
     }
 
     /**
-     * Carica un salvataggio esistente.
+     * Deserializza uno stato di gioco da file.
      * 
-     * @param saveName Nome del salvataggio da caricare (senza estensione)
-     * @param onSuccess Callback chiamata in caso di successo
-     * @param onError Callback chiamata in caso di errore
-     * @param errorHandler Gestore degli errori
-     * @param input Handler per l'input
-     * @param output Handler per l'output
+     * <p>Flusso operativo:
+     * <ol>
+     *   <li>Verifica esistenza file</li>
+     *   <li>Deserializza i componenti in ordine prestabilito</li>
+     *   <li>Verifica integrità del log associato</li>
+     *   <li>Ricostruisce l'engine tramite EngineFactory</li>
+     * </ol>
+     * 
+     * @param saveName Nome del salvataggio (senza estensione)
+     * @param onSuccess Callback per gestione successo (riceve l'engine ricostruito)
+     * @param onError Callback per gestione errori (riceve messaggio di errore)
+     * @param errorHandler Gestore centralizzato degli errori
+     * @param input Handler per l'input del gioco
+     * @param output Handler per l'output del gioco
      */
     public static void loadSave(
         String saveName, 
@@ -143,7 +202,7 @@ public class SaveGame {
         }
         
         try (ObjectInputStream in = new ObjectInputStream(Files.newInputStream(savePath))) {
-            // Deserializza i dati del gioco
+            // Deserializza i dati del gioco (ordine CRITICO)
             String playerName = (String) in.readObject();
             GameDescription game = (GameDescription) in.readObject();
             TimeManager timeManager = (TimeManager) in.readObject();
@@ -172,12 +231,20 @@ public class SaveGame {
     }
     
     /**
-    * Elimina un salvataggio esistente e il relativo file di log associato.
-    * 
-    * @param saveName Nome del salvataggio da eliminare (senza estensione)
-     * @param err
-    * @return true se il salvataggio è stato eliminato, false altrimenti
-    */
+     * Elimina un salvataggio e il relativo file di log.
+     * 
+     * <p>Strategia di eliminazione:
+     * <ol>
+     *   <li>Recupera il percorso del log associato</li>
+     *   <li>Elimina il log (se esiste)</li>
+     *   <li>Elimina il salvataggio</li>
+     *   <li>Considera l'operazione riuscita se almeno una delle due eliminazioni ha successo</li>
+     * </ol>
+     * 
+     * @param saveName Nome del salvataggio (senza estensione)
+     * @param err Gestore degli errori per logging
+     * @return true se almeno un file è stato eliminato, false altrimenti
+     */
     public static boolean deleteSave(String saveName, ErrorHandler err) {
         Path savePath = SAVE_DIR.resolve(saveName + ".dat");
         boolean logDeleted = false;
@@ -211,7 +278,17 @@ public class SaveGame {
     }
 
     /**
-     * Estrae il nome del log dal file .dat senza dipendere dalla deserializzazione completa.
+     * Estrae il percorso del file di log da un salvataggio.
+     * 
+     * <p>Tecnica utilizzata:
+     * <ul>
+     *   <li>Deserializzazione parziale del file</li>
+     *   <li>Lettura sequenziale fino al campo logFileName</li>
+     *   <li>Ignoro degli altri campi per performance</li>
+     * </ul>
+     * 
+     * @param savePath Percorso completo del file .dat
+     * @return Percorso del log associato o null se errore
      */
     static Path findLogFileName(Path savePath) {
         try (ObjectInputStream in = new ObjectInputStream(Files.newInputStream(savePath))) {
