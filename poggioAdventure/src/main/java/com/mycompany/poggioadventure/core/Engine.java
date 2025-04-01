@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.IntStream;
@@ -59,7 +60,7 @@ public class Engine {
         this.errorHandler = errorHandler;
         this.inputHandler = input;
         this.logger = logger; 
-        this.logTemp = new ArrayList<>();
+        this.logTemp = Collections.synchronizedList(new ArrayList<>());
         try {
             Set<String> stopWords = ResourceLoader.loadFileListInSet(new File(ResourceLoader.STOPWORDS_PATH.toString()));
             parser = new Parser(stopWords);
@@ -181,14 +182,23 @@ public void processCommand(String command) {
         output.writeln();
     }
 
-    public void saveGame() {
-        this.gameTime.stop();
-        SaveGame.saveGame(this, output);
-        for (String log : logTemp) {
-            logger.logInput(log); 
+     public void saveGame() {
+        gameTime.stop();
+        try {
+            // 1. Scrittura atomica dei log
+            logger.logInput(logTemp); 
+
+            // 2. Salvataggio stato gioco
+            SaveGame.saveGame(this, output);
+
+            // 3. Pulizia buffer
+            logTemp.clear();
+
+        } catch (IOException ex) {
+            errorHandler.handleRecoverableError("Salvataggio log fallito: " + ex);
+        } finally {
+            gameTime.start();
         }
-        this.logTemp.clear();
-        this.gameTime.start();
     }
 
     public Parser getParser() {

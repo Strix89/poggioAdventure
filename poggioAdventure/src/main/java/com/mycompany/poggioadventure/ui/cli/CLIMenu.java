@@ -9,6 +9,7 @@ import com.mycompany.poggioadventure.core.abstracts.MenuManager;
 import com.mycompany.poggioadventure.ui.InputHandler;
 import com.mycompany.poggioadventure.ui.OutputHandler;
 import com.mycompany.poggioadventure.persistence.LoggerInput;
+import com.mycompany.poggioadventure.ui.ErrorHandler;
 import java.util.List;
 
 /**
@@ -29,6 +30,7 @@ public class CLIMenu implements MenuManager {
      * Handler per l'input da console
      */
     private final InputHandler scanner;
+    private final ErrorHandler errorHan;
 
     /**
      * Costruttore che inizializza gli handler per input/output CLI
@@ -36,6 +38,7 @@ public class CLIMenu implements MenuManager {
     public CLIMenu() {
         this.output = new CLIOutputHandler();
         this.scanner = new CLIInputHandler();
+        this.errorHan = new CLIErrorHandler();
     }
 
     /**
@@ -79,18 +82,17 @@ public class CLIMenu implements MenuManager {
         output.write("\nInserisci nome giocatore: ", ColorText.WHITE);
         String name = scanner.getInput();
         
-        CLIErrorHandler error = new CLIErrorHandler();
         try {
             Engine engine = EngineFactory.createNewGame(
                 name, 
                 output, 
                 scanner, 
-                error, 
-                new LoggerInput(error)
+                errorHan, 
+                new LoggerInput(errorHan)
             );
             engine.startGameLoop();
         } catch (Exception ex) {
-            error.handleFatalError("Errore critico durante l'inizializzazione della partita", ex);
+            errorHan.handleFatalError("Errore critico durante l'inizializzazione della partita", ex);
         }
     }
 
@@ -123,7 +125,7 @@ public class CLIMenu implements MenuManager {
                 int selectedIndex = Integer.parseInt(input.substring(1)) - 1;
                 if (selectedIndex >= 0 && selectedIndex < saves.size()) {
                     String saveName = saves.get(selectedIndex);
-                    if (SaveGame.deleteSave(saveName)) {
+                    if (SaveGame.deleteSave(saveName, errorHan)) {
                         output.writeln("Salvataggio eliminato: " + saveName, ColorText.GREEN);
                         showLoadGame(); // Ricarica la lista
                     } else {

@@ -8,19 +8,22 @@ import com.mycompany.poggioadventure.ui.InputHandler;
 import com.mycompany.poggioadventure.ui.OutputHandler;
 import com.mycompany.poggioadventure.ui.ColorText;
 import com.mycompany.poggioadventure.ui.ErrorHandler;
-import com.mycompany.poggioadventure.persistence.LoggerInput;
 import java.io.*;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.format.DateTimeParseException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -170,8 +173,10 @@ public class SaveGame {
             long gameTime = (long) in.readObject();
             String logFileName = (String) in.readObject();
             
-            if (!LoggerInput.checkLog(logFileName)){
-                throw new IOException("Il file di log associato al salvataggio non esiste");
+            // Verifica aggiuntiva integrità log
+            if (!LoggerInput.checkLog(logFileName)) {
+                onError.accept("File di log corrotto");
+                return;
             }
             
             // Ricrea l'istanza del motore di gioco
@@ -191,34 +196,56 @@ public class SaveGame {
     * Elimina un salvataggio esistente e il relativo file di log associato.
     * 
     * @param saveName Nome del salvataggio da eliminare (senza estensione)
+     * @param err
     * @return true se il salvataggio è stato eliminato, false altrimenti
     */
-   public static boolean deleteSave(String saveName) {
-       Path savePath = SAVE_DIR.resolve(saveName + ".dat");
-       try {
-           String logFileName = null;
-           // Legge il file di salvataggio per ottenere il nome del log
-           if (Files.exists(savePath)) {
-               try (ObjectInputStream in = new ObjectInputStream(Files.newInputStream(savePath))) {
-                   in.readObject(); // Player name
-                   in.readObject(); // Game
-                   in.readObject(); // TimeManager
-                   in.readObject(); // Game time
-                   logFileName = (String) in.readObject(); // Log file name
-               } catch (IOException | ClassNotFoundException | ClassCastException e) {
-                   // Ignora errori di lettura e procedi
-               }
-           }
+    public static boolean deleteSave(String saveName, ErrorHandler err) {
+        Path savePath = SAVE_DIR.resolve(saveName + ".dat");
+        boolean logDeleted = false;
+        boolean saveDeleted = false;
 
-           // Elimina il file di log associato se presente
-           if (logFileName != null) {
-               LoggerInput.deleteLogFile(logFileName);
-           }
+        try {
+            // 1. Cerca il file di log associato (senza dipendere dalla deserializzazione)
+            Path logFileName = findLogFileName(savePath);
 
-           // Elimina il file di salvataggio
-           return Files.deleteIfExists(savePath);
-       } catch (IOException ex) {
-           return false;
-       }
-   }
+            // 2. Elimina il file di log se esiste
+            if (logFileName != null) {
+                logDeleted = LoggerInput.deleteLogFile(logFileName);
+            }
+
+            // 3. Elimina il salvataggio con gestione esplicita degli errori
+            try {
+                saveDeleted = Files.deleteIfExists(savePath);
+            } catch (IOException ex) {
+                // Registra l'errore ma non interrompere l'operazione
+                err.handleRecoverableError("Errore eliminazione salvataggio: " + ex.getMessage());
+                saveDeleted = false;
+            }
+
+            // 4. Se il salvataggio non esisteva ma il log sì, considera l'operazione comunque riuscita
+            return logDeleted || saveDeleted;
+
+        } catch (Exception ex) {
+            err.handleRecoverableError("Errore durante l'eliminazione: " + ex.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Estrae il nome del log dal file .dat senza dipendere dalla deserializzazione completa.
+     */
+    static Path findLogFileName(Path savePath) {
+        try (ObjectInputStream in = new ObjectInputStream(Files.newInputStream(savePath))) {
+            // Legge l'ordine standard degli oggetti serializzati
+            in.readObject(); // Salta playerName
+            in.readObject(); // Salta game
+            in.readObject(); // Salta timeManager
+            in.readObject(); // Salta gameTime
+            String logFileName = (String) in.readObject(); // Prende il nome del log
+
+            return Paths.get(logFileName);
+        } catch (Exception ex) {
+            return null;
+        }
+    }
 }

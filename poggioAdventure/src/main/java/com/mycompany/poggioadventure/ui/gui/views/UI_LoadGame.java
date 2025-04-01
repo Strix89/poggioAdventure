@@ -151,9 +151,9 @@ public class UI_LoadGame extends UI_Abstract {
             JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
-            if (SaveGame.deleteSave(saveName)) {
+            if (SaveGame.deleteSave(saveName, new GUIErrorHandler())) {
                 saveSlots = SaveGame.getSaveList();
-                saveList.setListData(saveSlots.toArray(new String[0]));
+                saveList.setListData(saveSlots.toArray(String[]::new));
                 JOptionPane.showMessageDialog(this, "Salvataggio eliminato!");
             } else {
                 new GUIErrorHandler().handleRecoverableError("Errore eliminazione");
@@ -294,7 +294,7 @@ public class UI_LoadGame extends UI_Abstract {
         String saveName = saveSlots.get(selectedIndex);
         ErrorHandler errorha = new GUIErrorHandler();
         UI_Game guiGame = new UI_Game();
-        LoggerInput.deleteLogFile(guiGame.getGameEngine().getLogger().getFileName());
+        LoggerInput.deleteLogFile(guiGame.getGameEngine().getLogger().getPathFile());
         new GUIOutputHandler(guiGame.getGameOutputArea()).clear();
         
         SaveGame.loadSave(saveName,

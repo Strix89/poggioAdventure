@@ -9,12 +9,15 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.imageio.ImageIO;
 
 /**
@@ -123,6 +126,7 @@ public class ResourceLoader {
         // Verifica e crea le directory necessarie
         checkSavesDirectory();
         checkLogsDirectory();
+        cleanOrphanedLogs();
         
         // Caricamento delle immagini per l'interfaccia utente
         UI_Config.setShieldImage(loadImage(UI_Config.getSHIELD_IMAGE_PATH()));
@@ -132,5 +136,36 @@ public class ResourceLoader {
         UI_Config.setNormalFont(loadFont(UI_Config.getFONT_NORMAL_PATH()));
         UI_Config.setBoldFont(loadFont(UI_Config.getFONT_BOLD_PATH()));
         UI_Config.setItalicFont(loadFont(UI_Config.getFONT_ITALIC_PATH()));
+    }
+    
+    
+    // Sostituisci cleanOrphanedLogs() con:
+    public static void cleanOrphanedLogs() {
+        try {
+            Set<Path> activeLogs = Files.list(SAVES_DIRECTORY)
+                .map(savePath -> {
+                    try {
+                        return SaveGame.findLogFileName(savePath);
+                    } catch (Exception e) {
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+            Files.list(LOGS_DIRECTORY)
+                .filter(logPath -> !activeLogs.contains(logPath.toAbsolutePath()))
+                .forEach(path -> {
+                    try {
+                        Files.delete(path);
+                    } catch (IOException ex) {
+                        Logger.getLogger(ResourceLoader.class.getName())
+                            .log(Level.WARNING, "Errore eliminazione log orfano", ex);
+                    }
+                });
+        } catch (IOException ex) {
+            Logger.getLogger(ResourceLoader.class.getName())
+                .log(Level.SEVERE, "Pulizia log fallita", ex);
+        }
     }
 }

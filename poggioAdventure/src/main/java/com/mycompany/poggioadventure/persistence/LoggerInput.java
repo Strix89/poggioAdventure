@@ -1,19 +1,19 @@
 package com.mycompany.poggioadventure.persistence;
 
 import com.mycompany.poggioadventure.ui.ErrorHandler;
-import com.mycompany.poggioadventure.persistence.ResourceLoader;
 import com.mycompany.poggioadventure.core.utils.Utils;
-import java.io.BufferedWriter;
+import static com.mycompany.poggioadventure.persistence.ResourceLoader.LOGS_DIRECTORY;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -41,6 +41,10 @@ public class LoggerInput {
      * Gestore degli errori per la segnalazione di problemi.
      */
     private final ErrorHandler errorHandler;
+    
+    protected static final String LOGS_DIR_PATTERN = 
+        Pattern.quote(LOGS_DIRECTORY.toString().replace(File.separatorChar, '/')) + 
+        "/[a-f0-9-]+_Input\\.txt";
 
     /**
      * Costruttore principale che inizializza un nuovo file di log.
@@ -103,22 +107,24 @@ public class LoggerInput {
     }
 
     /**
-     * Registra un input utente nel log in formato Base64.
-     * 
-     * @param input Comando da registrare (ignorato se null o vuoto)
+     * Registra gli input in append al file esistente
+     * @param commands Lista di comandi da registrare
+     * @throws java.io.IOException
      */
-    public void logInput(String input) {
-        if (fileName == null || input == null || input.trim().isEmpty()) return;
+    public void logInput(List<String> commands) throws IOException {
+        if (commands == null || commands.isEmpty()) return;
 
-        String encodedInput = Base64.getEncoder().encodeToString(input.getBytes());
-        
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, true))) {
-            writer.write(encodedInput + "\n");
-        } catch (IOException ex) {
-            errorHandler.handleFatalError("Errore durante la scrittura sul log", ex);
-            Utils.exitApplication(Utils.EXIT_CODE_LOG_ERROR);
-        }
+        // Crea il file se non esiste, altrimenti append
+        Files.write(Path.of(fileName),
+            commands.stream()
+                .map(cmd -> Base64.getEncoder().encodeToString(cmd.getBytes()))
+                .collect(Collectors.toList()),
+            StandardOpenOption.CREATE,
+            StandardOpenOption.APPEND,
+            StandardOpenOption.WRITE
+        );
     }
+
     
     /**
      * Legge e decodifica il contenuto di un file di log.
@@ -146,14 +152,12 @@ public class LoggerInput {
     /**
      * Elimina un file di log in modo sicuro.
      * 
-     * @param fileName Percorso completo del file da eliminare
+     * @param path
      * @return true se eliminato con successo, false altrimenti
      * @throws SecurityException Se si tenta di eliminare file al di fuori della directory dei log
      */
-    public static boolean deleteLogFile(String fileName) {
-        if (fileName == null) return false;
-        
-        Path path = Paths.get(fileName);
+    public static boolean deleteLogFile(Path path) {
+        if (path == null) return false;
         
         // Verifica sicurezza: solo file nella directory dei log
         if (!path.startsWith(ResourceLoader.LOGS_DIRECTORY)) {
@@ -175,17 +179,19 @@ public class LoggerInput {
     * @throws SecurityException Se si tenta di accedere a file non nella directory dei log
     */
    public static boolean checkLog(String fileName) {
-       if (fileName == null) return false;
-
-       Path path = Paths.get(fileName);
-
-       // Controllo sicurezza
-       if (!path.startsWith(ResourceLoader.LOGS_DIRECTORY)) {
-           throw new SecurityException("Accesso non autorizzato alla directory dei log");
-       }
-       
-       return Files.exists(path);
-   }
+        Path logPath = Paths.get(fileName);
+        if (!Files.exists(logPath)) return false;
+        
+        try {
+            // Verifica che ogni riga sia Base64 valido
+            Files.readAllLines(logPath).forEach(
+                line -> Base64.getDecoder().decode(line)
+            );
+            return true;
+        } catch (IOException ex) {
+            return false;
+        }
+    }
 
     /**
      * Restituisce il nome del file di log corrente.
@@ -196,6 +202,9 @@ public class LoggerInput {
         return fileName;
     }
     
+    public Path getPathFile(){
+        return Paths.get(fileName);
+    }
     /**
      * Imposta un nuovo file di log.
      * 
@@ -207,5 +216,12 @@ public class LoggerInput {
             throw new IllegalArgumentException("Nome file non può essere null");
         }
         this.fileName = fileName;
+    }
+    
+    public static boolean isValidLogFile(Path logPath) throws IOException {
+        String filename = logPath.getFileName().toString();
+        return filename.endsWith("_Input.txt") && 
+               filename.matches("[a-f0-9-]{36}_Input\\.txt") &&
+               Files.isRegularFile(logPath);
     }
 }
