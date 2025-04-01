@@ -186,14 +186,15 @@ public void processCommand(String command) {
         gameTime.stop();
         try {
             // 1. Scrittura atomica dei log
-            logger.logInput(logTemp); 
+            if (logger != null) {
+                logger.logInput(logTemp);
+            } 
 
             // 2. Salvataggio stato gioco
             SaveGame.saveGame(this, output);
 
             // 3. Pulizia buffer
             logTemp.clear();
-
         } catch (IOException ex) {
             errorHandler.handleRecoverableError("Salvataggio log fallito: " + ex);
         } finally {

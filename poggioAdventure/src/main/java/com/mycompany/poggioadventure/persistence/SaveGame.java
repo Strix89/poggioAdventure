@@ -12,18 +12,14 @@ import java.io.*;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.time.format.DateTimeParseException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -41,10 +37,6 @@ public class SaveGame {
     // Formattatore per la data/ora nei nomi dei file di salvataggio
     private static final DateTimeFormatter DATE_FORMATTER = 
         DateTimeFormatter.ofPattern("dd_MM_yyyy_HH-mm-ss");
-    
-    // Finestra temporale in ore entro cui eliminare i salvataggi precedenti
-    protected static final int SAVE_WINDOW_HOURS = 2;
-
     /**
      * Restituisce la lista dei salvataggi disponibili.
      * I file sono ordinati dal più recente al più vecchio.
@@ -67,9 +59,9 @@ public class SaveGame {
         }
     }
 
-    /**
+     /**
      * Salva lo stato corrente del gioco.
-     * Elimina eventuali salvataggi precedenti nella stessa finestra temporale.
+     * Elimina tutti i salvataggi precedenti con lo stesso username.
      * 
      * @param engine Istanza del motore di gioco da salvare
      * @param output Handler per l'output dei messaggi
@@ -79,7 +71,7 @@ public class SaveGame {
             String playerName = engine.getPlayerName();
             LocalDateTime now = LocalDateTime.now();
             
-            // Elimina salvataggi precedenti entro la finestra temporale
+            // Elimina tutti i salvataggi precedenti con lo stesso username
             try {
                 List<Path> existingSaves = Files.list(SAVE_DIR)
                         .filter(p -> {
@@ -89,23 +81,8 @@ public class SaveGame {
                         .collect(Collectors.toList());
                 
                 for (Path saveFile : existingSaves) {
-                    String fileName = saveFile.getFileName().toString();
-                    int startIndex = playerName.length() + 1;
-                    int endIndex = fileName.length() - 4; // Rimuovi .dat
-                    
-                    if (startIndex >= endIndex) continue;
-                    
-                    String datePart = fileName.substring(startIndex, endIndex);
                     try {
-                        LocalDateTime saveDate = LocalDateTime.parse(datePart, DATE_FORMATTER);
-                        Duration duration = Duration.between(saveDate, now);
-                        
-                        // Elimina se il salvataggio è nella finestra temporale
-                        if (duration.toHours() <= SAVE_WINDOW_HOURS) {
-                            Files.delete(saveFile);
-                        }
-                    } catch (DateTimeParseException e) {
-                        // Ignora file con formato data non valido
+                        Files.delete(saveFile);
                     } catch (IOException e) {
                         output.writeln("\nErrore cancellazione salvataggio: " + e.getMessage(), ColorText.ERROR);
                     }
@@ -173,7 +150,9 @@ public class SaveGame {
             long gameTime = (long) in.readObject();
             String logFileName = (String) in.readObject();
             
-            // Verifica aggiuntiva integrità log
+            // Crea il logger PRIMA di creare l'engine
+            LoggerInput logger = new LoggerInput(errorHandler, logFileName);
+
             if (!LoggerInput.checkLog(logFileName)) {
                 onError.accept("File di log corrotto");
                 return;
@@ -182,7 +161,7 @@ public class SaveGame {
             // Ricrea l'istanza del motore di gioco
             Engine engine = EngineFactory.createFromSave(
                 game, playerName, output, input, 
-                errorHandler, new LoggerInput(errorHandler, logFileName), 
+                errorHandler, logger, 
                 timeManager, gameTime
             );
             

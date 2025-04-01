@@ -113,7 +113,11 @@ public class LoggerInput {
      */
     public void logInput(List<String> commands) throws IOException {
         if (commands == null || commands.isEmpty()) return;
-
+        
+        System.out.println(fileName);
+        for(String command : commands){
+            System.out.println(command);
+        }
         // Crea il file se non esiste, altrimenti append
         Files.write(Path.of(fileName),
             commands.stream()
