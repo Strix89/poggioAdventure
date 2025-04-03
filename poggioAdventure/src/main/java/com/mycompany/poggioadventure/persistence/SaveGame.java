@@ -213,7 +213,7 @@ public class SaveGame {
             LoggerInput logger = new LoggerInput(errorHandler, logFileName);
 
             if (!LoggerInput.checkLog(logFileName)) {
-                onError.accept("File di log corrotto");
+                onError.accept("File di log corrotto o non esistente");
                 return;
             }
             

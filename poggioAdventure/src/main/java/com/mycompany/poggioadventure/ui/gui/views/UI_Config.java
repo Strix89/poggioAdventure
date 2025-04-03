@@ -94,11 +94,11 @@ public final class UI_Config {
     private static Font italicFont;
 
     // ============== PERCORSI RISORSE ==============
-    private static final Path SHIELD_IMAGE_PATH = Paths.get("resources", "img", "scudopoggiolevante.png");
-    private static final Path ASCII_FLIPPER_PATH = Paths.get("resources", "img", "flipper.jpg");
-    private static final Path FONT_NORMAL_PATH = Paths.get("resources", "fonts", "BarlowCondensed-Medium.ttf");
-    private static final Path FONT_BOLD_PATH = Paths.get("resources", "fonts", "BarlowCondensed-Bold.ttf");
-    private static final Path FONT_ITALIC_PATH = Paths.get("resources", "fonts", "BarlowCondensed-SemiBoldItalic.ttf");
+    private static final Path SHIELD_IMAGE_PATH = Paths.get("resources", "img", "scudopoggiolevante.png").toAbsolutePath();
+    private static final Path ASCII_FLIPPER_PATH = Paths.get("resources", "img", "flipper.jpg").toAbsolutePath();
+    private static final Path FONT_NORMAL_PATH = Paths.get("resources", "fonts", "BarlowCondensed-Medium.ttf").toAbsolutePath();
+    private static final Path FONT_BOLD_PATH = Paths.get("resources", "fonts", "BarlowCondensed-Bold.ttf").toAbsolutePath();
+    private static final Path FONT_ITALIC_PATH = Paths.get("resources", "fonts", "BarlowCondensed-SemiBoldItalic.ttf").toAbsolutePath();
 
     // ============== INIZIALIZZAZIONE ==============
     static {

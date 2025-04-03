@@ -64,7 +64,7 @@ public class ResourceLoader {
      * <p>Percorso predefinito: {@code sav/}
      * <p>Viene creata automaticamente se non esiste.
      */
-    public static final Path SAVES_DIRECTORY = Paths.get("sav").toAbsolutePath();
+    public static final Path SAVES_DIRECTORY = Paths.get("resources", "sav").toAbsolutePath();
     
     /**
      * Percorso assoluto della directory dei log dell'applicazione.
@@ -72,7 +72,7 @@ public class ResourceLoader {
      * <p>Percorso predefinito: {@code resources/logs/}
      * <p>Viene creata automaticamente se non esiste.
      */
-    public static final Path LOGS_DIRECTORY = Paths.get("resources","logs").toAbsolutePath();
+    public static final Path LOGS_DIRECTORY = Paths.get("resources", "logs").toAbsolutePath();
 
     /**
      * Carica un'immagine dal filesystem.

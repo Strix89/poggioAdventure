@@ -23,13 +23,6 @@
                     <include>**/*</include>
                 </includes>
             </resource>
-            <resource>
-                <directory>sav</directory>
-                <targetPath>../sav</targetPath>
-                <includes>
-                    <include>**/*</include>
-                </includes>
-            </resource>
         </resources>       
         <plugins>
             <plugin>
