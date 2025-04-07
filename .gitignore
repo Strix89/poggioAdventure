@@ -6,4 +6,6 @@
 /poggioServer/target/
 /poggioServer/resources/poggioDatabase.lock.db
 /poggioServer/resources/poggioDatabase.mv.db
+/poggioServer/resources/uploaded_logs/
 /poggioServer/logs/
+/poggioServer/resources/poggioDatabase.trace.db

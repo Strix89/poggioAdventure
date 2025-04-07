@@ -14,15 +14,17 @@ public class PlayerRecord {
     private Date data;       // Data vittoria, può essere null
     private Time ora;        // Ora vittoria, può essere null
     private String percorsoFileLog; // Path log, può essere null
+    private Long durataMs;
 
     // Costruttore di default necessario per alcune librerie JSON/Framework
     public PlayerRecord() { }
 
-    public PlayerRecord(String username, Date data, Time ora, String percorsoFileLog) {
+    public PlayerRecord(String username, Date data, Time ora, String percorsoFileLog, Long durataMs) {
         this.username = username;
         this.data = data;
         this.ora = ora;
         this.percorsoFileLog = percorsoFileLog;
+        this.durataMs = durataMs; // NUOVO
     }
 
     // Getters e Setters
@@ -57,6 +59,14 @@ public class PlayerRecord {
     public void setPercorsoFileLog(String percorsoFileLog) {
         this.percorsoFileLog = percorsoFileLog;
     }
+    
+    public Long getDurataMs() { 
+        return durataMs; 
+    }
+    
+    public void setDurataMs(Long durataMs) {
+        this.durataMs = durataMs; 
+    }
 
     // equals, hashCode, toString (Buona pratica)
     @Override
@@ -67,21 +77,23 @@ public class PlayerRecord {
         return Objects.equals(username, that.username) &&
                Objects.equals(data, that.data) &&
                Objects.equals(ora, that.ora) &&
-               Objects.equals(percorsoFileLog, that.percorsoFileLog);
+               Objects.equals(percorsoFileLog, that.percorsoFileLog) &&
+               Objects.equals(durataMs, that.durataMs); // NUOVO
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(username, data, ora, percorsoFileLog);
+        return Objects.hash(username, data, ora, percorsoFileLog, durataMs); // NUOVO
     }
 
     @Override
     public String toString() {
         return "PlayerRecord{" +
-                "username='" + username + '\'' +
-                ", data=" + data +
-                ", ora=" + ora +
-                ", percorsoFileLog='" + percorsoFileLog + '\'' +
-                '}';
+               "username='" + username + '\'' +
+               ", data=" + data +
+               ", ora=" + ora +
+               ", percorsoFileLog='" + percorsoFileLog + '\'' +
+               ", durataMs=" + durataMs + // NUOVO
+               '}';
     }
 }

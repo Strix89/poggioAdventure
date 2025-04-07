@@ -65,7 +65,7 @@ public class PoggioServer {
         try {
              // Trova e logga l'IP locale (questo è solo un esempio, potrebbe non funzionare su tutte le macchine/reti)
              java.net.InetAddress localhost = java.net.InetAddress.getLocalHost();
-             logger.info("Server potenzialmente raggiungibile su: http://{}:8080 (e altre interfacce)", localhost.getHostAddress());
+             logger.info("Server potenzialmente raggiungibile su: http://{}:8080", localhost.getHostAddress());
         } catch (java.net.UnknownHostException e) {
              logger.warn("Impossibile determinare l'IP locale.");
         }

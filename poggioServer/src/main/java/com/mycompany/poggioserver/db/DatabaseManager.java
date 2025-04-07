@@ -81,7 +81,8 @@ public class DatabaseManager {
                                 "username VARCHAR(255) PRIMARY KEY, " +
                                 "data DATE NULL, " +
                                 "ora TIME NULL, " +
-                                "percorso_file_log VARCHAR(1024) NULL)";
+                                "percorso_file_log VARCHAR(1024) NULL, " + 
+                                "durata_ms BIGINT NULL)";
 
         // Usa try-with-resources per ottenere e chiudere la connessione/statement
         try (Connection conn = dataSource.getConnection(); // Ottiene connessione dal pool

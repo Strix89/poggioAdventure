@@ -34,10 +34,11 @@ public interface PlayerDAO {
      * @param data La data della vittoria.
      * @param ora L'ora della vittoria.
      * @param logFilePath Il percorso del file di log (può essere null).
+     * @param durataMs
      * @return true se l'aggiornamento ha avuto successo (giocatore trovato), false altrimenti.
      * @throws SQLException Per errori DB o di parsing data/ora.
      */
-    boolean recordVictory(String username, Date data, Time ora, String logFilePath) throws SQLException;
+    boolean recordVictory(String username, Date data, Time ora, String logFilePath, Long durataMs) throws SQLException;
 
     // Potrebbe includere altri metodi come deletePlayer, getAllPlayers, etc.
 }

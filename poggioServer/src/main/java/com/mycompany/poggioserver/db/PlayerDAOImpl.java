@@ -52,7 +52,7 @@ public class PlayerDAOImpl implements PlayerDAO {
             throw new IllegalArgumentException("Username non può essere vuoto per la ricerca.");
         }
 
-        String sql = "SELECT username, data, ora, percorso_file_log FROM players WHERE username = ?";
+        String sql = "SELECT username, data, ora, percorso_file_log, durata_ms FROM players WHERE username = ?";
         PlayerRecord player = null;
 
         // Try-with-resources gestisce conn, pstmt, e rs
@@ -66,12 +66,15 @@ public class PlayerDAOImpl implements PlayerDAO {
                     Date data = rs.getDate("data");
                     Time ora = rs.getTime("ora");
                     String logPath = rs.getString("percorso_file_log");
+                    long durataValue = rs.getLong("durata_ms");
+                    Long durataMs = rs.wasNull() ? null : durataValue;
 
                     player = new PlayerRecord(
                         rs.getString("username"),
                         data,
                         ora,
-                        logPath
+                        logPath,
+                        durataMs
                     );
                     logger.debug("Giocatore trovato: {}", player);
                 } else {
@@ -86,22 +89,23 @@ public class PlayerDAOImpl implements PlayerDAO {
     }
 
     @Override
-    public boolean recordVictory(String username, Date data, Time ora, String logFilePath) throws SQLException {
+    public boolean recordVictory(String username, Date data, Time ora, String logFilePath, Long durataMs) throws SQLException {
          if (username == null || username.trim().isEmpty()) {
              throw new IllegalArgumentException("Username non può essere vuoto per registrare la vittoria.");
          }
 
-        String sql = "UPDATE players SET data = ?, ora = ?, percorso_file_log = ? WHERE username = ?";
+        String sql = "UPDATE players SET data = ?, ora = ?, percorso_file_log = ?, durata_ms = ? WHERE username = ?";
         boolean updated = false;
 
         // Try-with-resources gestisce conn e pstmt
         try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setDate(1, data);
             pstmt.setTime(2, ora);
             pstmt.setString(3, logFilePath);
-            pstmt.setString(4, username);
+            pstmt.setObject(4, durataMs); // Indice 4 per durata_ms
+            pstmt.setString(5, username);  // Indice 5 per username nel WHERE
 
             int affectedRows = pstmt.executeUpdate();
             updated = (affectedRows > 0);
