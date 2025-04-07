@@ -3,4 +3,7 @@
 /poggioAdventure/resources/logs/*
 /AppuntiOOP.md
 /poggioAdventure/sav
-/gameStatApp/target/
+/poggioServer/target/
+/poggioServer/resources/poggioDatabase.lock.db
+/poggioServer/resources/poggioDatabase.mv.db
+/poggioServer/logs/
