@@ -178,7 +178,7 @@ public class ResourceLoader {
             }
         } catch (IOException ex) {
             Logger.getLogger(ResourceLoader.class.getName()).log(Level.WARNING,
-                "Impossibile creare la cartella dei log scaricati: {0}", LOGS_DIRECTORY);
+                "Impossibile creare la cartella dei log scaricati: {0}", LOGS_DW_DIRECTORY);
         }
     }
 
