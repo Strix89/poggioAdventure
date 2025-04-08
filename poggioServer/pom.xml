@@ -84,6 +84,12 @@
             <artifactId>jersey-media-multipart</artifactId>
             <version>${jersey.version}</version> 
         </dependency>
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <version>5.0.0</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
     <build>
         <resources>
@@ -97,6 +103,10 @@
             </resource>
             <resource>
                 <directory>resources</directory> 
+                <filtering>false</filtering> 
+            </resource>
+            <resource>
+                <directory>logs</directory> 
                 <filtering>false</filtering> 
             </resource>
         </resources>

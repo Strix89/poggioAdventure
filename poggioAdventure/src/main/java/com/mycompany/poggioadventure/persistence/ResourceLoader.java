@@ -67,6 +67,14 @@ public class ResourceLoader {
     public static final Path SAVES_DIRECTORY = Paths.get("resources", "sav").toAbsolutePath();
     
     /**
+     * Percorso assoluto della directory dei log scaricati del gioco.
+     * <p>Contiene tutti gli stati di gioco salvati.
+     * <p>Percorso predefinito: {@code sav/}
+     * <p>Viene creata automaticamente se non esiste.
+     */
+    public static final Path LOGS_DW_DIRECTORY = Paths.get("resources", "down_logs").toAbsolutePath();
+    
+    /**
      * Percorso assoluto della directory dei log dell'applicazione.
      * <p>Contiene i file di log delle sessioni.
      * <p>Percorso predefinito: {@code resources/logs/}
@@ -162,7 +170,15 @@ public class ResourceLoader {
             }
         } catch (IOException ex) {
             Logger.getLogger(ResourceLoader.class.getName()).log(Level.WARNING,
-                "Impossibile creare la cartella dei log: {0}", LOGS_DIRECTORY);
+                "Impossibile creare la cartella dei log del gioco: {0}", LOGS_DIRECTORY);
+        }
+        try {
+            if (!Files.exists(LOGS_DW_DIRECTORY)) {
+                Files.createDirectories(LOGS_DW_DIRECTORY);
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(ResourceLoader.class.getName()).log(Level.WARNING,
+                "Impossibile creare la cartella dei log scaricati: {0}", LOGS_DIRECTORY);
         }
     }
 
