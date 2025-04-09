@@ -233,7 +233,7 @@ public class CLIMenu implements MenuManager {
                         if (SaveGame.deleteSave(saveName, errorHan)) {
                             output.writeln("Salvataggio '" + saveName + "' eliminato con successo.", ColorText.GREEN);
                             // Ricarica e mostra di nuovo la lista aggiornata dei salvataggi (ricorsione)
-                            showLoadGame();
+                            return;
                         } else {
                             // deleteSave ha restituito false (errore durante eliminazione)
                             // l'errore specifico dovrebbe essere stato già loggato da deleteSave tramite errorHan

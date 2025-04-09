@@ -188,7 +188,7 @@ public class LoggerInput {
         }
         
         // Verifica sicurezza: solo file nella directory dei log
-        if (!filePath.startsWith(ResourceLoader.LOGS_DIRECTORY)) {
+        if (!filePath.startsWith(ResourceLoader.LOGS_DIRECTORY.toRealPath())) {
             throw new SecurityException("Tentativo di accesso a file non autorizzato");
         }
         
