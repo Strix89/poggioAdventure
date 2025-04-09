@@ -298,10 +298,10 @@ public class Engine {
 
             SaveGame.saveGame(this, output);
 
-            logTemp.clear();
         } catch (IOException ex) {
             errorHandler.handleRecoverableError("Salvataggio log fallito: " + ex);
         } finally {
+            logTemp.clear();
             gameTime.start();
         }
     }
