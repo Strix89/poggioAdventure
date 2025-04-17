@@ -1,5 +1,13 @@
 /poggioAdventure/target/
 /poggioAdventure/.vscode/
 /poggioAdventure/resources/logs/*
+/poggioAdventure/resources/down_logs/*
 /AppuntiOOP.md
-/poggioAdventure/sav
+/poggioAdventure/sav/
+/poggioServer/target/
+/poggioServer/resources/poggioDatabase.lock.db
+/poggioServer/resources/poggioDatabase.mv.db
+/poggioServer/resources/uploaded_logs/
+/poggioServer/logs/
+/poggioServer/resources/poggioDatabase.trace.db
+/poggioServer/dependency-reduced-pom.xml
