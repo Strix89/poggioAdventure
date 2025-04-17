@@ -15,6 +15,11 @@ package com.mycompany.poggioadventure.parser;
  * @author pierpaolo
  */
 public enum CommandType {
+    
+    /**
+     *
+     */
+    TALK,
 
     /**
      *

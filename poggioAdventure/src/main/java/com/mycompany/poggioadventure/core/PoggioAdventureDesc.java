@@ -4,6 +4,7 @@ import com.mycompany.poggioadventure.observers.OpenObserver;
 import com.mycompany.poggioadventure.observers.InventoryObserver;
 import com.mycompany.poggioadventure.observers.MoveObserver;
 import com.mycompany.poggioadventure.observers.PushObserver;
+import com.mycompany.poggioadventure.observers.TalkObserver;
 import com.mycompany.poggioadventure.observers.PickUpObserver;
 import com.mycompany.poggioadventure.observers.LookAtObserver;
 import com.mycompany.poggioadventure.observers.UseObserver;
@@ -11,6 +12,7 @@ import com.mycompany.poggioadventure.ui.ColorText;
 import com.mycompany.poggioadventure.core.abstracts.GameDescription;
 import com.mycompany.poggioadventure.core.GameMap;
 import com.mycompany.poggioadventure.parser.ParserOutput;
+import com.mycompany.poggioadventure.model.AdvNPC;
 import com.mycompany.poggioadventure.model.AdvObject;
 import com.mycompany.poggioadventure.model.AdvObjectContainer;
 import com.mycompany.poggioadventure.parser.Command;
@@ -112,6 +114,10 @@ public class PoggioAdventureDesc extends GameDescription implements GameObservab
         save.setAlias(new String[]{"salva"});
         getCommands().add(save);
 
+        Command talk = new Command(CommandType.TALK, "parla");
+        talk.setAlias(new String[]{"dialoga", "chiedi", "conversa"});
+        getCommands().add(talk);
+
         //Rooms
         /*
          * Room è un attributo della classe GameDescription. Ogni stanza ha un id, un nome e una descrizione.
@@ -186,6 +192,33 @@ public class PoggioAdventureDesc extends GameDescription implements GameObservab
         kkey.setPushable(false);
         kkey.setPush(false);
         kitchen.getObjects().add(kkey);
+
+
+        // Aggiungi un NPC alla stanza di ingresso
+        AdvNPC guido = new AdvNPC(20, "Guido", "Un simpatico nano segretario");
+        guido.setAlias(new String[] { "guido", "nano", "segreterio" });
+
+        // Dialogo iniziale
+        guido.addFirstDialogueLine("Ciao! Benvenuto a Poggiolevante!");
+        guido.addFirstDialogueLine("Ho qui un oggetto che potrebbe esserti utile...");
+        // Dialogo successivo
+        guido.addSubsequentDialogueLine("Ben tornato! Spero che il post-it ti sia stato utile.");
+        guido.addSubsequentDialogueLine("Buona fortuna per la tua avventura!");
+
+        // Aggiungi un oggetto che l'NPC può dare al giocatore
+        AdvObject post_it = new AdvObject(21, "post-it", "Un post-it con delle istruzioni.");
+        post_it.setAlias(new String[] { "post-it", "note", "appunto" });
+        post_it.setPickupable(true); // Imposta l'oggetto come raccoglibile
+        guido.addItemToGive(post_it);
+
+        // Aggiungi l'NPC alla mappa del gioco
+        Room entry = gameMap.getRoomByName("Ingresso"); // Recupera la stanza di ingresso dalla mappa del gioco
+        if (entry == null) {
+            throw new Exception("Stanza di ingresso non trovata nella mappa del gioco.");
+        } else { 
+            entry.getObjects().add(guido); // Aggiungi l'NPC alla stanza di ingresso
+        }
+        
         //Observer
         /*
          * Viene utilizzato GameObserver per notificare gli observer quando avviene un'azione.
@@ -206,6 +239,8 @@ public class PoggioAdventureDesc extends GameDescription implements GameObservab
         this.attach(openObserver);
         GameObserver useObserver = new UseObserver(); // si occuperà di gestire l'azione di usare
         this.attach(useObserver);
+        GameObserver talkObserver = new TalkObserver();
+        this.attach(talkObserver);
 
         // Inizializza la stanza iniziale del gioco (ora la stanza iniziale viene
         // recuperata dalla GameMap)
