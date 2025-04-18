@@ -47,11 +47,27 @@ public class GameMap implements Serializable{
         return allFloors.get(0).get(0); // Prima stanza del primo piano
     }
 
+    /**
+     * Restituisce una stanza dato il suo nome.
+     * @param name Nome della stanza da cercare
+     * @return La stanza trovata o null se non esiste
+     */
+    public Room getRoomByName(String name) {
+        for (List<Room> floor : allFloors) {
+            for (Room room : floor) {
+                if (room.getName().equalsIgnoreCase(name)) {
+                    return room;
+                }
+            }
+        }
+        return null;
+    }
+
     // Metodo per aggiungere tutte le stanze (esempio)
     public void addRoomsToGameDescription() {
 
         // Primo piano (indice 0)
-        Room entry = new Room(0, "Ingresso", "Ti trovi nell'ingresso di Poggiolevante.");
+        Room entry = new Room(0, "Ingresso", "Ti trovi nell'ingresso di Poggiolevante e vedi un nano difronte a te..");
         Room hall = new Room(1, "Soggiorno", "Ti trovi nel soggiorno.");
         Room reception = new Room(2, "Portineria", "Ti trovi nella portineria.");
         Room corridor = new Room(3, "Corridoio", "Ti trovi nel corridoio del primo piano.");
