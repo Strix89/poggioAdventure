@@ -74,6 +74,21 @@ public class ResourceLoader {
      */
     public static final Path LOGS_DW_DIRECTORY = Paths.get("resources", "down_logs").toAbsolutePath();
     
+     /**
+     * Percorso assoluto della directory delle immagini.
+     * <p>Contiene tutti gli asset grafici del gioco.
+     * <p>Percorso predefinito: {@code resources/img/}
+     */
+    public static final Path IMG_PATH = Paths.get("resources", "img").toAbsolutePath();
+    
+    /**
+     * Percorso assoluto della directory dei font.
+     * <p>Contiene tutti i file dei font utilizzati nel gioco.
+     * <p>Percorso predefinito: {@code resources/fonts/}
+     */
+    public static final Path FONTS_PATH = Paths.get("resources", "fonts").toAbsolutePath();
+    
+    
     /**
      * Percorso assoluto della directory dei log dell'applicazione.
      * <p>Contiene i file di log delle sessioni.
@@ -181,6 +196,40 @@ public class ResourceLoader {
                 "Impossibile creare la cartella dei log scaricati: {0}", LOGS_DW_DIRECTORY);
         }
     }
+    
+     /**
+     * Verifica e crea la directory delle immagini se non esiste.
+     * <p>Logga un errore se la creazione fallisce, ma non termina l'applicazione.
+     */
+    public static void checkImagesDirectory() {
+        try {
+            if (!Files.exists(IMG_PATH)) {
+                Files.createDirectories(IMG_PATH);
+                Logger.getLogger(ResourceLoader.class.getName()).log(Level.INFO,
+                    "Cartella delle immagini creata: {0}", IMG_PATH);
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(ResourceLoader.class.getName()).log(Level.SEVERE,
+                "Impossibile creare la cartella delle immagini: {0}", IMG_PATH);
+        }
+    }
+    
+    /**
+     * Verifica e crea la directory dei font se non esiste.
+     * <p>Logga un errore se la creazione fallisce, ma non termina l'applicazione.
+     */
+    public static void checkFontsDirectory() {
+        try {
+            if (!Files.exists(FONTS_PATH)) {
+                Files.createDirectories(FONTS_PATH);
+                Logger.getLogger(ResourceLoader.class.getName()).log(Level.INFO,
+                    "Cartella dei font creata: {0}", FONTS_PATH);
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(ResourceLoader.class.getName()).log(Level.SEVERE,
+                "Impossibile creare la cartella dei font: {0}", FONTS_PATH);
+        }
+    }
 
     /**
      * Carica un file di testo in un Set di stringhe.
@@ -224,6 +273,8 @@ public class ResourceLoader {
         checkSavesDirectory();
         checkLogsDirectory();
         cleanOrphanedLogs();
+        checkImagesDirectory();
+        checkFontsDirectory();
         
         // Caricamento delle immagini per l'interfaccia utente
         UI_Config.setShieldImage(loadImage(UI_Config.getSHIELD_IMAGE_PATH()));

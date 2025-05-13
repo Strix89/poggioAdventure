@@ -10,7 +10,6 @@ import com.mycompany.poggioadventure.observers.LookAtObserver;
 import com.mycompany.poggioadventure.observers.UseObserver;
 import com.mycompany.poggioadventure.ui.ColorText;
 import com.mycompany.poggioadventure.core.abstracts.GameDescription;
-import com.mycompany.poggioadventure.core.GameMap;
 import com.mycompany.poggioadventure.parser.ParserOutput;
 import com.mycompany.poggioadventure.model.AdvNPC;
 import com.mycompany.poggioadventure.model.AdvObject;
@@ -196,7 +195,7 @@ public class PoggioAdventureDesc extends GameDescription implements GameObservab
 
         // Aggiungi un NPC alla stanza di ingresso
         AdvNPC guido = new AdvNPC(20, "Guido", "Un simpatico nano segretario");
-        guido.setAlias(new String[] { "guido", "nano", "segreterio" });
+        guido.setAlias(new String[] { "guido", "nano", "segretario" });
 
         // Dialogo iniziale
         guido.addFirstDialogueLine("Ciao! Benvenuto a Poggiolevante!");

@@ -2,6 +2,7 @@ package com.mycompany.poggioadventure.core;
 
 import com.mycompany.poggioadventure.model.Room;
 import com.mycompany.poggioadventure.parser.CommandType;
+import com.mycompany.poggioadventure.persistence.ResourceLoader;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,7 +69,9 @@ public class GameMap implements Serializable{
 
         // Primo piano (indice 0)
         Room entry = new Room(0, "Ingresso", "Ti trovi nell'ingresso di Poggiolevante e vedi un nano difronte a te..");
+        entry.setImagePath(ResourceLoader.IMG_PATH.resolve("Ingresso.png").toString());
         Room hall = new Room(1, "Soggiorno", "Ti trovi nel soggiorno.");
+        hall.setImagePath(ResourceLoader.IMG_PATH.resolve("penna.png").toString());
         Room reception = new Room(2, "Portineria", "Ti trovi nella portineria.");
         Room corridor = new Room(3, "Corridoio", "Ti trovi nel corridoio del primo piano.");
         Room galileo = new Room(4, "Galileo", "Sei nella stanza Galileo");

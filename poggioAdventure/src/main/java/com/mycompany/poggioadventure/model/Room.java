@@ -33,6 +33,8 @@ public class Room implements Serializable {
 
     // Riferimento alla stanza su un altro piano (nuovo attributo)
     private Room linkedRoom = null;  // Stanza collegata su un altro piano
+    
+    private String ImagePath = null;
 
     public Room(int id) {
         this.id = id;
@@ -155,5 +157,13 @@ public class Room implements Serializable {
             }
         }
         return null;
+    }
+
+    public String getImagePath() {
+        return ImagePath;
+    }
+
+    public void setImagePath(String ImagePath) {
+        this.ImagePath = ImagePath;
     }
 }

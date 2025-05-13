@@ -5,12 +5,13 @@ import java.util.List;
 import com.mycompany.poggioadventure.core.abstracts.GameDescription;
 import com.mycompany.poggioadventure.model.*;
 import com.mycompany.poggioadventure.parser.*;
+import java.io.Serializable;
 
 /**
  * Classe che implementa l'interfaccia {@link GameObserver} per osservare e reagire a eventi di tipo "talk".
  * Questa classe gestisce la logica di dialogo con i personaggi non giocanti (NPC) nel gioco.
  */
-public class TalkObserver implements GameObserver {
+public class TalkObserver implements GameObserver, Serializable {
 
     /**
      * Aggiorna lo stato del gioco in base al comando di tipo "talk".
