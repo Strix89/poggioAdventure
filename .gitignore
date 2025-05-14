@@ -3,7 +3,7 @@
 /poggioAdventure/resources/logs/*
 /poggioAdventure/resources/down_logs/*
 /AppuntiOOP.md
-/poggioAdventure/sav/
+/poggioAdventure/resources/sav/
 /poggioServer/target/
 /poggioServer/resources/poggioDatabase.lock.db
 /poggioServer/resources/poggioDatabase.mv.db

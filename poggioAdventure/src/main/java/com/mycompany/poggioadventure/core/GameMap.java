@@ -71,11 +71,15 @@ public class GameMap implements Serializable{
         Room entry = new Room(0, "Ingresso", "Ti trovi nell'ingresso di Poggiolevante e vedi un nano difronte a te..");
         entry.setImagePath(ResourceLoader.IMG_PATH.resolve("Ingresso.png").toString());
         Room hall = new Room(1, "Soggiorno", "Ti trovi nel soggiorno.");
-        hall.setImagePath(ResourceLoader.IMG_PATH.resolve("penna.png").toString());
+        hall.setImagePath(ResourceLoader.IMG_PATH.resolve("Hall.png").toString());
         Room reception = new Room(2, "Portineria", "Ti trovi nella portineria.");
+        reception.setImagePath(ResourceLoader.IMG_PATH.resolve("Portineria.png").toString());
         Room corridor = new Room(3, "Corridoio", "Ti trovi nel corridoio del primo piano.");
+        corridor.setImagePath(ResourceLoader.IMG_PATH.resolve("Corridoio.png").toString());
         Room galileo = new Room(4, "Galileo", "Sei nella stanza Galileo");
+        galileo.setImagePath(ResourceLoader.IMG_PATH.resolve("Galileo.png").toString());
         Room office = new Room(5, "Direzione", "Sei in direzione");
+        office.setImagePath(ResourceLoader.IMG_PATH.resolve("Direzione.png").toString());
         // Secondo piano (indice 1)
         Room hallway = new Room(6, "Disimpegno", "Ti trovi al 2° piano in un disimpegno.");
         Room craftRoom = new Room(7, "Stanza di Pino", "Sei nel laboratorio di Pino.");

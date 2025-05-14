@@ -19,7 +19,7 @@ public class Room implements Serializable {
     private String name;
     private String description;
     private String look;
-    private boolean visible = true;
+    private boolean hasBeenObserved = false;
     private CommandType linkedDirection = CommandType.NONE;
     
     // Riferimenti alle stanze collegate nello stesso piano
@@ -34,7 +34,7 @@ public class Room implements Serializable {
     // Riferimento alla stanza su un altro piano (nuovo attributo)
     private Room linkedRoom = null;  // Stanza collegata su un altro piano
     
-    private String ImagePath = null;
+    private String imagePath = null;
 
     public Room(int id) {
         this.id = id;
@@ -64,11 +64,11 @@ public class Room implements Serializable {
     }
 
     public boolean isVisible() {
-        return visible;
+        return hasBeenObserved;
     }
 
     public void setVisible(boolean visible) {
-        this.visible = visible;
+        this.hasBeenObserved = visible;
     }
 
     // Getter e Setter per le stanze collegate (nord, sud, est, ovest)
@@ -160,10 +160,10 @@ public class Room implements Serializable {
     }
 
     public String getImagePath() {
-        return ImagePath;
+        return imagePath;
     }
 
     public void setImagePath(String ImagePath) {
-        this.ImagePath = ImagePath;
+        this.imagePath = ImagePath;
     }
 }

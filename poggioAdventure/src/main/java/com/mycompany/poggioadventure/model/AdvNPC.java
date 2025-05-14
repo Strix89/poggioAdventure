@@ -10,16 +10,16 @@ import java.util.List;
 public class AdvNPC extends AdvObject {
     
     /** Elenco delle righe di dialogo che l'NPC dice la prima volta che viene interagito. */
-    private List<String> firstDialogue = new ArrayList<>();
+    private final List<String> firstDialogue = new ArrayList<>();
     
     /** Elenco delle righe di dialogo che l'NPC dice dopo essere stato interagito. */
-    private List<String> subsequentDialogue = new ArrayList<>();
+    private final List<String> subsequentDialogue = new ArrayList<>();
     
     /** Indica se l'NPC è stato interagito dal giocatore. */
     private boolean hasInteracted = false;
     
     /** Elenco degli oggetti che l'NPC può dare al giocatore. */
-    private List<AdvObject> itemsToGive = new ArrayList<>();
+    private final List<AdvObject> itemsToGive = new ArrayList<>();
 
     /**
      * Costruisce un nuovo NPC con un ID, un nome e una descrizione.
@@ -29,10 +29,16 @@ public class AdvNPC extends AdvObject {
      * @param name Il nome dell'NPC.
      * @param description La descrizione dell'NPC.
      */
+    public AdvNPC(int id, String name, String description, String imagePathForNPC) {
+        super(id, name, imagePathForNPC, description);
+        setPickupable(false); // L'NPC non può essere prelevato
+    }
+    
     public AdvNPC(int id, String name, String description) {
         super(id, name, description);
         setPickupable(false); // L'NPC non può essere prelevato
     }
+
 
     /**
      * Aggiunge una riga di dialogo da parte dell'NPC che viene visualizzata la prima volta che il giocatore interagisce con lui.
