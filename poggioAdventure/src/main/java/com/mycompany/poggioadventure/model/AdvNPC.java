@@ -22,12 +22,12 @@ public class AdvNPC extends AdvObject {
     private final List<AdvObject> itemsToGive = new ArrayList<>();
 
     /**
-     * Costruisce un nuovo NPC con un ID, un nome e una descrizione.
-     * Inizializza la proprietà pickupable a false, in quanto l'NPC non è prelevabile.
+     * Costruisce un nuovo NPC con un ID, un nome e una descrizione.Inizializza la proprietà pickupable a false, in quanto l'NPC non è prelevabile.
      * 
      * @param id L'ID dell'NPC.
      * @param name Il nome dell'NPC.
      * @param description La descrizione dell'NPC.
+     * @param imagePathForNPC
      */
     public AdvNPC(int id, String name, String description, String imagePathForNPC) {
         super(id, name, imagePathForNPC, description);

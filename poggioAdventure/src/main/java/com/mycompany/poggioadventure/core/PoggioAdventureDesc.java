@@ -13,7 +13,6 @@ import com.mycompany.poggioadventure.core.abstracts.GameDescription;
 import com.mycompany.poggioadventure.parser.ParserOutput;
 import com.mycompany.poggioadventure.model.AdvNPC;
 import com.mycompany.poggioadventure.model.AdvObject;
-import com.mycompany.poggioadventure.model.AdvObjectContainer;
 import com.mycompany.poggioadventure.parser.Command;
 import com.mycompany.poggioadventure.parser.CommandType;
 import com.mycompany.poggioadventure.model.Room;
@@ -236,24 +235,44 @@ public class PoggioAdventureDesc extends GameDescription implements GameObservab
     }
 
     @Override
-    public String getWelcomeMsg() {
+    public String getGUIWelcomeMsg() {
+        return ""
+                + "===============================================================================\n"
+                + "                             BENVENUTO NEL COLLEGIO TECNOMAGICO DI SAN JOSE MARIA \n"
+                + "===============================================================================\n"
+                + "Sei una matricola in cerca di ammissione a questo prestigioso collegio,\n"
+                + "dove solo i più brillanti superano le prove.\n"
+                + "===============================================================================";
+    }
+    
+    @Override
+    public String getCLIWelcomeMsg() {
         return ""
                 + "====================================================================\n"
-                + "*      BENVENUTO NEL COLLEGIO TECNOMAGICO DI SAN JOSE MARIA *\n"
+                + "       BENVENUTO NEL COLLEGIO TECNOMAGICO DI SAN JOSE MARIA \n"
                 + "====================================================================\n"
-                + "\n"
                 + "Sei una matricola in cerca di ammissione a questo prestigioso collegio,\n"
-                + "dove solo i più brillanti superano le prove iniziatiche.\n"
+                + "dove solo i più brillanti superano le prove.\n"
                 + "====================================================================";
     }
 
     @Override
-    public String getGameVersion() {
+    public String getGUIGameVersion() {
         return 
-        "\t           ==================================================\n" +
-        "\t                           PoggioAdventure .v0.1 - 2024-2025           \n" +
-        "\t                                      developed by:                    \n" +
-        "\t                           Strix89 | MikeRvsso | Elia-Valenza26        \n" +
-        "\t           ==================================================\n";
+        "===============================================================================\n" +
+        "\t                                 PoggioAdventure .v0.1 - 2024-2025           \n" +
+        "\t                                            developed by:                    \n" +
+        "\t                                 Strix89 | MikeRvsso | Elia-Valenza26        \n" +
+        "===============================================================================\n";
+    } 
+    
+    @Override
+    public String getCLIGameVersion() {
+        return 
+        "====================================================\n" +
+        "          PoggioAdventure .v0.1 - 2024-2025         \n" +
+        "                   developed by:                    \n" +
+        "        Strix89 | MikeRvsso | Elia-Valenza26        \n" +
+        "====================================================\n";
     } 
 }

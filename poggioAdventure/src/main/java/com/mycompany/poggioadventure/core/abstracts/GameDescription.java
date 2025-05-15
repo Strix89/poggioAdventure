@@ -96,8 +96,9 @@ public abstract class GameDescription implements Serializable {
      *
      * @return
      */
-    public abstract String getWelcomeMsg();
+    public abstract String getCLIWelcomeMsg();
+    public abstract String getGUIWelcomeMsg();
     
-    public abstract String getGameVersion();
-    
+    public abstract String getCLIGameVersion();
+    public abstract String getGUIGameVersion();
 }

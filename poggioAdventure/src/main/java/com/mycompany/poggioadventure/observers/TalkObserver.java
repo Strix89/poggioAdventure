@@ -67,4 +67,6 @@ public class TalkObserver implements GameObserver, Serializable {
         }
         return msg.toString();
     }
+    
+    
 }
