@@ -205,12 +205,12 @@ public class PoggioAdventureDesc extends GameDescription implements GameObservab
     @Override
     public String getGUIWelcomeMsg() {
         return ""
-                + "===============================================================================\n"
+                + "==============================================================================\n"
                 + "                             BENVENUTO NEL COLLEGIO TECNOMAGICO DI SAN JOSE MARIA \n"
-                + "===============================================================================\n"
+                + "==============================================================================\n"
                 + "Sei una matricola in cerca di ammissione a questo prestigioso collegio,\n"
                 + "dove solo i più brillanti superano le prove.\n"
-                + "===============================================================================";
+                + "==============================================================================";
     }
     
     @Override
