@@ -40,10 +40,17 @@ public class TalkObserver implements GameObserver, Serializable {
             for (AdvObject obj : npcs) {
                 if (obj instanceof AdvNPC) {
                     AdvNPC npc = (AdvNPC) obj;
+                    
+                    // Aggiungi il percorso dell'immagine se presente
+                    if (npc.getImagePath() != null && !npc.getImagePath().isEmpty() && !npc.isObscureImage()) {
+                        msg.append("\nIMAGE:").append(npc.getImagePath()).append("\n");
+                    } else {
+                        msg.append("\n");
+                    }
 
                     // Mostra il dialogo dell'NPC
                     for (String line : npc.getDialogue()) {
-                        msg.append(npc.getName()).append(": \"").append(line).append("\"\n");
+                        msg.append("[ORANGE]").append(npc.getName()).append("[/]").append(": \"").append(line).append("\"\n");
                     }
 
                     // Se l'NPC non è stato ancora interagito e ha oggetti da dare
@@ -51,17 +58,17 @@ public class TalkObserver implements GameObserver, Serializable {
                         // Aggiungi gli oggetti all'inventario del giocatore
                         for (AdvObject item : npc.getItemsToGive()) {
                             description.getInventory().add(item);
-                            msg.append("\n").append(npc.getName())
+                            msg.append("\n").append("[ORANGE]").append(npc.getName())
+                               .append("[/]")
                                .append(" ti ha dato: ")
-                               .append(item.getName())
-                               .append("\n");
+                               .append(item.getName());
                         }
                         // Segna l'NPC come interagito
                         npc.setHasInteracted(true);
                     }
                 } else {
                     // Se l'oggetto non è un NPC, il giocatore non può parlare con esso
-                    msg.append("Non puoi parlare con ").append(obj.getName()).append("!\n");
+                    msg.append("Non puoi parlare con").append(obj.getName()).append("!\n");
                 }
             }
         }

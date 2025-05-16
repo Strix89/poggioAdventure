@@ -95,12 +95,10 @@ public class UseObserver implements GameObserver, Serializable {
                         break;
                 }
             }
-
             if (!interact) {
                 msg.append("Non ci sono oggetti utilizzabili qui.");
             }
         }
-
         return msg.toString();
     }
 }

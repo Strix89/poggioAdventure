@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.poggioadventure.observers;
 
 import java.util.List;
@@ -46,9 +42,9 @@ public class PickUpObserver implements GameObserver, Serializable {
                         msg.append("Hai raccolto: ").append(obj.getDescription()).append("\n");
 
                         if (description.getCurrentRoom().getId() == 2) {
-                            description.getCurrentRoom().setLook("La solita cucina...");
+                            description.getCurrentRoom().setBaseLookDescription("La solita cucina...");
                         } else if (description.getCurrentRoom().getId() == 3) {
-                            description.getCurrentRoom().setLook("Non c'è nulla di interessante qui.");
+                            description.getCurrentRoom().setBaseLookDescription("Non c'è nulla di interessante qui.");
                         }
                     } else {
                         msg.append("Non puoi raccogliere questo oggetto: ").append(obj.getName()).append("\n");

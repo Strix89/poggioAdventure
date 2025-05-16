@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.mycompany.poggioadventure.model;
 
 import java.io.Serializable;
@@ -42,6 +37,8 @@ public class AdvObject implements Serializable {
     private boolean push = false;
     
     private String imagePath = null;
+    
+    private boolean obscureImage = false;
 
     /**
      *
@@ -101,7 +98,7 @@ public class AdvObject implements Serializable {
         this.name = name;
         this.description = description;
         this.alias = alias;
-        this.imagePath = imagePath;
+        this.imagePath = image;
     }
 
     /**
@@ -288,5 +285,13 @@ public class AdvObject implements Serializable {
 
     public void setImagePath(String imagePath) {
         this.imagePath = imagePath;
+    }
+
+    public boolean isObscureImage() {
+        return obscureImage;
+    }
+
+    public void setObscureImage(boolean obscureImage) {
+        this.obscureImage = obscureImage;
     }
 }

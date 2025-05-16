@@ -377,11 +377,12 @@ public class UI_NewGame extends UI_Abstract {
                         }
                     });
                 // Fine caso USER_NOT_FOUND
-                case SUCCESS_OK -> // Utente già esistente sul server
+                case SUCCESS_OK -> {// Utente già esistente sul server
                     errorHan.handleRecoverableError("Errore: L'utente '" + playerName + "' esiste già. Carica la partita o scegli un nome diverso.");
+                    new UI_Init().setVisible(true);
                 // L'utente vedrà questo messaggio, ma le finestre precedenti sono già chiuse.
                 // Potrebbe essere necessario un modo per tornare al menu principale qui.
-
+                }
                 case CONNECTION_ERROR -> // Errore di connessione al server
                     errorHan.handleRecoverableError("Errore di connessione: Impossibile comunicare con il server per verificare l'utente.");
 

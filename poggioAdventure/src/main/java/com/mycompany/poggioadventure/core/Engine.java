@@ -136,7 +136,7 @@ public class Engine {
         }
         getGameColoredVersion();
         output.writeln(this.output instanceof GUIOutputHandler ? game.getGUIWelcomeMsg() : game.getCLIWelcomeMsg(), ColorText.WHITE);
-        output.write("\nTi trovi qui: ", ColorText.WHITE);
+        output.write(" \nTi trovi qui: ", ColorText.WHITE);
         output.writeln(game.getCurrentRoom().getName(), ColorText.BRIGHT_YELLOW);
         output.writeln(game.getCurrentRoom().getDescription(), ColorText.WHITE);
         printCursor();

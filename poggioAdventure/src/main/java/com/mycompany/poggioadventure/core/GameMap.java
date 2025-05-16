@@ -1,5 +1,7 @@
 package com.mycompany.poggioadventure.core;
 
+import com.mycompany.poggioadventure.model.AdvNPC;
+import com.mycompany.poggioadventure.model.AdvObject;
 import com.mycompany.poggioadventure.model.Room;
 import com.mycompany.poggioadventure.parser.CommandType;
 import com.mycompany.poggioadventure.persistence.ResourceLoader;
@@ -65,10 +67,29 @@ public class GameMap implements Serializable{
     }
 
     // Metodo per aggiungere tutte le stanze (esempio)
-    public void addRoomsToGameDescription() {
+    public void addElementsToGameDescription() {
 
         // Primo piano (indice 0)
-        Room entry = new Room(0, "Ingresso", "Ti trovi nell'ingresso di Poggiolevante e vedi un nano difronte a te..");
+        // Aggiungi un NPC alla stanza di ingresso
+        AdvNPC guido = new AdvNPC(20, "Guido", "Un simpatico nano segretario");
+        guido.setAlias(new String[] { "guido", "nano", "segretario" });
+        guido.setImagePath(ResourceLoader.IMG_PATH.resolve("nano.png").toString());
+
+        // Dialogo iniziale
+        guido.addFirstDialogueLine("Ciao! Benvenuto a Poggiolevante!");
+        guido.addFirstDialogueLine("Ho qui un oggetto che potrebbe esserti utile...");
+        // Dialogo successivo
+        guido.addSubsequentDialogueLine("Ben tornato! Spero che il post-it ti sia stato utile.");
+        guido.addSubsequentDialogueLine("Buona fortuna per la tua avventura!");
+
+        // Aggiungi un oggetto che l'NPC può dare al giocatore
+        AdvObject post_it = new AdvObject(21, "post-it", "Un post-it con delle istruzioni.");
+        post_it.setAlias(new String[] { "post-it", "note", "appunto" });
+        post_it.setPickupable(true); // Imposta l'oggetto come raccoglibile
+        guido.addItemToGive(post_it);
+
+        Room entry = new Room(0, "Ingresso", "Ti trovi nell'ingresso di Poggiolevante");
+        entry.addObject(guido, "C'è un nano vicino la porta, leggi il nome sulla targhetta si chiama GUIDO");
         entry.setImagePath(ResourceLoader.IMG_PATH.resolve("Ingresso.png").toString());
         Room hall = new Room(1, "Soggiorno", "Ti trovi nel soggiorno.");
         hall.setImagePath(ResourceLoader.IMG_PATH.resolve("Hall.png").toString());
@@ -135,5 +156,18 @@ public class GameMap implements Serializable{
 
     public List<List<Room>> getAllFloors() {
         return allFloors;
+    }
+    
+    /**
+    * Rimuove le immagini da tutti gli NPC presenti nelle stanze del gioco.Utilizza espressioni lambda e stream per l'elaborazione.
+     * @param obscure
+    */
+    public void alterateNPCImages(boolean obscure) {
+        allFloors.stream()
+            .flatMap(List::stream) // Flattena tutte le stanze in un unico stream
+            .forEach(room -> room.getObjects().stream()
+                .filter(obj -> obj instanceof AdvNPC)
+                .forEach(npc -> ((AdvNPC) npc).setObscureImage(obscure))
+            );
     }
 }

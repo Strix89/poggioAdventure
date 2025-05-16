@@ -11,8 +11,6 @@ import com.mycompany.poggioadventure.observers.UseObserver;
 import com.mycompany.poggioadventure.ui.ColorText;
 import com.mycompany.poggioadventure.core.abstracts.GameDescription;
 import com.mycompany.poggioadventure.parser.ParserOutput;
-import com.mycompany.poggioadventure.model.AdvNPC;
-import com.mycompany.poggioadventure.model.AdvObject;
 import com.mycompany.poggioadventure.parser.Command;
 import com.mycompany.poggioadventure.parser.CommandType;
 import com.mycompany.poggioadventure.model.Room;
@@ -46,9 +44,6 @@ public class PoggioAdventureDesc extends GameDescription implements GameObservab
     private ParserOutput parserOutput;
     private final List<String> messages = new ArrayList<>();
 
-    // Aggiungi un'istanza di GameMap per gestire le stanze e i loro collegamenti
-    private GameMap gameMap;
-
     /**
      * Metodo Init : inizializza il gioco
      * Questo metodo viene chiamato per inizializzare il gioco.
@@ -59,8 +54,7 @@ public class PoggioAdventureDesc extends GameDescription implements GameObservab
     public void init() throws Exception {
         messages.clear();
         // Inizializza la mappa del gioco
-        gameMap = new GameMap(); // Crea un'istanza della GameMap
-        gameMap.addRoomsToGameDescription(); // Aggiungi tutte le stanze alla mappa del gioco
+        this.getGameMap().addElementsToGameDescription(); // Aggiungi tutte le stanze alla mappa del gioco
 
         // Comandi del gioco
         Command nord = new Command(CommandType.NORD, "nord");
@@ -115,32 +109,6 @@ public class PoggioAdventureDesc extends GameDescription implements GameObservab
         Command talk = new Command(CommandType.TALK, "parla");
         talk.setAlias(new String[]{"dialoga", "chiedi", "conversa"});
         getCommands().add(talk);
-
-
-        // Aggiungi un NPC alla stanza di ingresso
-        AdvNPC guido = new AdvNPC(20, "Guido", "Un simpatico nano segretario");
-        guido.setAlias(new String[] { "guido", "nano", "segretario" });
-
-        // Dialogo iniziale
-        guido.addFirstDialogueLine("Ciao! Benvenuto a Poggiolevante!");
-        guido.addFirstDialogueLine("Ho qui un oggetto che potrebbe esserti utile...");
-        // Dialogo successivo
-        guido.addSubsequentDialogueLine("Ben tornato! Spero che il post-it ti sia stato utile.");
-        guido.addSubsequentDialogueLine("Buona fortuna per la tua avventura!");
-
-        // Aggiungi un oggetto che l'NPC può dare al giocatore
-        AdvObject post_it = new AdvObject(21, "post-it", "Un post-it con delle istruzioni.");
-        post_it.setAlias(new String[] { "post-it", "note", "appunto" });
-        post_it.setPickupable(true); // Imposta l'oggetto come raccoglibile
-        guido.addItemToGive(post_it);
-
-        // Aggiungi l'NPC alla mappa del gioco
-        Room entry = gameMap.getRoomByName("Ingresso"); // Recupera la stanza di ingresso dalla mappa del gioco
-        if (entry == null) {
-            throw new Exception("Stanza di ingresso non trovata nella mappa del gioco.");
-        } else { 
-            entry.getObjects().add(guido); // Aggiungi l'NPC alla stanza di ingresso
-        }
         
         //Observer
         /*
@@ -167,7 +135,7 @@ public class PoggioAdventureDesc extends GameDescription implements GameObservab
 
         // Inizializza la stanza iniziale del gioco (ora la stanza iniziale viene
         // recuperata dalla GameMap)
-        setCurrentRoom(gameMap.getStartingRoom()); // Imposta la stanza iniziale come la prima stanza del primo piano
+        setCurrentRoom(this.getGameMap().getStartingRoom()); // Imposta la stanza iniziale come la prima stanza del primo piano
     }
 
     /**
@@ -248,31 +216,31 @@ public class PoggioAdventureDesc extends GameDescription implements GameObservab
     @Override
     public String getCLIWelcomeMsg() {
         return ""
-                + "====================================================================\n"
+                + "========================================================================\n"
                 + "       BENVENUTO NEL COLLEGIO TECNOMAGICO DI SAN JOSE MARIA \n"
-                + "====================================================================\n"
+                + "========================================================================\n"
                 + "Sei una matricola in cerca di ammissione a questo prestigioso collegio,\n"
                 + "dove solo i più brillanti superano le prove.\n"
-                + "====================================================================";
+                + "========================================================================";
     }
 
     @Override
     public String getGUIGameVersion() {
         return 
-        "===============================================================================\n" +
-        "\t                                 PoggioAdventure .v0.1 - 2024-2025           \n" +
-        "\t                                            developed by:                    \n" +
-        "\t                                 Strix89 | MikeRvsso | Elia-Valenza26        \n" +
-        "===============================================================================\n";
+        "================================================================================\n" +
+        "\t                                    PoggioAdventure .v0.1 - 2024-2025           \n" +
+        "\t                                              developed by:                      \n" +
+        "\t                                   Strix89 | MikeRvsso | Elia-Valenza26         \n" +
+        "================================================================================\n";
     } 
     
     @Override
     public String getCLIGameVersion() {
         return 
-        "====================================================\n" +
-        "          PoggioAdventure .v0.1 - 2024-2025         \n" +
-        "                   developed by:                    \n" +
-        "        Strix89 | MikeRvsso | Elia-Valenza26        \n" +
-        "====================================================\n";
+        "==========================================================================\n" +
+        "                     PoggioAdventure .v0.1 - 2024-2025                 \n" +
+        "                               developed by:                           \n" +
+        "                    Strix89 | MikeRvsso | Elia-Valenza26               \n" +
+        "==========================================================================\n";
     } 
 }
