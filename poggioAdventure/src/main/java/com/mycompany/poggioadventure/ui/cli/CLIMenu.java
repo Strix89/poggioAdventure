@@ -73,7 +73,7 @@ public class CLIMenu implements MenuManager {
     @Override
     public void showMainMenu() {
         // Stampa il titolo del gioco una volta all'avvio del menu
-        output.writeln("\n=== POGGIO ADVENTURE ===", ColorText.NAVY);
+        output.writeln("\n===== POGGIO ADVENTURE =====", ColorText.NAVY);
 
         // Loop infinito per mostrare ripetutamente il menu principale
         while(true) {
@@ -83,7 +83,7 @@ public class CLIMenu implements MenuManager {
             output.writeln("2) Carica Partita", ColorText.WHITE);
             output.writeln("3) Classifica", ColorText.WHITE);
             output.writeln("4) Esci", ColorText.WHITE);
-            output.write("\nSeleziona un'opzione: ", ColorText.WHITE); // Prompt per l'utente
+            output.write(" \nSeleziona un'opzione: ", ColorText.WHITE); // Prompt per l'utente
 
             // Legge la scelta dell'utente
             String choice = scanner.getInput();
@@ -199,20 +199,20 @@ public class CLIMenu implements MenuManager {
         if (saves.isEmpty()) {
             output.writeln("\nNessun salvataggio disponibile.", ColorText.ORANGE);
             // Breve pausa prima di tornare al menu principale
-             output.write("Premi Invio per continuare...", ColorText.WHITE);
+             output.write("\nPremi Invio per continuare...", ColorText.WHITE);
              scanner.getInput();
             return; // Torna al menu principale
         }
 
         // Mostra l'elenco numerato dei salvataggi
-        output.writeln("\n=== SALVATAGGI DISPONIBILI ===", ColorText.YELLOW);
+        output.writeln(" \n=== SALVATAGGI DISPONIBILI ===", ColorText.YELLOW);
         for (int i = 0; i < saves.size(); i++) {
             // Mostra numero indice (partendo da 1) e nome del salvataggio
             output.writeln((i + 1) + ") " + saves.get(i), ColorText.WHITE);
         }
 
         // Chiede all'utente di scegliere un'azione (caricare o eliminare)
-        output.write("\nSeleziona il numero del salvataggio da caricare (es: 2)\n" +
+        output.write(" \nSeleziona il numero del salvataggio da caricare (es: 2)\n" +
                      "oppure inserisci '!' seguito dal numero per ELIMINARE (es: !2): ", ColorText.WHITE);
         String input = scanner.getInput().trim(); // Legge l'input e rimuove spazi extra
 
@@ -361,7 +361,7 @@ public class CLIMenu implements MenuManager {
      */
     @Override
     public void exit() {
-        output.writeln("\nGrazie per aver giocato a Poggio Adventure! Uscita...", ColorText.GREEN);
+        output.writeln("\nGrazie per aver giocato a PoggioAdventure! Uscita...", ColorText.GREEN);
         Utils.exitApplication(); // Chiama il metodo statico per uscire (probabilmente fa System.exit)
     }
 }

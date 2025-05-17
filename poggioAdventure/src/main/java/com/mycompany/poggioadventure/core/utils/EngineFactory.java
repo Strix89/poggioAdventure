@@ -7,6 +7,7 @@ import com.mycompany.poggioadventure.ui.OutputHandler;
 import com.mycompany.poggioadventure.ui.ErrorHandler;
 import com.mycompany.poggioadventure.core.PoggioAdventureDesc;
 import com.mycompany.poggioadventure.persistence.LoggerInput;
+import com.mycompany.poggioadventure.ui.cli.CLIOutputHandler;
 
 /**
  * Factory per la creazione di istanze del motore di gioco (Engine).
@@ -45,7 +46,9 @@ public class EngineFactory {
         // Inizializza la descrizione del gioco
         GameDescription game = new PoggioAdventureDesc();
         game.init(); // Configura stanze, oggetti e stato iniziale
-        
+        if (output instanceof CLIOutputHandler){
+            game.getGameMap().alterateNPCImages(true);
+        }
         return new Engine(game, playerName, output, input, errorHandler, logger);
     }
 
@@ -68,7 +71,11 @@ public class EngineFactory {
                                        TimeManager time, long gameTime) {
         // Crea l'engine con lo stato salvato
         Engine gameEngine = new Engine(savedGame, playerName, output, input, errorHandler, logger);
-        
+        if (output instanceof CLIOutputHandler) {
+            savedGame.getGameMap().alterateNPCImages(true);
+        } else{ 
+            savedGame.getGameMap().alterateNPCImages(false);
+        }
         // Ripristina lo stato temporale
         gameEngine.setTimeManager(time);
         gameEngine.setGameTime(gameTime);

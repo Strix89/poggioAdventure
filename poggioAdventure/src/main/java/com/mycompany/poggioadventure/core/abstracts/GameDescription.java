@@ -5,6 +5,7 @@
  */
 package com.mycompany.poggioadventure.core.abstracts;
 
+import com.mycompany.poggioadventure.core.GameMap;
 import com.mycompany.poggioadventure.ui.OutputHandler;
 import com.mycompany.poggioadventure.parser.ParserOutput;
 import com.mycompany.poggioadventure.model.AdvObject;
@@ -21,7 +22,7 @@ import java.util.List;
 public abstract class GameDescription implements Serializable {
     private static final long serialVersionUID = 537489926633277910L;
     
-    private final List<Room> rooms = new ArrayList<>();
+    private final GameMap gameMap = new GameMap();
 
     private final List<Command> commands = new ArrayList<>();
 
@@ -30,14 +31,6 @@ public abstract class GameDescription implements Serializable {
     private Room currentRoom;
     
     private String currentChapter;
-
-    /**
-     *
-     * @return
-     */
-    public List<Room> getRooms() {
-        return rooms;
-    }
 
     /**
      *
@@ -96,8 +89,13 @@ public abstract class GameDescription implements Serializable {
      *
      * @return
      */
-    public abstract String getWelcomeMsg();
+    public abstract String getCLIWelcomeMsg();
+    public abstract String getGUIWelcomeMsg();
     
-    public abstract String getGameVersion();
-    
+    public abstract String getCLIGameVersion();
+    public abstract String getGUIGameVersion();
+
+    public GameMap getGameMap() {
+        return gameMap;
+    }
 }

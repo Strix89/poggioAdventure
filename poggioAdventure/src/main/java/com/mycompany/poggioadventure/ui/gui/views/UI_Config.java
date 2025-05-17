@@ -9,7 +9,6 @@ import java.awt.Insets;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -94,11 +93,11 @@ public final class UI_Config {
     private static Font italicFont;
 
     // ============== PERCORSI RISORSE ==============
-    private static final Path SHIELD_IMAGE_PATH = Paths.get("resources", "img", "scudopoggiolevante.png").toAbsolutePath();
-    private static final Path ASCII_FLIPPER_PATH = Paths.get("resources", "img", "flipper.jpg").toAbsolutePath();
-    private static final Path FONT_NORMAL_PATH = Paths.get("resources", "fonts", "BarlowCondensed-Medium.ttf").toAbsolutePath();
-    private static final Path FONT_BOLD_PATH = Paths.get("resources", "fonts", "BarlowCondensed-Bold.ttf").toAbsolutePath();
-    private static final Path FONT_ITALIC_PATH = Paths.get("resources", "fonts", "BarlowCondensed-SemiBoldItalic.ttf").toAbsolutePath();
+    private static final Path SHIELD_IMAGE_PATH = ResourceLoader.IMG_PATH.resolve("scudopoggiolevante.png");
+    private static final Path ASCII_FLIPPER_PATH = ResourceLoader.IMG_PATH.resolve("flipper.jpg");
+    private static final Path FONT_NORMAL_PATH = ResourceLoader.FONTS_PATH.resolve("BarlowCondensed-Medium.ttf");
+    private static final Path FONT_BOLD_PATH = ResourceLoader.FONTS_PATH.resolve("BarlowCondensed-Bold.ttf");
+    private static final Path FONT_ITALIC_PATH = ResourceLoader.FONTS_PATH.resolve("BarlowCondensed-SemiBoldItalic.ttf");
 
     // ============== INIZIALIZZAZIONE ==============
     static {

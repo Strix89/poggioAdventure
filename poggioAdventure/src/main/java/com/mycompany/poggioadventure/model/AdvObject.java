@@ -1,11 +1,5 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.mycompany.poggioadventure.model;
 
-import java.io.File;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -42,7 +36,9 @@ public class AdvObject implements Serializable {
 
     private boolean push = false;
     
-    private File imagePath = null;
+    private String imagePath = null;
+    
+    private boolean obscureImage = false;
 
     /**
      *
@@ -78,14 +74,14 @@ public class AdvObject implements Serializable {
      *
      * @param id
      * @param name
+     * @param image
      * @param description
-     * @param imagePath
      */
-    public AdvObject(int id, String name, String imagePath, String description) {
+    public AdvObject(int id, String name, String image, String description) {
         this.id = id;
         this.name = name;
-        this.imagePath = new File(imagePath);
         this.description = description;
+        this.imagePath = image;
     }
 
 
@@ -97,12 +93,12 @@ public class AdvObject implements Serializable {
      * @param alias
      * @param imagePath
      */
-    public AdvObject(int id, String name, String imagePath, String description, Set<String> alias) {
+    public AdvObject(int id, String name, String image, String description, Set<String> alias) {
         this.id = id;
         this.name = name;
-        this.imagePath = new File(imagePath);
         this.description = description;
         this.alias = alias;
+        this.imagePath = image;
     }
 
     /**
@@ -260,14 +256,6 @@ public class AdvObject implements Serializable {
         return hash;
     }
 
-    public File getImagePath() {
-        return imagePath;
-    }
-
-    public void setImagePath(File imagePath) {
-        this.imagePath = imagePath;
-    }
-
     /**
      *
      * @param obj
@@ -289,6 +277,21 @@ public class AdvObject implements Serializable {
             return false;
         }
         return true;
+    }   
+
+    public String getImagePath() {
+        return imagePath;
     }
 
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
+    }
+
+    public boolean isObscureImage() {
+        return obscureImage;
+    }
+
+    public void setObscureImage(boolean obscureImage) {
+        this.obscureImage = obscureImage;
+    }
 }

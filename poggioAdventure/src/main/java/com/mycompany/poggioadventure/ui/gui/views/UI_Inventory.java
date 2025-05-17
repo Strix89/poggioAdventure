@@ -3,10 +3,13 @@ package com.mycompany.poggioadventure.ui.gui.views;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.mycompany.poggioadventure.ui.UI_Abstract;
 import com.mycompany.poggioadventure.model.AdvObject;
+import com.mycompany.poggioadventure.persistence.ResourceLoader;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -234,20 +237,24 @@ public class UI_Inventory extends UI_Abstract {
         objectsScroller.setPreferredSize(new Dimension(panelWidth, objectsScroller.getPreferredSize().height));
     }
 
-    /**
-     * Mostra i dettagli di un oggetto selezionato.
-     * @param obj Oggetto di cui mostrare i dettagli
-     */
     private void showObjectDetails(AdvObject obj) {
         imageObjects.removeAll();
         imageObjects.setLayout(new BorderLayout());
 
-        if (obj.getImagePath() != null && obj.getImagePath().exists()) {
-            ImageIcon icon = new ImageIcon(obj.getImagePath().getPath());
-            Image image = icon.getImage().getScaledInstance(280, 200, Image.SCALE_SMOOTH);
-            JLabel imageLabel = new JLabel(new ImageIcon(image));
-            imageLabel.setHorizontalAlignment(JLabel.CENTER);
-            imageObjects.add(imageLabel, BorderLayout.CENTER);
+        if (obj.getImagePath() != null) {
+            try {
+                BufferedImage bufferedImage = ResourceLoader.loadImage(obj.getImagePath());
+                Image scaledImage = bufferedImage.getScaledInstance(280, 200, Image.SCALE_SMOOTH);
+                JLabel imageLabel = new JLabel(new ImageIcon(scaledImage));
+                imageLabel.setHorizontalAlignment(JLabel.CENTER);
+                imageObjects.add(imageLabel, BorderLayout.CENTER);
+
+            } catch (IOException | IllegalArgumentException ex) {
+                JLabel errorLabel = new JLabel("Errore nel caricamento dell'immagine");
+                errorLabel.setForeground(UI_Config.TEXT_COLOR);
+                errorLabel.setHorizontalAlignment(JLabel.CENTER);
+                imageObjects.add(errorLabel, BorderLayout.CENTER);
+            }
         } else {
             JLabel noImageLabel = new JLabel("Nessuna immagine disponibile");
             noImageLabel.setForeground(UI_Config.TEXT_COLOR);
@@ -281,7 +288,7 @@ public class UI_Inventory extends UI_Abstract {
                 objects.add(new AdvObject(
                     i,
                     "Oggetto " + i,
-                    "./resources/img/none.png",
+                    ResourceLoader.IMG_PATH.resolve("non2e.png").toString(),
                     "Descrizione dettagliata per l'oggetto " + i
                 ));
             }

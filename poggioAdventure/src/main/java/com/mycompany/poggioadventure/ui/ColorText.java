@@ -103,4 +103,12 @@ public enum ColorText {
     public Color getSwingColor() { 
         return swingColor; 
     }
+    
+    public static ColorText fromString(String colorName) {
+        try {
+            return ColorText.valueOf(colorName.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return RESET;
+        }
+    }
 }

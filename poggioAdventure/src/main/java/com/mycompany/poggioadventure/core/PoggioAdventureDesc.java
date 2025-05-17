@@ -10,11 +10,7 @@ import com.mycompany.poggioadventure.observers.LookAtObserver;
 import com.mycompany.poggioadventure.observers.UseObserver;
 import com.mycompany.poggioadventure.ui.ColorText;
 import com.mycompany.poggioadventure.core.abstracts.GameDescription;
-import com.mycompany.poggioadventure.core.GameMap;
 import com.mycompany.poggioadventure.parser.ParserOutput;
-import com.mycompany.poggioadventure.model.AdvNPC;
-import com.mycompany.poggioadventure.model.AdvObject;
-import com.mycompany.poggioadventure.model.AdvObjectContainer;
 import com.mycompany.poggioadventure.parser.Command;
 import com.mycompany.poggioadventure.parser.CommandType;
 import com.mycompany.poggioadventure.model.Room;
@@ -48,9 +44,6 @@ public class PoggioAdventureDesc extends GameDescription implements GameObservab
     private ParserOutput parserOutput;
     private final List<String> messages = new ArrayList<>();
 
-    // Aggiungi un'istanza di GameMap per gestire le stanze e i loro collegamenti
-    private GameMap gameMap;
-
     /**
      * Metodo Init : inizializza il gioco
      * Questo metodo viene chiamato per inizializzare il gioco.
@@ -61,8 +54,7 @@ public class PoggioAdventureDesc extends GameDescription implements GameObservab
     public void init() throws Exception {
         messages.clear();
         // Inizializza la mappa del gioco
-        gameMap = new GameMap(); // Crea un'istanza della GameMap
-        gameMap.addRoomsToGameDescription(); // Aggiungi tutte le stanze alla mappa del gioco
+        this.getGameMap().addElementsToGameDescription(); // Aggiungi tutte le stanze alla mappa del gioco
 
         // Comandi del gioco
         Command nord = new Command(CommandType.NORD, "nord");
@@ -117,107 +109,6 @@ public class PoggioAdventureDesc extends GameDescription implements GameObservab
         Command talk = new Command(CommandType.TALK, "parla");
         talk.setAlias(new String[]{"dialoga", "chiedi", "conversa"});
         getCommands().add(talk);
-
-        //Rooms
-        /*
-         * Room è un attributo della classe GameDescription. Ogni stanza ha un id, un nome e una descrizione.
-         * Ogni stanza ha un metodo setLook che permette di visualizzare la stanza e i collegamenti con le altre stanze.
-         * L'inizializzazione delle stanze avviene tramite il costruttore della classe Room.
-         */
-        Room hall = new Room(0, "Corridoio", "Sei nel corridoio della vecchia casa.\nOrmai non abiti più qui da anni!\nTi ricorderai come raggiungere le innumerevoli stanze?");
-        hall.setLook("Sei nel corridoio, a nord vedi il bagno, a sud il soggiorno e ad ovest la tua cameretta.\nForse il gioco sarà lì?");
-        Room livingRoom = new Room(1, "Soggiorno", "Ti trovi nel soggiorno.\nCi sono quei mobili marrone scuro che hai sempre odiato e delle orribili sedie.");
-        livingRoom.setLook("Non c'è nulla di interessante qui.");
-        Room kitchen = new Room(2, "Cucina", "Ti trovi nella solita cucina.\nMobili bianchi, maniglie azzurre, quello strano lampadario che adoravi tanto quando eri piccolo.\n"
-                + "C'è un tavolo con un bel portafrutta e una finestra.");
-        kitchen.setLook("La solita cucina, ma noti una chiave vicino al portafrutta.");
-        Room bathroom = new Room(3, "Bagno", "Sei nel bagno.\nQuanto tempo passato qui dentro...meglio non pensarci...");
-        bathroom.setLook("Vedo delle batterie sul mobile alla destra del lavandino.");
-        Room yourRoom = new Room(4, "La tua cameratta", "Finalmente la tua cameretta!\nQuesto luogo ti è così famigliare...ma non ricordi dove hai messo il nuovo regalo di zia Lina.");
-        yourRoom.setLook("C'è un armadio bianco, di solito ci conservi i tuoi giochi.");
-        //map
-        /**
-         * I metodi sottostanti definiscono la mappa del gioco. Ogni stanza ha un nome e una descrizione.
-         */
-        kitchen.setEast(livingRoom); //collega la cucina al soggiorno
-        livingRoom.setNorth(hall); //collega il soggiorno al corridoio 
-        livingRoom.setWest(kitchen); // collega il soggiorno alla cucina
-        hall.setSouth(livingRoom); // collega il corridoio al soggiorno
-        hall.setWest(yourRoom); // collega il corridoio alla tua cameretta
-        hall.setNorth(bathroom); // collega il corridoio al bagno
-        bathroom.setSouth(hall); // collega il bagno al corridoio
-        yourRoom.setEast(hall);  // collega la tua cameretta al corridoio
-        /*
-         * Questi comandi aggiungono le stanze (kitchen, livingRoom, hall, bathroom, yourRoom) alla lista delle stanze del gioco
-         * che si trovano nella classe GameDescription
-         */
-        getRooms().add(kitchen);  
-        getRooms().add(livingRoom);
-        getRooms().add(hall);
-        getRooms().add(bathroom);
-        getRooms().add(yourRoom);
-        //obejcts
-        /*
-         * Permette di definire gli oggetti presenti nelle stanze.
-         * Ogni AdvObject crea un oggetto con un id, un nome e una descrizione.
-         */
-        AdvObject battery = new AdvObject(1, "batteria", "Un pacco di batterie, chissà se sono cariche.");
-        battery.setAlias(new String[]{"batterie", "pile", "pila"});
-        battery.setPushable(true); //metodo che setta la batteria come non spingibile
-        bathroom.getObjects().add(battery);
-        AdvObject scopettino = new AdvObject(5, "scopettino", "Uno scopettino per pulire il cesso.");
-        scopettino.setAlias(new String[]{"scopa", "spazzolino", "scopettino"});
-        scopettino.setPushable(true);
-        bathroom.getObjects().add(scopettino);
-        AdvObjectContainer armadietto = new AdvObjectContainer(6, "armadietto", "Un piccolo armadietto da bagno");
-        armadietto.setAlias(new String[]{"mobiletto", "cassettiera"});
-        armadietto.setOpenable(true);
-        bathroom.getObjects().add(armadietto);
-        armadietto.add(battery);
-
-
-        AdvObjectContainer wardrobe = new AdvObjectContainer(2, "armadio", "Un semplice armadio.");
-        wardrobe.setAlias(new String[]{"guardaroba", "vestiario"});
-        wardrobe.setOpenable(false); //metodo che setta l'armadio come non apribile
-        wardrobe.setPickupable(false); //metodo che setta l'armadio come non raccoglibile
-        wardrobe.setOpen(false); //metodo che setta l'armadio come chiuso
-        yourRoom.getObjects().add(wardrobe); 
-        AdvObject toy = new AdvObject(3, "giocattolo", "Il gioco che ti ha regalato zia Lina.");
-        toy.setAlias(new String[]{"gioco", "robot"});
-        toy.setPushable(false);
-        toy.setPush(false); 
-        wardrobe.add(toy);
-        AdvObject kkey = new AdvObject(4, "chiave", "Usa semplice chiave come tante altre.");
-        kkey.setAlias(new String[]{"key"});
-        kkey.setPushable(false);
-        kkey.setPush(false);
-        kitchen.getObjects().add(kkey);
-
-
-        // Aggiungi un NPC alla stanza di ingresso
-        AdvNPC guido = new AdvNPC(20, "Guido", "Un simpatico nano segretario");
-        guido.setAlias(new String[] { "guido", "nano", "segreterio" });
-
-        // Dialogo iniziale
-        guido.addFirstDialogueLine("Ciao! Benvenuto a Poggiolevante!");
-        guido.addFirstDialogueLine("Ho qui un oggetto che potrebbe esserti utile...");
-        // Dialogo successivo
-        guido.addSubsequentDialogueLine("Ben tornato! Spero che il post-it ti sia stato utile.");
-        guido.addSubsequentDialogueLine("Buona fortuna per la tua avventura!");
-
-        // Aggiungi un oggetto che l'NPC può dare al giocatore
-        AdvObject post_it = new AdvObject(21, "post-it", "Un post-it con delle istruzioni.");
-        post_it.setAlias(new String[] { "post-it", "note", "appunto" });
-        post_it.setPickupable(true); // Imposta l'oggetto come raccoglibile
-        guido.addItemToGive(post_it);
-
-        // Aggiungi l'NPC alla mappa del gioco
-        Room entry = gameMap.getRoomByName("Ingresso"); // Recupera la stanza di ingresso dalla mappa del gioco
-        if (entry == null) {
-            throw new Exception("Stanza di ingresso non trovata nella mappa del gioco.");
-        } else { 
-            entry.getObjects().add(guido); // Aggiungi l'NPC alla stanza di ingresso
-        }
         
         //Observer
         /*
@@ -244,7 +135,7 @@ public class PoggioAdventureDesc extends GameDescription implements GameObservab
 
         // Inizializza la stanza iniziale del gioco (ora la stanza iniziale viene
         // recuperata dalla GameMap)
-        setCurrentRoom(gameMap.getStartingRoom()); // Imposta la stanza iniziale come la prima stanza del primo piano
+        setCurrentRoom(this.getGameMap().getStartingRoom()); // Imposta la stanza iniziale come la prima stanza del primo piano
     }
 
     /**
@@ -312,24 +203,44 @@ public class PoggioAdventureDesc extends GameDescription implements GameObservab
     }
 
     @Override
-    public String getWelcomeMsg() {
+    public String getGUIWelcomeMsg() {
         return ""
-                + "====================================================================\n"
-                + "*      BENVENUTO NEL COLLEGIO TECNOMAGICO DI SAN JOSE MARIA *\n"
-                + "====================================================================\n"
-                + "\n"
+                + "==============================================================================\n"
+                + "                             BENVENUTO NEL COLLEGIO TECNOMAGICO DI SAN JOSE MARIA \n"
+                + "==============================================================================\n"
                 + "Sei una matricola in cerca di ammissione a questo prestigioso collegio,\n"
-                + "dove solo i più brillanti superano le prove iniziatiche.\n"
-                + "====================================================================";
+                + "dove solo i più brillanti superano le prove.\n"
+                + "==============================================================================";
+    }
+    
+    @Override
+    public String getCLIWelcomeMsg() {
+        return ""
+                + "========================================================================\n"
+                + "       BENVENUTO NEL COLLEGIO TECNOMAGICO DI SAN JOSE MARIA \n"
+                + "========================================================================\n"
+                + "Sei una matricola in cerca di ammissione a questo prestigioso collegio,\n"
+                + "dove solo i più brillanti superano le prove.\n"
+                + "========================================================================";
     }
 
     @Override
-    public String getGameVersion() {
+    public String getGUIGameVersion() {
         return 
-        "\t           ==================================================\n" +
-        "\t                           PoggioAdventure .v0.1 - 2024-2025           \n" +
-        "\t                                      developed by:                    \n" +
-        "\t                           Strix89 | MikeRvsso | Elia-Valenza26        \n" +
-        "\t           ==================================================\n";
+        "================================================================================\n" +
+        "\t                                    PoggioAdventure .v0.1 - 2024-2025           \n" +
+        "\t                                              developed by:                      \n" +
+        "\t                                   Strix89 | MikeRvsso | Elia-Valenza26         \n" +
+        "================================================================================\n";
+    } 
+    
+    @Override
+    public String getCLIGameVersion() {
+        return 
+        "==========================================================================\n" +
+        "                     PoggioAdventure .v0.1 - 2024-2025                 \n" +
+        "                               developed by:                           \n" +
+        "                    Strix89 | MikeRvsso | Elia-Valenza26               \n" +
+        "==========================================================================\n";
     } 
 }

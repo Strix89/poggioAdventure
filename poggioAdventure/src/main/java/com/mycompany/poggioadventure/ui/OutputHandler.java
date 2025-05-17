@@ -1,5 +1,7 @@
 package com.mycompany.poggioadventure.ui;
 
+import java.util.regex.Pattern;
+
 /**
  * Interfaccia per la gestione dell'output di gioco su console e interfaccia grafica.
  * 
@@ -18,6 +20,9 @@ package com.mycompany.poggioadventure.ui;
  * @author Strix89
  */
 public interface OutputHandler {
+    
+    static final Pattern COLOR_BLOCK_PATTERN = Pattern.compile("\\[([A-Z_]+)\\](.*?)\\[/\\]");
+    static final Pattern IMAGE_TAG_PATTERN = Pattern.compile("^IMAGE:.*$", Pattern.MULTILINE);
 
     /**
      * Scrive un messaggio senza andare a capo.
@@ -27,6 +32,8 @@ public interface OutputHandler {
      * 
      */
     void write(String message, ColorText color);
+    
+    void write(String message);
 
     /**
      * Scrive un messaggio andando a capo.
@@ -36,6 +43,8 @@ public interface OutputHandler {
      * 
      */
     void writeln(String message, ColorText color);
+    
+    void writeln(String message);
 
     /**
      * Va semplicemente a capo.
@@ -54,4 +63,10 @@ public interface OutputHandler {
      * </ul>
      */
     void clear();
+    
+    default void writeFormatted(String message) {
+        writeFormatted(message, ColorText.RESET);
+    }
+
+    void writeFormatted(String formattedMessage, ColorText baseColor);
 }

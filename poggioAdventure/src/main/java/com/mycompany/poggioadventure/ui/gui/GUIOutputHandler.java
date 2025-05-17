@@ -1,43 +1,33 @@
 package com.mycompany.poggioadventure.ui.gui;
 
+import com.mycompany.poggioadventure.persistence.ResourceLoader;
 import com.mycompany.poggioadventure.ui.ColorText;
-import javax.swing.JOptionPane;
+import com.mycompany.poggioadventure.ui.OutputHandler;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.ImageIcon;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
-import com.mycompany.poggioadventure.ui.OutputHandler;
 
-/**
- * Implementazione GUI dell'interfaccia OutputHandler che gestisce l'output del gioco
- * attraverso un componente JTextPane Swing.
- * 
- * <p>Questa classe permette di:
- * <ul>
- *   <li>Visualizzare testo formattato con colori</li>
- *   <li>Gestire l'output in modo thread-safe</li>
- *   <li>Pulire l'area di output</li>
- *   <li>Mostrare messaggi su nuove linee</li>
- * </ul>
- * 
- * @author Strix89
- */
 public class GUIOutputHandler implements OutputHandler {
+    // Pattern uniforme con CLI
+    private static final Pattern COLOR_BLOCK_PATTERN = 
+        Pattern.compile("\\[([A-Z_]+)\\](.*?)\\[/\\]");
     
-    /**
-     * Componente JTextPane che mostra l'output del gioco.
-     * Viene inizializzato nel costruttore e non può essere modificato.
-     */
+    private static final Pattern IMAGE_TAG_PATTERN = 
+        Pattern.compile("^IMAGE:.*$", Pattern.MULTILINE);
+
     private final JTextPane outputPane;
 
-    /**
-     * Costruttore che inizializza l'handler con il componente di output specificato.
-     * 
-     * @param outputPane Il componente JTextPane su cui visualizzare l'output
-     * @throws IllegalArgumentException Se outputPane è null
-     */
     public GUIOutputHandler(JTextPane outputPane) {
         if (outputPane == null) {
             throw new IllegalArgumentException("Il componente di output non può essere null");
@@ -45,59 +35,144 @@ public class GUIOutputHandler implements OutputHandler {
         this.outputPane = outputPane;
     }
 
-    /**
-     * Scrive un messaggio nell'area di output con il colore specificato.
-     * L'operazione viene eseguita in modo thread-safe tramite SwingUtilities.
-     * 
-     * @param message Il messaggio da visualizzare
-     * @param color Il colore del testo (vedi ColorText)
-     */
     @Override
-    public void write(String message, ColorText color) {
+    public void writeFormatted(String formattedMessage, ColorText baseColor) {
         SwingUtilities.invokeLater(() -> {
             try {
                 StyledDocument doc = outputPane.getStyledDocument();
-                Style style = outputPane.addStyle("ColorStyle", null);
-                StyleConstants.setForeground(style, color.getSwingColor());
-                doc.insertString(doc.getLength(), message, style);
-                
-                // Auto-scroll to bottom
+                String[] lines = formattedMessage.split("\n", -1);
+                List<String> lineList = new ArrayList<>(List.of(lines));
+
+                // Rimuove l'ultimo elemento se è una riga vuota (dovuta allo split con -1)
+                if (!lineList.isEmpty() && lineList.get(lineList.size()-1).isEmpty()) {
+                    lineList.remove(lineList.size()-1);
+                }
+
+                for (int i = 0; i < lineList.size(); i++) {
+                    String line = lineList.get(i);
+                    boolean isLastLine = (i == lineList.size() - 1);
+                    
+                    if (IMAGE_TAG_PATTERN.matcher(line).matches()) {
+                        handleImage(line.substring(6).trim(), doc);
+                    } else {
+                        processStyledText(line, doc, baseColor);
+                    }
+                    
+                    // Aggiunge newline solo se non è l'ultima riga o il messaggio originale termina con \n
+                    if (!isLastLine || formattedMessage.endsWith("\n")) {
+                        doc.insertString(doc.getLength(), "\n", null);
+                    }
+                }
                 outputPane.setCaretPosition(doc.getLength());
             } catch (BadLocationException ex) {
-                JOptionPane.showMessageDialog(null,
-                    "Errore critico nella stampa del gioco: " + ex.getMessage(),
-                    "Errore", JOptionPane.ERROR_MESSAGE);
+                new GUIErrorHandler().handleRecoverableError("Errore di visualizzazione: " + ex.getMessage());
             }
         });
     }
-    
-    /**
-     * Scrive un messaggio seguito da un newline nell'area di output.
-     * 
-     * @param message Il messaggio da visualizzare
-     * @param color Il colore del testo (vedi ColorText)
-     */
-    @Override
-    public void writeln(String message, ColorText color) {
-        write(message + "\n", color);
-    }
-    
-    /**
-     * Scrive una linea vuota nell'area di output.
-     */
-    @Override
-    public void writeln() {
-        write("\n", ColorText.RESET);
+
+    private void processStyledText(String text, StyledDocument doc, ColorText baseColor) 
+        throws BadLocationException {
+        
+        Matcher matcher = COLOR_BLOCK_PATTERN.matcher(text);
+        int lastPos = 0;
+        ColorText currentColor = baseColor;
+
+        while (matcher.find()) {
+            // Testo prima del blocco colorato
+            if (lastPos < matcher.start()) {
+                String segment = text.substring(lastPos, matcher.start());
+                addTextSegment(doc, segment, baseColor);
+            }
+
+            // Processa il blocco colorato
+            try {
+                currentColor = ColorText.valueOf(matcher.group(1));
+                String content = matcher.group(2);
+                addTextSegment(doc, content, currentColor);
+            } catch (IllegalArgumentException e) {
+                // Se il colore non esiste, aggiunge il contenuto originale
+                addTextSegment(doc, matcher.group(0), baseColor);
+            }
+
+            lastPos = matcher.end();
+        }
+
+        // Testo rimanente fuori da blocchi colorati
+        if (lastPos < text.length()) {
+            String remaining = text.substring(lastPos);
+            addTextSegment(doc, remaining, baseColor);
+        }
     }
 
-    /**
-     * Pulisce completamente l'area di output.
-     * L'operazione viene eseguita in modo thread-safe tramite SwingUtilities.
-     */
+    private void addTextSegment(StyledDocument doc, String text, ColorText color) 
+        throws BadLocationException {
+        
+        if (!text.isEmpty()) {
+            Style style = doc.addStyle(color.name(), null);
+            StyleConstants.setForeground(style, color.getSwingColor());
+            doc.insertString(doc.getLength(), text, style);
+        }
+    }
+
+    private void handleImage(String imagePath, StyledDocument doc) {
+        try {
+            BufferedImage image = ResourceLoader.loadImage(imagePath);
+            Image scaled = scaleImage(image, 300);
+            ImageIcon icon = new ImageIcon(scaled);
+
+            Style style = doc.addStyle("ImageStyle", null);
+            StyleConstants.setIcon(style, icon);
+            // Rimuoviamo l'allineamento al centro
+            // StyleConstants.setAlignment(style, StyleConstants.ALIGN_CENTER);
+
+            // Aggiunge una riga vuota prima dell'immagine
+            if (doc.getLength() > 0 && !doc.getText(doc.getLength() - 1, 1).equals("\n")) {
+                doc.insertString(doc.getLength(), "\n", null);
+            }
+
+            // Inseriamo un singolo spazio con l'icona
+            doc.insertString(doc.getLength(), " ", style);
+
+            // Aggiunge una riga vuota dopo l'immagine
+            doc.insertString(doc.getLength(), "\n", null);
+        } catch (IOException | BadLocationException ex) {
+            new GUIErrorHandler().handleRecoverableError("Immagine non trovata: " + imagePath);
+        }
+    }
+
+    private Image scaleImage(BufferedImage original, int targetWidth) {
+        double ratio = (double) targetWidth / original.getWidth();
+        int newHeight = (int) (original.getHeight() * ratio);
+        return original.getScaledInstance(targetWidth, newHeight, Image.SCALE_SMOOTH);
+    }
+
+    @Override
+    public void write(String message, ColorText color) {
+        writeFormatted(message, color);
+    }
+    
+    @Override
+    public void write(String message){
+        writeFormatted(message, ColorText.RESET);
+    }
+
+    @Override
+    public void writeln(String message, ColorText color) {
+        writeFormatted(message + "\n", color);
+    }
+    
+    @Override
+    public void writeln(String message) {
+        writeFormatted(message + "\n", ColorText.RESET);
+    }
+
+    @Override
+    public void writeln() {
+        writeFormatted("\n", ColorText.RESET);
+    }
+
     @Override
     public void clear() {
-        SwingUtilities.invokeLater(() -> {
-            outputPane.setText("");
-        });
+        SwingUtilities.invokeLater(() -> outputPane.setText(""));
     }
 }

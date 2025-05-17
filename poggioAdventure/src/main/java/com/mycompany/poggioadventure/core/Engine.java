@@ -17,6 +17,7 @@ import com.mycompany.poggioadventure.core.utils.Utils;
 import com.mycompany.poggioadventure.model.AdvObject;
 import com.mycompany.poggioadventure.parser.CommandType;
 import com.mycompany.poggioadventure.model.Room;
+import com.mycompany.poggioadventure.ui.gui.GUIOutputHandler;
 
 import java.io.File;
 import java.io.IOException;
@@ -134,8 +135,8 @@ public class Engine {
             Utils.exitApplication(Utils.EXIT_CODE_RESOURCE_ERROR);
         }
         getGameColoredVersion();
-        output.writeln(game.getWelcomeMsg(), ColorText.WHITE);
-        output.write("\nTi trovi qui: ", ColorText.WHITE);
+        output.writeln(this.output instanceof GUIOutputHandler ? game.getGUIWelcomeMsg() : game.getCLIWelcomeMsg(), ColorText.WHITE);
+        output.write(" \nTi trovi qui: ", ColorText.WHITE);
         output.writeln(game.getCurrentRoom().getName(), ColorText.BRIGHT_YELLOW);
         output.writeln(game.getCurrentRoom().getDescription(), ColorText.WHITE);
         printCursor();
@@ -254,7 +255,7 @@ public class Engine {
      * </ul>
      */
     private void getGameColoredVersion() {
-        String version = game.getGameVersion();
+        String version = this.output instanceof GUIOutputHandler ? game.getGUIGameVersion() : game.getCLIGameVersion();
 
         String[] lines = Arrays.stream(version.split("\n"))
                                .filter(line -> !line.trim().isEmpty())

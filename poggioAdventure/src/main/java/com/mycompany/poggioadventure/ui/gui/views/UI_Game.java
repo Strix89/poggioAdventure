@@ -4,6 +4,7 @@ import com.mycompany.poggioadventure.ui.ErrorHandler;
 import com.mycompany.poggioadventure.ui.ColorText;
 import com.mycompany.poggioadventure.core.Engine;
 import com.mycompany.poggioadventure.core.utils.EngineFactory;
+import com.mycompany.poggioadventure.model.Room;
 import com.mycompany.poggioadventure.ui.InputHandler;
 import com.mycompany.poggioadventure.ui.OutputHandler;
 import com.mycompany.poggioadventure.ui.UI_Abstract;
@@ -11,14 +12,13 @@ import com.mycompany.poggioadventure.ui.gui.GUIOutputHandler;
 import com.mycompany.poggioadventure.ui.gui.GUIErrorHandler;
 import com.mycompany.poggioadventure.ui.gui.GUIInputHandler;
 import com.mycompany.poggioadventure.persistence.LoggerInput;
+import com.mycompany.poggioadventure.persistence.ResourceLoader;
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
-import javax.imageio.ImageIO;
 
 /**
  * Finestra principale del gioco che gestisce l'interfaccia utente completa.
@@ -127,10 +127,13 @@ public class UI_Game extends UI_Abstract {
         } catch (Exception ex) {
             errHandler.handleFatalError("Errore inizializzazione gioco", ex);
         }
-        
         playerNameLabel.setText(playerName);
         commandInput.addActionListener(e -> processCommand());
         sendButton.addActionListener(e -> processCommand());
+        Room startingRoom = gameEngine.getGame().getCurrentRoom();
+        if (startingRoom != null && startingRoom.getImagePath() != null) {
+            updateRoomImage(startingRoom.getImagePath());
+        }
     }
 
     // ============== CREAZIONE PANNELLI ==============
@@ -343,8 +346,14 @@ public class UI_Game extends UI_Abstract {
         String command = commandInput.getText().trim();
         if (!command.isEmpty()) {
             gameEngine.getOutput().write("\nComando Inserito: ", ColorText.WHITE);
-            gameEngine.getOutput().writeln(command, ColorText.ORANGE);
+            gameEngine.getOutput().writeln(command, ColorText.GOLD);
             gameEngine.processCommand(command);
+
+            Room currentRoom = gameEngine.getGame().getCurrentRoom();
+            if (currentRoom != null && currentRoom.getImagePath() != null) {
+                updateRoomImage(currentRoom.getImagePath());
+            }
+
             commandInput.setText("");
         }
     }
@@ -356,15 +365,19 @@ public class UI_Game extends UI_Abstract {
     public void updateRoomImage(String imagePath) {
         imagePanel.removeAll();
         try {
-            BufferedImage image = ImageIO.read(new File(imagePath));
+            // Usa ResourceLoader invece di ImageIO.read diretto
+            BufferedImage image = ResourceLoader.loadImage(imagePath);
             Image scaled = image.getScaledInstance(
                 imagePanel.getWidth(),
                 imagePanel.getHeight(),
                 Image.SCALE_SMOOTH
             );
             imagePanel.add(new JLabel(new ImageIcon(scaled)), BorderLayout.CENTER);
-        } catch (IOException ex) {
-            imagePanel.add(new JLabel("Immagine non trovata", JLabel.CENTER));
+        } catch (IOException | IllegalArgumentException ex) {
+            JLabel errorLabel = new JLabel("Immagine non disponibile");
+            errorLabel.setForeground(UI_Config.TEXT_COLOR);
+            errorLabel.setHorizontalAlignment(JLabel.CENTER);
+            imagePanel.add(errorLabel, BorderLayout.CENTER);
         }
         imagePanel.revalidate();
         imagePanel.repaint();
@@ -446,6 +459,10 @@ public class UI_Game extends UI_Abstract {
     public void setGameEngine(Engine gameEngine) {
         this.playerNameLabel.setText(gameEngine.getPlayerName());
         this.gameEngine = gameEngine;
+        Room currentRoom = gameEngine.getGame().getCurrentRoom();
+            if (currentRoom != null && currentRoom.getImagePath() != null) {
+                updateRoomImage(currentRoom.getImagePath());
+        }
     }
 
     // ============== MAIN PER TEST ==============

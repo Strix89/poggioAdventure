@@ -5,6 +5,7 @@
  */
 package com.mycompany.poggioadventure.model;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -56,12 +57,12 @@ public class AdvObjectContainer extends AdvObject {
      *
      * @param id
      * @param name
-     * @param imagePath
+     * @param image
      * @param description
      * @param alias
      */
-    public AdvObjectContainer(int id, String name, String imagePath, String description, Set<String> alias) {
-        super(id, name, imagePath, description, alias);
+    public AdvObjectContainer(int id, String name, String image, String description, Set<String> alias) {
+        super(id, name, image, description, alias);
     }
 
     /**
