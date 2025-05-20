@@ -5,6 +5,7 @@ import com.mycompany.poggioadventure.parser.ParserOutput;
 import com.mycompany.poggioadventure.model.AdvObject;
 import com.mycompany.poggioadventure.model.AdvObjectContainer;
 import com.mycompany.poggioadventure.parser.CommandType;
+import com.mycompany.poggioadventure.ui.OutputHandler;
 import java.util.List;
 import java.io.Serializable;
 
@@ -20,14 +21,13 @@ public class OpenObserver implements GameObserver, Serializable {
      *
      * MIGLIORAMENTO:
      * In questa versione, gli oggetti contenuti nei contenitori NON vengono più
-     * rilasciati automaticamente nella stanza o nell'inventario.
-     * Viene solo mostrato il contenuto, lasciando al giocatore la scelta se
-     * raccoglierli esplicitamente tramite "prendi".
-     *
-     * Questo evita comportamenti indesiderati e rende il gameplay più controllato.
+     * rilasciati automaticamente nella stanza o nell'inventario.Viene solo mostrato il contenuto, lasciando al giocatore la scelta se
+ raccoglierli esplicitamente tramite "prendi".Questo evita comportamenti indesiderati e rende il gameplay più controllato.
+     * @param description
+     * @param parserOutput
      */
     @Override
-    public String update(GameDescription description, ParserOutput parserOutput) {
+    public String update(GameDescription description, ParserOutput parserOutput, OutputHandler output) {
         StringBuilder msg = new StringBuilder();
 
         if (parserOutput.getCommand().getType() == CommandType.OPEN) {

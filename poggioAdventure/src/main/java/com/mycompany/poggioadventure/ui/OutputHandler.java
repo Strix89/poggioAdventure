@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
  */
 public interface OutputHandler {
     
-    static final Pattern COLOR_BLOCK_PATTERN = Pattern.compile("\\[([A-Z_]+)\\](.*?)\\[/\\]");
+    static final Pattern COLOR_BLOCK_PATTERN = Pattern.compile("\\[([A-Za-z_]+)\\](.*?)\\[/\\]", Pattern.CASE_INSENSITIVE);
     static final Pattern IMAGE_TAG_PATTERN = Pattern.compile("^IMAGE:.*$", Pattern.MULTILINE);
 
     /**

@@ -7,7 +7,6 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.ImageIcon;
@@ -19,12 +18,6 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
 public class GUIOutputHandler implements OutputHandler {
-    // Pattern uniforme con CLI
-    private static final Pattern COLOR_BLOCK_PATTERN = 
-        Pattern.compile("\\[([A-Z_]+)\\](.*?)\\[/\\]");
-    
-    private static final Pattern IMAGE_TAG_PATTERN = 
-        Pattern.compile("^IMAGE:.*$", Pattern.MULTILINE);
 
     private final JTextPane outputPane;
 
@@ -83,16 +76,9 @@ public class GUIOutputHandler implements OutputHandler {
                 String segment = text.substring(lastPos, matcher.start());
                 addTextSegment(doc, segment, baseColor);
             }
-
-            // Processa il blocco colorato
-            try {
-                currentColor = ColorText.valueOf(matcher.group(1));
-                String content = matcher.group(2);
-                addTextSegment(doc, content, currentColor);
-            } catch (IllegalArgumentException e) {
-                // Se il colore non esiste, aggiunge il contenuto originale
-                addTextSegment(doc, matcher.group(0), baseColor);
-            }
+            currentColor = ColorText.fromString(matcher.group(1));
+            String content = matcher.group(2);
+            addTextSegment(doc, content, currentColor);
 
             lastPos = matcher.end();
         }

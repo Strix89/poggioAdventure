@@ -56,6 +56,8 @@ public class AdvObject implements Serializable {
     public AdvObject(int id, String name) {
         this.id = id;
         this.name = name;
+        this.alias = new HashSet<>();
+        this.alias.add(name);
     }
     
     /**
@@ -68,6 +70,8 @@ public class AdvObject implements Serializable {
         this.id = id;
         this.name = name;
         this.description = description;
+        this.alias = new HashSet<>();
+        this.alias.add(name);
     }
 
     /**
@@ -82,6 +86,8 @@ public class AdvObject implements Serializable {
         this.name = name;
         this.description = description;
         this.imagePath = image;
+        this.alias = new HashSet<>();
+        this.alias.add(name);
     }
 
 

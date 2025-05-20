@@ -63,6 +63,7 @@ public class UI_Inventory extends UI_Abstract {
         configureMainWindow();
         createLeftPanel();
         createRightPanel();
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); 
     }
 
     // ============== CONFIGURAZIONE FINESTRA ==============
@@ -208,7 +209,7 @@ public class UI_Inventory extends UI_Abstract {
         panel.setBackground(new Color(90, 90, 90));
 
         // Calcola larghezza massima testo
-        Font font = UI_Config.getNormalFont().deriveFont(12f);
+        Font font = UI_Config.getNormalFont().deriveFont(16f);
         FontMetrics fontMetrics = getFontMetrics(font);
         int maxTextWidth = 0;
 

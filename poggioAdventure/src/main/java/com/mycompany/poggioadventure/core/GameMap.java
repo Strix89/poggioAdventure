@@ -87,6 +87,12 @@ public class GameMap implements Serializable{
         post_it.setAlias(new String[] { "post-it", "note", "appunto" });
         post_it.setPickupable(true); // Imposta l'oggetto come raccoglibile
         guido.addItemToGive(post_it);
+        
+        AdvObject pen = new AdvObject(22, "Penna", 
+                ResourceLoader.IMG_PATH.resolve("penna.png").toString(),
+                "Una penna molto particolare, apprtenuta a Lovrenzo Burdo.\n Trattala con passione e devozione.");
+        pen.setAlias(new String[] { "penna", "pen"});
+        pen.setPickupable(true);
 
         Room entry = new Room(0, "Ingresso", "Ti trovi nell'ingresso di Poggiolevante");
         entry.addObject(guido, "C'è un nano vicino la porta, leggi il nome sulla targhetta si chiama GUIDO");
@@ -122,6 +128,7 @@ public class GameMap implements Serializable{
         office.setEast(corridor);
         // Collegamenti secondo piano
         galileo.setWest(hall);
+        galileo.addObject(pen);
         hallway.setEast(craftRoom);
         craftRoom.setWest(hallway);
         hallway.setNorth(entryLab);

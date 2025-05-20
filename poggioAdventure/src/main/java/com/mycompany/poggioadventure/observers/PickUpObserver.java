@@ -6,6 +6,7 @@ import com.mycompany.poggioadventure.core.abstracts.GameDescription;
 import com.mycompany.poggioadventure.parser.ParserOutput;
 import com.mycompany.poggioadventure.model.AdvObject;
 import com.mycompany.poggioadventure.parser.CommandType;
+import com.mycompany.poggioadventure.ui.OutputHandler;
 import java.io.Serializable;
 
 /**
@@ -26,7 +27,7 @@ public class PickUpObserver implements GameObserver, Serializable {
      * @return
      */
     @Override
-    public String update(GameDescription description, ParserOutput parserOutput) {
+    public String update(GameDescription description, ParserOutput parserOutput, OutputHandler output) {
         StringBuilder msg = new StringBuilder();
 
         if (parserOutput.getCommand().getType() == CommandType.PICK_UP) {
