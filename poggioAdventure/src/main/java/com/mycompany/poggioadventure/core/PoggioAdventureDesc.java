@@ -152,7 +152,7 @@ public class PoggioAdventureDesc extends GameDescription implements GameObservab
                 continue;
             }
             Room cr = getCurrentRoom();
-            notifyObservers();
+            notifyObservers(out);
             boolean move = !cr.equals(getCurrentRoom()) && getCurrentRoom() != null;
             if (!messages.isEmpty()) {
                 for (String m : messages) {
@@ -194,11 +194,12 @@ public class PoggioAdventureDesc extends GameDescription implements GameObservab
 
     /**
      * Metodo che permette di notificare gli observer
+     * @param output
      */
     @Override
-    public void notifyObservers() {
+    public void notifyObservers(OutputHandler output) {
         for (GameObserver o : observer) {
-            messages.add(o.update(this, parserOutput));
+            messages.add(o.update(this, parserOutput, output));
         }
     }
 

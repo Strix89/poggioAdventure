@@ -1,10 +1,7 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.poggioadventure.core.abstracts;
 
 import com.mycompany.poggioadventure.observers.GameObserver;
+import com.mycompany.poggioadventure.ui.OutputHandler;
 
 /**
  *
@@ -26,7 +23,7 @@ public interface GameObservable {
     
     /**
      *
-     */
-    public void notifyObservers();
+     * @param output */
+    public void notifyObservers(OutputHandler output);
     
 }

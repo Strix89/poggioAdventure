@@ -27,7 +27,7 @@ public enum ColorText {
     RED("\u001B[31m", new Color(255, 0, 0)),
     GREEN("\u001B[32m", new Color(0, 255, 0)),
     YELLOW("\u001B[33m", new Color(255, 255, 0)),
-    BLUE("\u001B[34m", new Color(0, 120, 215)),  // Windows 10 blue
+    BLUE("\u001B[34m", new Color(0, 120, 215)),
     MAGENTA("\u001B[35m", new Color(255, 0, 255)),
     CYAN("\u001B[36m", new Color(0, 255, 255)),
     WHITE("\u001B[37m", Color.WHITE),

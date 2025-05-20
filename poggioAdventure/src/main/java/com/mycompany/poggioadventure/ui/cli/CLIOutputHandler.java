@@ -55,7 +55,7 @@ public class CLIOutputHandler implements OutputHandler {
 
             // Applica il colore del blocco
             try {
-                currentColor = ColorText.valueOf(matcher.group(1));
+                currentColor = ColorText.fromString(matcher.group(1));
                 result.append(currentColor.getANSICode());
                 result.append(matcher.group(2)); // Contenuto del blocco
                 result.append(ColorText.RESET.getANSICode());
