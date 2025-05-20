@@ -76,16 +76,9 @@ public class GUIOutputHandler implements OutputHandler {
                 String segment = text.substring(lastPos, matcher.start());
                 addTextSegment(doc, segment, baseColor);
             }
-
-            // Processa il blocco colorato
-            try {
-                currentColor = ColorText.fromString(matcher.group(1));
-                String content = matcher.group(2);
-                addTextSegment(doc, content, currentColor);
-            } catch (IllegalArgumentException e) {
-                // Se il colore non esiste, aggiunge il contenuto originale
-                addTextSegment(doc, matcher.group(0), baseColor);
-            }
+            currentColor = ColorText.fromString(matcher.group(1));
+            String content = matcher.group(2);
+            addTextSegment(doc, content, currentColor);
 
             lastPos = matcher.end();
         }
