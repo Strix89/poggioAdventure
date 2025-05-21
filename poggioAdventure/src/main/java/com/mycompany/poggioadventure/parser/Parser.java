@@ -47,22 +47,6 @@ public class Parser {
     }
 
     /**
-     * Controlla se un token corrisponde ad un oggetto valido nel gioco.
-     *
-     * @param token La parola da verificare.
-     * @param objects La lista di oggetti disponibili.
-     * @return L'indice dell'oggetto se trovato, altrimenti -1.
-     */
-    private int checkForObject(String token, List<AdvObject> objects) {
-        for (int i = 0; i < objects.size(); i++) {
-            if (objects.get(i).getName().equals(token) || objects.get(i).getAlias().contains(token)) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    /**
      * Divide la lista di token in più comandi separati da congiunzioni.
      * La congiunzione deve essere seguita da un comando valido per dividerli.
      *
@@ -73,30 +57,19 @@ public class Parser {
     private List<List<String>> splitCommands(List<String> tokens, List<Command> commands) {
         List<List<String>> result = new ArrayList<>();
         List<String> current = new ArrayList<>();
-
         for (int i = 0; i < tokens.size(); i++) {
             String token = tokens.get(i).toLowerCase();
-
-            if (conjunctions.contains(token)) {
-                if (i + 1 < tokens.size()) {
-                    String next = tokens.get(i + 1).toLowerCase();
-                    if (checkForCommand(next, commands) >= 0) {
-                        if (!current.isEmpty()) {
-                            result.add(new ArrayList<>(current));
-                            current.clear();
-                        }
-                        continue; // Salta la congiunzione
-                    }
+            if (conjunctions.contains(token) && i + 1 < tokens.size()) {
+                String next = tokens.get(i + 1).toLowerCase();
+                if (checkForCommand(next, commands) >= 0) {
+                    if (!current.isEmpty()) result.add(current);
+                    current = new ArrayList<>();
+                    continue;
                 }
             }
-
             current.add(token);
         }
-
-        if (!current.isEmpty()) {
-            result.add(current);
-        }
-
+        if (!current.isEmpty()) result.add(current);
         return result;
     }
 
@@ -110,21 +83,22 @@ public class Parser {
      */
     private List<AdvObject> findMultipleObjects(List<String> tokens, List<AdvObject> objects) {
         List<AdvObject> foundObjects = new ArrayList<>();
-
-        // Per ogni token tranne il primo (che è il comando)
         for (int i = 1; i < tokens.size(); i++) {
-            String token = tokens.get(i);
+            String token = tokens.get(i).toLowerCase();
+            // Cerca negli oggetti diretti nella stanza/inventario
             for (AdvObject obj : objects) {
-                // Controlla se il nome o alias coincide col token
                 if (obj.getName().equalsIgnoreCase(token) || obj.getAlias().contains(token)) {
-                    foundObjects.add(obj);
+                    if (!foundObjects.contains(obj)) {
+                        foundObjects.add(obj);
+                    }
                 }
-                // Se è un contenitore aperto, cerca dentro i suoi oggetti
-                else if (obj instanceof AdvObjectContainer) {
-                    AdvObjectContainer container = (AdvObjectContainer) obj;
-                    if (container.isOpen()) {
-                        for (AdvObject innerObj : container.getList()) {
-                            if (innerObj.getName().equalsIgnoreCase(token) || innerObj.getAlias().contains(token)) {
+            }
+            // Cerca nei contenitori aperti
+            for (AdvObject obj : objects) {
+                if (obj instanceof AdvObjectContainer && ((AdvObjectContainer) obj).isOpen()) {
+                    for (AdvObject innerObj : ((AdvObjectContainer) obj).getList()) {
+                        if (innerObj.getName().equalsIgnoreCase(token) || innerObj.getAlias().contains(token)) {
+                            if (!foundObjects.contains(innerObj)) {
                                 foundObjects.add(innerObj);
                             }
                         }
@@ -132,7 +106,6 @@ public class Parser {
                 }
             }
         }
-
         return foundObjects;
     }
 
