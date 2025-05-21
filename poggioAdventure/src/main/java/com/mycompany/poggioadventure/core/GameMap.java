@@ -2,6 +2,7 @@ package com.mycompany.poggioadventure.core;
 
 import com.mycompany.poggioadventure.model.AdvNPC;
 import com.mycompany.poggioadventure.model.AdvObject;
+import com.mycompany.poggioadventure.model.AdvObjectContainer;
 import com.mycompany.poggioadventure.model.Room;
 import com.mycompany.poggioadventure.parser.CommandType;
 import com.mycompany.poggioadventure.persistence.ResourceLoader;
@@ -94,19 +95,58 @@ public class GameMap implements Serializable{
         pen.setAlias(new String[] { "penna", "pen"});
         pen.setPickupable(true);
 
+        //Definizione oggetto contenitore armadio
+        AdvObjectContainer armadioHall = new AdvObjectContainer(23,"armadio", 
+                ResourceLoader.IMG_PATH.resolve("armdaio.png").toString(),
+                "Un armadio di legno chiuso. Potrebbe contenere qualcosa di interessante.");
+        armadioHall.setAlias(new String[] { "Armadio", "armadietto", "mobile" });
+        armadioHall.setPickupable(false); // Non raccoglibile
+        armadioHall.setOpenable(true); // Imposta l'oggetto come apribile
+
+        //Oggetti nell'armadio
+        AdvObject cappotto = new AdvObject(24, "Cappotto", 
+                ResourceLoader.IMG_PATH.resolve("Cappotto.png").toString(),
+                "Un cappotto di pelle, sembra molto costoso.");
+        cappotto.setAlias(new String[] { "CSappotto", "giacca", "giaccone"});
+        cappotto.setPickupable(true);
+        armadioHall.add(cappotto);
+
+        AdvObject pantaloni = new AdvObject(25, "Pantaloni", 
+                ResourceLoader.IMG_PATH.resolve("Pantaloni.png").toString(),
+                "Un paio di pantaloni sporchi, emanano un bel profumino.");
+        pantaloni.setAlias(new String[] { "Pantaloni", "jeans", "trousers"});
+        pantaloni.setPickupable(true);
+        armadioHall.add(pantaloni);
+
+        AdvObject bastone = new AdvObject(26, "Bastone", 
+                ResourceLoader.IMG_PATH.resolve("Bastone.png").toString(),
+                "Un bastone di legno, sembra robusto.");
+        bastone.setAlias(new String[] { "Bastone", "deambulatore", "stick"});
+        bastone.setPickupable(true);
+        armadioHall.add(bastone);
+        
+
         Room entry = new Room(0, "Ingresso", "Ti trovi nell'ingresso di Poggiolevante");
         entry.addObject(guido, "C'è un nano vicino la porta, leggi il nome sulla targhetta si chiama GUIDO");
         entry.setImagePath(ResourceLoader.IMG_PATH.resolve("Ingresso.png").toString());
-        Room hall = new Room(1, "Soggiorno", "Ti trovi nel soggiorno.");
+
+        Room hall = new Room(1, "Hall", "Ti trovi nella Hall di PoggioLevante.");
         hall.setImagePath(ResourceLoader.IMG_PATH.resolve("Hall.png").toString());
+        hall.addObject(armadioHall, "C'è un armadio di legno chiuso.");
+
         Room reception = new Room(2, "Portineria", "Ti trovi nella portineria.");
         reception.setImagePath(ResourceLoader.IMG_PATH.resolve("Portineria.png").toString());
+
         Room corridor = new Room(3, "Corridoio", "Ti trovi nel corridoio del primo piano.");
         corridor.setImagePath(ResourceLoader.IMG_PATH.resolve("Corridoio.png").toString());
+
         Room galileo = new Room(4, "Galileo", "Sei nella stanza Galileo");
         galileo.setImagePath(ResourceLoader.IMG_PATH.resolve("Galileo.png").toString());
+
         Room office = new Room(5, "Direzione", "Sei in direzione");
         office.setImagePath(ResourceLoader.IMG_PATH.resolve("Direzione.png").toString());
+
+
         // Secondo piano (indice 1)
         Room hallway = new Room(6, "Disimpegno", "Ti trovi al 2° piano in un disimpegno.");
         Room craftRoom = new Room(7, "Stanza di Pino", "Sei nel laboratorio di Pino.");

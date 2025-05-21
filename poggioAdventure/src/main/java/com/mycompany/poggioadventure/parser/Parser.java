@@ -2,6 +2,7 @@ package com.mycompany.poggioadventure.parser;
 
 import com.mycompany.poggioadventure.core.utils.Utils;
 import com.mycompany.poggioadventure.model.AdvObject;
+import com.mycompany.poggioadventure.model.AdvObjectContainer;
 
 import java.util.*;
 
@@ -100,20 +101,38 @@ public class Parser {
     }
 
     /**
-     * Cerca e restituisce gli oggetti trovati nella lista di token (sia nella stanza che nell'inventario).
+     * Cerca oggetti nella lista fornita e, se trova contenitori aperti,
+     * cerca ricorsivamente anche dentro i loro contenuti.
      *
-     * @param tokens La lista di token derivante dal comando utente.
-     * @param objects La lista di oggetti presenti nella stanza.
-     * @return Una lista di oggetti trovati.
+     * @param tokens lista di token oggetto da cercare
+     * @param objects lista di oggetti (in stanza o inventario)
+     * @return lista di oggetti trovati corrispondenti ai token
      */
     private List<AdvObject> findMultipleObjects(List<String> tokens, List<AdvObject> objects) {
         List<AdvObject> foundObjects = new ArrayList<>();
+
+        // Per ogni token tranne il primo (che è il comando)
         for (int i = 1; i < tokens.size(); i++) {
-            int objectIndex = checkForObject(tokens.get(i), objects);
-            if (objectIndex >= 0) {
-                foundObjects.add(objects.get(objectIndex));
+            String token = tokens.get(i);
+            for (AdvObject obj : objects) {
+                // Controlla se il nome o alias coincide col token
+                if (obj.getName().equalsIgnoreCase(token) || obj.getAlias().contains(token)) {
+                    foundObjects.add(obj);
+                }
+                // Se è un contenitore aperto, cerca dentro i suoi oggetti
+                else if (obj instanceof AdvObjectContainer) {
+                    AdvObjectContainer container = (AdvObjectContainer) obj;
+                    if (container.isOpen()) {
+                        for (AdvObject innerObj : container.getList()) {
+                            if (innerObj.getName().equalsIgnoreCase(token) || innerObj.getAlias().contains(token)) {
+                                foundObjects.add(innerObj);
+                            }
+                        }
+                    }
+                }
             }
         }
+
         return foundObjects;
     }
 
@@ -141,6 +160,7 @@ public class Parser {
         Command cmd = commands.get(ic);
         List<AdvObject> roomObjects = findMultipleObjects(tokens, objects);
         List<AdvObject> invObjects = findMultipleObjects(tokens, inventory);
+
 
         if (!roomObjects.isEmpty() && !invObjects.isEmpty()) {
             return new ParserOutput(cmd, roomObjects.get(0), invObjects.get(0), roomObjects, invObjects);

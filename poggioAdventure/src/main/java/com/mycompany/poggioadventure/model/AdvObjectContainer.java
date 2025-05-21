@@ -59,6 +59,17 @@ public class AdvObjectContainer extends AdvObject {
      * @param name
      * @param image
      * @param description
+     */
+    public AdvObjectContainer(int id, String name, String image, String description) {
+        super(id, name, image, description);
+    }
+
+    /**
+     *
+     * @param id
+     * @param name
+     * @param image
+     * @param description
      * @param alias
      */
     public AdvObjectContainer(int id, String name, String image, String description, Set<String> alias) {
