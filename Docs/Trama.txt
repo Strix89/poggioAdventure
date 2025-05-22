@@ -5,6 +5,12 @@ Per essere ammessa, la matricola deve passare 3 sfide in difficoltà crescente.
 2 Prova : mostrare  capacità elettroniche. 
 3 Prova : rivoluzione robot
 
+OGGETTI FUFFA: 
+- HALL => Armadio(giaccone vecchio, dei pantaloni sporchi, bastone per anziani)
+- GALILEO => foto che raffigura san nicola travestito da astronauta
+- CORRIDOIO => Vetrinetta(bibbia, guida alla confessione)
+- UFFICIO MICHELE => micro sd, chiavi auto
+
 ----------------------------------------------------------------------------------------------------------------------------------------
 
 NPC: [Guido, tutor, Dottor burdo]

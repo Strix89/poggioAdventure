@@ -27,6 +27,7 @@ public class PushObserver implements GameObserver, Serializable {
 
             boolean hasBattery = false;
             boolean hasScopettino = false;
+            boolean hasPulsanteRack = false;
 
             for (AdvObject obj : allObjects) {
                 if (obj == null) continue;
@@ -36,6 +37,8 @@ public class PushObserver implements GameObserver, Serializable {
                 // Rileva se sono presenti batteria e scopettino
                 if (id == 1) hasBattery = true;
                 if (id == 5) hasScopettino = true;
+                if (id == 24) hasPulsanteRack = true;
+
 
                 // Gestione oggetti pushabili
                 if (obj.isPushable()) {
@@ -50,6 +53,10 @@ public class PushObserver implements GameObserver, Serializable {
                         } else {
                             msg.append("Non posso utilizzare il giocattolo senza delle batterie.\n");
                         }
+                    }
+                    if (hasPulsanteRack) {
+                        msg.append("Hai premuto il pulsante per mandare giù il rack!\nIl direttore ti caccia fuori e ti dice di non tornare mai più!\n");
+                        //qui bisogna implementare il game over
                     }
 
                     interacted = true;
