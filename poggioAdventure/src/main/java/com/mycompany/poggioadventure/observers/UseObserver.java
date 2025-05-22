@@ -92,6 +92,19 @@ public class UseObserver implements GameObserver, Serializable {
                         interact = true;
                         break;
 
+                    case 23:
+                        AdvObject rack = description.getCurrentRoom().getObject(22);
+                        if (rack != null) {
+                            if (rack.isOpen()) {
+                                msg.append("Il rack è già aperto...hai la memoria di un criceto!\n");
+                            } else {
+                                msg.append("Sei fortunato! La chiave ha sbloccato la serratura del rack. Adesso puoi aprirlo.\n");
+                                rack.setOpenable(true);
+                            }     
+                        }
+                        interact = true;
+                        break;
+
                     default:
                         break;
                 }

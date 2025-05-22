@@ -72,7 +72,6 @@ public class OpenObserver implements GameObserver, Serializable {
                         for (AdvObject inner : container.getList()) {
                             msg.append(" - ").append(inner.getName()).append(": ").append(inner.getDescription()).append("\n");
                         }
-                        msg.append("Puoi ora raccogliere questi oggetti se lo desideri.\n");
                     }
                 }
 

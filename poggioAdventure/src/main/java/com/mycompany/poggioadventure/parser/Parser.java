@@ -2,6 +2,7 @@ package com.mycompany.poggioadventure.parser;
 
 import com.mycompany.poggioadventure.core.utils.Utils;
 import com.mycompany.poggioadventure.model.AdvObject;
+import com.mycompany.poggioadventure.model.AdvObjectContainer;
 
 import java.util.*;
 
@@ -46,22 +47,6 @@ public class Parser {
     }
 
     /**
-     * Controlla se un token corrisponde ad un oggetto valido nel gioco.
-     *
-     * @param token La parola da verificare.
-     * @param objects La lista di oggetti disponibili.
-     * @return L'indice dell'oggetto se trovato, altrimenti -1.
-     */
-    private int checkForObject(String token, List<AdvObject> objects) {
-        for (int i = 0; i < objects.size(); i++) {
-            if (objects.get(i).getName().equals(token) || objects.get(i).getAlias().contains(token)) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    /**
      * Divide la lista di token in più comandi separati da congiunzioni.
      * La congiunzione deve essere seguita da un comando valido per dividerli.
      *
@@ -72,46 +57,53 @@ public class Parser {
     private List<List<String>> splitCommands(List<String> tokens, List<Command> commands) {
         List<List<String>> result = new ArrayList<>();
         List<String> current = new ArrayList<>();
-
         for (int i = 0; i < tokens.size(); i++) {
             String token = tokens.get(i).toLowerCase();
-
-            if (conjunctions.contains(token)) {
-                if (i + 1 < tokens.size()) {
-                    String next = tokens.get(i + 1).toLowerCase();
-                    if (checkForCommand(next, commands) >= 0) {
-                        if (!current.isEmpty()) {
-                            result.add(new ArrayList<>(current));
-                            current.clear();
-                        }
-                        continue; // Salta la congiunzione
-                    }
+            if (conjunctions.contains(token) && i + 1 < tokens.size()) {
+                String next = tokens.get(i + 1).toLowerCase();
+                if (checkForCommand(next, commands) >= 0) {
+                    if (!current.isEmpty()) result.add(current);
+                    current = new ArrayList<>();
+                    continue;
                 }
             }
-
             current.add(token);
         }
-
-        if (!current.isEmpty()) {
-            result.add(current);
-        }
-
+        if (!current.isEmpty()) result.add(current);
         return result;
     }
 
     /**
-     * Cerca e restituisce gli oggetti trovati nella lista di token (sia nella stanza che nell'inventario).
+     * Cerca oggetti nella lista fornita e, se trova contenitori aperti,
+     * cerca ricorsivamente anche dentro i loro contenuti.
      *
-     * @param tokens La lista di token derivante dal comando utente.
-     * @param objects La lista di oggetti presenti nella stanza.
-     * @return Una lista di oggetti trovati.
+     * @param tokens lista di token oggetto da cercare
+     * @param objects lista di oggetti (in stanza o inventario)
+     * @return lista di oggetti trovati corrispondenti ai token
      */
     private List<AdvObject> findMultipleObjects(List<String> tokens, List<AdvObject> objects) {
         List<AdvObject> foundObjects = new ArrayList<>();
         for (int i = 1; i < tokens.size(); i++) {
-            int objectIndex = checkForObject(tokens.get(i), objects);
-            if (objectIndex >= 0) {
-                foundObjects.add(objects.get(objectIndex));
+            String token = tokens.get(i).toLowerCase();
+            // Cerca negli oggetti diretti nella stanza/inventario
+            for (AdvObject obj : objects) {
+                if (obj.getName().equalsIgnoreCase(token) || obj.getAlias().contains(token)) {
+                    if (!foundObjects.contains(obj)) {
+                        foundObjects.add(obj);
+                    }
+                }
+            }
+            // Cerca nei contenitori aperti
+            for (AdvObject obj : objects) {
+                if (obj instanceof AdvObjectContainer && ((AdvObjectContainer) obj).isOpen()) {
+                    for (AdvObject innerObj : ((AdvObjectContainer) obj).getList()) {
+                        if (innerObj.getName().equalsIgnoreCase(token) || innerObj.getAlias().contains(token)) {
+                            if (!foundObjects.contains(innerObj)) {
+                                foundObjects.add(innerObj);
+                            }
+                        }
+                    }
+                }
             }
         }
         return foundObjects;
@@ -141,6 +133,7 @@ public class Parser {
         Command cmd = commands.get(ic);
         List<AdvObject> roomObjects = findMultipleObjects(tokens, objects);
         List<AdvObject> invObjects = findMultipleObjects(tokens, inventory);
+
 
         if (!roomObjects.isEmpty() && !invObjects.isEmpty()) {
             return new ParserOutput(cmd, roomObjects.get(0), invObjects.get(0), roomObjects, invObjects);
