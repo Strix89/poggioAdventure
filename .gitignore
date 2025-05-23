@@ -12,3 +12,7 @@
 /poggioServer/resources/poggioDatabase.trace.db
 /poggioServer/dependency-reduced-pom.xml
 TODO.txt
+
+# macOS
+.DS_Store
+**/.DS_Store
