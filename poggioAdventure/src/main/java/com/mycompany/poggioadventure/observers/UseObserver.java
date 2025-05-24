@@ -125,13 +125,8 @@ public class UseObserver implements GameObserver, Serializable {
                                 // IMPORTANTE: Forza la visualizzazione immediata del messaggio
                                 gameContext.getOutputHandler().writeln(msg.toString(), ColorText.WHITE);
                                 msg.setLength(0); // Svuota il buffer perché è già stato stampato
-                                try {
-                                    Thread.sleep(500);
-                                    FlipperLogic flipperLogic = new FlipperLogic(gameContext);
-                                    flipperLogic.startInteractiveCLISession();
-                                } catch (InterruptedException e) {
-                                    Thread.currentThread().interrupt();
-                                }
+                                FlipperLogic flipperLogic = new FlipperLogic(gameContext);
+                                flipperLogic.startInteractiveCLISession();
                             } else {
                                 handleFlipperGUI(gameContext);
                             }
