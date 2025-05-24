@@ -186,11 +186,6 @@ public class FlipperLogic {
                 // Processa il comando del Flipper
                 FlipperResult result = commandProcessor.processCommand(userInput);
                 
-                // Applica effetti del comando
-                if (result.getTimeModification() != 0) {
-                    applyTimeModification(result.getTimeModification());
-                }
-                
                 // Mostra risultato con colori appropriati
                 ColorText color = getColorForResult(result.getType());
                 output.writeln(result.getMessage(), color);
@@ -236,24 +231,6 @@ public class FlipperLogic {
             case INFO: return ColorText.CYAN;
             default: return ColorText.WHITE;
         }
-    }
-    
-    /**
-     * Applica modifiche al timer di gioco basate sui risultati del Flipper.
-     * 
-     * <p>Implementazione futura: questa funzione dovrebbe integrare
-     * con il sistema di timer del gioco per applicare bonus/penalità.
-     * 
-     * @param seconds Secondi da aggiungere (positivi) o sottrarre (negativi)
-     * 
-     * @implNote Attualmente è un placeholder per future implementazioni
-     * @todo Implementare integrazione con gameContext.getStopWatch()
-     */
-    private void applyTimeModification(int seconds) {
-        // Implementa la modifica del timer tramite GameContext
-        // if (gameContext != null && gameContext.getEngine() != null) {
-            //gameContext.getStopWatch();
-        // }
     }
     
     /**
