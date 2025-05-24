@@ -1,11 +1,11 @@
 package com.mycompany.poggioadventure.observers;
 
+import com.mycompany.poggioadventure.core.GameContext;
 import com.mycompany.poggioadventure.core.abstracts.GameDescription;
 import com.mycompany.poggioadventure.parser.ParserOutput;
 import com.mycompany.poggioadventure.parser.CommandType;
 import java.io.Serializable;
 import com.mycompany.poggioadventure.model.Room;
-import com.mycompany.poggioadventure.ui.OutputHandler;
 
 /**
  *
@@ -21,7 +21,7 @@ public class MoveObserver implements GameObserver, Serializable {
      * @return
      */
     @Override
-    public String update(GameDescription description, ParserOutput parserOutput, OutputHandler output) {
+    public String update(GameDescription description, ParserOutput parserOutput, GameContext gameContext) {
         CommandType direction = parserOutput.getCommand().getType();
         // Controlla se il comando è effettivamente una direzione
         if (!direction.isDirection()) {

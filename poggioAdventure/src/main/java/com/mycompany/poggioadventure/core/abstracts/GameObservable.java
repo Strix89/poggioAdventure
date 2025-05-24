@@ -1,7 +1,8 @@
 package com.mycompany.poggioadventure.core.abstracts;
 
+import com.mycompany.poggioadventure.core.GameContext;
 import com.mycompany.poggioadventure.observers.GameObserver;
-import com.mycompany.poggioadventure.ui.OutputHandler;
+import com.mycompany.poggioadventure.parser.ParserOutput;
 
 /**
  *
@@ -24,6 +25,6 @@ public interface GameObservable {
     /**
      *
      * @param output */
-    public void notifyObservers(OutputHandler output);
+    public void notifyObservers(ParserOutput parserOutput, GameContext gameContext);
     
 }

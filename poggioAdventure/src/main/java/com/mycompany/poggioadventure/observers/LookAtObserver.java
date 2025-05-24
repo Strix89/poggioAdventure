@@ -1,9 +1,9 @@
 package com.mycompany.poggioadventure.observers;
 
+import com.mycompany.poggioadventure.core.GameContext;
 import com.mycompany.poggioadventure.core.abstracts.GameDescription;
 import com.mycompany.poggioadventure.parser.ParserOutput;
 import com.mycompany.poggioadventure.parser.CommandType;
-import com.mycompany.poggioadventure.ui.OutputHandler;
 import java.io.Serializable;
 
 /**
@@ -19,7 +19,7 @@ public class LookAtObserver implements GameObserver, Serializable {
      * @return
      */
     @Override
-    public String update(GameDescription description, ParserOutput parserOutput, OutputHandler output) {
+    public String update(GameDescription description, ParserOutput parserOutput, GameContext gameContext) {
         StringBuilder msg = new StringBuilder();
         if (parserOutput.getCommand().getType() == CommandType.LOOK_AT) {
             if (description.getCurrentRoom().getLook() != null) {

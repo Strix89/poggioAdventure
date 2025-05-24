@@ -7,9 +7,6 @@ import com.mycompany.poggioadventure.core.utils.Utils; // Utility generiche (es.
 // Import PoggioAdventure UI (Abstract, Enums, Handlers)
 import com.mycompany.poggioadventure.ui.UI_Abstract; // Classe base astratta per le finestre UI
 import com.mycompany.poggioadventure.ui.ApiClientResult; // Enum per i risultati delle chiamate API
-import static com.mycompany.poggioadventure.ui.ApiClientResult.CONNECTION_ERROR; // Import statico per enum
-import static com.mycompany.poggioadventure.ui.ApiClientResult.SUCCESS_OK; // Import statico per enum
-import static com.mycompany.poggioadventure.ui.ApiClientResult.USER_NOT_FOUND; // Import statico per enum
 import com.mycompany.poggioadventure.ui.ErrorHandler; // Interfaccia per gestione errori
 import com.mycompany.poggioadventure.ui.gui.GUIErrorHandler; // Implementazione GUI per ErrorHandler
 
