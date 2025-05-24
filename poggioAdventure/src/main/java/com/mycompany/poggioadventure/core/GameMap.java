@@ -105,6 +105,7 @@ public class GameMap implements Serializable{
                 "Una foto di San Nicola vestito da Astronauta.\nAnche un Santo può essere un astronauta !");
         foto.setAlias(new String[] { "Foto", "immagine", "picture"});
         foto.setPickupable(true);
+        foto.setPushable(true); // Imposta l'oggetto come spingibile
 
         //Definizione oggetto contenitore armadio
         AdvObjectContainer armadioHall = new AdvObjectContainer(5,"armadio",
@@ -133,6 +134,7 @@ public class GameMap implements Serializable{
                 "Un bastone di legno, sembra robusto.");
         bastone.setAlias(new String[] { "Bastone", "deambulatore", "stick"});
         bastone.setPickupable(true);
+        bastone.setPushable(true); // Imposta l'oggetto come spingibile
         armadioHall.add(bastone);
 
         //Definizione oggetto contenitore vetrina
@@ -180,13 +182,13 @@ public class GameMap implements Serializable{
                 "Un paio di forbici, potrebbero tornarti utili.");
         forbici.setAlias(new String[] { "Forbici", "attrezzo", "strumento"});
         forbici.setPickupable(true);
-        forbici.setPushable(true);
 
         AdvObject martello = new AdvObject(16, "Martello",
                 ResourceLoader.IMG_PATH.resolve("Martello.png").toString(),
                 "Un martello, ha un manico molto interessante");
         martello.setAlias(new String[] { "Martello", "attrezzo", "strumento"});
         martello.setPickupable(true);
+        martello.setPushable(true); // Imposta l'oggetto come spingibile
 
         AdvObject segaCircolare = new AdvObject(17, "Sega circolare",
                 "Una sega circolare, sembra molto affilata.");
@@ -220,7 +222,16 @@ public class GameMap implements Serializable{
                 "Una tastiera molto vecchia");
         tastiera.setAlias(new String[] { "Tastiera", "periferica"});
         tastiera.setPickupable(true);
+        tastiera.setPushable(true); // Imposta l'oggetto come spingibile
         contenitore.add(tastiera);
+
+        AdvObject cpu = new AdvObject(18, "CPU", 
+                ResourceLoader.IMG_PATH.resolve("CPU.png").toString(),
+                "Il processore principale del computer. Questo è il cervello che farà funzionare tutto il sistema!");
+        cpu.setAlias(new String[] { "CPU", "processore", "chip", "centrale"});
+        cpu.setPickupable(true);
+        cpu.setPushable(true);
+        contenitore.add(cpu);
 
         AdvObjectContainer rack = new AdvObjectContainer(22,"Rack",
                 "Un armadio rack, da qui puoi accedere a tutti i server");
@@ -253,12 +264,14 @@ public class GameMap implements Serializable{
                 "Un saldatore a mano con punta fine");
         saldatore.setAlias(new String[] { "attrezzo", "saldatrice"});
         saldatore.setPickupable(true);
+        saldatore.setPushable(true); // Imposta l'oggetto come spingibile
 
         AdvObject bobbinaPLA = new AdvObject(27, "Bobina",
                 ResourceLoader.IMG_PATH.resolve("BobinaPLA.png").toString(),
                 "Una bobina di filamento PLA per stampante 3D");
         bobbinaPLA.setAlias(new String[] { "filamento", "PLA"});
         bobbinaPLA.setPickupable(true);
+        bobbinaPLA.setPushable(true);
 
 
         Room entry = new Room(0, "Ingresso", "Ti trovi nell'ingresso di Poggiolevante");
