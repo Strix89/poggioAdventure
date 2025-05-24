@@ -1,7 +1,6 @@
 package com.mycompany.poggioadventure.observers;
 
 import com.mycompany.poggioadventure.core.abstracts.GameDescription;
-import com.mycompany.poggioadventure.core.utils.GameUtils;
 import com.mycompany.poggioadventure.parser.ParserOutput;
 import com.mycompany.poggioadventure.model.AdvObject;
 import com.mycompany.poggioadventure.parser.CommandType;
@@ -11,108 +10,151 @@ import java.util.List;
 
 /**
  *
- * @author pierpaolo
+ * @author MikeRvsso
  */
 public class UseObserver implements GameObserver, Serializable {
 
-    @Override
-    public String update(GameDescription description, ParserOutput parserOutput, OutputHandler output) {
-        StringBuilder msg = new StringBuilder();
+   @Override
+public String update(GameDescription description, ParserOutput parserOutput, OutputHandler output) {
+    StringBuilder msg = new StringBuilder();
 
-        if (parserOutput.getCommand().getType() == CommandType.USE) {
-            boolean interact = false;
+    if (parserOutput.getCommand().getType() == CommandType.USE) {
+        boolean interact = false;
 
-            List<AdvObject> allObjects = parserOutput.getObjects();
-            allObjects.addAll(parserOutput.getInvObjects());
+        List<AdvObject> allObjects = parserOutput.getObjects();
+        allObjects.addAll(parserOutput.getInvObjects());
 
-            for (AdvObject obj : allObjects) {
-                if (obj == null) continue;
+        for (AdvObject obj : allObjects) {
+            if (obj == null) continue;
 
-                int id = obj.getId();
+            int id = obj.getId();
 
-                switch (id) {
-                    case 1: // Batterie
-                        AdvObject giocattolo = GameUtils.getObjectFromInventory(description.getInventory(), 3);
-                        if (giocattolo != null) {
-                            giocattolo.setPushable(true);
-                            msg.append("Hai inserito le batterie nel giocattolo. Sei ritornato un bambino felice!\n");
-                        } else {
-                            msg.append("Non c'è nessun oggetto nell'inventario che funziona con questo tipo di batterie.\n");
-                        }
-                        interact = true;
-                        break;
+            switch (id) {
+                case 17: // Sega circolare - UNICO OGGETTO che può essere usato senza raccoglierlo
+                    msg.append("Una sega circolare affilata per assemblare un pc? Mhh vedo che qualcuno qui non ti è molto simpatico... ");
+                    msg.append("meglio lasciarla dove sta!\n");
+                    interact = true;
+                    break;
 
-                    case 2: // Armadio
-                        if (obj.isOpen()) {
-                            msg.append("L'armadio è troppo pieno, non puoi inserirci più nulla!\n");
-                        } else {
-                            msg.append("L'armadio è chiuso e di certo non puoi sollevarlo o spostarlo, è troppo pesante e tu non hai abbastanza muscoli!\n");
-                        }
-                        interact = true;
-                        break;
+                // TUTTI GLI ALTRI OGGETTI richiedono di essere nell'inventario
+                case 3: // Penna di Lorenzo Burdo
+                    if (parserOutput.getInvObjects().contains(obj)) {
+                        msg.append("Usi la penna di Lorenzo Burdo per scrivere il test di logica. ");
+                        msg.append("La penna scorre fluida sulla carta, quasi magicamente...\n");
+                    } else {
+                        msg.append("Devi prima raccogliere la penna per poterla utilizzare.\n");
+                    }
+                    interact = true;
+                    break;
 
-                    case 3: // Giocattolo
-                        if (parserOutput.getInvObjects().contains(obj)) {
-                            if (obj.isPushable()) {
-                                msg.append("Premi il pulsante del giocattolo e in seguito ad una forte esplosione la tua casa prende fuoco...\n"
-                                        + "tu e tuoi famigliari cercate invano di salvarvi e venite avvolti dalle fiamme...\n"
-                                        + "è stata una morte CALOROSA...addio!\n");
-                                description.setCurrentRoom(null);
-                            } else {
-                                msg.append("Mancano le batterie, non posso utilizzarlo così.\n");
-                            }
-                        } else {
-                            msg.append("Devi prima raccoglierlo per poterlo utilizzare.\n");
-                        }
-                        interact = true;
-                        break;
+                case 4: // Foto di San Nicola astronauta
+                    if (parserOutput.getInvObjects().contains(obj)) {
+                        msg.append("Osservi attentamente la foto di San Nicola vestito da astronauta. ");
+                        msg.append("Forse nasconde un indizio per le prove future?\n");
+                    } else {
+                        msg.append("Devi prima raccogliere la foto per poterla esaminare da vicino.\n");
+                    }
+                    interact = true;
+                    break;
 
-                    case 4: // Chiave
-                        AdvObject armadio = description.getCurrentRoom().getObject(2);
-                        if (armadio != null) {
-                            if (armadio.isOpen()) {
-                                msg.append("L'armadio è già aperto...hai la memoria di un criceto!\n");
-                            } else if (armadio.isOpenable()) {
-                                msg.append("L'armadio è già aperto! Perché mi chiedi di fare cose così stupide...\n");
-                            } else {
-                                msg.append("Sei fortunato! La chiave ha sbloccato la serratura dell'armadio. Adesso puoi aprirlo.\n");
-                                armadio.setOpenable(true);
-                            }
-                            interact = true;
-                        }
-                        break;
+                case 16: // Martello
+                    if (parserOutput.getInvObjects().contains(obj)) {
+                        msg.append("Un martello da laboratorio. Potrebbe essere utile per assemblare ");
+                        msg.append("o sistemare componenti hardware, ma usalo con cautela!\n");
+                    } else {
+                        msg.append("Devi prima raccogliere il martello per poterlo utilizzare.\n");
+                    }
+                    interact = true;
+                    break;
 
-                    case 5: // Scopettino
-                        boolean hasBattery = GameUtils.getObjectFromInventory(description.getInventory(), 1) != null;
-                        if (hasBattery) {
-                            msg.append("Adesso hai uno scopettino elettrico potenziato!\n");
-                        } else {
-                            msg.append("Lo scopettino è solo uno scopettino. Magari con delle batterie potresti farlo brillare.\n");
-                        }
-                        interact = true;
-                        break;
+                case 25: // Set cacciaviti
+                    if (parserOutput.getInvObjects().contains(obj)) {
+                        msg.append("Un set di cacciaviti di precisione. ");
+                        msg.append("Perfetti per assemblare componenti delicati del computer!\n");
+                    } else {
+                        msg.append("Devi prima raccogliere il set di cacciaviti per poterlo utilizzare.\n");
+                    }
+                    interact = true;
+                    break;
 
-                    case 23:
-                        AdvObject rack = description.getCurrentRoom().getObject(22);
-                        if (rack != null) {
-                            if (rack.isOpen()) {
-                                msg.append("Il rack è già aperto...hai la memoria di un criceto!\n");
-                            } else {
-                                msg.append("Sei fortunato! La chiave ha sbloccato la serratura del rack. Adesso puoi aprirlo.\n");
-                                rack.setOpenable(true);
-                            }     
-                        }
-                        interact = true;
-                        break;
+                case 26: // Saldatore
+                    if (parserOutput.getInvObjects().contains(obj)) {
+                        msg.append("Un saldatore professionale. ");
+                        msg.append("Utile per riparazioni elettroniche avanzate, ma richiede esperienza!\n");
+                    } else {
+                        msg.append("Devi prima raccogliere il saldatore per poterlo utilizzare.\n");
+                    }
+                    interact = true;
+                    break;
 
-                    default:
-                        break;
-                }
-            }
-            if (!interact) {
-                msg.append("Non ci sono oggetti utilizzabili qui.");
+                case 18: // CPU
+                    if (parserOutput.getInvObjects().contains(obj)) {
+                        msg.append("Il processore principale del computer. Questo è il cervello ");
+                        msg.append("che farà funzionare tutto il sistema!\n");
+                    } else {
+                        msg.append("Devi prima raccogliere la CPU per poterla utilizzare.\n");
+                    }
+                    interact = true;
+                    break;
+
+                case 19: // Cavo HDMI
+                    if (parserOutput.getInvObjects().contains(obj)) {
+                        msg.append("Un cavo per collegare monitor e dispositivi. ");
+                        msg.append("Fondamentale per vedere se il PC funziona correttamente!\n");
+                    } else {
+                        msg.append("Devi prima raccogliere il cavo HDMI per poterlo utilizzare.\n");
+                    }
+                    interact = true;
+                    break;
+
+                case 20: // Mouse
+                    if (parserOutput.getInvObjects().contains(obj)) {
+                        msg.append("Un mouse per controllare il computer. ");
+                        msg.append("Sembra un po' usurato ma dovrebbe ancora funzionare.\n");
+                    } else {
+                        msg.append("Devi prima raccogliere il mouse per poterlo utilizzare.\n");
+                    }
+                    interact = true;
+                    break;
+
+                case 21: // Tastiera
+                    if (parserOutput.getInvObjects().contains(obj)) {
+                        msg.append("Una tastiera vintage. ");
+                        msg.append("I tasti sembrano ancora responsivi nonostante l'età.\n");
+                    } else {
+                        msg.append("Devi prima raccogliere la tastiera per poterla utilizzare.\n");
+                    }
+                    interact = true;
+                    break;
+
+                case 27: // Bobina PLA
+                    if (parserOutput.getInvObjects().contains(obj)) {
+                        msg.append("Materiale per stampante 3D. ");
+                        msg.append("Potrebbe servire per creare supporti o parti personalizzate!\n");
+                    } else {
+                        msg.append("Devi prima raccogliere la bobina PLA per poterla utilizzare.\n");
+                    }
+                    interact = true;
+                    break;
+
+                default:
+                    // Per tutti gli altri oggetti, controlla sempre l'inventario
+                    if (parserOutput.getInvObjects().contains(obj)) {
+                        msg.append("Esamini ").append(obj.getName()).append(". ");
+                        msg.append("Potrebbe essere utile per una delle prove del collegio.\n");
+                    } else {
+                        msg.append("Devi prima raccogliere ").append(obj.getName()).append(" per poterlo utilizzare.\n");
+                    }
+                    interact = true;
+                    break;
             }
         }
-        return msg.toString();
+
+        if (!interact) {
+            msg.append("Non ci sono oggetti utilizzabili qui o non hai gli oggetti necessari nell'inventario.");
+        }
     }
+
+    return msg.toString();
+}
 }

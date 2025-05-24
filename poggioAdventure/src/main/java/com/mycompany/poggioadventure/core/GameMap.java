@@ -10,6 +10,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ *
+ * @author MikeRvsso
+ */
+
 public class GameMap implements Serializable{
     private final List<List<Room>> allFloors = new ArrayList<>(); // Lista di piani
 
@@ -91,7 +96,7 @@ public class GameMap implements Serializable{
         
         AdvObject pen = new AdvObject(3, "Penna", 
                 ResourceLoader.IMG_PATH.resolve("penna.png").toString(),
-                "Una penna molto particolare, apprtenuta a Lovrenzo Burdo.\nTrattala con passione e devozione.");
+                "Una penna molto particolare, appartenuta a Lorenzo Burdo.\nTrattala con passione e devozione.");
         pen.setAlias(new String[] { "penna", "pen"});
         pen.setPickupable(true);
 
