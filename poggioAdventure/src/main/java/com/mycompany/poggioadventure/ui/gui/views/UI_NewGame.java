@@ -1,12 +1,12 @@
 package com.mycompany.poggioadventure.ui.gui.views;
 
+import com.mycompany.poggioadventure.core.utils.ApiClientResult;
 // Import PoggioAdventure Core/Utils
 import com.mycompany.poggioadventure.core.utils.PoggioClientJersey; // Client per comunicare con l'API backend
 import com.mycompany.poggioadventure.core.utils.Utils; // Utility generiche (es. per uscire)
 
 // Import PoggioAdventure UI (Abstract, Enums, Handlers)
 import com.mycompany.poggioadventure.ui.UI_Abstract; // Classe base astratta per le finestre UI
-import com.mycompany.poggioadventure.ui.ApiClientResult; // Enum per i risultati delle chiamate API
 import com.mycompany.poggioadventure.ui.ErrorHandler; // Interfaccia per gestione errori
 import com.mycompany.poggioadventure.ui.gui.GUIErrorHandler; // Implementazione GUI per ErrorHandler
 

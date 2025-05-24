@@ -2,10 +2,17 @@ package com.mycompany.poggioadventure.observers;
 
 import com.mycompany.poggioadventure.core.GameContext;
 import com.mycompany.poggioadventure.core.abstracts.GameDescription;
-import com.mycompany.poggioadventure.core.utils.GameUtils;
+import com.mycompany.poggioadventure.core.utils.Utils;
 import com.mycompany.poggioadventure.parser.ParserOutput;
+import com.mycompany.poggioadventure.ui.ColorText;
+import com.mycompany.poggioadventure.ui.cli.CLIInputHandler;
+import com.mycompany.poggioadventure.ui.gui.views.UI_Flipper;
 import com.mycompany.poggioadventure.model.AdvObject;
+import com.mycompany.poggioadventure.model.FlipperLogic;
 import com.mycompany.poggioadventure.parser.CommandType;
+
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.Serializable;
 import java.util.List;
 
@@ -14,6 +21,8 @@ import java.util.List;
  * @author pierpaolo
  */
 public class UseObserver implements GameObserver, Serializable {
+
+    private transient UI_Flipper flipperWindow;
 
     @Override
     public String update(GameDescription description, ParserOutput parserOutput, GameContext gameContext) {
@@ -32,7 +41,7 @@ public class UseObserver implements GameObserver, Serializable {
 
                 switch (id) {
                     case 1: // Batterie
-                        AdvObject giocattolo = GameUtils.getObjectFromInventory(description.getInventory(), 3);
+                        AdvObject giocattolo = Utils.getObjectFromInventory(description.getInventory(), 3);
                         if (giocattolo != null) {
                             giocattolo.setPushable(true);
                             msg.append("Hai inserito le batterie nel giocattolo. Sei ritornato un bambino felice!\n");
@@ -83,7 +92,7 @@ public class UseObserver implements GameObserver, Serializable {
                         break;
 
                     case 5: // Scopettino
-                        boolean hasBattery = GameUtils.getObjectFromInventory(description.getInventory(), 1) != null;
+                        boolean hasBattery = Utils.getObjectFromInventory(description.getInventory(), 1) != null;
                         if (hasBattery) {
                             msg.append("Adesso hai uno scopettino elettrico potenziato!\n");
                         } else {
@@ -96,7 +105,7 @@ public class UseObserver implements GameObserver, Serializable {
                         AdvObject rack = description.getCurrentRoom().getObject(22);
                         if (rack != null) {
                             if (rack.isOpen()) {
-                                msg.append("Il rack è già aperto...hai la memoria di un criceto!\n");
+                                msg.append("Il rack è già aperto...hai la memoria di un criceto,\n Senti il Direttore gridare: [RED] Sei un IDIOTA[/]!\n");
                             } else {
                                 msg.append("Sei fortunato! La chiave ha sbloccato la serratura del rack. Adesso puoi aprirlo.\n");
                                 rack.setOpenable(true);
@@ -104,7 +113,32 @@ public class UseObserver implements GameObserver, Serializable {
                         }
                         interact = true;
                         break;
-
+                    case 50:
+                        if (parserOutput.getInvObjects().contains(obj)) {    
+                            if (flipperWindow != null && flipperWindow.isVisible()) {
+                                msg.append("[RED]Il Flipper Zero è già attivo! Completa prima l'operazione in corso.[/]\n");
+                                break;
+                            }                        
+                            msg.append("[CRIMSON]Attivazione Flipper Zero...[/]");
+                            
+                            if (gameContext.getInputHandler() instanceof CLIInputHandler) {
+                                // IMPORTANTE: Forza la visualizzazione immediata del messaggio
+                                gameContext.getOutputHandler().writeln(msg.toString(), ColorText.WHITE);
+                                msg.setLength(0); // Svuota il buffer perché è già stato stampato
+                                try {
+                                    Thread.sleep(500);
+                                    FlipperLogic flipperLogic = new FlipperLogic(gameContext);
+                                    flipperLogic.startInteractiveCLISession();
+                                } catch (InterruptedException e) {
+                                    Thread.currentThread().interrupt();
+                                }
+                            } else {
+                                handleFlipperGUI(gameContext);
+                            }
+                        } else {
+                            msg.append("Hai avuto per caso un'illuminazione da [HOT_PINK]San Josè Maria[/]?\nNO NO Flipper? Hai rotto il ca***!\n");
+                        }
+                        interact = true;
                     default:
                         break;
                 }
@@ -115,4 +149,24 @@ public class UseObserver implements GameObserver, Serializable {
         }
         return msg.toString();
     }
+
+    /**
+     * Gestisce l'apertura della GUI del Flipper
+     * Crea una finestra se non esiste, altrimenti mostra un messaggio di errore
+     * 
+     * @param gameContext Il contesto del gioco
+     */
+    private void handleFlipperGUI(GameContext gameContext) {
+        // Crea e mostra la finestra del Flipper
+        FlipperLogic flipperLogic = new FlipperLogic(gameContext);
+        flipperWindow = flipperLogic.openGUIInterface(); // Ora restituisce l'istanza
+        
+        // Aggiunge un listener per sapere quando la finestra viene chiusa
+        flipperWindow.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+                flipperWindow = null;
+            }
+        });
+    }  
 }

@@ -1,10 +1,14 @@
 package com.mycompany.poggioadventure.ui.gui.views;
 
-import com.formdev.flatlaf.FlatLightLaf;
 import com.mycompany.poggioadventure.ui.UI_Abstract;
+import com.mycompany.poggioadventure.core.GameContext;
+import com.mycompany.poggioadventure.core.abstracts.IFlipperCommandProcessor;
+import com.mycompany.poggioadventure.core.FlipperCommandProcessor;
+import com.mycompany.poggioadventure.core.utils.FlipperResult;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.function.Consumer;
 
 /**
  * Classe che rappresenta una finestra per l'interfaccia utente del "Flipper Zero".
@@ -20,13 +24,26 @@ public class UI_Flipper extends UI_Abstract {
     private JTextField inputField;  // Campo di testo per l'inserimento dei comandi
     private JButton sendButton;     // Pulsante per inviare i comandi
     private JLabel imageLabel;     // Etichetta per visualizzare l'immagine ASCII
+    
+    // Logic e contesto
+    private final GameContext gameContext;
+    private final IFlipperCommandProcessor commandProcessor;
+    private Consumer<String> onCommandCallback;
 
     /**
-     * Costruttore della classe. Chiama il costruttore della superclasse UI_Abstract
-     * per inizializzare l'interfaccia grafica.
+     * Costruttore della classe con GameContext e CommandProcessor.
      */
-    public UI_Flipper() {
+    public UI_Flipper(GameContext gameContext, IFlipperCommandProcessor commandProcessor) {
         super();
+        this.gameContext = gameContext;
+        this.commandProcessor = commandProcessor != null ? commandProcessor : new FlipperCommandProcessor(gameContext);
+    }
+
+    /**
+     * Imposta il callback per gestire i risultati dei comandi.
+     */
+    public void setCommandCallback(Consumer<String> callback) {
+        this.onCommandCallback = callback;
     }
 
     /**
@@ -77,6 +94,11 @@ public class UI_Flipper extends UI_Abstract {
             BorderFactory.createLineBorder(UI_Config.BORDER_COLOR, 1),  // Bordo esterno
             BorderFactory.createEmptyBorder(5, 5, 5, 5)  // Padding interno
         ));
+        inputField.setToolTipText("Inserisci: [frequenza] [comando] (es: 433.92 GoToRecharge)");
+        
+        // Abilita invio con Enter
+        inputField.addActionListener(e -> processCommand());
+        
         bottomPanel.add(inputField, BorderLayout.CENTER);  // Aggiunge il campo di input al pannello
 
         // Configurazione del pulsante di invio
@@ -85,7 +107,7 @@ public class UI_Flipper extends UI_Abstract {
         sendButton.setForeground(UI_Config.TEXT_COLOR);  // Colore del testo
         sendButton.setBackground(UI_Config.BUTTON_BASE_COLOR);  // Colore di sfondo
         sendButton.setFocusPainted(false);  // Disabilita l'effetto di focus
-        sendButton.addActionListener(e -> onSendButtonClicked());  // Aggiunge l'azione al pulsante
+        sendButton.addActionListener(e -> processCommand());  // Aggiunge l'azione al pulsante
         bottomPanel.add(sendButton, BorderLayout.EAST);  // Aggiunge il pulsante al pannello
 
         add(bottomPanel, BorderLayout.SOUTH);  // Aggiunge il pannello inferiore alla finestra
@@ -98,6 +120,90 @@ public class UI_Flipper extends UI_Abstract {
     }
 
     /**
+     * Processa il comando inserito dall'utente usando il CommandProcessor.
+     * Mostra il risultato tramite JOptionPane.
+     */
+    private void processCommand() {
+        String input = inputField.getText().trim();
+        if (input.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                "Inserisci un comando!\n\nFormato: [frequenza] [comando]\nEsempio: 433.92 GoToRecharge",
+                "Input Vuoto",
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        gameContext.getTemplog().add("[FLIPPER]: " + input);  // Aggiunge il comando al log temporaneo
+
+        // Processa il comando tramite CommandProcessor
+        FlipperResult result = commandProcessor.processCommand(input);
+        
+        // Apply effects
+        if (result.getTimeModification() != 0) {
+            applyTimeModification(result.getTimeModification());
+        }
+        
+        // Mostra risultato tramite dialog
+        showResultDialog(result);
+        
+        // Notifica il callback se presente
+        if (onCommandCallback != null) {
+            onCommandCallback.accept(result.getMessage());
+        }
+        
+        inputField.setText("");
+    }
+
+    /**
+     * Mostra il risultato del comando tramite JOptionPane con icona appropriata.
+     */
+    private void showResultDialog(FlipperResult result) {
+        String title;
+        int messageType;
+        
+        switch (result.getType()) {
+            case SUCCESS:
+                title = "✅ Comando Eseguito con Successo";
+                messageType = JOptionPane.INFORMATION_MESSAGE;
+                break;
+            case ERROR:
+                title = "❌ Errore nell'Esecuzione";
+                messageType = JOptionPane.ERROR_MESSAGE;
+                break;
+            case WARNING:
+                title = "⚠️ Comando Eseguito con Avvisi";
+                messageType = JOptionPane.WARNING_MESSAGE;
+                break;
+            case INFO:
+                title = "ℹ️ Informazione";
+                messageType = JOptionPane.INFORMATION_MESSAGE;
+                break;
+            default:
+                title = "Risultato Comando";
+                messageType = JOptionPane.PLAIN_MESSAGE;
+        }
+        
+        // Aggiungi informazioni su modifiche al tempo se presenti
+        String message = result.getMessage();
+        if (result.getTimeModification() != 0) {
+            message += "\n\n⏱️ Modifica al timer: " + 
+                      (result.getTimeModification() > 0 ? "+" : "") + 
+                      result.getTimeModification() + " secondi";
+        }
+        
+        JOptionPane.showMessageDialog(this, message, title, messageType);
+    }
+    
+    /**
+     * Applica modifiche al timer di gioco.
+     */
+    private void applyTimeModification(int seconds) {
+        // Implementa la modifica del timer tramite GameContext
+        // if (gameContext != null && gameContext.getEngine() != null) {
+        //     gameContext.getEngine().modifyCountdown(seconds);
+        // }
+    }
+
+    /**
      * Implementazione del metodo astratto getWindowTitle() della superclasse UI_Abstract.
      * Restituisce il titolo della finestra.
      *
@@ -105,41 +211,72 @@ public class UI_Flipper extends UI_Abstract {
      */
     @Override
     protected String getWindowTitle() {
-        return "Flipper Zero";
+        return "Flipper Zero - Robot Control Interface";
     }
 
     /**
-     * Metodo chiamato quando viene cliccato il pulsante "Invia".
-     * Gestisce l'input dell'utente e mostra un messaggio di conferma o errore.
-     */
-    private void onSendButtonClicked() {
-        String inputText = inputField.getText().trim();  // Ottiene il testo inserito dall'utente
-        if (!inputText.isEmpty()) {
-            // Mostra un messaggio di conferma con il testo inserito
-            JOptionPane.showMessageDialog(this,
-                "Hai inserito: " + inputText,
-                "Input Ricevuto",
-                JOptionPane.INFORMATION_MESSAGE);
-            inputField.setText("");  // Resetta il campo di input
-        } else {
-            // Mostra un messaggio di errore se il campo è vuoto
-            JOptionPane.showMessageDialog(this,
-                "Il campo di testo è vuoto!",
-                "Errore",
-                JOptionPane.WARNING_MESSAGE);
-        }
-    }
-
-    /**
-     * Metodo main per avviare l'applicazione.
-     *
-     * @param args Argomenti della riga di comando (non utilizzati)
+     * Metodo main per testare UI_Flipper in modalità standalone.
      */
     public static void main(String[] args) {
-        FlatLightLaf.setup();  // Configura il tema FlatLaf light per l'interfaccia
-        EventQueue.invokeLater(() -> {
-            UI_Flipper window = new UI_Flipper();  // Crea una nuova finestra
-            window.setVisible(true);  // Rende la finestra visibile
+
+        // Crea un GameContext mock per il test
+        GameContext mockGameContext = createMockGameContext();
+        
+        // Crea il CommandProcessor
+        IFlipperCommandProcessor commandProcessor = new FlipperCommandProcessor(mockGameContext);
+        
+        // Crea l'interfaccia UI_Flipper
+        SwingUtilities.invokeLater(() -> {
+            try {
+                UI_Flipper flipperUI = new UI_Flipper(mockGameContext, commandProcessor);
+                
+                // Imposta callback per vedere i risultati
+                flipperUI.setCommandCallback(result -> {
+                    System.out.println("CALLBACK RICEVUTO: " + result);
+                    
+                    // Simula reazioni del gioco
+                    if (result.contains("SUCCESSO")) {
+                        System.out.println("🎉 GIOCO COMPLETATO!");
+                    } else if (result.contains("ATTENZIONE")) {
+                        System.out.println("⚠️ PENALITÀ APPLICATA!");
+                    } else if (result.contains("INFO")) {
+                        System.out.println("ℹ️ BONUS RICEVUTO!");
+                    }
+                });
+                
+                // Configura la finestra
+                flipperUI.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                flipperUI.setLocationRelativeTo(null); // Centra la finestra
+                flipperUI.setVisible(true);
+                
+                System.out.println("UI_Flipper avviata in modalità test!");
+                System.out.println("Prova questi comandi:");
+                System.out.println("✅ 433.92 GoToRecharge");
+                System.out.println("⚠️ 868.0 Override");
+                System.out.println("ℹ️ 915.0 Stop");
+                System.out.println("❌ 999.0 GoToRecharge (errore)");
+                
+            } catch (Exception e) {
+                System.err.println("Errore durante l'avvio di UI_Flipper: " + e.getMessage());
+                e.printStackTrace();
+                
+                JOptionPane.showMessageDialog(null, 
+                    "Errore durante l'avvio di UI_Flipper:\n" + e.getMessage(),
+                    "Errore di Test",
+                    JOptionPane.ERROR_MESSAGE);
+            }
         });
+    }
+    
+    /**
+     * Crea un GameContext mock per i test.
+     */
+    private static GameContext createMockGameContext() {
+        return new GameContext(null, null, null, null, null, null) {
+            @Override
+            public String toString() {
+                return "MockGameContext per test UI_Flipper";
+            }
+        };
     }
 }

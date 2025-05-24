@@ -1,4 +1,4 @@
-package com.mycompany.poggioadventure.ui;
+package com.mycompany.poggioadventure.core.utils;
 
 /**
  * Enum che rappresenta i possibili risultati delle operazioni del PoggioClientJersey.

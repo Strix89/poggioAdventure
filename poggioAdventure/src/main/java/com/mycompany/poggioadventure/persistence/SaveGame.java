@@ -4,11 +4,9 @@ package com.mycompany.poggioadventure.persistence;
 import com.mycompany.poggioadventure.core.utils.TimeManager; // Gestore del tempo di gioco
 import com.mycompany.poggioadventure.core.Engine; // Motore principale del gioco
 import com.mycompany.poggioadventure.core.abstracts.GameDescription; // Descrizione astratta dello stato del gioco
+import com.mycompany.poggioadventure.core.utils.ApiClientResult;
 import com.mycompany.poggioadventure.core.utils.EngineFactory; // Factory per creare istanze di Engine
 import com.mycompany.poggioadventure.core.utils.PoggioClientJersey; // Client per API REST PoggioServer
-
-// Import delle classi UI e Gestione Errori/Input/Output
-import com.mycompany.poggioadventure.ui.ApiClientResult; // Enum per risultati chiamate API
 import com.mycompany.poggioadventure.ui.InputHandler; // Gestore input utente
 import com.mycompany.poggioadventure.ui.OutputHandler; // Gestore output utente
 import com.mycompany.poggioadventure.ui.ColorText; // Utility per testo colorato

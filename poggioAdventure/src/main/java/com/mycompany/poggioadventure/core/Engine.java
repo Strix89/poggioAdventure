@@ -145,7 +145,7 @@ public class Engine {
         timeManager = new TimeManager();
         gameTime = StopWatch.getInstance();
         gameTime.start();
-        gameContext = new GameContext(game, output, errorHandler, logTemp, gameTime);
+        gameContext = new GameContext(game, input, output, errorHandler, logTemp, gameTime);
     }
 
     /**

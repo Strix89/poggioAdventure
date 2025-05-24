@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import com.mycompany.poggioadventure.model.AdvObject;
+
 /**
  * Classe che raccoglie utility methods e costanti di sistema.
  * Fornisce funzionalità generiche riutilizzabili in tutto il progetto.
@@ -37,6 +39,21 @@ public class Utils {
             }
         }
         return tokens;
+    }
+
+    /**
+     *
+     * @param inventory
+     * @param id
+     * @return
+     */
+    public static AdvObject getObjectFromInventory(List<AdvObject> inventory, int id) {
+        for (AdvObject o : inventory) {
+            if (o.getId() == id) {
+                return o;
+            }
+        }
+        return null;
     }
 
     /**
