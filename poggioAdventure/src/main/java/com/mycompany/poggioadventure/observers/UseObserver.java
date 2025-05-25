@@ -100,7 +100,6 @@ public class UseObserver implements GameObserver, Serializable {
                         }
                         interact = true;
                         break;
-
                     case 23:
                         AdvObject rack = description.getCurrentRoom().getObject(22);
                         if (rack != null) {
@@ -114,7 +113,8 @@ public class UseObserver implements GameObserver, Serializable {
                         interact = true;
                         break;
                     case 50:
-                        if (parserOutput.getInvObjects().contains(obj)) {    
+                        boolean hasFlipper = Utils.getObjectFromInventory(description.getInventory(), 50) != null;
+                        if (hasFlipper) {    
                             if (flipperWindow != null && flipperWindow.isVisible()) {
                                 msg.append("[RED]Il Flipper Zero è già attivo! Completa prima l'operazione in corso.[/]\n");
                                 break;
