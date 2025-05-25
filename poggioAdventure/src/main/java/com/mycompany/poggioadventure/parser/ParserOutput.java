@@ -18,7 +18,7 @@ public class ParserOutput implements Serializable {
     private AdvObject invObject;
     
     // Liste di oggetti per supportare comandi multipli su più oggetti
-    private List<AdvObject> objects = new ArrayList<>();
+    private List<AdvObject> roomObjects = new ArrayList<>();
     private List<AdvObject> invObjects = new ArrayList<>();
 
     /**
@@ -31,7 +31,7 @@ public class ParserOutput implements Serializable {
         this.command = command;
         this.object = object;
         if (object != null) {
-            this.objects.add(object);
+            this.roomObjects.add(object);
         }
     }
 
@@ -47,7 +47,7 @@ public class ParserOutput implements Serializable {
         this.object = object;
         this.invObject = invObject;
         if (object != null) {
-            this.objects.add(object);
+            this.roomObjects.add(object);
         }
         if (invObject != null) {
             this.invObjects.add(invObject);
@@ -60,16 +60,16 @@ public class ParserOutput implements Serializable {
      * @param command Comando riconosciuto
      * @param object Oggetto principale riconosciuto
      * @param invObject Oggetto dell'inventario riconosciuto
-     * @param objects Lista di oggetti riconosciuti
+     * @param roomObjects Lista di oggetti riconosciuti
      * @param invObjects Lista di oggetti dell'inventario riconosciuti
      */
     public ParserOutput(Command command, AdvObject object, AdvObject invObject, 
-                        List<AdvObject> objects, List<AdvObject> invObjects) {
+                        List<AdvObject> roomObjects, List<AdvObject> invObjects) {
         this.command = command;
         this.object = object;
         this.invObject = invObject;
-        if (objects != null) {
-            this.objects = objects;
+        if (roomObjects != null) {
+            this.roomObjects = roomObjects;
         }
         if (invObjects != null) {
             this.invObjects = invObjects;
@@ -121,15 +121,15 @@ public class ParserOutput implements Serializable {
     /**
      * @return Lista di tutti gli oggetti riconosciuti
      */
-    public List<AdvObject> getObjects() {
-        return objects;
+    public List<AdvObject> getRoomObjects() {
+        return roomObjects;
     }
     
     /**
-     * @param objects Lista di oggetti da impostare
+     * @param roomObjects Lista di oggetti da impostare
      */
-    public void setObjects(List<AdvObject> objects) {
-        this.objects = objects;
+    public void setRoomObjects(List<AdvObject> roomObjects) {
+        this.roomObjects = roomObjects;
     }
     
     /**
@@ -152,7 +152,7 @@ public class ParserOutput implements Serializable {
      * @return true se ci sono più oggetti, false altrimenti
      */
     public boolean hasMultipleObjects() {
-        return objects.size() > 1;
+        return roomObjects.size() > 1;
     }
     
     /**

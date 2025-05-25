@@ -29,7 +29,7 @@ public class TalkObserver implements GameObserver, Serializable {
 
         // Verifica se il comando è di tipo TALK
         if (parserOutput.getCommand().getType() == CommandType.TALK) {
-            List<AdvObject> npcs = parserOutput.getObjects();
+            List<AdvObject> npcs = parserOutput.getRoomObjects();
 
             // Se non ci sono oggetti NPC selezionati, chiedi con chi il giocatore vuole parlare
             if (npcs.isEmpty()) {

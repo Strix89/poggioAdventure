@@ -19,7 +19,7 @@ import java.util.*;
 public class Parser {
 
     private final Set<String> stopwords; // Insieme di parole da ignorare (es. articoli, preposizioni)
-    private final Set<String> conjunctions = new HashSet<>(Arrays.asList("e", "poi", "dopo", "quindi", "inoltre", "successivamente"));
+    private final Set<String> conjunctions = new HashSet<>(Arrays.asList("e", "poi", "dopo", "quindi", "inoltre", "successivamente", "contro", "su"));
 
     /**
      * Costruttore della classe Parser. Inizializza il set di stopwords.

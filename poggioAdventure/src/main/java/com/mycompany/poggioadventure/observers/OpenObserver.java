@@ -34,7 +34,7 @@ public class OpenObserver implements GameObserver, Serializable {
             boolean interacted = false;
 
             // Unione degli oggetti della stanza e dell'inventario
-            List<AdvObject> allObjects = parserOutput.getObjects();
+            List<AdvObject> allObjects = parserOutput.getRoomObjects();
             allObjects.addAll(parserOutput.getInvObjects());
 
             // Se non ci sono oggetti validi
