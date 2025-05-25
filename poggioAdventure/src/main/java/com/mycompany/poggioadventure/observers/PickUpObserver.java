@@ -32,7 +32,7 @@ public class PickUpObserver implements GameObserver, Serializable {
         StringBuilder msg = new StringBuilder();
 
         if (parserOutput.getCommand().getType() == CommandType.PICK_UP) {
-            List<AdvObject> objectsToPick = parserOutput.getObjects();
+            List<AdvObject> objectsToPick = parserOutput.getRoomObjects();
 
             if (objectsToPick == null || objectsToPick.isEmpty()) {
                 msg.append("Non c'è niente da raccogliere qui.");
