@@ -1,11 +1,11 @@
 package com.mycompany.poggioadventure.observers;
 
+import com.mycompany.poggioadventure.core.GameContext;
 import com.mycompany.poggioadventure.core.abstracts.GameDescription;
 import com.mycompany.poggioadventure.parser.ParserOutput;
 import com.mycompany.poggioadventure.model.AdvObject;
 import com.mycompany.poggioadventure.model.AdvObjectContainer;
 import com.mycompany.poggioadventure.parser.CommandType;
-import com.mycompany.poggioadventure.ui.OutputHandler;
 import java.util.List;
 import java.io.Serializable;
 
@@ -27,7 +27,7 @@ public class OpenObserver implements GameObserver, Serializable {
      * @param parserOutput
      */
     @Override
-    public String update(GameDescription description, ParserOutput parserOutput, OutputHandler output) {
+    public String update(GameDescription description, ParserOutput parserOutput, GameContext gameContext) {
         StringBuilder msg = new StringBuilder();
 
         if (parserOutput.getCommand().getType() == CommandType.OPEN) {

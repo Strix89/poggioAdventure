@@ -100,6 +100,8 @@ public class Engine {
      * Buffer temporaneo per i comandi da loggare
      */
     private List<String> logTemp;
+
+    private GameContext gameContext;
     
     /**
      * Costruttore principale dell'Engine.
@@ -143,6 +145,7 @@ public class Engine {
         timeManager = new TimeManager();
         gameTime = StopWatch.getInstance();
         gameTime.start();
+        gameContext = new GameContext(game, input, output, errorHandler, logTemp, gameTime);
     }
 
     /**
@@ -181,7 +184,7 @@ public class Engine {
                 if (p.getCommand().getType() == CommandType.SAVE) {
                     saveGame();
                 } else {
-                    game.nextMove(List.of(p), output);
+                    game.nextMove(List.of(p), gameContext);
                 }
 
                 // Gestione uscita dal gioco

@@ -67,6 +67,31 @@ public enum ColorText {
     OLIVE("\u001B[38;2;128;128;0m", new Color(128, 128, 0)),         // Oliva
     SUNFLOWER("\u001B[38;2;244;213;64m", new Color(244, 213, 64)),   // Girasole
     
+    // ============== SFUMATURE DI ROSA ==============
+    PINK("\u001B[38;2;255;192;203m", new Color(255, 192, 203)),      // Rosa standard
+    HOT_PINK("\u001B[38;2;255;105;180m", new Color(255, 105, 180)),  // Rosa acceso
+    DEEP_PINK("\u001B[38;2;255;20;147m", new Color(255, 20, 147)),   // Rosa intenso
+    LIGHT_PINK("\u001B[38;2;255;182;193m", new Color(255, 182, 193)), // Rosa chiaro
+    SALMON("\u001B[38;2;250;128;114m", new Color(250, 128, 114)),    // Salmone
+    
+    // ============== SFUMATURE DI VERDE ==============
+    FOREST_GREEN("\u001B[38;2;34;139;34m", new Color(34, 139, 34)),  // Verde foresta
+    LIME("\u001B[38;2;50;205;50m", new Color(50, 205, 50)),          // Verde lime
+    EMERALD("\u001B[38;2;80;200;120m", new Color(80, 200, 120)),     // Smeraldo
+    MINT("\u001B[38;2;152;251;152m", new Color(152, 251, 152)),      // Verde menta
+    
+    // ============== SFUMATURE DI VIOLA ==============
+    PURPLE("\u001B[38;2;128;0;128m", new Color(128, 0, 128)),        // Viola standard
+    LAVENDER("\u001B[38;2;230;230;250m", new Color(230, 230, 250)),  // Lavanda
+    VIOLET("\u001B[38;2;138;43;226m", new Color(138, 43, 226)),      // Violetto
+    PLUM("\u001B[38;2;221;160;221m", new Color(221, 160, 221)),      // Prugna
+    
+    // ============== COLORI NEUTRI ==============
+    GRAY("\u001B[38;2;128;128;128m", new Color(128, 128, 128)),      // Grigio
+    SILVER("\u001B[38;2;192;192;192m", new Color(192, 192, 192)),    // Argento
+    BEIGE("\u001B[38;2;245;245;220m", new Color(245, 245, 220)),     // Beige
+    BROWN("\u001B[38;2;165;42;42m", new Color(165, 42, 42)),         // Marrone
+    
     // ============== COLORI SEMANTICI ==============
     NPC("\u001B[36m", new Color(0, 255, 255)),       // Personaggi non giocanti
     ITEM("\u001B[33m", new Color(255, 185, 0)),      // Oggetti di gioco

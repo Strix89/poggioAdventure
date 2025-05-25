@@ -7,6 +7,7 @@ import com.mycompany.poggioadventure.ui.ColorText; // Utility per output colorat
 // Import classi di persistenza e stato gioco
 import com.mycompany.poggioadventure.persistence.SaveGame; // Gestore salvataggi (statico)
 import com.mycompany.poggioadventure.core.Engine; // Motore principale del gioco
+import com.mycompany.poggioadventure.core.utils.ApiClientResult;
 import com.mycompany.poggioadventure.core.utils.EngineFactory; // Factory per creare istanze di Engine
 import com.mycompany.poggioadventure.core.abstracts.MenuManager; // Interfaccia che questa classe implementa
 import com.mycompany.poggioadventure.core.utils.PoggioClientJersey; // Client per l'API del server
@@ -16,7 +17,6 @@ import com.mycompany.poggioadventure.persistence.RankingEntryDTO; // DTO per i d
 // Import interfacce/classi UI e gestione errori
 import com.mycompany.poggioadventure.ui.InputHandler; // Interfaccia per gestione input
 import com.mycompany.poggioadventure.ui.OutputHandler; // Interfaccia per gestione output
-import com.mycompany.poggioadventure.ui.ApiClientResult; // Enum per risultati chiamate API
 import com.mycompany.poggioadventure.ui.ErrorHandler; // Interfaccia per gestione errori
 
 // Import standard Java

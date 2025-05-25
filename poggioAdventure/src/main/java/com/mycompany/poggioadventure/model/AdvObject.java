@@ -40,6 +40,7 @@ public class AdvObject implements Serializable {
     
     private boolean obscureImage = false;
 
+
     /**
      *
      * @param id
@@ -95,9 +96,9 @@ public class AdvObject implements Serializable {
      *
      * @param id
      * @param name
+     * @param image
      * @param description
      * @param alias
-     * @param imagePath
      */
     public AdvObject(int id, String name, String image, String description, Set<String> alias) {
         this.id = id;
@@ -232,7 +233,11 @@ public class AdvObject implements Serializable {
      * @param alias
      */
     public void setAlias(Set<String> alias) {
-        this.alias = alias;
+        if (this.alias == null || this.alias.isEmpty()) {
+            this.alias = alias;
+        } else {
+            this.alias.addAll(alias);
+        }
     }
     
     /**
@@ -240,7 +245,11 @@ public class AdvObject implements Serializable {
      * @param alias
      */
     public void setAlias(String[] alias) {
-        this.alias = new HashSet<>(Arrays.asList(alias));
+        if (this.alias == null || this.alias.isEmpty()) {
+            this.alias = new HashSet<>(Arrays.asList(alias));
+        } else {
+            this.alias.addAll(Arrays.asList(alias));
+        }
     }
 
     /**
@@ -279,10 +288,7 @@ public class AdvObject implements Serializable {
             return false;
         }
         final AdvObject other = (AdvObject) obj;
-        if (this.id != other.id) {
-            return false;
-        }
-        return true;
+        return this.id == other.id;
     }   
 
     public String getImagePath() {

@@ -1,5 +1,6 @@
 package com.mycompany.poggioadventure.observers;
 
+import com.mycompany.poggioadventure.core.GameContext;
 import com.mycompany.poggioadventure.core.abstracts.GameDescription;
 import com.mycompany.poggioadventure.parser.ParserOutput;
 import com.mycompany.poggioadventure.model.AdvObject;
@@ -40,8 +41,9 @@ public class InventoryObserver implements GameObserver, Serializable {
      * @return Stringa vuota per GUI, descrizione testuale per CLI
      */
     @Override
-    public String update(GameDescription description, ParserOutput parserOutput, OutputHandler output) {
+    public String update(GameDescription description, ParserOutput parserOutput, GameContext gameContext) {
         StringBuilder msg = new StringBuilder();
+        OutputHandler output = gameContext.getOutputHandler(); // Ottiene l'output handler dal contesto del gioco
         
         if (parserOutput.getCommand().getType() == CommandType.INVENTORY) {
             if (output instanceof GUIOutputHandler) {

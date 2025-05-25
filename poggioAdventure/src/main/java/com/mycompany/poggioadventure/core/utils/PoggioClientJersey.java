@@ -2,7 +2,6 @@ package com.mycompany.poggioadventure.core.utils;
 
 import com.mycompany.poggioadventure.persistence.RankingEntryDTO; // DTO per i dati della classifica
 import com.mycompany.poggioadventure.persistence.ResourceLoader; // Utility per caricare/trovare percorsi risorse
-import com.mycompany.poggioadventure.ui.ApiClientResult; // Enum per rappresentare l'esito delle chiamate API
 
 // Import Jakarta RS (JAX-RS) per il client REST
 import jakarta.ws.rs.client.Client; // Interfaccia principale del client JAX-RS

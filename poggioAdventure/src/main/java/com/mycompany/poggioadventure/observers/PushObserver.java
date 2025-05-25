@@ -1,11 +1,12 @@
 package com.mycompany.poggioadventure.observers;
 
+import com.mycompany.poggioadventure.core.GameContext;
 import com.mycompany.poggioadventure.core.abstracts.GameDescription;
 import com.mycompany.poggioadventure.parser.ParserOutput;
 import com.mycompany.poggioadventure.model.AdvObject;
 import com.mycompany.poggioadventure.parser.CommandType;
-import com.mycompany.poggioadventure.core.utils.GameUtils;
-import com.mycompany.poggioadventure.ui.OutputHandler;
+import com.mycompany.poggioadventure.core.utils.Utils;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -16,7 +17,7 @@ import java.util.List;
 public class PushObserver implements GameObserver, Serializable {
 
     @Override
-    public String update(GameDescription description, ParserOutput parserOutput, OutputHandler output) {
+    public String update(GameDescription description, ParserOutput parserOutput, GameContext gameContext) {
         StringBuilder msg = new StringBuilder();
 
         if (parserOutput.getCommand().getType() == CommandType.PUSH) {
@@ -45,7 +46,7 @@ public class PushObserver implements GameObserver, Serializable {
                     msg.append("Hai premuto: ").append(obj.getName()).append("\n");
 
                     if (id == 3) { // Giocattolo
-                        if (GameUtils.getObjectFromInventory(description.getInventory(), 1) != null) {
+                        if (Utils.getObjectFromInventory(description.getInventory(), 1) != null) {
                             msg.append("Premi il pulsante del giocattolo e in seguito ad una forte esplosione la tua casa prende fuoco...\n")
                                .append("tu e tuoi famigliari cercate invano di salvarvi e venite avvolti dalle fiamme...\n")
                                .append("è stata una morte CALOROSA...addio!\n");

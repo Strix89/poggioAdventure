@@ -2,10 +2,10 @@ package com.mycompany.poggioadventure.observers;
 
 import java.util.List;
 
+import com.mycompany.poggioadventure.core.GameContext;
 import com.mycompany.poggioadventure.core.abstracts.GameDescription;
 import com.mycompany.poggioadventure.model.*;
 import com.mycompany.poggioadventure.parser.*;
-import com.mycompany.poggioadventure.ui.OutputHandler;
 import java.io.Serializable;
 
 /**
@@ -24,7 +24,7 @@ public class TalkObserver implements GameObserver, Serializable {
      * @return Una stringa contenente il messaggio di interazione con l'NPC.
      */
     @Override
-    public String update(GameDescription description, ParserOutput parserOutput, OutputHandler output) {
+    public String update(GameDescription description, ParserOutput parserOutput, GameContext gameContext) {
         StringBuilder msg = new StringBuilder();
 
         // Verifica se il comando è di tipo TALK

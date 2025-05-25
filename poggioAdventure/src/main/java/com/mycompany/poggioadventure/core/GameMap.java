@@ -254,7 +254,12 @@ public class GameMap implements Serializable{
                 "Una bobina di filamento PLA per stampante 3D");
         bobbinaPLA.setAlias(new String[] { "filamento", "PLA"});
         bobbinaPLA.setPickupable(true);
-
+        
+        AdvObject flipper = new AdvObject(50, "FlipperZero",
+                ResourceLoader.IMG_PATH.resolve("Flipper.png").toString(),
+                "Un oggetto tecnomagico");
+        flipper.setAlias(new String[] {"flipper", "tecnomagia"});
+        flipper.setPickupable(true);
 
         Room entry = new Room(0, "Ingresso", "Ti trovi nell'ingresso di Poggiolevante");
         entry.addObject(guido, "C'è un nano vicino la porta, leggi il nome sulla targhetta si chiama GUIDO");
@@ -277,6 +282,7 @@ public class GameMap implements Serializable{
         galileo.setImagePath(ResourceLoader.IMG_PATH.resolve("Galileo.png").toString());        
         galileo.addObject(pen);
         galileo.addObject(foto);
+        galileo.addObject(flipper);
 
         Room office = new Room(5, "Direzione", "Sei in direzione");
         office.setImagePath(ResourceLoader.IMG_PATH.resolve("Direzione.png").toString());

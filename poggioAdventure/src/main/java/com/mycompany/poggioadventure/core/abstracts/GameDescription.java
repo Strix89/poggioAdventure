@@ -1,7 +1,7 @@
 package com.mycompany.poggioadventure.core.abstracts;
 
+import com.mycompany.poggioadventure.core.GameContext;
 import com.mycompany.poggioadventure.core.GameMap;
-import com.mycompany.poggioadventure.ui.OutputHandler;
 import com.mycompany.poggioadventure.parser.ParserOutput;
 import com.mycompany.poggioadventure.model.AdvObject;
 import com.mycompany.poggioadventure.parser.Command;
@@ -70,7 +70,7 @@ public abstract class GameDescription implements Serializable {
      * @param list
      * @param out
      */
-    public abstract void nextMove(List<ParserOutput> list, OutputHandler out);
+    public abstract void nextMove(List<ParserOutput> list, GameContext gameContext);
     
     public String getCurrentChapter(){
         return currentChapter;

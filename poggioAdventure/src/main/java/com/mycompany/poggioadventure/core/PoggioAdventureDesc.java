@@ -41,7 +41,6 @@ import com.mycompany.poggioadventure.ui.OutputHandler;
 public class PoggioAdventureDesc extends GameDescription implements GameObservable {
     
     private final List<GameObserver> observer = new ArrayList<>();
-    private ParserOutput parserOutput;
     private final List<String> messages = new ArrayList<>();
 
     /**
@@ -144,28 +143,27 @@ public class PoggioAdventureDesc extends GameDescription implements GameObservab
      * @param out
      */
     @Override
-    public void nextMove(List<ParserOutput> list, OutputHandler out) {
+    public void nextMove(List<ParserOutput> list, GameContext gameContext) {
         for (ParserOutput p : list) {
-            this.parserOutput = p;
             if (p.getCommand() == null) {
-                out.writeln("Non ho capito cosa devo fare! Prova con un altro comando.", ColorText.RED);
+                gameContext.getOutputHandler().writeln("Non ho capito cosa devo fare! Prova con un altro comando.", ColorText.RED);
                 continue;
             }
             Room cr = getCurrentRoom();
-            notifyObservers(out);
+            notifyObservers(p, gameContext);
             boolean move = !cr.equals(getCurrentRoom()) && getCurrentRoom() != null;
             if (!messages.isEmpty()) {
                 for (String m : messages) {
                     if (!m.trim().isEmpty()) {
-                        out.writeln(m, ColorText.WHITE);
+                        gameContext.getOutputHandler().writeln(m, ColorText.WHITE);
                     }
                 }
                 messages.clear();
             }
             if (move) {
-                out.writeln("\n" + getCurrentRoom().getName(), ColorText.YELLOW);
-                out.writeln("================================================", ColorText.WHITE);
-                out.writeln(getCurrentRoom().getDescription(), ColorText.WHITE);
+                gameContext.getOutputHandler().writeln("\n" + getCurrentRoom().getName(), ColorText.YELLOW);
+                gameContext.getOutputHandler().writeln("================================================", ColorText.WHITE);
+                gameContext.getOutputHandler().writeln(getCurrentRoom().getDescription(), ColorText.WHITE);
             }
         }
     }
@@ -197,21 +195,21 @@ public class PoggioAdventureDesc extends GameDescription implements GameObservab
      * @param output
      */
     @Override
-    public void notifyObservers(OutputHandler output) {
+    public void notifyObservers(ParserOutput parserOutput, GameContext gameContext) {
         for (GameObserver o : observer) {
-            messages.add(o.update(this, parserOutput, output));
+            messages.add(o.update(this, parserOutput, gameContext));
         }
     }
 
     @Override
     public String getGUIWelcomeMsg() {
         return ""
-                + "==============================================================================\n"
+                + "============================================================================\n"
                 + "                             BENVENUTO NEL COLLEGIO TECNOMAGICO DI SAN JOSE MARIA \n"
-                + "==============================================================================\n"
+                + "============================================================================\n"
                 + "Sei una matricola in cerca di ammissione a questo prestigioso collegio,\n"
                 + "dove solo i più brillanti superano le prove.\n"
-                + "==============================================================================";
+                + "============================================================================";
     }
     
     @Override
