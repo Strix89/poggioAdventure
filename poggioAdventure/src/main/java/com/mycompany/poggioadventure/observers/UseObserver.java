@@ -9,12 +9,28 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- *
+ * Observer che gestisce il comando USE per utilizzare oggetti nel gioco.
+ * 
+ * Controlla oggetti nell'inventario e nella stanza corrente, fornendo
+ * risposte specifiche basate sull'ID dell'oggetto e le tre prove del collegio.
+ * 
  * @author pierpaolo & MikeRvsso
- *
+ * @version 1.0
+ * @see CommandType#USE
  */
 public class UseObserver implements GameObserver, Serializable {
-
+    /**
+     * Gestisce l'utilizzo di oggetti in base al comando USE.
+     * 
+     * Combina oggetti da inventario e stanza corrente, eseguendo azioni
+     * specifiche per ogni oggetto. Controlla se l'oggetto è nell'inventario
+     * prima di permetterne l'utilizzo.
+     * 
+     * @param description Stato corrente del gioco
+     * @param parserOutput Output del parser con comando e oggetti
+     * @param output Handler per l'output utente
+     * @return Messaggio di risposta dell'utilizzo
+     */
     @Override
     public String update(GameDescription description, ParserOutput parserOutput, OutputHandler output) {
         StringBuilder msg = new StringBuilder();
