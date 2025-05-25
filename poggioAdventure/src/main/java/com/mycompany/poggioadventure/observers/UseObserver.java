@@ -10,7 +10,8 @@ import java.util.List;
 
 /**
  *
- * @author MikeRvsso
+ * @author pierpaolo & MikeRvsso
+ *
  */
 public class UseObserver implements GameObserver, Serializable {
 

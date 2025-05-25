@@ -10,7 +10,7 @@ import java.util.List;
 
 /**
  *
- * @author pierpaolo
+ * @author pierpaolo & MikeRvsso
  */
 public class PushObserver implements GameObserver, Serializable {
 
