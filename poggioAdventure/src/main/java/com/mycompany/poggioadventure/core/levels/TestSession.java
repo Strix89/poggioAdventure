@@ -3,10 +3,13 @@ package com.mycompany.poggioadventure.core.levels;
 import com.mycompany.poggioadventure.model.AdvNPC;
 import com.mycompany.poggioadventure.ui.InputHandler;
 import com.mycompany.poggioadventure.ui.OutputHandler;
+import com.mycompany.poggioadventure.ui.gui.GUIInputHandler;
 import com.mycompany.poggioadventure.ui.ColorText;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.swing.JOptionPane;
 
 /**
  * Gestisce una sessione di test in corso, incluso lo stato corrente e il conteggio errori.
@@ -162,26 +165,48 @@ public class TestSession implements Serializable {
         outputHandler.writeln("=".repeat(50), ColorText.LIME);
         outputHandler.writeln(npc.getName() + ": Cominciamo!!", ColorText.WHITE);
         outputHandler.writeln("Puoi commettere massimo " + test.getMaxWrongAnswers() + " errori.", ColorText.WARNING);
-        outputHandler.writeln("Digita 'q' per abbandonare il test.\n", ColorText.WHITE);
+        outputHandler.writeln("Digita 'q', 'quit' o 'esci' per abbandonare il test.\n", ColorText.WHITE);
         
         while (hasNextQuestion() && isActive) {
-            // Mostra la domanda corrente
-            outputHandler.writeln(getCurrentQuestionText(), ColorText.SUNFLOWER);
-            
-            // Ottieni input dall'utente
-            String userInput = inputHandler.getInput().trim();
+            Question currentQuestion = getCurrentQuestion();
+            String userInput;
+
+            if (inputHandler instanceof GUIInputHandler) {
+                // Costruisci il prompt per JOptionPane
+                StringBuilder questionPromptBuilder = new StringBuilder();
+                questionPromptBuilder.append("Domanda ").append(currentQuestionIndex + 1)
+                    .append(" di ").append(test.getQuestions().size()).append("\n");
+                questionPromptBuilder.append("Errori: ").append(wrongAnswersCount)
+                    .append("/").append(test.getMaxWrongAnswers()).append("\n\n");
+                questionPromptBuilder.append(currentQuestion.getQuestionText()).append("\n\n");
+                for (int i = 0; i < currentQuestion.getOptions().size(); i++) {
+                    questionPromptBuilder.append(i + 1).append(" - ").append(currentQuestion.getOptions().get(i)).append("\n");
+                }
+                questionPromptBuilder.append("\nDigita il numero della tua risposta (1-")
+                    .append(currentQuestion.getOptions().size()).append("):");
+                
+                userInput = JOptionPane.showInputDialog(null, questionPromptBuilder.toString(), test.getTestName(), JOptionPane.QUESTION_MESSAGE);
+                if (userInput == null) { // L'utente ha chiuso JOptionPane o premuto Annulla
+                    userInput = "quit"; // Tratta come un abbandono
+                } else {
+                    userInput = userInput.trim();
+                }
+            } else { // Modalità CLI
+                outputHandler.writeln(getCurrentQuestionText(), ColorText.SUNFLOWER); // Stampa domanda completa in CLI
+                userInput = inputHandler.getInput().trim();
+            }
             
             // Controlla se l'utente vuole abbandonare
             if ("quit".equalsIgnoreCase(userInput) || "esci".equalsIgnoreCase(userInput) || "q".equalsIgnoreCase(userInput)) {
                 outputHandler.writeln("Hai abbandonato il test.", ColorText.ERROR);
-                deactivate();
-                return false;
+                deactivate(); // Disattiva la sessione di test
+                // npc.setTestCompleted(false); // Opzionale: considera se l'abbandono conta come fallimento o non completato
+                return false; // Test non superato perché abbandonato
             }
             
             // Prova a interpretare come numero
             try {
                 int answerNumber = Integer.parseInt(userInput);
-                Question currentQuestion = getCurrentQuestion();
                 
                 // Valida l'input
                 if (answerNumber < 1 || answerNumber > currentQuestion.getOptions().size()) {
@@ -191,8 +216,8 @@ public class TestSession implements Serializable {
                 }
                 
                 // Processa la risposta
-                int answerIndex = answerNumber - 1;
-                boolean isCorrect = addAnswer(answerIndex);
+                int answerIndex = answerNumber - 1; // Converte in indice 0-based
+                boolean isCorrect = addAnswer(answerIndex); // addAnswer aggiorna currentQuestionIndex, wrongAnswersCount, ecc.
                 
                 if (isCorrect) {
                     outputHandler.writeln("✅ Risposta corretta!", ColorText.SUCCESS);
@@ -201,36 +226,32 @@ public class TestSession implements Serializable {
                                         (currentQuestion.getCorrectAnswerIndex() + 1) + " - " + 
                                         currentQuestion.getOptions().get(currentQuestion.getCorrectAnswerIndex()), 
                                         ColorText.ERROR);
-                    
                     outputHandler.writeln("Errori: " + wrongAnswersCount + "/" + test.getMaxWrongAnswers(), 
                                         ColorText.WARNING);
                 }
                 
-                outputHandler.writeln("");
+                outputHandler.writeln(""); // Riga vuota per spaziatura
                 
-                // Controlla se il test è fallito
-                if (isFailed) {
+                // Controlla se il test è fallito per troppi errori
+                if (isFailed()) { // Usa il metodo isFailed() che controlla wrongAnswersCount >= test.getMaxWrongAnswers()
                     outputHandler.writeln("🚫 TROPPI ERRORI! Il test è terminato.", ColorText.ERROR);
-                    break;
+                    // npc.setTestCompleted(false); // Il test è fallito, non completato con successo
+                    break; // Esce dal loop while
                 }
                 
             } catch (NumberFormatException e) {
-                outputHandler.writeln("Input non valido! Inserisci solo il numero della risposta o 'quit' per abbandonare.", 
+                outputHandler.writeln("Input non valido! Inserisci solo il numero della risposta o 'quit'/'esci'/'q' per abbandonare.", 
                                     ColorText.ERROR);
             }
         }
         
         // Mostra risultato finale
-        showFinalResult(outputHandler);
+        showFinalResult(outputHandler); // showFinalResult aggiorna npc.setTestCompleted
         
-        // Dai ricompensa se test superato
-        if (!isFailed && isCompleted) {
-            return true;
-        }
-        
-        return false;
+        // Restituisce true se il test è stato completato e non fallito
+        return isCompleted() && !isFailed();
     }
-    
+
     /**
      * Mostra il risultato finale del test.
      */
@@ -241,12 +262,16 @@ public class TestSession implements Serializable {
         outputHandler.writeln("Errori commessi: " + wrongAnswersCount + "/" + test.getMaxWrongAnswers() + " consentiti", 
                             ColorText.WHITE);
         
-        if (isFailed) {
+        if (isFailed()) {
             outputHandler.writeln("❌ FALLITO! " + test.getFailureMessage(), ColorText.ERROR);
-            npc.setTestCompleted(false);
-        } else {
+            npc.setTestCompleted(false); // Imposta che il test non è stato superato
+        } else if (isCompleted()) { // Assicurati che sia completato (tutte le domande risposte o terminato correttamente)
             outputHandler.writeln("✅ SUPERATO! " + test.getSuccessMessage(), ColorText.SUCCESS);
-            npc.setTestCompleted(true);;
+            npc.setTestCompleted(true); // Imposta che il test è stato superato
+        } else {
+             // Caso in cui il test è stato abbandonato e isActive è false ma non isFailed e non isCompleted
+            outputHandler.writeln("ℹ️ TEST NON COMPLETATO.", ColorText.WARNING);
+            npc.setTestCompleted(false);
         }
         outputHandler.writeln("=".repeat(50) + "\n", ColorText.LIME);
     }
