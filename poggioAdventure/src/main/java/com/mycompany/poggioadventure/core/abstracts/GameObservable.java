@@ -1,6 +1,6 @@
 package com.mycompany.poggioadventure.core.abstracts;
 
-import com.mycompany.poggioadventure.core.GameContext;
+import com.mycompany.poggioadventure.core.utils.GameContext;
 import com.mycompany.poggioadventure.observers.GameObserver;
 import com.mycompany.poggioadventure.parser.ParserOutput;
 

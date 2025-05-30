@@ -64,32 +64,30 @@ public class CLIMenu implements MenuManager {
         this.errorHan = new CLIErrorHandler();
     }
 
-    /**
-     * Mostra il menu principale del gioco all'utente sulla console.
-     * Presenta le opzioni disponibili: Nuova Partita, Carica Partita, Classifica, Esci.
-     * Il menu rimane attivo (ciclo `while(true)`) finché l'utente non sceglie
-     * l'opzione per uscire (che chiama {@link #exit()}).
-     */
     @Override
     public void showMainMenu() {
+        Thread mainThread = Thread.currentThread();
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            output.writeln("\nUscita dal gioco...", ColorText.CRIMSON);
+            mainThread.interrupt();
+        }));
         // Stampa il titolo del gioco una volta all'avvio del menu
         output.writeln("\n===== POGGIO ADVENTURE =====", ColorText.NAVY);
 
         // Loop infinito per mostrare ripetutamente il menu principale
-        while(true) {
-            // Stampa le opzioni del menu
-            output.writeln("\nMenu Principale:", ColorText.WHITE);
-            output.writeln("1) Nuova Partita", ColorText.WHITE);
-            output.writeln("2) Carica Partita", ColorText.WHITE);
-            output.writeln("3) Classifica", ColorText.WHITE);
-            output.writeln("4) Esci", ColorText.WHITE);
-            output.write(" \nSeleziona un'opzione: ", ColorText.WHITE); // Prompt per l'utente
+        try{
+            while(true) {
+                // Stampa le opzioni del menu
+                output.writeln("\nMenu Principale:", ColorText.WHITE);
+                output.writeln("1) Nuova Partita", ColorText.WHITE);
+                output.writeln("2) Carica Partita", ColorText.WHITE);
+                output.writeln("3) Classifica", ColorText.WHITE);
+                output.writeln("4) Esci", ColorText.WHITE);
+                output.write(" \nSeleziona un'opzione: ", ColorText.WHITE); // Prompt per l'utente
 
-            // Legge la scelta dell'utente
-            String choice = scanner.getInput();
-
-            // Esegue l'azione corrispondente alla scelta
-            switch(choice) {
+                String choice = scanner.getInput();
+                // Esegue l'azione corrispondente alla scelta
+                switch(choice) {
                 case "1": // Nuova Partita
                     showNewGame();
                     break; // Torna al loop del menu dopo che showNewGame termina
@@ -107,7 +105,10 @@ public class CLIMenu implements MenuManager {
                     output.writeln("Opzione non valida. Riprova.", ColorText.ERROR);
                     // Il loop continua, mostrando di nuovo il menu
                     break;
+                }
             }
+        } catch (Exception e) {
+            return; // In caso di eccezione, esce dal loop del menu principale
         }
     }
 
@@ -154,9 +155,7 @@ public class CLIMenu implements MenuManager {
                         engine.startGameLoop();
                     } catch (Exception ex) {
                         // Gestisce errori critici durante la creazione dell'engine o l'avvio del gioco
-                        errorHan.handleFatalError("Errore critico durante l'inizializzazione della nuova partita", ex);
-                        // Potrebbe essere opportuno uscire dall'applicazione qui
-                        // Utils.exitApplication(Utils.EXIT_CODE_ERROR);
+                        errorHan.handleFatalError("Errore o uscita: ", ex);
                     }
                     break; // Fine caso USER_NOT_FOUND
 

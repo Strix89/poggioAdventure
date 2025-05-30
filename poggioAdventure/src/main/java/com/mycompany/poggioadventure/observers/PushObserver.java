@@ -1,10 +1,10 @@
 package com.mycompany.poggioadventure.observers;
 
-import com.mycompany.poggioadventure.core.GameContext;
 import com.mycompany.poggioadventure.core.abstracts.GameDescription;
 import com.mycompany.poggioadventure.parser.ParserOutput;
 import com.mycompany.poggioadventure.model.AdvObject;
 import com.mycompany.poggioadventure.parser.CommandType;
+import com.mycompany.poggioadventure.core.utils.GameContext;
 import com.mycompany.poggioadventure.core.utils.Utils;
 import java.io.Serializable;
 import java.util.List;

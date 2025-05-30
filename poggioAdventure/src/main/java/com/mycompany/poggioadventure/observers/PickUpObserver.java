@@ -2,8 +2,8 @@ package com.mycompany.poggioadventure.observers;
 
 import java.util.List;
 
-import com.mycompany.poggioadventure.core.GameContext;
 import com.mycompany.poggioadventure.core.abstracts.GameDescription;
+import com.mycompany.poggioadventure.core.utils.GameContext;
 import com.mycompany.poggioadventure.parser.ParserOutput;
 import com.mycompany.poggioadventure.model.AdvObject;
 import com.mycompany.poggioadventure.model.AdvObjectContainer;

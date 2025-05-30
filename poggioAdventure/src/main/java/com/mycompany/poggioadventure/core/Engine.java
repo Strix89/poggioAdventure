@@ -2,6 +2,7 @@ package com.mycompany.poggioadventure.core;
 
 import com.mycompany.poggioadventure.core.abstracts.GameDescription;
 import com.mycompany.poggioadventure.core.utils.TimeManager;
+import com.mycompany.poggioadventure.core.utils.GameContext;
 import com.mycompany.poggioadventure.core.utils.StopWatch;
 import com.mycompany.poggioadventure.persistence.LoggerInput;
 import com.mycompany.poggioadventure.parser.Parser;

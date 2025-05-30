@@ -1,7 +1,8 @@
-package com.mycompany.poggioadventure.core;
+package com.mycompany.poggioadventure.core.levels;
 
 import com.mycompany.poggioadventure.core.abstracts.IFlipperCommandProcessor;
 import com.mycompany.poggioadventure.core.utils.FlipperResult;
+import com.mycompany.poggioadventure.core.utils.GameContext;
 
 import java.util.HashMap;
 import java.util.Map;

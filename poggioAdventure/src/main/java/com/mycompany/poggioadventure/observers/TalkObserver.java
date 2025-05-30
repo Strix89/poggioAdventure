@@ -2,10 +2,11 @@ package com.mycompany.poggioadventure.observers;
 
 import java.util.List;
 
-import com.mycompany.poggioadventure.core.GameContext;
 import com.mycompany.poggioadventure.core.abstracts.GameDescription;
+import com.mycompany.poggioadventure.core.utils.GameContext;
 import com.mycompany.poggioadventure.model.*;
 import com.mycompany.poggioadventure.parser.*;
+
 import java.io.Serializable;
 
 /**
@@ -33,7 +34,7 @@ public class TalkObserver implements GameObserver, Serializable {
 
             // Se non ci sono oggetti NPC selezionati, chiedi con chi il giocatore vuole parlare
             if (npcs.isEmpty()) {
-                msg.append("Con chi vorresti parlare?");
+                msg.append("Con chi vorresti parlare? Con il [LAVENDER]muro[/]?");
                 return msg.toString();
             }
 
@@ -56,25 +57,40 @@ public class TalkObserver implements GameObserver, Serializable {
 
                     // Se l'NPC non è stato ancora interagito e ha oggetti da dare
                     if (!npc.hasInteracted() && !npc.getItemsToGive().isEmpty()) {
-                        // Aggiungi gli oggetti all'inventario del giocatore
+                        msg.append("\n").append(npc.getName()).append(" ti dà:\n");
                         for (AdvObject item : npc.getItemsToGive()) {
-                            description.getInventory().add(item);
-                            msg.append("\n").append("[ORANGE]").append(npc.getName())
-                               .append("[/]")
-                               .append(" ti ha dato: ")
-                               .append(item.getName());
+                            msg.append("- ").append(item.getName()).append("\n");
                         }
-                        // Segna l'NPC come interagito
-                        npc.setHasInteracted(true);
+                    }
+                    npc.setHasInteracted(true);
+
+                    if (npc.hasTest()){
+                        if (npc.isTestCompleted()){
+                            msg.append(npc.getName()).append(": Hai già superato test! Non c'è bisogno di rifarlo.\n");
+                        } else if (npc.startTestSession()) {
+                            gameContext.getOutputHandler().writeln(msg.toString());
+                            msg.setLength(0);
+                            boolean testPassed = npc.getActiveTestSession().executeTest(
+                                gameContext.getOutputHandler(), 
+                                gameContext.getInputHandler());
+                            
+                            // Gestisci la ricompensa se il test è stato superato
+                            if (testPassed && npc.hasRewardObject()) {
+                                description.getInventory().add(npc.getRewardObject());
+                                msg.append("\n🎁 ").append(npc.getName())
+                                .append(" ti consegna: ").append(npc.getRewardObject().getName()).append("!\n");
+                                msg.append("L'oggetto è stato aggiunto al tuo inventario.\n");
+                            }
+                            // Pulisci la sessione
+                            npc.clearTestSession();
+                        }
                     }
                 } else {
                     // Se l'oggetto non è un NPC, il giocatore non può parlare con esso
-                    msg.append("Non puoi parlare con").append(obj.getName()).append("!\n");
+                    msg.append("Fai uso di [LIME]pita[/] per caso? \nNon puoi parlare con").append(obj.getName()).append("!\n");
                 }
             }
         }
         return msg.toString();
     }
-    
-    
 }

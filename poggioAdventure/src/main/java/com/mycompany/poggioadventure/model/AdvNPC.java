@@ -1,5 +1,7 @@
 package com.mycompany.poggioadventure.model;
 
+import com.mycompany.poggioadventure.core.levels.Test;
+import com.mycompany.poggioadventure.core.levels.TestSession;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +22,18 @@ public class AdvNPC extends AdvObject {
     
     /** Elenco degli oggetti che l'NPC può dare al giocatore. */
     private final List<AdvObject> itemsToGive = new ArrayList<>();
+    
+    /** Test che l'NPC può far eseguire al giocatore. */
+    private Test test = null;
+    
+    /** Sessione di test attiva per questo NPC. */
+    private TestSession activeTestSession = null;
+    
+    /** Indica se il giocatore ha già completato il test. */
+    private boolean testCompleted = false;
+    
+    /** Oggetto speciale che viene dato al completamento del test. */
+    private AdvObject rewardObject = null;
 
     /**
      * Costruisce un nuovo NPC con un ID, un nome e una descrizione.Inizializza la proprietà pickupable a false, in quanto l'NPC non è prelevabile.
@@ -38,8 +52,7 @@ public class AdvNPC extends AdvObject {
         super(id, name, description);
         setPickupable(false); // L'NPC non può essere prelevato
     }
-
-
+    
     /**
      * Aggiunge una riga di dialogo da parte dell'NPC che viene visualizzata la prima volta che il giocatore interagisce con lui.
      * 
@@ -102,5 +115,118 @@ public class AdvNPC extends AdvObject {
      */
     public void setHasInteracted(boolean hasInteracted) {
         this.hasInteracted = hasInteracted;
+    }
+    
+    // ========== METODI PER IL SISTEMA TEST ==========
+    
+    /**
+     * Imposta il test che l'NPC può far eseguire.
+     * 
+     * @param test Il test da assegnare all'NPC
+     */
+    public void setTest(Test test) {
+        this.test = test;
+    }
+    
+    /**
+     * Restituisce il test dell'NPC.
+     * 
+     * @return Il test dell'NPC, null se non ne ha uno
+     */
+    public Test getTest() {
+        return test;
+    }
+    
+    /**
+     * Verifica se l'NPC ha un test disponibile.
+     * 
+     * @return true se l'NPC ha un test
+     */
+    public boolean hasTest() {
+        return test != null && !testCompleted;
+    }
+    
+    /**
+     * Inizia una nuova sessione di test.
+     * 
+     * @return true se il test è stato avviato, false se già completato o non disponibile
+     */
+    public boolean startTestSession() {
+        if (!hasTest()) {
+            return false;
+        }
+        
+        this.activeTestSession = new TestSession(test, this);
+        return true;
+    }
+    
+    /**
+     * Verifica se c'è una sessione di test attiva.
+     * 
+     * @return true se la sessione è attiva
+     */
+    public boolean hasActiveTestSession() {
+        return activeTestSession != null && activeTestSession.isActive();
+    }
+    
+    /**
+     * Restituisce la sessione di test attiva.
+     * 
+     * @return La sessione attiva o null
+     */
+    public TestSession getActiveTestSession() {
+        return activeTestSession;
+    }
+    
+    /**
+     * Termina la sessione di test attiva.
+     */
+    public void clearTestSession() {
+        this.activeTestSession = null;
+    }
+    
+    /**
+     * Verifica se il test è stato completato.
+     * 
+     * @return true se il test è stato completato
+     */
+    public boolean isTestCompleted() {
+        return testCompleted;
+    }
+    
+    /**
+     * Imposta lo stato di completamento del test.
+     * 
+     * @param testCompleted true se il test è stato completato
+     */
+    public void setTestCompleted(boolean testCompleted) {
+        this.testCompleted = testCompleted;
+    }
+    
+    /**
+     * Imposta l'oggetto ricompensa per il superamento del test.
+     * 
+     * @param rewardObject L'oggetto da dare come ricompensa
+     */
+    public void setRewardObject(AdvObject rewardObject) {
+        this.rewardObject = rewardObject;
+    }
+    
+    /**
+     * Restituisce l'oggetto ricompensa.
+     * 
+     * @return L'oggetto ricompensa o null
+     */
+    public AdvObject getRewardObject() {
+        return rewardObject;
+    }
+    
+    /**
+     * Verifica se l'NPC ha un oggetto ricompensa.
+     * 
+     * @return true se ha un oggetto ricompensa
+     */
+    public boolean hasRewardObject() {
+        return rewardObject != null;
     }
 }

@@ -40,6 +40,8 @@ public class AdvObject implements Serializable {
     
     private boolean obscureImage = false;
 
+    private boolean isVisible = true;
+
 
     /**
      *
@@ -305,5 +307,13 @@ public class AdvObject implements Serializable {
 
     public void setObscureImage(boolean obscureImage) {
         this.obscureImage = obscureImage;
+    }
+
+    public boolean isVisible() {
+        return isVisible;
+    }
+
+    public void setVisible(boolean isVisible) {
+        this.isVisible = isVisible;
     }
 }

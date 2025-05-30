@@ -1,5 +1,7 @@
 package com.mycompany.poggioadventure.core;
 
+import com.mycompany.poggioadventure.core.levels.Question;
+import com.mycompany.poggioadventure.core.levels.Test;
 import com.mycompany.poggioadventure.model.AdvNPC;
 import com.mycompany.poggioadventure.model.AdvObject;
 import com.mycompany.poggioadventure.model.AdvObjectContainer;
@@ -8,6 +10,7 @@ import com.mycompany.poggioadventure.parser.CommandType;
 import com.mycompany.poggioadventure.persistence.ResourceLoader;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -77,16 +80,112 @@ public class GameMap implements Serializable{
 
         // Primo piano (indice 0)
         // Aggiungi un NPC alla stanza di ingresso
-        AdvNPC guido = new AdvNPC(1, "Guido", "Un simpatico nano segretario");
+        AdvNPC guido = new AdvNPC(1, "Guido", "Un simpatico nano segretario esperto di informatica");
         guido.setAlias(new String[] { "guido", "nano", "segretario" });
         guido.setImagePath(ResourceLoader.IMG_PATH.resolve("nano.png").toString());
 
+        // === CONFIGURAZIONE DIALOGHI ===
         // Dialogo iniziale
         guido.addFirstDialogueLine("Ciao! Benvenuto a Poggiolevante!");
-        guido.addFirstDialogueLine("Ho qui un oggetto che potrebbe esserti utile...");
-        // Dialogo successivo
-        guido.addSubsequentDialogueLine("Ben tornato! Spero che il post-it ti sia stato utile.");
-        guido.addSubsequentDialogueLine("Buona fortuna per la tua avventura!");
+        guido.addFirstDialogueLine("Sono Guido, l'esperto informatico del posto.");
+        guido.addFirstDialogueLine("Ho preparato un test di programmazione Java per te!");
+        guido.addFirstDialogueLine("Se lo superi, ti darò una chiave speciale...");
+        
+        // Dialogo dopo la prima interazione (prima del test)
+        guido.addSubsequentDialogueLine("Allora, sei pronto per il test di Java?");
+        guido.addSubsequentDialogueLine("Non preoccuparti, è più facile di quanto sembri!");
+
+        // === CREAZIONE DOMANDE DEL TEST ===
+        
+        // Domanda 1: Concetti base Java
+        List<String> options1 = Arrays.asList(
+                "Un linguaggio di programmazione orientato agli oggetti",
+                "Un sistema operativo per computer",
+                "Un database relazionale",
+                "Un framework per applicazioni web"
+        );
+        Question question1 = new Question(
+                "Cos'è Java?",
+                options1,
+                0
+        );
+
+        // Domanda 2: Sintassi Java
+        List<String> options2 = Arrays.asList(
+                "public static void main(String[] args)",
+                "private static void main(String[] args)",
+                "public void main(String[] args)",
+                "static void main(String[] args)"
+        );
+        Question question2 = new Question(
+                "Qual è la firma corretta del metodo main in Java?",
+                options2,
+                0
+        );
+
+        // Domanda 3: OOP in Java
+        List<String> options3 = Arrays.asList(
+                "Astrazione, Incapsulamento, Ereditarietà, Polimorfismo",
+                "Astrazione, Composizione, Aggregazione, Polimorfismo",
+                "Incapsulamento, Modularità, Ereditarietà, Astrazione",
+                "Composizione, Incapsulamento, Modularità, Polimorfismo"
+        );
+        Question question3 = new Question(
+                "Quali sono i quattro pilastri della programmazione orientata agli oggetti?",
+                options3,
+                0
+        );
+
+        // Domanda 4: Gestione memoria
+        List<String> options4 = Arrays.asList(
+                "Garbage Collection automatico",
+                "Gestione manuale con malloc/free",
+                "Riferimenti a puntatori",
+                "Stack Overflow automatico"
+        );
+        Question question4 = new Question(
+                "Come viene gestita la memoria in Java?",
+                options4,
+                0
+        );
+
+        // Domanda 5: Eccezioni
+        List<String> options5 = Arrays.asList(
+                "try-catch-finally",
+                "if-else-endif", 
+                "begin-rescue-end",
+                "error-handle-continue"
+        );
+        Question question5 = new Question(
+                "Quale struttura si usa in Java per gestire le eccezioni?",
+                options5,
+                0
+        );
+
+        // Lista delle domande
+        List<Question> questions = Arrays.asList(question1, question2, question3, question4, question5);
+
+        // === CREAZIONE DEL TEST ===
+        Test javaTest = new Test(
+                "Test di Competenza Java Basilare", // Nome del test
+                questions,                            // Lista domande
+                2,                                   // Massimo 2 errori consentiti su 5 domande
+                "🎉 Fantastico! Hai dimostrato eccellenti competenze in Java! Sei un vero programmatore!",
+                "😞 Non hai superato il test. Studia ancora i fondamenti di Java e riprova quando ti senti pronto!"
+        );
+
+        // === CREAZIONE OGGETTO RICOMPENSA ===
+        AdvObject chiaveJava = new AdvObject(100, "chiave-java", 
+                "Una chiave dorata con il logo di Java. Emana un'aura di conoscenza informatica.");
+        chiaveJava.setAlias(new String[]{"chiave", "chiave-dorata", "key", "java-key"});
+        chiaveJava.setPickupable(true);
+        
+        // Puoi anche aggiungere un'immagine alla chiave
+        // chiaveJava.setImagePath(ResourceLoader.IMG_PATH.resolve("chiave_java.png").toString());
+
+        // === ASSEGNAZIONE TEST E RICOMPENSA ALL'NPC ===
+        guido.setTest(javaTest);
+        guido.setRewardObject(chiaveJava);
 
         // Aggiungi un oggetto che l'NPC può dare al giocatore
         AdvObject post_it = new AdvObject(2, "post-it", "Un post-it con delle istruzioni.");

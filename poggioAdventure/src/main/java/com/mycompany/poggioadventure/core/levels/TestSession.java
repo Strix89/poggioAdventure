@@ -1,0 +1,253 @@
+package com.mycompany.poggioadventure.core.levels;
+
+import com.mycompany.poggioadventure.model.AdvNPC;
+import com.mycompany.poggioadventure.ui.InputHandler;
+import com.mycompany.poggioadventure.ui.OutputHandler;
+import com.mycompany.poggioadventure.ui.ColorText;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Gestisce una sessione di test in corso, incluso lo stato corrente e il conteggio errori.
+ */
+public class TestSession implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
+    private final Test test;
+    private final AdvNPC npc;
+    private int currentQuestionIndex;
+    private final List<Integer> answers;
+    private int wrongAnswersCount;
+    private boolean isActive;
+    private boolean isCompleted;
+    private boolean isFailed;
+    
+    public TestSession(Test test, AdvNPC npc) {
+        this.test = test;
+        this.npc = npc;
+        this.currentQuestionIndex = 0;
+        this.answers = new ArrayList<>();
+        this.wrongAnswersCount = 0;
+        this.isActive = true;
+        this.isCompleted = false;
+        this.isFailed = false;
+    }
+    
+    public Test getTest() {
+        return test;
+    }
+    
+    public AdvNPC getNpc() {
+        return npc;
+    }
+    
+    public int getCurrentQuestionIndex() {
+        return currentQuestionIndex;
+    }
+    
+    public Question getCurrentQuestion() {
+        if (currentQuestionIndex < test.getQuestions().size()) {
+            return test.getQuestions().get(currentQuestionIndex);
+        }
+        return null;
+    }
+    
+    public boolean hasNextQuestion() {
+        return currentQuestionIndex < test.getQuestions().size();
+    }
+    
+    public int getWrongAnswersCount() {
+        return wrongAnswersCount;
+    }
+    
+    public int getRemainingErrors() {
+        return test.getMaxWrongAnswers() - wrongAnswersCount;
+    }
+    
+    /**
+     * Aggiunge una risposta e controlla se il test continua o termina.
+     * 
+     * @param answerIndex Indice della risposta data (0-based)
+     * @return true se la risposta era corretta, false altrimenti
+     */
+    public boolean addAnswer(int answerIndex) {
+        answers.add(answerIndex);
+        Question currentQuestion = test.getQuestions().get(currentQuestionIndex);
+        boolean isCorrect = currentQuestion.isCorrectAnswer(answerIndex);
+        
+        if (!isCorrect) {
+            wrongAnswersCount++;
+            
+            // Controlla se ha superato il limite di errori
+            if (test.isFailed(wrongAnswersCount)) {
+                isFailed = true;
+                isActive = false;
+                isCompleted = true;
+                return false;
+            }
+        }
+        
+        currentQuestionIndex++;
+        
+        // Controlla se ha finito tutte le domande
+        if (!hasNextQuestion()) {
+            isCompleted = true;
+            isActive = false;
+        }
+        
+        return isCorrect;
+    }
+    
+    public List<Integer> getAnswers() {
+        return new ArrayList<>(answers);
+    }
+    
+    public boolean isActive() {
+        return isActive;
+    }
+    
+    public boolean isCompleted() {
+        return isCompleted;
+    }
+    
+    public boolean isFailed() {
+        return isFailed;
+    }
+    
+    public void deactivate() {
+        isActive = false;
+    }
+    
+    /**
+     * Genera il testo formattato per la domanda corrente con opzioni numerate.
+     */
+    public String getCurrentQuestionText() {
+        if (!hasNextQuestion()) {
+            return "Test completato!";
+        }
+        
+        Question question = getCurrentQuestion();
+        StringBuilder sb = new StringBuilder();
+        
+        sb.append("\n=== ").append(test.getTestName()).append(" ===\n");
+        sb.append("Domanda ").append(currentQuestionIndex + 1)
+          .append(" di ").append(test.getQuestions().size()).append("\n");
+        sb.append("Errori: ").append(wrongAnswersCount)
+          .append("/").append(test.getMaxWrongAnswers()).append("\n\n");
+        
+        sb.append(question.getQuestionText()).append("\n\n");
+        
+        // Aggiungi le opzioni numerate
+        for (int i = 0; i < question.getOptions().size(); i++) {
+            sb.append(i + 1).append(" - ").append(question.getOptions().get(i)).append("\n");
+        }
+        
+        sb.append("\nDigita il numero della tua risposta (1-")
+          .append(question.getOptions().size()).append("): ");
+        
+        return sb.toString();
+    }
+    
+    /**
+     * Esegue il test completo bloccando il gioco fino al completamento.
+     * 
+     * @param outputHandler Gestore dell'output per mostrare domande e risultati
+     * @param inputHandler Gestore dell'input per ricevere le risposte
+     * @return true se il test è stato superato, false altrimenti
+     */
+    public boolean executeTest(OutputHandler outputHandler, InputHandler inputHandler) {
+        outputHandler.writeln("\n" + "=".repeat(50), ColorText.LIME);
+        outputHandler.writeln("🎓 " + test.getTestName() + " 🎓", ColorText.LIME);
+        outputHandler.writeln("=".repeat(50), ColorText.LIME);
+        outputHandler.writeln(npc.getName() + ": Cominciamo!!", ColorText.WHITE);
+        outputHandler.writeln("Puoi commettere massimo " + test.getMaxWrongAnswers() + " errori.", ColorText.WARNING);
+        outputHandler.writeln("Digita 'q' per abbandonare il test.\n", ColorText.WHITE);
+        
+        while (hasNextQuestion() && isActive) {
+            // Mostra la domanda corrente
+            outputHandler.writeln(getCurrentQuestionText(), ColorText.SUNFLOWER);
+            
+            // Ottieni input dall'utente
+            String userInput = inputHandler.getInput().trim();
+            
+            // Controlla se l'utente vuole abbandonare
+            if ("quit".equalsIgnoreCase(userInput) || "esci".equalsIgnoreCase(userInput) || "q".equalsIgnoreCase(userInput)) {
+                outputHandler.writeln("Hai abbandonato il test.", ColorText.ERROR);
+                deactivate();
+                return false;
+            }
+            
+            // Prova a interpretare come numero
+            try {
+                int answerNumber = Integer.parseInt(userInput);
+                Question currentQuestion = getCurrentQuestion();
+                
+                // Valida l'input
+                if (answerNumber < 1 || answerNumber > currentQuestion.getOptions().size()) {
+                    outputHandler.writeln("Risposta non valida! Inserisci un numero da 1 a " + 
+                                        currentQuestion.getOptions().size() + ".", ColorText.ERROR);
+                    continue;
+                }
+                
+                // Processa la risposta
+                int answerIndex = answerNumber - 1;
+                boolean isCorrect = addAnswer(answerIndex);
+                
+                if (isCorrect) {
+                    outputHandler.writeln("✅ Risposta corretta!", ColorText.SUCCESS);
+                } else {
+                    outputHandler.writeln("❌ Risposta sbagliata. La risposta corretta era: " + 
+                                        (currentQuestion.getCorrectAnswerIndex() + 1) + " - " + 
+                                        currentQuestion.getOptions().get(currentQuestion.getCorrectAnswerIndex()), 
+                                        ColorText.ERROR);
+                    
+                    outputHandler.writeln("Errori: " + wrongAnswersCount + "/" + test.getMaxWrongAnswers(), 
+                                        ColorText.WARNING);
+                }
+                
+                outputHandler.writeln("");
+                
+                // Controlla se il test è fallito
+                if (isFailed) {
+                    outputHandler.writeln("🚫 TROPPI ERRORI! Il test è terminato.", ColorText.ERROR);
+                    break;
+                }
+                
+            } catch (NumberFormatException e) {
+                outputHandler.writeln("Input non valido! Inserisci solo il numero della risposta o 'quit' per abbandonare.", 
+                                    ColorText.ERROR);
+            }
+        }
+        
+        // Mostra risultato finale
+        showFinalResult(outputHandler);
+        
+        // Dai ricompensa se test superato
+        if (!isFailed && isCompleted) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Mostra il risultato finale del test.
+     */
+    private void showFinalResult(OutputHandler outputHandler) {
+        outputHandler.writeln("\n" + "=".repeat(50), ColorText.LIME);
+        outputHandler.writeln("📊 RISULTATO FINALE 📊", ColorText.LIME);
+        outputHandler.writeln("=".repeat(50), ColorText.LIME);
+        outputHandler.writeln("Errori commessi: " + wrongAnswersCount + "/" + test.getMaxWrongAnswers() + " consentiti", 
+                            ColorText.WHITE);
+        
+        if (isFailed) {
+            outputHandler.writeln("❌ FALLITO! " + test.getFailureMessage(), ColorText.ERROR);
+            npc.setTestCompleted(false);
+        } else {
+            outputHandler.writeln("✅ SUPERATO! " + test.getSuccessMessage(), ColorText.SUCCESS);
+            npc.setTestCompleted(true);;
+        }
+        outputHandler.writeln("=".repeat(50) + "\n", ColorText.LIME);
+    }
+}

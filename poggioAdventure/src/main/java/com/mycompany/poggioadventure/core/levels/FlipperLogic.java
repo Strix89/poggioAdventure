@@ -1,9 +1,8 @@
-package com.mycompany.poggioadventure.model;
+package com.mycompany.poggioadventure.core.levels;
 
-import com.mycompany.poggioadventure.core.GameContext;
 import com.mycompany.poggioadventure.core.abstracts.IFlipperCommandProcessor;
-import com.mycompany.poggioadventure.core.FlipperCommandProcessor;
 import com.mycompany.poggioadventure.core.utils.FlipperResult;
+import com.mycompany.poggioadventure.core.utils.GameContext;
 import com.mycompany.poggioadventure.ui.ColorText;
 import com.mycompany.poggioadventure.ui.gui.views.UI_Flipper;
 

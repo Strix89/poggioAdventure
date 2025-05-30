@@ -17,8 +17,8 @@ import com.mycompany.poggioadventure.model.Room;
 import java.util.ArrayList;
 import java.util.List;
 import com.mycompany.poggioadventure.core.abstracts.GameObservable;
+import com.mycompany.poggioadventure.core.utils.GameContext;
 import com.mycompany.poggioadventure.observers.GameObserver;
-import com.mycompany.poggioadventure.ui.OutputHandler;
 
 /**
  * ATTENZIONE: La descrizione del gioco è fatta in modo che qualsiasi gioco

@@ -1,14 +1,14 @@
 package com.mycompany.poggioadventure.observers;
 
-import com.mycompany.poggioadventure.core.GameContext;
 import com.mycompany.poggioadventure.core.abstracts.GameDescription;
+import com.mycompany.poggioadventure.core.levels.FlipperLogic;
+import com.mycompany.poggioadventure.core.utils.GameContext;
 import com.mycompany.poggioadventure.core.utils.Utils;
 import com.mycompany.poggioadventure.parser.ParserOutput;
 import com.mycompany.poggioadventure.ui.ColorText;
 import com.mycompany.poggioadventure.ui.cli.CLIInputHandler;
 import com.mycompany.poggioadventure.ui.gui.views.UI_Flipper;
 import com.mycompany.poggioadventure.model.AdvObject;
-import com.mycompany.poggioadventure.model.FlipperLogic;
 import com.mycompany.poggioadventure.parser.CommandType;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;

@@ -1,0 +1,99 @@
+2025-05-30 15:47:43.764 [main] INFO  c.m.poggioserver.PoggioServer - Avvio PoggioServer...
+2025-05-30 15:47:43.775 [main] INFO  c.m.poggioserver.PoggioServer - Inizializzazione DatabaseManager (tramite caricamento classe)...
+2025-05-30 15:47:43.777 [main] INFO  c.m.poggioserver.db.DatabaseManager - Inizializzazione statica di DatabaseManager in corso...
+2025-05-30 15:47:43.780 [main] DEBUG c.m.poggioserver.db.DatabaseManager - Caricamento proprietà da /db.properties
+2025-05-30 15:47:43.786 [main] INFO  c.m.poggioserver.db.DatabaseManager - File properties '/db.properties' caricato correttamente.
+2025-05-30 15:47:43.788 [main] DEBUG c.m.poggioserver.db.DatabaseManager - Configurazione HikariConfig...
+2025-05-30 15:47:43.798 [main] INFO  c.m.poggioserver.db.DatabaseManager - Configurazione HikariCP completata per pool 'PoggioPool'
+2025-05-30 15:47:43.798 [main] DEBUG c.m.poggioserver.db.DatabaseManager - Dettagli configurazione HikariCP: com.zaxxer.hikari.HikariConfig@65d6b83b
+2025-05-30 15:47:44.328 [main] INFO  c.m.poggioserver.db.DatabaseManager - Pool di connessioni HikariDataSource ('PoggioPool') creato.
+2025-05-30 15:47:44.328 [main] INFO  c.m.poggioserver.db.DatabaseManager - Verifica/Creazione dello schema del database (tabella 'players')...
+2025-05-30 15:47:44.331 [main] INFO  c.m.poggioserver.db.DatabaseManager - Tabella 'players' verificata/creata con successo.
+2025-05-30 15:47:44.348 [main] INFO  c.m.poggioserver.db.DatabaseManager - Inizializzazione statica di DatabaseManager completata con successo.
+2025-05-30 15:47:44.348 [main] INFO  c.m.poggioserver.PoggioServer - DatabaseManager caricato correttamente.
+2025-05-30 15:47:44.348 [main] INFO  c.m.poggioserver.PoggioServer - Inizializzazione DatabaseManager completata.
+2025-05-30 15:47:44.348 [main] INFO  c.m.poggioserver.PoggioServer - Configurazione applicazione JAX-RS...
+2025-05-30 15:47:44.425 [main] INFO  c.m.poggioserver.PoggioServer - Applicazione JAX-RS configurata. Risorse, Feature e Filtri registrati: [class org.glassfish.jersey.gson.JsonGsonFeature, class com.mycompany.poggioserver.resources.PlayerResource, class org.glassfish.jersey.media.multipart.MultiPartFeature, class com.mycompany.poggioserver.filters.ApiKeyFilter]
+2025-05-30 15:47:44.425 [main] INFO  c.m.poggioserver.PoggioServer - Avvio server HTTP Grizzly su http://0.0.0.0:8080/
+2025-05-30 15:47:45.719 [main] INFO  c.m.poggioserver.PoggioServer - Server Grizzly avviato con successo.
+2025-05-30 15:47:45.719 [main] INFO  c.m.poggioserver.PoggioServer - Indirizzo IP locale rilevato: 10.10.11.247. Il server potrebbe essere raggiungibile (dalla rete locale) a: http://10.10.11.247:8080
+2025-05-30 15:47:45.721 [main] INFO  c.m.poggioserver.PoggioServer - File properties del database utilizzato: file:/C:/Users/tomma/Desktop/MAP/MAP_ExamProject/poggioAdventure/poggioServer/target/classes/db.properties
+2025-05-30 15:47:45.721 [main] INFO  c.m.poggioserver.PoggioServer - Registrazione shutdown hook per chiusura pulita...
+2025-05-30 15:47:45.721 [main] INFO  c.m.poggioserver.PoggioServer - Server PoggioServer avviato e in ascolto su http://0.0.0.0:8080/. Premi INVIO per fermare...
+2025-05-30 15:48:50.284 [grizzly-http-server-0] DEBUG c.m.p.filters.ApiKeyFilter - Controllo API Key per richiesta a URI: players/tommyboy. Header 'X-API-Key' ricevuto: Z10_F4_WO4H
+2025-05-30 15:48:50.284 [grizzly-http-server-0] DEBUG c.m.p.filters.ApiKeyFilter - API Key valida. Accesso consentito per richiesta a URI: players/tommyboy
+2025-05-30 15:48:50.286 [grizzly-http-server-0] INFO  c.m.p.resources.PlayerResource - Ricevuta richiesta GET /players/tommyboy
+2025-05-30 15:48:50.300 [grizzly-http-server-0] DEBUG c.m.poggioserver.db.PlayerDAOImpl - Giocatore con username 'tommyboy' non trovato nel database.
+2025-05-30 15:48:50.300 [grizzly-http-server-0] WARN  c.m.p.resources.PlayerResource - Richiesta GET per utente non esistente: tommyboy
+2025-05-30 15:50:45.148 [grizzly-http-server-1] DEBUG c.m.p.filters.ApiKeyFilter - Controllo API Key per richiesta a URI: players/tommyboy. Header 'X-API-Key' ricevuto: Z10_F4_WO4H
+2025-05-30 15:50:45.148 [grizzly-http-server-1] DEBUG c.m.p.filters.ApiKeyFilter - API Key valida. Accesso consentito per richiesta a URI: players/tommyboy
+2025-05-30 15:50:45.148 [grizzly-http-server-1] INFO  c.m.p.resources.PlayerResource - Ricevuta richiesta GET /players/tommyboy
+2025-05-30 15:50:45.148 [grizzly-http-server-1] DEBUG c.m.poggioserver.db.PlayerDAOImpl - Giocatore con username 'tommyboy' non trovato nel database.
+2025-05-30 15:50:45.148 [grizzly-http-server-1] WARN  c.m.p.resources.PlayerResource - Richiesta GET per utente non esistente: tommyboy
+2025-05-30 15:52:09.827 [grizzly-http-server-2] DEBUG c.m.p.filters.ApiKeyFilter - Controllo API Key per richiesta a URI: players/tommyboy. Header 'X-API-Key' ricevuto: Z10_F4_WO4H
+2025-05-30 15:52:09.830 [grizzly-http-server-2] DEBUG c.m.p.filters.ApiKeyFilter - API Key valida. Accesso consentito per richiesta a URI: players/tommyboy
+2025-05-30 15:52:09.830 [grizzly-http-server-2] INFO  c.m.p.resources.PlayerResource - Ricevuta richiesta GET /players/tommyboy
+2025-05-30 15:52:09.830 [grizzly-http-server-2] DEBUG c.m.poggioserver.db.PlayerDAOImpl - Giocatore con username 'tommyboy' non trovato nel database.
+2025-05-30 15:52:09.830 [grizzly-http-server-2] WARN  c.m.p.resources.PlayerResource - Richiesta GET per utente non esistente: tommyboy
+2025-05-30 15:59:20.898 [grizzly-http-server-3] DEBUG c.m.p.filters.ApiKeyFilter - Controllo API Key per richiesta a URI: players/tommyboy. Header 'X-API-Key' ricevuto: Z10_F4_WO4H
+2025-05-30 15:59:20.898 [grizzly-http-server-3] DEBUG c.m.p.filters.ApiKeyFilter - API Key valida. Accesso consentito per richiesta a URI: players/tommyboy
+2025-05-30 15:59:20.898 [grizzly-http-server-3] INFO  c.m.p.resources.PlayerResource - Ricevuta richiesta GET /players/tommyboy
+2025-05-30 15:59:20.898 [grizzly-http-server-3] DEBUG c.m.poggioserver.db.PlayerDAOImpl - Giocatore con username 'tommyboy' non trovato nel database.
+2025-05-30 15:59:20.898 [grizzly-http-server-3] WARN  c.m.p.resources.PlayerResource - Richiesta GET per utente non esistente: tommyboy
+2025-05-30 16:04:51.477 [grizzly-http-server-4] DEBUG c.m.p.filters.ApiKeyFilter - Controllo API Key per richiesta a URI: players/tommyboy. Header 'X-API-Key' ricevuto: Z10_F4_WO4H
+2025-05-30 16:04:51.477 [grizzly-http-server-4] DEBUG c.m.p.filters.ApiKeyFilter - API Key valida. Accesso consentito per richiesta a URI: players/tommyboy
+2025-05-30 16:04:51.477 [grizzly-http-server-4] INFO  c.m.p.resources.PlayerResource - Ricevuta richiesta GET /players/tommyboy
+2025-05-30 16:04:51.477 [grizzly-http-server-4] DEBUG c.m.poggioserver.db.PlayerDAOImpl - Giocatore con username 'tommyboy' non trovato nel database.
+2025-05-30 16:04:51.477 [grizzly-http-server-4] WARN  c.m.p.resources.PlayerResource - Richiesta GET per utente non esistente: tommyboy
+2025-05-30 16:06:31.213 [grizzly-http-server-5] DEBUG c.m.p.filters.ApiKeyFilter - Controllo API Key per richiesta a URI: players/awdwad. Header 'X-API-Key' ricevuto: Z10_F4_WO4H
+2025-05-30 16:06:31.213 [grizzly-http-server-5] DEBUG c.m.p.filters.ApiKeyFilter - API Key valida. Accesso consentito per richiesta a URI: players/awdwad
+2025-05-30 16:06:31.213 [grizzly-http-server-5] INFO  c.m.p.resources.PlayerResource - Ricevuta richiesta GET /players/awdwad
+2025-05-30 16:06:31.213 [grizzly-http-server-5] DEBUG c.m.poggioserver.db.PlayerDAOImpl - Giocatore con username 'awdwad' non trovato nel database.
+2025-05-30 16:06:31.213 [grizzly-http-server-5] WARN  c.m.p.resources.PlayerResource - Richiesta GET per utente non esistente: awdwad
+2025-05-30 16:11:51.536 [grizzly-http-server-6] DEBUG c.m.p.filters.ApiKeyFilter - Controllo API Key per richiesta a URI: players/awdwada. Header 'X-API-Key' ricevuto: Z10_F4_WO4H
+2025-05-30 16:11:51.538 [grizzly-http-server-6] DEBUG c.m.p.filters.ApiKeyFilter - API Key valida. Accesso consentito per richiesta a URI: players/awdwada
+2025-05-30 16:11:51.538 [grizzly-http-server-6] INFO  c.m.p.resources.PlayerResource - Ricevuta richiesta GET /players/awdwada
+2025-05-30 16:11:51.538 [grizzly-http-server-6] DEBUG c.m.poggioserver.db.PlayerDAOImpl - Giocatore con username 'awdwada' non trovato nel database.
+2025-05-30 16:11:51.538 [grizzly-http-server-6] WARN  c.m.p.resources.PlayerResource - Richiesta GET per utente non esistente: awdwada
+2025-05-30 16:25:05.948 [main] INFO  c.m.poggioserver.PoggioServer - Avvio PoggioServer...
+2025-05-30 16:25:05.952 [main] INFO  c.m.poggioserver.PoggioServer - Inizializzazione DatabaseManager (tramite caricamento classe)...
+2025-05-30 16:25:05.954 [main] INFO  c.m.poggioserver.db.DatabaseManager - Inizializzazione statica di DatabaseManager in corso...
+2025-05-30 16:25:05.954 [main] DEBUG c.m.poggioserver.db.DatabaseManager - Caricamento proprietà da /db.properties
+2025-05-30 16:25:05.956 [main] INFO  c.m.poggioserver.db.DatabaseManager - File properties '/db.properties' caricato correttamente.
+2025-05-30 16:25:05.956 [main] DEBUG c.m.poggioserver.db.DatabaseManager - Configurazione HikariConfig...
+2025-05-30 16:25:05.963 [main] INFO  c.m.poggioserver.db.DatabaseManager - Configurazione HikariCP completata per pool 'PoggioPool'
+2025-05-30 16:25:05.963 [main] DEBUG c.m.poggioserver.db.DatabaseManager - Dettagli configurazione HikariCP: com.zaxxer.hikari.HikariConfig@65d6b83b
+2025-05-30 16:25:10.444 [main] INFO  c.m.poggioserver.db.DatabaseManager - Pool di connessioni HikariDataSource ('PoggioPool') creato.
+2025-05-30 16:25:10.448 [main] INFO  c.m.poggioserver.db.DatabaseManager - Verifica/Creazione dello schema del database (tabella 'players')...
+2025-05-30 16:25:10.450 [main] INFO  c.m.poggioserver.db.DatabaseManager - Tabella 'players' verificata/creata con successo.
+2025-05-30 16:25:10.455 [main] INFO  c.m.poggioserver.db.DatabaseManager - Inizializzazione statica di DatabaseManager completata con successo.
+2025-05-30 16:25:10.455 [main] INFO  c.m.poggioserver.PoggioServer - DatabaseManager caricato correttamente.
+2025-05-30 16:25:10.455 [main] INFO  c.m.poggioserver.PoggioServer - Inizializzazione DatabaseManager completata.
+2025-05-30 16:25:10.455 [main] INFO  c.m.poggioserver.PoggioServer - Configurazione applicazione JAX-RS...
+2025-05-30 16:25:10.502 [main] INFO  c.m.poggioserver.PoggioServer - Applicazione JAX-RS configurata. Risorse, Feature e Filtri registrati: [class com.mycompany.poggioserver.resources.PlayerResource, class org.glassfish.jersey.gson.JsonGsonFeature, class com.mycompany.poggioserver.filters.ApiKeyFilter, class org.glassfish.jersey.media.multipart.MultiPartFeature]
+2025-05-30 16:25:10.502 [main] INFO  c.m.poggioserver.PoggioServer - Avvio server HTTP Grizzly su http://0.0.0.0:8080/
+2025-05-30 16:25:11.512 [main] INFO  c.m.poggioserver.PoggioServer - Server Grizzly avviato con successo.
+2025-05-30 16:25:11.512 [main] INFO  c.m.poggioserver.PoggioServer - Indirizzo IP locale rilevato: 10.10.11.247. Il server potrebbe essere raggiungibile (dalla rete locale) a: http://10.10.11.247:8080
+2025-05-30 16:25:11.512 [main] INFO  c.m.poggioserver.PoggioServer - File properties del database utilizzato: file:/C:/Users/tomma/Desktop/MAP/MAP_ExamProject/poggioAdventure/poggioServer/target/classes/db.properties
+2025-05-30 16:25:11.519 [main] INFO  c.m.poggioserver.PoggioServer - Registrazione shutdown hook per chiusura pulita...
+2025-05-30 16:25:11.519 [main] INFO  c.m.poggioserver.PoggioServer - Server PoggioServer avviato e in ascolto su http://0.0.0.0:8080/. Premi INVIO per fermare...
+2025-05-30 16:25:16.584 [grizzly-http-server-0] DEBUG c.m.p.filters.ApiKeyFilter - Controllo API Key per richiesta a URI: players/dawdwad. Header 'X-API-Key' ricevuto: Z10_F4_WO4H
+2025-05-30 16:25:16.584 [grizzly-http-server-0] DEBUG c.m.p.filters.ApiKeyFilter - API Key valida. Accesso consentito per richiesta a URI: players/dawdwad
+2025-05-30 16:25:16.584 [grizzly-http-server-0] INFO  c.m.p.resources.PlayerResource - Ricevuta richiesta GET /players/dawdwad
+2025-05-30 16:25:16.602 [grizzly-http-server-0] DEBUG c.m.poggioserver.db.PlayerDAOImpl - Giocatore con username 'dawdwad' non trovato nel database.
+2025-05-30 16:25:16.602 [grizzly-http-server-0] WARN  c.m.p.resources.PlayerResource - Richiesta GET per utente non esistente: dawdwad
+2025-05-30 16:26:19.219 [grizzly-http-server-1] DEBUG c.m.p.filters.ApiKeyFilter - Controllo API Key per richiesta a URI: players/tommyboy. Header 'X-API-Key' ricevuto: Z10_F4_WO4H
+2025-05-30 16:26:19.219 [grizzly-http-server-1] DEBUG c.m.p.filters.ApiKeyFilter - API Key valida. Accesso consentito per richiesta a URI: players/tommyboy
+2025-05-30 16:26:19.219 [grizzly-http-server-1] INFO  c.m.p.resources.PlayerResource - Ricevuta richiesta GET /players/tommyboy
+2025-05-30 16:26:19.219 [grizzly-http-server-1] DEBUG c.m.poggioserver.db.PlayerDAOImpl - Giocatore con username 'tommyboy' non trovato nel database.
+2025-05-30 16:26:19.219 [grizzly-http-server-1] WARN  c.m.p.resources.PlayerResource - Richiesta GET per utente non esistente: tommyboy
+2025-05-30 16:27:11.011 [grizzly-http-server-2] DEBUG c.m.p.filters.ApiKeyFilter - Controllo API Key per richiesta a URI: players/tommyboy. Header 'X-API-Key' ricevuto: Z10_F4_WO4H
+2025-05-30 16:27:11.011 [grizzly-http-server-2] DEBUG c.m.p.filters.ApiKeyFilter - API Key valida. Accesso consentito per richiesta a URI: players/tommyboy
+2025-05-30 16:27:11.011 [grizzly-http-server-2] INFO  c.m.p.resources.PlayerResource - Ricevuta richiesta GET /players/tommyboy
+2025-05-30 16:27:11.011 [grizzly-http-server-2] DEBUG c.m.poggioserver.db.PlayerDAOImpl - Giocatore con username 'tommyboy' non trovato nel database.
+2025-05-30 16:27:11.011 [grizzly-http-server-2] WARN  c.m.p.resources.PlayerResource - Richiesta GET per utente non esistente: tommyboy
+2025-05-30 16:49:15.277 [grizzly-http-server-3] DEBUG c.m.p.filters.ApiKeyFilter - Controllo API Key per richiesta a URI: players/tommyboy. Header 'X-API-Key' ricevuto: Z10_F4_WO4H
+2025-05-30 16:49:15.279 [grizzly-http-server-3] DEBUG c.m.p.filters.ApiKeyFilter - API Key valida. Accesso consentito per richiesta a URI: players/tommyboy
+2025-05-30 16:49:15.279 [grizzly-http-server-3] INFO  c.m.p.resources.PlayerResource - Ricevuta richiesta GET /players/tommyboy
+2025-05-30 16:49:15.279 [grizzly-http-server-3] DEBUG c.m.poggioserver.db.PlayerDAOImpl - Giocatore con username 'tommyboy' non trovato nel database.
+2025-05-30 16:49:15.279 [grizzly-http-server-3] WARN  c.m.p.resources.PlayerResource - Richiesta GET per utente non esistente: tommyboy

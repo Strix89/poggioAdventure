@@ -106,10 +106,8 @@ public class GUIOutputHandler implements OutputHandler {
             Image scaled = scaleImage(image, 300);
             ImageIcon icon = new ImageIcon(scaled);
 
-            Style style = doc.addStyle("ImageStyle", null);
+            Style style = doc.addStyle("ImageStyle_" + imagePath.hashCode(), null); // Usa un nome di stile univoco
             StyleConstants.setIcon(style, icon);
-            // Rimuoviamo l'allineamento al centro
-            // StyleConstants.setAlignment(style, StyleConstants.ALIGN_CENTER);
 
             // Aggiunge una riga vuota prima dell'immagine
             if (doc.getLength() > 0 && !doc.getText(doc.getLength() - 1, 1).equals("\n")) {
@@ -121,7 +119,9 @@ public class GUIOutputHandler implements OutputHandler {
 
             // Aggiunge una riga vuota dopo l'immagine
             doc.insertString(doc.getLength(), "\n", null);
+            outputPane.setCaretPosition(doc.getLength()); // Assicurati che anche questo sia qui se necessario
         } catch (IOException | BadLocationException ex) {
+            // Considera di mostrare l'errore anche tramite SwingUtilities.invokeLater se GUIErrorHandler lo richiede
             new GUIErrorHandler().handleRecoverableError("Immagine non trovata: " + imagePath);
         }
     }

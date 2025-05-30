@@ -1,8 +1,7 @@
-package com.mycompany.poggioadventure.core;
+package com.mycompany.poggioadventure.core.utils;
 
 import java.util.List;
 import com.mycompany.poggioadventure.core.abstracts.GameDescription;
-import com.mycompany.poggioadventure.core.utils.StopWatch;
 import com.mycompany.poggioadventure.ui.ErrorHandler;
 import com.mycompany.poggioadventure.ui.InputHandler;
 import com.mycompany.poggioadventure.ui.OutputHandler;
