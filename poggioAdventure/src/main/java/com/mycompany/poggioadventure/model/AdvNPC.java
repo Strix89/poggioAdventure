@@ -28,7 +28,7 @@ public class AdvNPC extends AdvObject {
     
     /** Sessione di test attiva per questo NPC. */
     private TestSession activeTestSession = null;
-    
+
     /** Indica se il giocatore ha già completato il test. */
     private boolean testCompleted = false;
     
