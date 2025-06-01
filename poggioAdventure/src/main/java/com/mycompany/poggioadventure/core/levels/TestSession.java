@@ -1,6 +1,5 @@
 package com.mycompany.poggioadventure.core.levels;
 
-import com.mycompany.poggioadventure.model.AdvNPC;
 import com.mycompany.poggioadventure.ui.InputHandler;
 import com.mycompany.poggioadventure.ui.OutputHandler;
 import com.mycompany.poggioadventure.ui.gui.GUIInputHandler;
@@ -18,7 +17,6 @@ public class TestSession implements Serializable {
     private static final long serialVersionUID = 1L;
     
     private final Test test;
-    private final AdvNPC npc;
     private int currentQuestionIndex;
     private final List<Integer> answers;
     private int wrongAnswersCount;
@@ -26,9 +24,8 @@ public class TestSession implements Serializable {
     private boolean isCompleted;
     private boolean isFailed;
     
-    public TestSession(Test test, AdvNPC npc) {
+    public TestSession(Test test) {
         this.test = test;
-        this.npc = npc;
         this.currentQuestionIndex = 0;
         this.answers = new ArrayList<>();
         this.wrongAnswersCount = 0;
@@ -39,10 +36,6 @@ public class TestSession implements Serializable {
     
     public Test getTest() {
         return test;
-    }
-    
-    public AdvNPC getNpc() {
-        return npc;
     }
     
     public int getCurrentQuestionIndex() {
@@ -155,11 +148,11 @@ public class TestSession implements Serializable {
      * @param inputHandler Gestore dell'input per ricevere le risposte
      * @return true se il test è stato superato, false altrimenti
      */
-    public boolean executeTest(OutputHandler outputHandler, InputHandler inputHandler) {
+    public boolean executeTest(OutputHandler outputHandler, InputHandler inputHandler, String npcName) {
         outputHandler.writeln("=".repeat(50), ColorText.LIGHT_ORANGE);
         outputHandler.writeln("\t" + test.getTestName(), ColorText.LIGHT_ORANGE);
         outputHandler.writeln("=".repeat(50), ColorText.LIGHT_ORANGE);
-        outputHandler.writeln("[NPC]" + npc.getName() + "[/]: Cominciamo!", ColorText.WHITE);
+        outputHandler.writeln("[NPC]" + npcName + "[/]: Cominciamo!", ColorText.WHITE);
         outputHandler.writeln("Puoi commettere massimo " + test.getMaxWrongAnswers() + " errori.", ColorText.WARNING);
         outputHandler.writeln("Digita '[RED]q[/]', '[RED]quit[/]' o '[RED]esci[/]' per abbandonare il test.\n", ColorText.WHITE);
         
@@ -230,14 +223,14 @@ public class TestSession implements Serializable {
             }
         }
         
-        showFinalResult(outputHandler);
+        showFinalResult(outputHandler, npcName);
         return isCompleted && !isFailed;
     }
 
     /**
      * Mostra il risultato finale del test.
      */
-    private void showFinalResult(OutputHandler outputHandler) {
+    private void showFinalResult(OutputHandler outputHandler, String npcName) {
         outputHandler.writeln("\n" + "=".repeat(60), ColorText.LIGHT_ORANGE);
         outputHandler.writeln("RISULTATO FINALE", ColorText.LIGHT_ORANGE);
         outputHandler.writeln("=".repeat(60), ColorText.LIGHT_ORANGE);
@@ -245,14 +238,11 @@ public class TestSession implements Serializable {
                             ColorText.WHITE);
         
         if (isFailed) {
-            outputHandler.writeln("[ERROR]❌[/] FALLITO! [NPC]" + npc.getName() + "[/]: " + test.getFailureMessage(), ColorText.WHITE);
-            npc.setTestCompleted(false);
+            outputHandler.writeln("[ERROR]❌[/] FALLITO! [NPC]" + npcName + "[/]: " + test.getFailureMessage(), ColorText.WHITE);
         } else if (isCompleted) {
-            outputHandler.writeln("[SUCCESS]✅[/] [NPC]" + npc.getName() + "[/]: " + test.getSuccessMessage(), ColorText.WHITE);
-            npc.setTestCompleted(true);
+            outputHandler.writeln("[SUCCESS]✅[/] [NPC]" + npcName + "[/]: " + test.getSuccessMessage(), ColorText.WHITE);
         } else {
             outputHandler.writeln("ℹ️ TEST NON COMPLETATO.", ColorText.WARNING);
-            npc.setTestCompleted(false);
         }
         outputHandler.writeln("=".repeat(60) + "\n", ColorText.LIGHT_ORANGE);
     }

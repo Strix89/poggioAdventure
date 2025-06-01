@@ -156,7 +156,7 @@ public class AdvNPC extends AdvObject {
             return false;
         }
         
-        this.activeTestSession = new TestSession(test, this);
+        this.activeTestSession = new TestSession(test);
         return true;
     }
     

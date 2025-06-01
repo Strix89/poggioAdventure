@@ -76,10 +76,12 @@ public class TalkObserver implements GameObserver, Serializable {
 
                                 boolean testPassed = npc.getActiveTestSession().executeTest(
                                     gameContext.getOutputHandler(), 
-                                    gameContext.getInputHandler());
+                                    gameContext.getInputHandler(),
+                                    npc.getName());
                                 
                                 if (testPassed && npc.hasRewardObject()) {
                                     description.getInventory().add(npc.getRewardObject());
+                                    npc.setTestCompleted(testPassed);
                                 }
                             }
                         }
