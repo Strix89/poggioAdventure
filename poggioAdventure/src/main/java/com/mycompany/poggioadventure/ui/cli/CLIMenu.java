@@ -13,12 +13,13 @@ import com.mycompany.poggioadventure.core.abstracts.MenuManager; // Interfaccia 
 import com.mycompany.poggioadventure.core.utils.PoggioClientJersey; // Client per l'API del server
 import com.mycompany.poggioadventure.persistence.LoggerInput; // Gestore/Logger per input/eventi
 import com.mycompany.poggioadventure.persistence.RankingEntryDTO; // DTO per i dati della classifica
-
+import com.mycompany.poggioadventure.persistence.ResourceLoader;
 // Import interfacce/classi UI e gestione errori
 import com.mycompany.poggioadventure.ui.InputHandler; // Interfaccia per gestione input
 import com.mycompany.poggioadventure.ui.OutputHandler; // Interfaccia per gestione output
 import com.mycompany.poggioadventure.ui.ErrorHandler; // Interfaccia per gestione errori
 
+import java.io.IOException;
 // Import standard Java
 import java.util.List; // Per gestire liste (es. lista salvataggi, classifica)
 
@@ -62,28 +63,56 @@ public class CLIMenu implements MenuManager {
         this.output = new CLIOutputHandler();
         this.scanner = new CLIInputHandler();
         this.errorHan = new CLIErrorHandler();
+
+        // Carica le risorse necessarie per l'interfaccia CLI
+        try {
+            ResourceLoader.loadResourcesForCLI();
+        } catch (IOException ex) {
+            errorHan.handleFatalError("ERRORE: Inizializzazione risorse CLI fallita", ex);
+            Utils.exitApplication(Utils.EXIT_CODE_RESOURCE_ERROR);
+        }
     }
 
     @Override
     public void showMainMenu() {
         Thread mainThread = Thread.currentThread();
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            output.writeln("\nUscita dal gioco...", ColorText.CRIMSON);
+            output.writeln("\n\nUscita dal gioco...\n", ColorText.CRIMSON);
             mainThread.interrupt();
         }));
-        // Stampa il titolo del gioco una volta all'avvio del menu
-        output.writeln("\n[BRIGHT_RED]=================[/] [BRIGHT_BLUE]POGGIO ADVENTURE[/] [BRIGHT_RED]=================[/]", ColorText.NAVY);
+        
+        // ASCII Art colorata
+        output.writeln("", ColorText.WHITE);
+        output.writeln("                ██████╗  ██████╗  ██████╗  ██████╗ ██╗ ██████╗               ", ColorText.BRIGHT_RED);
+        output.writeln("                ██╔══██╗██╔═══██╗██╔════╝ ██╔════╝ ██║██╔═══██╗              ", ColorText.BRIGHT_RED);
+        output.writeln("                ██████╔╝██║   ██║██║  ███╗██║  ███╗██║██║   ██║              ", ColorText.BRIGHT_RED);
+        output.writeln("                ██╔═══╝ ██║   ██║██║   ██║██║   ██║██║██║   ██║              ", ColorText.BRIGHT_RED);
+        output.writeln("                ██║     ╚██████╔╝╚██████╔╝╚██████╔╝██║╚██████╔╝              ", ColorText.BRIGHT_RED);
+        output.writeln("                ╚═╝      ╚═════╝  ╚═════╝  ╚═════╝ ╚═╝ ╚═════╝               ", ColorText.BRIGHT_RED);
+        output.writeln("                                                                             ", ColorText.WHITE);
+        output.writeln(" █████╗ ██████╗ ██╗   ██╗███████╗███╗   ██╗████████╗██╗   ██╗██████╗ ███████╗", ColorText.BRIGHT_BLUE);
+        output.writeln("██╔══██╗██╔══██╗██║   ██║██╔════╝████╗  ██║╚══██╔══╝██║   ██║██╔══██╗██╔════╝", ColorText.BRIGHT_BLUE);
+        output.writeln("███████║██║  ██║██║   ██║█████╗  ██╔██╗ ██║   ██║   ██║   ██║██████╔╝█████╗  ", ColorText.BRIGHT_BLUE);
+        output.writeln("██╔══██║██║  ██║╚██╗ ██╔╝██╔══╝  ██║╚██╗██║   ██║   ██║   ██║██╔══██╗██╔══╝  ", ColorText.BRIGHT_BLUE);
+        output.writeln("██║  ██║██████╔╝ ╚████╔╝ ███████╗██║ ╚████║   ██║   ╚██████╔╝██║  ██║███████╗", ColorText.BRIGHT_BLUE);
+        output.writeln("╚═╝  ╚═╝╚═════╝   ╚═══╝  ╚══════╝╚═╝  ╚═══╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝╚══════╝", ColorText.BRIGHT_BLUE);
+        output.writeln("                                                                             ", ColorText.WHITE);
+        
+        // Titolo colorato: POGGIO in blu, ADVENTURE in rosso
+        output.write("\n[BRIGHT_RED]=================================[/] [BRIGHT_BLUE]TEXT[/][WHITE] -[/]", ColorText.NAVY);
+        output.write(" [BRIGHT_RED]GAME[/]", ColorText.NAVY);
+        output.writeln(" [BRIGHT_RED]================================[/]", ColorText.NAVY);
 
         // Loop infinito per mostrare ripetutamente il menu principale
         try{
             while(true) {
                 // Stampa le opzioni del menu
                 output.writeln("\nMenu Principale:", ColorText.WHITE);
-                output.writeln("[BRIGHT_YELLOW]1)[/] Nuova Partita", ColorText.WHITE);
-                output.writeln("[BRIGHT_YELLOW]2)[/] Carica Partita", ColorText.WHITE);
-                output.writeln("[BRIGHT_YELLOW]3)[/] Classifica", ColorText.WHITE);
+                output.writeln("[YELLOW]1)[/] Nuova Partita", ColorText.WHITE);
+                output.writeln("[YELLOW]2)[/] Carica Partita", ColorText.WHITE);
+                output.writeln("[YELLOW]3)[/] Classifica", ColorText.WHITE);
                 output.writeln("[BRIGHT_YELLOW]4)[/] Esci", ColorText.WHITE);
-                output.write(" \nSeleziona un'[BRIGHT_YELLOW]opzione[/]: ", ColorText.WHITE); // Prompt per l'utente
+                output.write(" \nSeleziona un'opzione: ", ColorText.WHITE); // Prompt per l'utente
 
                 String choice = scanner.getInput();
                 // Esegue l'azione corrispondente alla scelta
