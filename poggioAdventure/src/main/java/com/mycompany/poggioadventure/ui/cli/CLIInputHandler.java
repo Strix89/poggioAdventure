@@ -1,6 +1,8 @@
 package com.mycompany.poggioadventure.ui.cli;
 
 import com.mycompany.poggioadventure.ui.InputHandler;
+
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 /**
@@ -33,6 +35,16 @@ public class CLIInputHandler implements InputHandler {
      */
     @Override
     public String getInput() {
-        return scanner.nextLine().trim();
+        try {
+            if (scanner.hasNextLine()) {
+                return scanner.nextLine().trim();
+            } else {
+                // Stream chiuso o EOF
+                throw new RuntimeException("Input stream closed");
+            }
+        } catch (NoSuchElementException e) {
+            // Gestisce la chiusura improvvisa dell'input
+            throw new RuntimeException("Input interrupted", e);
+        }
     }
 }

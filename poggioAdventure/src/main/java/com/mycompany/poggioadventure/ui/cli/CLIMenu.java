@@ -31,7 +31,7 @@ import java.util.List; // Per gestire liste (es. lista salvataggi, classifica)
  * Include la gestione del menu principale, la creazione di una nuova partita,
  * il caricamento/eliminazione di partite salvate e la visualizzazione della classifica.
  *
- * @author Strix89 // Autore originale
+ * @author Strix89
  */
 public class CLIMenu implements MenuManager {
 
@@ -78,7 +78,15 @@ public class CLIMenu implements MenuManager {
         Thread mainThread = Thread.currentThread();
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             output.writeln("\n\nUscita dal gioco...\n", ColorText.CRIMSON);
-            mainThread.interrupt();
+            ResourceLoader.cleanOrphanedLogs();
+            mainThread.interrupt(); // Interrompe il thread principale
+            
+            // Piccola pausa per permettere al thread principale di gestire l'interruzione
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+            }
         }));
         
         // ASCII Art colorata

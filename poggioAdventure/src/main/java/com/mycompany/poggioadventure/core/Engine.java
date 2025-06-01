@@ -223,9 +223,24 @@ public class Engine {
      * </ul>
      */
     public void startGameLoop() {
-        while (game.getCurrentRoom() != null) {
-            String command = inputHandler.getInput();
-            processCommand(command);
+        try {
+            while (game.getCurrentRoom() != null && !Thread.currentThread().isInterrupted()) {
+                try {
+                    String command = inputHandler.getInput();
+                    processCommand(command);
+                } catch (RuntimeException e) {
+                    if (e.getMessage().contains("Input interrupted") || 
+                        e.getMessage().contains("Input stream closed")) {
+                        output.writeln("\n\nGioco interrotto dall'utente.", ColorText.YELLOW);
+                        break;
+                    }
+                    throw e; // Re-lancia se è un errore diverso
+                }
+            }
+        } catch (Exception e) {
+            if (!Thread.currentThread().isInterrupted()) {
+                throw e; // Solo se non è un'interruzione volontaria
+            }
         }
     }
 
@@ -244,7 +259,7 @@ public class Engine {
      */
     private void printCursor(){
         if (inputHandler instanceof CLIInputHandler) {
-            output.write("\n?> ", ColorText.WHITE);
+            output.write("\n[NEON_ORANGE]?>[/] ", ColorText.WHITE);
         }
     }
 

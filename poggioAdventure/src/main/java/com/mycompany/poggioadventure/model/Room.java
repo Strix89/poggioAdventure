@@ -221,7 +221,7 @@ public class Room implements Serializable {
             
             // NORD - Freccia su
             if (hasNorth) {
-                String northText = "[BRIGHT_YELLOW]↑[/]";
+                String northText = "[BRIGHT_YELLOW]^^[/]";
                 if (this.north.hasBeenObserved()) {
                     northText += " " + this.north.getName();
                 }
@@ -230,7 +230,7 @@ public class Room implements Serializable {
             
             // SUD - Freccia giù
             if (hasSouth) {
-                String southText = "[BRIGHT_YELLOW]↓[/]";
+                String southText = "[BRIGHT_YELLOW]vv[/]";
                 if (this.south.hasBeenObserved()) {
                     southText += " " + this.south.getName();
                 }
@@ -239,7 +239,7 @@ public class Room implements Serializable {
             
             // OVEST - Freccia sinistra
             if (hasWest) {
-                String westText = "[BRIGHT_YELLOW]←[/]";
+                String westText = "[BRIGHT_YELLOW]<<[/]";
                 if (this.west.hasBeenObserved()) {
                     westText += " " + this.west.getName();
                 }
@@ -248,21 +248,21 @@ public class Room implements Serializable {
             
             // EST - Freccia destra
             if (hasEast) {
-                String eastText = "[BRIGHT_YELLOW]→[/]";
+                String eastText = "[BRIGHT_YELLOW]>>[/]";
                 if (this.east.hasBeenObserved()) {
                     eastText += " " + this.east.getName();
                 }
                 directions.add(eastText);
             }
             
-            // COLLEGAMENTO SPECIALE - Frecce doppie colorate diversamente
+            // COLLEGAMENTO SPECIALE - Con asterisco
             if (hasLinked) {
                 String linkedText = "";
                 switch (this.linkedDirection) {
-                    case NORD:  linkedText = "[BRIGHT_CYAN]⇈[/]"; break;
-                    case SOUTH: linkedText = "[BRIGHT_CYAN]⇊[/]"; break;
-                    case EAST:  linkedText = "[BRIGHT_CYAN]⇉[/]"; break;
-                    case WEST:  linkedText = "[BRIGHT_CYAN]⇇[/]"; break;
+                    case NORD:  linkedText = "[BRIGHT_CYAN]^^*[/]"; break;
+                    case SOUTH: linkedText = "[BRIGHT_CYAN]vv*[/]"; break;
+                    case EAST:  linkedText = "[BRIGHT_CYAN]>>*[/]"; break;
+                    case WEST:  linkedText = "[BRIGHT_CYAN]<<*[/]"; break;
                     default: break;
                 }
                 if (!linkedText.isEmpty()) {
