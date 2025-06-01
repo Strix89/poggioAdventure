@@ -32,9 +32,11 @@ public class MoveObserver implements GameObserver, Serializable {
         // 1. Controlla prima le direzioni normali
         Room nextRoom = getRoomInDirection(currentRoom, direction);
 
-        if(nextRoom != null) {
+        if(nextRoom != null && !nextRoom.isForbidden()) {
             description.setCurrentRoom(nextRoom);
             return "Ti sei spostato a " + nextRoom.getName() + ".";
+        } else if (nextRoom != null && nextRoom.isForbidden()) {
+            return "Non puoi andare li la stanza sembra essere bloccata a chiave!";
         }
         
         // 2. Controlla i collegamenti tra piani SOLO se:
@@ -44,11 +46,15 @@ public class MoveObserver implements GameObserver, Serializable {
         if(direction.isDirection() && 
            currentRoom.getLinkedRoom() != null && 
            currentRoom.getLinkedDirection() == direction) {
-            
-            description.setCurrentRoom(currentRoom.getLinkedRoom());
+            nextRoom = currentRoom.getLinkedRoom();
+
+            if (nextRoom.isForbidden()) {
+                return "Non puoi andare li la stanza sembra essere bloccata a chiave!";
+            }
+            description.setCurrentRoom(nextRoom);
             return "Hai cambiato piano! Sei ora in: " + currentRoom.getLinkedRoom().getName();
         }      
-        return "\nNon puoi andare in quella direzione (" + parserOutput.getCommand().getName() + ")!\nSoffri in silenzio...";
+        return "\nNon puoi andare in quella direzione ([BRIGHT_YELLOW]" + parserOutput.getCommand().getName() + "[/])!\n[DARK_ORANGE]Soffri in silenzio...[/]";
     }
 
     private Room getRoomInDirection(Room room, CommandType dir) {

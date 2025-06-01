@@ -27,6 +27,7 @@ public class LookAtObserver implements GameObserver, Serializable {
             } else {
                 msg.append("Non c'è niente di interessante qui.");
             }
+            description.getCurrentRoom().setHasBeenObserved(true);
         }
         return msg.toString();
     }

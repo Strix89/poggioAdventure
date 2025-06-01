@@ -7,33 +7,52 @@ import java.util.List;
 import java.util.Map;
 import java.io.Serializable;
 
+/**
+ * Rappresenta una stanza nel gioco di avventura.
+ * Ogni stanza può contenere oggetti, essere collegata ad altre stanze,
+ * e fornire descrizioni dinamiche basate sul suo stato.
+ *
+ * @author Strix89 & MikeRvsso
+ */
 public class Room implements Serializable {
     
     private static final long serialVersionUID = 123456789L;
 
-    private final int id;
-    private String name;
-    private String description; 
-    private String baseLookDescription; 
-    private boolean hasBeenObserved = false;
-    private CommandType linkedDirection = CommandType.NONE;
+    // --- ATTRIBUTI PRINCIPALI ---
+    private final int id;                           // Identificatore univoco della stanza
+    private String name;                            // Nome della stanza
+    private String description;                     // Descrizione base della stanza
+    private String baseLookDescription;             // Descrizione alternativa per il comando "guarda"
+    private boolean hasBeenObserved = false;        // Flag per tracciare se il giocatore ha visitato la stanza
+    private boolean isForbidden = false;            // Flag per stanze non accessibili
+    private String imagePath = null;                // Percorso dell'immagine associata alla stanza
+
+    // --- COLLEGAMENTI TRA STANZE ---
+    private Room south = null;                      // Stanza a sud
+    private Room north = null;                      // Stanza a nord  
+    private Room east = null;                       // Stanza a est
+    private Room west = null;                       // Stanza a ovest
     
-    private Room south = null;
-    private Room north = null;
-    private Room east = null;
-    private Room west = null;
+    // --- COLLEGAMENTI SPECIALI (per collegare piani diversi) ---
+    private Room linkedRoom = null;                 // Stanza collegata specialmente (es. scale)
+    private CommandType linkedDirection = CommandType.NONE; // Direzione del collegamento speciale
 
-    private final List<AdvObject> objectsInRoom = new ArrayList<>();
-    private final Map<Integer, String> objectLookLabels = new HashMap<>(); // Usa l'ID dell'oggetto come chiave
-
-    private Room linkedRoom = null;
-    private String imagePath = null;
+    // --- GESTIONE OGGETTI ---
+    private final List<AdvObject> objectsInRoom = new ArrayList<>();           // Lista oggetti nella stanza
+    private final Map<Integer, String> objectLookLabels = new HashMap<>();     // Etichette personalizzate per oggetti
 
     // --- COSTRUTTORI ---
+    
+    /**
+     * Costruttore base con solo ID
+     */
     public Room(int id) {
         this.id = id;
     }
 
+    /**
+     * Costruttore con ID, nome e descrizione
+     */
     public Room(int id, String name, String description) {
         this.id = id;
         this.name = name;
@@ -41,6 +60,9 @@ public class Room implements Serializable {
         this.baseLookDescription = null;
     }
 
+    /**
+     * Costruttore completo con descrizione personalizzata per il comando "guarda"
+     */
     public Room(int id, String name, String description, String baseLook) {
         this.id = id;
         this.name = name;
@@ -48,7 +70,8 @@ public class Room implements Serializable {
         this.baseLookDescription = baseLook;
     }
 
-    // --- GETTER E SETTER ESISTENTI (name, description, collegamenti stanze, etc.) ---
+    // --- GETTER E SETTER ---
+    
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
     public String getDescription() { return description; }
@@ -74,14 +97,14 @@ public class Room implements Serializable {
     public void setImagePath(String imagePath) { this.imagePath = imagePath; }
     public void setBaseLookDescription(String baseLookText) { this.baseLookDescription = baseLookText; }
     public String getBaseLookDescription() { return this.baseLookDescription; }
+    public List<AdvObject> getObjects() { return objectsInRoom; }
+    public boolean isForbidden() { return isForbidden; }
+    public void setForbidden(boolean forbidden) { this.isForbidden = forbidden; }
 
-    public List<AdvObject> getObjects() {
-        return objectsInRoom;
-    }
+    // --- GESTIONE OGGETTI ---
 
     /**
-     * Aggiunge un oggetto alla stanza.
-     * @param object L'oggetto da aggiungere.
+     * Aggiunge un oggetto alla stanza se non è già presente
      */
     public void addObject(AdvObject object) {
         if (object != null && !this.objectsInRoom.contains(object)) {
@@ -90,74 +113,174 @@ public class Room implements Serializable {
     }
 
     /**
-     * Aggiunge un oggetto alla stanza con un'etichetta opzionale per il comando "guarda".
-     * @param object L'oggetto da aggiungere.
-     * @param lookLabel L'etichetta da mostrare quando si guarda la stanza (può essere null).
+     * Aggiunge un oggetto con un'etichetta personalizzata per il comando "guarda"
      */
     public void addObject(AdvObject object, String lookLabel) {
-        addObject(object); // Chiama il metodo addObject esistente
+        addObject(object);
         if (object != null && lookLabel != null && !lookLabel.trim().isEmpty()) {
             this.objectLookLabels.put(object.getId(), lookLabel.trim());
         }
     }
 
+    /**
+     * Rimuove un oggetto dalla stanza e la sua etichetta associata
+     */
     public boolean removeObject(AdvObject object) {
         if (object != null) {
-            this.objectLookLabels.remove(object.getId()); // Rimuovi anche l'etichetta associata
+            this.objectLookLabels.remove(object.getId());
             return this.objectsInRoom.remove(object);
         }
         return false;
     }
     
+    /**
+     * Cerca un oggetto per nome o alias
+     */
     public AdvObject getObjectByName(String name) {
         if (name == null) return null;
+        
         for (AdvObject obj : objectsInRoom) {
+            // Controllo nome esatto
             if (obj.getName().equalsIgnoreCase(name)) {
                 return obj;
             }
+            // Controllo alias
             if (obj.getAlias() != null && obj.getAlias().contains(name.toLowerCase())) {
                 return obj;
             }
         }
         return null;
     }
+
+    /**
+     * Cerca un oggetto per ID
+     */
+    public AdvObject getObject(int id) {
+        for (AdvObject o : objectsInRoom) {
+            if (o.getId() == id) {
+                return o;
+            }
+        }
+        return null;
+    }
     
     /**
-     * Imposta o aggiorna l'etichetta 'look' per un oggetto specifico in questa stanza.
-     * Se l'oggetto non è nella stanza, l'etichetta non viene memorizzata (o potresti decidere di aggiungerlo).
-     * @param objectId L'ID dell'oggetto.
-     * @param lookLabel L'etichetta da mostrare. Se null o vuota, rimuove l'etichetta esistente.
+     * Imposta un'etichetta personalizzata per un oggetto
      */
     public void setObjectLookLabel(int objectId, String lookLabel) {
         if (lookLabel != null && !lookLabel.trim().isEmpty()) {
             this.objectLookLabels.put(objectId, lookLabel.trim());
         } else {
-            this.objectLookLabels.remove(objectId); // Rimuovi l'etichetta se è nulla o vuota
+            this.objectLookLabels.remove(objectId);
         }
     }
 
     /**
-     * Recupera l'etichetta 'look' per un oggetto specifico.
-     * @param objectId L'ID dell'oggetto.
-     * @return L'etichetta, o null se non definita.
+     * Recupera l'etichetta personalizzata di un oggetto
      */
     public String getObjectLookLabel(int objectId) {
         return this.objectLookLabels.get(objectId);
     }
 
+    // --- METODO PRINCIPALE: DESCRIZIONE DINAMICA DELLA STANZA ---
 
-    // --- METODO getLook() MODIFICATO ---
-    public String getLook() { // Sovrascrivilo se estendi una classe base, altrimenti è un metodo normale
+    /**
+     * Genera una descrizione completa della stanza includendo:
+     * - Descrizione base o personalizzata
+     * - Direzioni disponibili con nomi delle stanze (se osservate)
+     * - Lista degli oggetti presenti
+     * - Lista degli NPC presenti
+     */
+    public String getLook() {
         StringBuilder dynamicLook = new StringBuilder();
 
+        // === DESCRIZIONE DELLA STANZA ===
         if (this.baseLookDescription != null && !this.baseLookDescription.trim().isEmpty()) {
+            // Usa descrizione personalizzata se disponibile
             dynamicLook.append("\n").append(this.baseLookDescription).append("\n");
         } else if (this.description != null && !this.description.trim().isEmpty()) {
+            // Usa descrizione standard
             dynamicLook.append(this.description).append("\n");
         } else {
+            // Descrizione di fallback
             dynamicLook.append("Ti guardi intorno nella stanza '").append(this.name).append("'.").append("\n");
         }
 
+        // === CONTROLLO DIREZIONI DISPONIBILI ===
+        boolean hasNorth = this.north != null;
+        boolean hasSouth = this.south != null;
+        boolean hasEast = this.east != null;
+        boolean hasWest = this.west != null;
+        boolean hasLinked = this.linkedRoom != null && this.linkedDirection != CommandType.NONE;
+        
+        // === GENERAZIONE LISTA DIREZIONI ===
+        if (hasNorth || hasSouth || hasEast || hasWest || hasLinked) {
+            dynamicLook.append("\n[BRIGHT_YELLOW]Direzioni[/] disponibili:\n");
+            
+            List<String> directions = new ArrayList<>();
+            
+            // NORD - Freccia su
+            if (hasNorth) {
+                String northText = "[BRIGHT_YELLOW]↑[/]";
+                if (this.north.hasBeenObserved()) {
+                    northText += " " + this.north.getName();
+                }
+                directions.add(northText);
+            }
+            
+            // SUD - Freccia giù
+            if (hasSouth) {
+                String southText = "[BRIGHT_YELLOW]↓[/]";
+                if (this.south.hasBeenObserved()) {
+                    southText += " " + this.south.getName();
+                }
+                directions.add(southText);
+            }
+            
+            // OVEST - Freccia sinistra
+            if (hasWest) {
+                String westText = "[BRIGHT_YELLOW]←[/]";
+                if (this.west.hasBeenObserved()) {
+                    westText += " " + this.west.getName();
+                }
+                directions.add(westText);
+            }
+            
+            // EST - Freccia destra
+            if (hasEast) {
+                String eastText = "[BRIGHT_YELLOW]→[/]";
+                if (this.east.hasBeenObserved()) {
+                    eastText += " " + this.east.getName();
+                }
+                directions.add(eastText);
+            }
+            
+            // COLLEGAMENTO SPECIALE - Frecce doppie colorate diversamente
+            if (hasLinked) {
+                String linkedText = "";
+                switch (this.linkedDirection) {
+                    case NORD:  linkedText = "[BRIGHT_CYAN]⇈[/]"; break;
+                    case SOUTH: linkedText = "[BRIGHT_CYAN]⇊[/]"; break;
+                    case EAST:  linkedText = "[BRIGHT_CYAN]⇉[/]"; break;
+                    case WEST:  linkedText = "[BRIGHT_CYAN]⇇[/]"; break;
+                    default: break;
+                }
+                if (!linkedText.isEmpty()) {
+                    if (this.linkedRoom.hasBeenObserved()) {
+                        linkedText += " " + this.linkedRoom.getName();
+                    }
+                    directions.add(linkedText);
+                }
+            }
+            
+            // Stampa direzioni formattate: | direzione | direzione | direzione |
+            dynamicLook.append("[ORANGE]|[/] ")
+                      .append(String.join(" [ORANGE]|[/] ", directions))
+                      .append(" [ORANGE]|[/]")
+                      .append("\n");
+        }
+
+        // === ELABORAZIONE OGGETTI E NPC ===
         List<String> itemDescriptions = new ArrayList<>();
         List<String> npcDescriptions = new ArrayList<>();
 
@@ -165,46 +288,55 @@ public class Room implements Serializable {
             if (obj == null) continue;
 
             String name = obj.getName();
-            String label = this.objectLookLabels.get(obj.getId()); // Prendi l'etichetta dalla Map
-            String displayText = name;
+            String label = this.objectLookLabels.get(obj.getId());
+            String displayText;
 
-            if (label != null) {
-                displayText += " (" + label + ")"; // Aggiungi l'etichetta al nome: "tavolo (coperto di cianfrusaglie)"
-            }
-
+            // Distingui tra NPC e oggetti normali
             if (obj instanceof AdvNPC) {
+                displayText = "[NPC]" + name + "[/]";
+                if (label != null) {
+                    displayText += ": [ " + label + " ]";
+                }
                 npcDescriptions.add(displayText);
             } else {
+                displayText = "[ITEM]" + name + "[/]";
+                if (label != null) {
+                    displayText += ": [ " + label + " ]";
+                }
                 itemDescriptions.add(displayText);
             }
         }
 
+        // === STAMPA OGGETTI ===
         if (!itemDescriptions.isEmpty()) {
-            dynamicLook.append("\nNoti anche i seguenti oggetti: \n");
-            dynamicLook.append(String.join(", ", itemDescriptions)); // String.join è più semplice di stream per questo
-            dynamicLook.append(".");
+            dynamicLook.append("\n[ITEM]Noti[/] i seguenti [ITEM]oggetti[/]: \n");
+            dynamicLook.append(String.join(", ", itemDescriptions));
+            dynamicLook.append(!npcDescriptions.isEmpty() ? "\n" : "");
         }
 
+        // === STAMPA NPC ===
         if (!npcDescriptions.isEmpty()) {
-            dynamicLook.append("\nCi sono delle persone qui: \n");
+            dynamicLook.append("\n[NPC]Noti[/] delle [NPC]persone[/] qui: \n");
             dynamicLook.append(String.join(", ", npcDescriptions));
-            dynamicLook.append(".");
         }
 
+        // === MESSAGGIO DI FALLBACK ===
         if (itemDescriptions.isEmpty() && npcDescriptions.isEmpty()) {
             if ((this.baseLookDescription == null || this.baseLookDescription.trim().isEmpty()) &&
                 (this.description != null && this.description.toLowerCase().contains("stanza"))) {
-                 dynamicLook.append("\nAl momento, non sembra esserci nient'altro di particolare.");
+                dynamicLook.append("\nAl momento, non sembra esserci nient'altro di particolare.");
             }
         }
         
-        this.hasBeenObserved = true;
         return dynamicLook.toString().trim();
     }
 
-    // --- METODI HASHCODE, EQUALS, E GETOBJECT(BY ID) ESISTENTI ---
+    // --- METODI DI UTILITÀ ---
+
     @Override
-    public int hashCode() { return 83 * id; }
+    public int hashCode() { 
+        return 83 * id; 
+    }
 
     @Override
     public boolean equals(Object obj) {
@@ -212,14 +344,5 @@ public class Room implements Serializable {
         if (obj == null || getClass() != obj.getClass()) return false;
         Room other = (Room) obj;
         return id == other.id;
-    }
-    
-    public AdvObject getObject(int id) { // Cerca per ID
-        for (AdvObject o : objectsInRoom) {
-            if (o.getId() == id) {
-                return o;
-            }
-        }
-        return null;
     }
 }

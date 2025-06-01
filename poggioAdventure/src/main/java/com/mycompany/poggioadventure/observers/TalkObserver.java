@@ -34,26 +34,26 @@ public class TalkObserver implements GameObserver, Serializable {
             List<AdvObject> npcs = parserOutput.getRoomObjects();
 
             if (npcs.isEmpty()) {
-                msg.append("Con chi vorresti parlare? Con il [LAVENDER]muro[/]");
+                msg.append("\nCon chi vorresti parlare? Con il [LIME]muro[/]?");
                 return msg.toString();
             }
 
             for (AdvObject obj : npcs) {
                 if (obj instanceof AdvNPC) {
                     AdvNPC npc = (AdvNPC) obj;
-                    
-                    if (npc.getImagePath() != null && !npc.getImagePath().isEmpty() && !npc.isObscureImage()) {
+
+                    if (npc.getImagePath() != null && !npc.getImagePath().isEmpty() && !npc.isObscureImage() && npc.getDialogue().size() != 0) {
                         msg.append("\nIMAGE:").append(npc.getImagePath()).append("\n");
                     } else {
                         msg.append("\n");
                     }
 
                     for (String line : npc.getDialogue()) {
-                        msg.append("[ORANGE]").append(npc.getName()).append("[/]").append(": \"").append(line).append("\"\n");
+                        msg.append("[NPC]").append(npc.getName()).append("[/]").append(": \"").append(line).append("\"\n");
                     }
 
                     if (!npc.hasInteracted() && !npc.getItemsToGive().isEmpty()) {
-                        msg.append("\n").append(npc.getName()).append(" ti dà:\n");
+                        msg.append("\n[NPC]").append(npc.getName()).append("[/] ti dà:\n");
                         for (AdvObject item : npc.getItemsToGive()) {
                             description.getInventory().add(item);
                             msg.append("- ").append(item.getName()).append("\n");
@@ -61,14 +61,13 @@ public class TalkObserver implements GameObserver, Serializable {
                     }
                     npc.setHasInteracted(true);
 
-                    if (npc.hasTest()) {
+                    if (npc.getTest() != null) {
                         if (npc.isTestCompleted()) {
-                            msg.append(npc.getName()).append(": Hai già superato questo test!\n");
+                            msg.append("[NPC]" + npc.getName() + "[/]").append(": \"Hai già superato questo test!\"\n");
                         } else {
                             // Controlla se c'è una sessione fallita (anche se non più attiva)
                             if (npc.getActiveTestSession() != null && npc.getActiveTestSession().isFailed()) {
-                                msg.append(npc.getName()).append(": Vuoi riprovare il test?\n");
-                                npc.clearTestSession();
+                                msg.append("[NPC]" + npc.getName() + "[/]").append(": \"Vuoi riprovare il test?\"\n");
                             }
                             
                             if (npc.startTestSession()) {
@@ -81,15 +80,12 @@ public class TalkObserver implements GameObserver, Serializable {
                                 
                                 if (testPassed && npc.hasRewardObject()) {
                                     description.getInventory().add(npc.getRewardObject());
-                                    msg.append("\n🎁 ").append(npc.getName())
-                                       .append(" ti consegna: ").append(npc.getRewardObject().getName()).append("!\n");
-                                    msg.append("L'oggetto è stato aggiunto al tuo inventario.\n");
                                 }
                             }
                         }
                     }
                 } else {
-                    msg.append("Fai uso di [LIME]pita[/] per caso? \nNon puoi parlare con ").append(obj.getName()).append("!\n");
+                    msg.append("Fai uso di [LIME]pita[/] per caso? \nNon puoi parlare con [ITEM]").append(obj.getName()).append("[/]!\n");
                 }
             }
         }

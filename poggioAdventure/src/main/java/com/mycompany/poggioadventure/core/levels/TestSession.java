@@ -156,12 +156,12 @@ public class TestSession implements Serializable {
      * @return true se il test è stato superato, false altrimenti
      */
     public boolean executeTest(OutputHandler outputHandler, InputHandler inputHandler) {
-        outputHandler.writeln("=".repeat(50), ColorText.LIME);
-        outputHandler.writeln(test.getTestName() + " 🎓", ColorText.LIME);
-        outputHandler.writeln("=".repeat(50), ColorText.LIME);
-        outputHandler.writeln("[ORANGE]" + npc.getName() + "[/]: Cominciamo!", ColorText.WHITE);
+        outputHandler.writeln("=".repeat(50), ColorText.LIGHT_ORANGE);
+        outputHandler.writeln("\t" + test.getTestName(), ColorText.LIGHT_ORANGE);
+        outputHandler.writeln("=".repeat(50), ColorText.LIGHT_ORANGE);
+        outputHandler.writeln("[NPC]" + npc.getName() + "[/]: Cominciamo!", ColorText.WHITE);
         outputHandler.writeln("Puoi commettere massimo " + test.getMaxWrongAnswers() + " errori.", ColorText.WARNING);
-        outputHandler.writeln("Digita 'q', 'quit' o 'esci' per abbandonare il test.\n", ColorText.WHITE);
+        outputHandler.writeln("Digita '[RED]q[/]', '[RED]quit[/]' o '[RED]esci[/]' per abbandonare il test.\n", ColorText.WHITE);
         
         while (hasNextQuestion() && isActive) {
             Question currentQuestion = getCurrentQuestion();
@@ -238,22 +238,22 @@ public class TestSession implements Serializable {
      * Mostra il risultato finale del test.
      */
     private void showFinalResult(OutputHandler outputHandler) {
-        outputHandler.writeln("\n" + "=".repeat(50), ColorText.LIME);
-        outputHandler.writeln("RISULTATO FINALE", ColorText.LIME);
-        outputHandler.writeln("=".repeat(50), ColorText.LIME);
-        outputHandler.writeln("Errori commessi: [RED]" + wrongAnswersCount + "[/]/" + test.getMaxWrongAnswers(), 
+        outputHandler.writeln("\n" + "=".repeat(60), ColorText.LIGHT_ORANGE);
+        outputHandler.writeln("RISULTATO FINALE", ColorText.LIGHT_ORANGE);
+        outputHandler.writeln("=".repeat(60), ColorText.LIGHT_ORANGE);
+        outputHandler.writeln("[RED]Errori[/] commessi: [RED]" + wrongAnswersCount + "[/]/" + test.getMaxWrongAnswers(), 
                             ColorText.WHITE);
         
         if (isFailed) {
-            outputHandler.writeln("❌ FALLITO! " + test.getFailureMessage(), ColorText.ERROR);
+            outputHandler.writeln("[ERROR]❌[/] FALLITO! [NPC]" + npc.getName() + "[/]: " + test.getFailureMessage(), ColorText.WHITE);
             npc.setTestCompleted(false);
         } else if (isCompleted) {
-            outputHandler.writeln("✅ SUPERATO! " + test.getSuccessMessage(), ColorText.SUCCESS);
+            outputHandler.writeln("[SUCCESS]✅[/] [NPC]" + npc.getName() + "[/]: " + test.getSuccessMessage(), ColorText.WHITE);
             npc.setTestCompleted(true);
         } else {
             outputHandler.writeln("ℹ️ TEST NON COMPLETATO.", ColorText.WARNING);
             npc.setTestCompleted(false);
         }
-        outputHandler.writeln("=".repeat(50) + "\n", ColorText.LIME);
+        outputHandler.writeln("=".repeat(60) + "\n", ColorText.LIGHT_ORANGE);
     }
 }

@@ -57,7 +57,7 @@ public class PoggioAdventureDesc extends GameDescription implements GameObservab
 
         // Comandi del gioco
         Command nord = new Command(CommandType.NORD, "nord");
-        nord.setAlias(new String[] { "n", "N", "Nord", "NORD" });
+        nord.setAlias(new String[] { "n", "N", "Nord", "NORD", "Su", "su", "sù", "sù", "sopra", "Sopra"});
         getCommands().add(nord);
 
         Command iventory = new Command(CommandType.INVENTORY, "inventario");
@@ -65,15 +65,15 @@ public class PoggioAdventureDesc extends GameDescription implements GameObservab
         getCommands().add(iventory);
 
         Command sud = new Command(CommandType.SOUTH, "sud");
-        sud.setAlias(new String[] { "s", "S", "Sud", "SUD" });
+        sud.setAlias(new String[] { "s", "S", "Sud", "SUD", "Giù", "giu", "giù", "giù", "sotto", "Sotto"});
         getCommands().add(sud);
 
         Command est = new Command(CommandType.EAST, "est");
-        est.setAlias(new String[] { "e", "E", "Est", "EST" });
+        est.setAlias(new String[] { "e", "E", "Est", "EST", "Destra", "destra"});
         getCommands().add(est);
 
         Command ovest = new Command(CommandType.WEST, "ovest");
-        ovest.setAlias(new String[] { "o", "O", "Ovest", "OVEST" });
+        ovest.setAlias(new String[] { "o", "O", "Ovest", "OVEST", "Sinistra", "sinistra"});
         getCommands().add(ovest);
 
         Command end = new Command(CommandType.END, "end");
@@ -204,12 +204,12 @@ public class PoggioAdventureDesc extends GameDescription implements GameObservab
     @Override
     public String getGUIWelcomeMsg() {
         return ""
-                + "============================================================================\n"
+                + "==============================================================================\n"
                 + "                             BENVENUTO NEL COLLEGIO TECNOMAGICO DI SAN JOSE MARIA \n"
-                + "============================================================================\n"
+                + "==============================================================================\n"
                 + "Sei una matricola in cerca di ammissione a questo prestigioso collegio,\n"
                 + "dove solo i più brillanti superano le prove.\n"
-                + "============================================================================";
+                + "==============================================================================";
     }
     
     @Override
@@ -226,11 +226,11 @@ public class PoggioAdventureDesc extends GameDescription implements GameObservab
     @Override
     public String getGUIGameVersion() {
         return 
-        "================================================================================\n" +
+        "==============================================================================\n" +
         "\t                                    PoggioAdventure .v0.1 - 2024-2025           \n" +
         "\t                                              developed by:                      \n" +
         "\t                                   Strix89 | MikeRvsso | Elia-Valenza26         \n" +
-        "================================================================================\n";
+        "==============================================================================\n";
     } 
     
     @Override

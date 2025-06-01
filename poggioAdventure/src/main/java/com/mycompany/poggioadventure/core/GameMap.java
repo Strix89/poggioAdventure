@@ -170,28 +170,23 @@ public class GameMap implements Serializable{
                 "Test di Competenza Java Basilare", // Nome del test
                 questions,                            // Lista domande
                 2,                                   // Massimo 2 errori consentiti su 5 domande
-                "🎉 Fantastico! Hai dimostrato eccellenti competenze in Java! Sei un vero programmatore!",
+                "Fantastico! Hai dimostrato eccellenti competenze in Java! Sei un vero programmatore!",
                 "😞 Non hai superato il test. Studia ancora i fondamenti di Java e riprova quando ti senti pronto!"
         );
 
         // === CREAZIONE OGGETTO RICOMPENSA ===
-        AdvObject chiaveJava = new AdvObject(100, "chiave-java", 
-                "Una chiave dorata con il logo di Java. Emana un'aura di conoscenza informatica.");
-        chiaveJava.setAlias(new String[]{"chiave", "chiave-dorata", "key", "java-key"});
-        chiaveJava.setPickupable(true);
-        
-        // Puoi anche aggiungere un'immagine alla chiave
-        // chiaveJava.setImagePath(ResourceLoader.IMG_PATH.resolve("chiave_java.png").toString());
+        AdvObject level1Complete = new AdvObject(100, "level1Complete");
+        level1Complete.setVisible(false);
 
         // === ASSEGNAZIONE TEST E RICOMPENSA ALL'NPC ===
         guido.setTest(javaTest);
-        guido.setRewardObject(chiaveJava);
+        guido.setRewardObject(level1Complete);
 
         // Aggiungi un oggetto che l'NPC può dare al giocatore
         AdvObject post_it = new AdvObject(2, "post-it", "Un post-it con delle istruzioni.");
         post_it.setAlias(new String[] { "post-it", "note", "appunto" });
         post_it.setPickupable(true); // Imposta l'oggetto come raccoglibile
-        guido.addItemToGive(post_it);
+        
         
         AdvObject pen = new AdvObject(3, "Penna", 
                 ResourceLoader.IMG_PATH.resolve("penna.png").toString(),
@@ -381,6 +376,7 @@ public class GameMap implements Serializable{
         Room entry = new Room(0, "Ingresso", "Ti trovi nell'ingresso di Poggiolevante");
         entry.addObject(guido, "C'è un nano vicino la porta, leggi il nome sulla targhetta si chiama GUIDO");
         entry.setImagePath(ResourceLoader.IMG_PATH.resolve("Ingresso.png").toString());
+        entry.addObject(post_it, "C'è un post-it attaccato alla porta con delle istruzioni.");
 
         Room hall = new Room(1, "Hall", "Ti trovi nella Hall di PoggioLevante.");
         hall.setImagePath(ResourceLoader.IMG_PATH.resolve("Hall.png").toString());
@@ -450,6 +446,7 @@ public class GameMap implements Serializable{
         hallway.setEast(craftRoom);
         craftRoom.setWest(hallway);
         hallway.setNorth(entryLab);
+        hallway.setForbidden(true);
         entryLab.setSouth(hallway);
         entryLab.setEast(lab5);
         lab5.setWest(entryLab);

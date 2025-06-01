@@ -9,6 +9,7 @@ import com.mycompany.poggioadventure.model.Room;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -56,7 +57,9 @@ public abstract class GameDescription implements Serializable {
      * @return
      */
     public List<AdvObject> getInventory() {
-        return inventory;
+        return inventory.stream()
+                .filter(obj -> obj.isVisible())
+                .collect(Collectors.toList());
     }
 
     /**

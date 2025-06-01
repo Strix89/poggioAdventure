@@ -345,8 +345,8 @@ public class UI_Game extends UI_Abstract {
     private void processCommand() {
         String command = commandInput.getText().trim();
         if (!command.isEmpty()) {
-            gameEngine.getOutput().write("\nComando Inserito: ", ColorText.WHITE);
-            gameEngine.getOutput().writeln(command, ColorText.GOLD);
+            gameEngine.getOutput().write("\n[NEON_ORANGE]-[/]Comando Inserito[NEON_ORANGE]-[/]: ", ColorText.WHITE);
+            gameEngine.getOutput().writeln(command, ColorText.NEON_ORANGE);
             gameEngine.processCommand(command);
 
             Room currentRoom = gameEngine.getGame().getCurrentRoom();
