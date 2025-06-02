@@ -76,6 +76,48 @@ public class TimeManager implements Runnable, Serializable {
     }
 
     /**
+     * Riavvia il timer resettando il tempo trascorso.
+     */
+    public synchronized void restart() {
+        stop();
+        tempoTrascorso = 0;
+        start();
+    }
+
+    /**
+     * Imposta il tempo totale del timer.
+     * @param tempoTotaleSecondi Tempo totale in secondi
+     */
+    public synchronized void setTempoTotale(int tempoTotaleSecondi) {
+        this.tempoTotale = tempoTotaleSecondi * 1000L; // Converte in millisecondi
+    }
+
+    /**
+     * Restituisce il tempo rimanente in secondi.
+     * @return Tempo rimanente in secondi
+     */
+    public synchronized long getTempoRimanente() {
+        long rimanente = (tempoTotale - tempoTrascorso) / 1000;
+        return Math.max(0, rimanente);
+    }
+
+    /**
+     * Restituisce il tempo trascorso in secondi.
+     * @return Tempo trascorso in secondi
+     */
+    public synchronized long getTempoTrascorso() {
+        return tempoTrascorso / 1000;
+    }
+
+    /**
+     * Verifica se il timer è in esecuzione.
+     * @return true se il timer è attivo
+     */
+    public synchronized boolean isRunning() {
+        return inEsecuzione;
+    }
+
+    /**
      * Metodo eseguito dal thread: aggiorna il countdown ogni intervallo.
      * Utilizza sequenze ANSI per riscrivere la stessa riga, consentendo di mostrare l'aggiornamento in tempo reale
      * senza creare nuove righe di output, sebbene questo metodo sia pensato principalmente per output su console.
@@ -108,13 +150,6 @@ public class TimeManager implements Runnable, Serializable {
             //System.out.print("?> ");
             //System.out.flush();
         }
-
-        // Se il countdown è terminato, visualizza un messaggio finale e termina l'applicazione
-        if (inEsecuzione && tempoTrascorso >= tempoTotale) {
-            System.out.println("\nIl tempo è scaduto! Il gioco termina qui...");
-            System.exit(0);
-        }
-
         inEsecuzione = false;
     }
 }

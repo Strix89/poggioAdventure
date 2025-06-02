@@ -1,7 +1,6 @@
 package com.mycompany.poggioadventure.core.utils;
 
 import java.util.List;
-import com.mycompany.poggioadventure.core.abstracts.GameDescription;
 import com.mycompany.poggioadventure.ui.ErrorHandler;
 import com.mycompany.poggioadventure.ui.InputHandler;
 import com.mycompany.poggioadventure.ui.OutputHandler;
@@ -39,13 +38,7 @@ import com.mycompany.poggioadventure.ui.OutputHandler;
  * @since 1.0
  */
 public class GameContext {
-    
-    /** 
-     * Riferimento al modello principale del gioco contenente stato, 
-     * stanze, oggetti e logica di business.
-     */
-    private final GameDescription gameDescription;
-    
+
     /** 
      * Gestore dell'output verso l'interfaccia utente.
      * Può essere CLI o GUI-based.
@@ -91,23 +84,13 @@ public class GameContext {
      * 
      * @throws IllegalArgumentException se uno dei parametri richiesti è null
      */
-    public GameContext(GameDescription gameDescription, InputHandler inputHandler, OutputHandler outputHandler, 
+    public GameContext(InputHandler inputHandler, OutputHandler outputHandler, 
                       ErrorHandler errorHandler, List<String> templog, StopWatch stopWatch) {
-        this.gameDescription = gameDescription;
         this.outputHandler = outputHandler;
         this.inputHandler = inputHandler;
         this.errorHandler = errorHandler;
         this.templog = templog;
         this.stopWatch = stopWatch;
-    }
-    
-    /**
-     * Restituisce il modello principale del gioco.
-     * 
-     * @return L'istanza di GameDescription contenente lo stato del gioco
-     */
-    public GameDescription getGameDescription() { 
-        return gameDescription; 
     }
     
     /**

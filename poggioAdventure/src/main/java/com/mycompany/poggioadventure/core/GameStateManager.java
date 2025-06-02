@@ -1,41 +1,58 @@
 package com.mycompany.poggioadventure.core;
 
-import com.mycompany.poggioadventure.core.Engine;
+import com.mycompany.poggioadventure.core.abstracts.GameDescription;
 import com.mycompany.poggioadventure.core.abstracts.GameState;
-//import com.mycompany.poggioadventure.core.levels.LogicTestState;
-//import com.mycompany.poggioadventure.core.levels.PCAssemblyState;
-//import com.mycompany.poggioadventure.core.levels.RobotRevolutionState;
+import com.mycompany.poggioadventure.core.levels.Level1State;
+import com.mycompany.poggioadventure.core.utils.TimeManager;
 import com.mycompany.poggioadventure.ui.ColorText;
-import com.mycompany.poggioadventure.core.utils.StopWatch;
+import com.mycompany.poggioadventure.ui.OutputHandler;
+import com.mycompany.poggioadventure.model.AdvObject;
+
+import java.util.List;
 
 /**
  * Gestore centralizzato per la transizione tra stati/livelli del gioco.
  * 
- * <p>Responsabilità:
- * <ul>
- *   <li>Mantiene lo stato corrente del gioco</li>
- *   <li>Gestisce le transizioni tra livelli</li>
- *   <li>Monitora i timer di ogni livello</li>
- *   <li>Coordina successi e fallimenti</li>
- * </ul>
+ * <p>Risolve le dipendenze circolari usando callback pattern e dependency injection.
+ * Gestisce il timing dei livelli tramite TimeManager.
  */
 public class GameStateManager {
     
     private GameState currentState;
-    private Engine engine;
-    private StopWatch levelTimer;
+    private GameDescription gameDescription;
+    private OutputHandler output;
+    private TimeManager timeManager;
     private int currentLevelIndex = 0;
+    private long levelStartTime;
+    
+    // Callback per comunicare con Engine senza dipendenza diretta
+    private Runnable onGameCompleted;
+    private Runnable onGameReset;
     
     // Sequenza predefinita dei livelli
     private final GameState[] levels = {
-        //new LogicTestState(),
-        //new PCAssemblyState(),
-        //new RobotRevolutionState()
+        new Level1State(),
+        //new Level2State(), 
+        //new Level3State()
     };
     
-    public GameStateManager(Engine engine) {
-        this.engine = engine;
-        this.levelTimer = StopWatch.getInstance();
+    /**
+     * Costruttore con dependency injection per evitare dipendenze circolari.
+     * 
+     * @param gameDescription Stato del gioco
+     * @param output Handler per output utente
+     * @param timeManager Gestore del tempo di gioco
+     * @param onGameCompleted Callback per completamento gioco
+     * @param onGameReset Callback per reset gioco
+     */
+    public GameStateManager(GameDescription gameDescription, OutputHandler output, 
+                           TimeManager timeManager, Runnable onGameCompleted, 
+                           Runnable onGameReset) {
+        this.gameDescription = gameDescription;
+        this.output = output;
+        this.timeManager = timeManager;
+        this.onGameCompleted = onGameCompleted;
+        this.onGameReset = onGameReset;
     }
     
     /**
@@ -53,27 +70,57 @@ public class GameStateManager {
     public void checkStateAfterCommand() {
         if (currentState == null) return;
         
-        long elapsedTime = levelTimer.getElapsedSeconds();
+        long elapsedTime = System.currentTimeMillis() - levelStartTime;
         
-        // Verifica timeout
-        if (elapsedTime >= currentState.getTimeLimit()) {
-            engine.getOutput().writeln("\n⏰ TEMPO SCADUTO! Il livello verrà resettato.", ColorText.RED);
-            currentState.handleFailure(engine, GameState.FailureType.LIGHT);
+        // Verifica timeout usando TimeManager
+        if (timeManager.getTempoRimanente() <= 0 || elapsedTime >= currentState.getTimeLimit()) {
+            output.writeln("\n⏰ TEMPO SCADUTO! Ricominciando dall'inizio...", ColorText.RED);
+            currentState.handleFailure(GameState.FailureType.SEVERE, this::resetGame);
             return;
         }
         
-        // Verifica completamento
-        if (currentState.isCompleted(engine.getGame())) {
-            currentState.handleSuccess(engine);
+        // Verifica completamento tramite oggetti nell'inventario
+        if (checkInventoryCompletion()) {
+            output.writeln("\n🎉 LIVELLO COMPLETATO!", ColorText.GREEN);
+            currentState.handleSuccess(this::advanceToNextLevel);
+            return;
+        }
+        
+        // Verifica altre condizioni di completamento
+        if (currentState.isCompleted(gameDescription)) {
+            currentState.handleSuccess(this::advanceToNextLevel);
             return;
         }
         
         // Verifica condizioni di fallimento
-        if (currentState.isFailureConditionMet(engine.getGame(), elapsedTime)) {
-            // Determina il tipo di fallimento basandosi sulla logica del livello
+        if (currentState.isFailureConditionMet(gameDescription, elapsedTime)) {
             GameState.FailureType failureType = determinFailureType();
-            currentState.handleFailure(engine, failureType);
+            currentState.handleFailure(failureType, 
+                failureType == GameState.FailureType.SEVERE ? this::resetGame : this::resetCurrentLevel);
         }
+    }
+    
+    /**
+     * Verifica se il giocatore ha gli oggetti necessari per completare il livello.
+     */
+    private boolean checkInventoryCompletion() {
+        if (currentState == null) return false;
+        
+        List<Integer> requiredObjects = currentState.getRequiredObjects();
+        if (requiredObjects.isEmpty()) return false;
+        
+        List<AdvObject> inventory = gameDescription.getInventory();
+        
+        // Verifica che tutti gli oggetti richiesti siano presenti
+        for (Integer requiredId : requiredObjects) {
+            boolean found = inventory.stream()
+                .anyMatch(obj -> obj.getId() == requiredId);
+            if (!found) {
+                return false;
+            }
+        }
+        
+        return true;
     }
     
     /**
@@ -95,7 +142,7 @@ public class GameStateManager {
      */
     public void resetCurrentLevel() {
         if (currentState != null) {
-            engine.getOutput().writeln("\n🔄 Resetting livello: " + currentState.getLevelName(), ColorText.YELLOW);
+            output.writeln("\n🔄 Resetting livello: " + currentState.getLevelName(), ColorText.YELLOW);
             transitionToLevel(currentState);
         }
     }
@@ -104,51 +151,87 @@ public class GameStateManager {
      * Reset completo del gioco.
      */
     public void resetGame() {
-        engine.getOutput().writeln("\n💀 GAME OVER! Ricominciando dall'inizio...", ColorText.RED);
+        output.writeln("\n💀 GAME OVER! Ricominciando dall'inizio...", ColorText.RED);
         currentLevelIndex = 0;
+        
+        // Reset del TimeManager usando il nuovo metodo
+        timeManager.restart();
+        
         transitionToLevel(levels[currentLevelIndex]);
+        
+        // Notifica Engine per reset completo
+        if (onGameReset != null) {
+            onGameReset.run();
+        }
     }
     
     /**
      * Gestisce la transizione verso un nuovo livello.
      */
     private void transitionToLevel(GameState newState) {
-        // Ferma il timer precedente
-        levelTimer.stop();
-        
         // Imposta il nuovo stato
         currentState = newState;
         
-        // Inizializza il nuovo livello
-        currentState.enter(engine);
+        // Inizializza il nuovo livello tramite GameState
+        currentState.enter(gameDescription, output);
         
-        // Avvia il timer per il nuovo livello
-        levelTimer.reset();
-        levelTimer.start();
+        // Imposta la stanza iniziale del livello
+        if (currentState.getStartingRoom() != null) {
+            gameDescription.setCurrentRoom(currentState.getStartingRoom());
+        }
+        
+        // Registra l'inizio del livello
+        levelStartTime = System.currentTimeMillis();
+        
+        // Configura TimeManager per questo livello (ora con metodo corretto)
+        long levelTimeSeconds = currentState.getTimeLimit() / 1000;
+        timeManager.stop(); // Ferma il timer corrente
+        timeManager.setTempoTotale((int) levelTimeSeconds);
+        timeManager.start(); // Riavvia con il nuovo tempo
         
         // Notifica il cambio di livello
-        engine.getOutput().writeln("\n🎮 LIVELLO: " + currentState.getLevelName(), ColorText.NEON_ORANGE);
-        engine.getOutput().writeln("⏱️ Tempo limite: " + formatTime(currentState.getTimeLimit()), ColorText.CYAN);
+        output.writeln("\n🎮 LIVELLO: " + currentState.getLevelName(), ColorText.NEON_ORANGE);
+        output.writeln("⏱️ Tempo limite: " + formatTime(currentState.getTimeLimit()), ColorText.CYAN);
+        
+        // Mostra oggetti richiesti se presenti
+        List<Integer> required = currentState.getRequiredObjects();
+        if (!required.isEmpty()) {
+            output.writeln("🎯 Oggetti necessari: " + required.size(), ColorText.YELLOW);
+        }
     }
     
     /**
      * Determina il tipo di fallimento basandosi sul contesto.
      */
     private GameState.FailureType determinFailureType() {
-        // Implementa logica specifica per determinare se il fallimento è grave o lieve
-        // Per ora, defaultiamo a LIGHT (reset livello)
-        return GameState.FailureType.LIGHT;
+        // Logica per determinare se il fallimento è grave o lieve
+        // Per timeout defaultiamo a SEVERE (reset completo)
+        long elapsedTime = System.currentTimeMillis() - levelStartTime;
+        
+        if (elapsedTime >= currentState.getTimeLimit() * 0.9) {
+            return GameState.FailureType.SEVERE; // Vicino al timeout
+        }
+        
+        return GameState.FailureType.LIGHT; // Fallimento recoverable
     }
     
     /**
      * Gestisce il completamento dell'intero gioco.
      */
     private void handleGameCompletion() {
-        levelTimer.stop();
-        engine.getOutput().writeln("\n🎉 CONGRATULAZIONI! Hai completato tutti i livelli!", ColorText.GREEN);
-        engine.getOutput().writeln("🏆 Sei riuscito a superare tutte le prove di Poggio Adventure!", ColorText.GOLD);
+        output.writeln("\n🎉 CONGRATULAZIONI! Hai completato tutti i livelli!", ColorText.GREEN);
+        output.writeln("🏆 Sei riuscito a superare tutte le prove di Poggio Adventure!", ColorText.GOLD);
         
-        // Potresti aggiungere qui statistiche finali, salvataggio punteggio, etc.
+        // Ferma il TimeManager
+        timeManager.stop();
+        
+        // Statistiche finali usando TimeManager (metodo corretto)
+        output.writeln("⏱️ Tempo totale: " + formatTime(timeManager.getTempoTrascorso() * 1000), ColorText.CYAN);
+        
+        // Notifica Engine per completamento
+        if (onGameCompleted != null) {
+            onGameCompleted.run();
+        }
     }
     
     /**
@@ -162,9 +245,22 @@ public class GameStateManager {
     
     // Getters
     public GameState getCurrentState() { return currentState; }
-    public long getCurrentLevelElapsedTime() { return levelTimer.getElapsedSeconds(); }
-    public long getCurrentLevelRemainingTime() { 
-        return Math.max(0, currentState.getTimeLimit() - levelTimer.getElapsedSeconds()); 
+    
+    public long getCurrentLevelElapsedTime() { 
+        return System.currentTimeMillis() - levelStartTime; 
     }
+    
+    public long getCurrentLevelRemainingTime() { 
+        if (currentState == null) return 0;
+        return Math.max(0, currentState.getTimeLimit() - getCurrentLevelElapsedTime()); 
+    }
+    
     public int getCurrentLevelIndex() { return currentLevelIndex; }
+    
+    /**
+     * Restituisce il tempo rimanente del TimeManager in millisecondi.
+     */
+    public long getTimeManagerRemainingTime() {
+        return timeManager.getTempoRimanente() * 1000L;
+    }
 }

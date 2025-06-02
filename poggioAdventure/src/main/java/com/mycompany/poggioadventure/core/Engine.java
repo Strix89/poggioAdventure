@@ -102,6 +102,11 @@ public class Engine {
      */
     private List<String> logTemp;
 
+    /**
+     * GameStateManager per gestione livelli senza dipendenze circolari
+     */
+    private GameStateManager gameStateManager;
+
     private GameContext gameContext;
     
     /**
@@ -146,7 +151,21 @@ public class Engine {
         timeManager = new TimeManager();
         gameTime = StopWatch.getInstance();
         gameTime.start();
-        gameContext = new GameContext(game, input, output, errorHandler, logTemp, gameTime);
+        gameContext = new GameContext(input, output, errorHandler, logTemp, gameTime);
+        // Inizializza GameStateManager con gestione errori
+        try {
+            gameStateManager = new GameStateManager(
+                game,
+                output,
+                timeManager, 
+                this::handleGameCompleted, 
+                this::handleGameReset      
+            );
+            gameStateManager.startGame();
+        } catch (Exception e) {
+            errorHandler.handleFatalError("Errore durante inizializzazione GameStateManager", e);
+            Utils.exitApplication(Utils.EXIT_CODE_INITIALIZATION_ERROR);
+        }
     }
 
     /**
@@ -200,6 +219,10 @@ public class Engine {
 
             if (!commandExecuted) {
                 output.writeln("Non capisco quello che mi vuoi dire.", ColorText.ERROR);
+            }
+
+            if (gameStateManager != null) {
+                gameStateManager.checkStateAfterCommand();
             }
 
             // Logging avanzato delle modifiche di stato
@@ -423,5 +446,33 @@ public class Engine {
      */
     public long getLongGameTime(){
         return this.gameTime.getElapsedSeconds();
+    }
+
+    /**
+     * Callback per gestire il completamento del gioco.
+     */
+    private void handleGameCompleted() {
+        output.writeln("🎊 Il gioco è terminato con successo!", ColorText.GOLD);
+        // Altre azioni di cleanup o salvataggio finale
+    }
+
+    /**
+     * Callback per gestire il reset del gioco.
+     */
+    private void handleGameReset() {
+        // Reset dello stato di Engine se necessario
+        try {
+            this.game.init(); // Re-inizializza il gioco
+        } catch (Exception e) {
+            errorHandler.handleFatalError("Errore durante reset del gioco", e);
+        }
+    }
+
+    /**
+     * Restituisce il GameStateManager.
+     * @return Istanza del GameStateManager
+     */
+    public GameStateManager getGameStateManager() {
+        return gameStateManager;
     }
 }

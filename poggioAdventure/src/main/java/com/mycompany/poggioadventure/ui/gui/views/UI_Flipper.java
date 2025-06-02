@@ -273,7 +273,7 @@ public class UI_Flipper extends UI_Abstract {
      * Crea un GameContext mock per i test.
      */
     private static GameContext createMockGameContext() {
-        return new GameContext(null, null, null, null, null, null) {
+        return new GameContext(null, null, null, null, null) {
             @Override
             public String toString() {
                 return "MockGameContext per test UI_Flipper";

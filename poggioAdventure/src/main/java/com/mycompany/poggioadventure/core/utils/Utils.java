@@ -20,6 +20,7 @@ public class Utils {
     public static final int EXIT_CODE_SAVE_ERROR = 2;    // Errore nei salvataggi
     public static final int EXIT_CODE_RESOURCE_ERROR = 3; // Errore nel caricamento risorse
     public static final int EXIT_CODE_LOG_ERROR = 4;     // Errore nei log
+    public static final int EXIT_CODE_INITIALIZATION_ERROR = 5; // Input non valido
 
     /**
      * Parsa una stringa rimuovendo le stopwords.
