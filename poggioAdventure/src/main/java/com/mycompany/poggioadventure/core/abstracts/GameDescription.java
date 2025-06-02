@@ -6,6 +6,12 @@ import com.mycompany.poggioadventure.parser.ParserOutput;
 import com.mycompany.poggioadventure.model.AdvObject;
 import com.mycompany.poggioadventure.parser.Command;
 import com.mycompany.poggioadventure.model.Room;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,8 +31,6 @@ public abstract class GameDescription implements Serializable {
     private final List<AdvObject> inventory = new ArrayList<>();
 
     private Room currentRoom;
-    
-    private String currentChapter;
 
     /**
      *
@@ -75,14 +79,6 @@ public abstract class GameDescription implements Serializable {
      */
     public abstract void nextMove(List<ParserOutput> list, GameContext gameContext);
     
-    public String getCurrentChapter(){
-        return currentChapter;
-    }
-    
-    public void setCurrentChapeter(String cp){
-       currentChapter = cp;
-    }
-    
     /**
      *
      * @return
@@ -95,5 +91,27 @@ public abstract class GameDescription implements Serializable {
 
     public GameMap getGameMap() {
         return gameMap;
+    }
+
+    /**
+     * Crea una copia profonda usando la serializzazione.
+     * @return Una nuova istanza clonata
+     */
+    public GameDescription clone() {
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(baos);
+            oos.writeObject(this);
+            oos.close();
+            
+            ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+            ObjectInputStream ois = new ObjectInputStream(bais);
+            GameDescription cloned = (GameDescription) ois.readObject();
+            ois.close();
+            
+            return cloned;
+        } catch (IOException | ClassNotFoundException e) {
+            throw new RuntimeException("Errore durante la clonazione", e);
+        }
     }
 }

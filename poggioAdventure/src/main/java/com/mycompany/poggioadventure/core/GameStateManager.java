@@ -4,6 +4,7 @@ import com.mycompany.poggioadventure.core.abstracts.GameDescription;
 import com.mycompany.poggioadventure.core.abstracts.GameState;
 import com.mycompany.poggioadventure.core.levels.Level1State;
 import com.mycompany.poggioadventure.core.utils.TimeManager;
+import com.mycompany.poggioadventure.core.utils.Utils;
 import com.mycompany.poggioadventure.ui.ColorText;
 import com.mycompany.poggioadventure.ui.OutputHandler;
 import com.mycompany.poggioadventure.model.AdvObject;
@@ -20,6 +21,8 @@ public class GameStateManager {
     
     private GameState currentState;
     private GameDescription gameDescription;
+    private GameDescription snapshotGameDesc;
+    private String playerName;
     private OutputHandler output;
     private TimeManager timeManager;
     private int currentLevelIndex = 0;
@@ -31,7 +34,7 @@ public class GameStateManager {
     
     // Sequenza predefinita dei livelli
     private final GameState[] levels = {
-        new Level1State(),
+        new Level1State(Utils.LEVEL_1_TIME_LIMIT, Utils.LEVEL_1_REQUIRED_OBJECTS, Utils.LEVEL_1_FORBIDDEN_OBJECTS),
         //new Level2State(), 
         //new Level3State()
     };
@@ -46,13 +49,14 @@ public class GameStateManager {
      * @param onGameReset Callback per reset gioco
      */
     public GameStateManager(GameDescription gameDescription, OutputHandler output, 
-                           TimeManager timeManager, Runnable onGameCompleted, 
+                           TimeManager timeManager, String playerName, Runnable onGameCompleted, 
                            Runnable onGameReset) {
         this.gameDescription = gameDescription;
         this.output = output;
         this.timeManager = timeManager;
         this.onGameCompleted = onGameCompleted;
         this.onGameReset = onGameReset;
+        snapshotGameDesc = (GameDescription) gameDescription.clone();
     }
     
     /**
@@ -106,7 +110,7 @@ public class GameStateManager {
     private boolean checkInventoryCompletion() {
         if (currentState == null) return false;
         
-        List<Integer> requiredObjects = currentState.getRequiredObjects();
+        List<Integer> requiredObjects = currentState.getRequiredIDObjects();
         if (requiredObjects.isEmpty()) return false;
         
         List<AdvObject> inventory = gameDescription.getInventory();
@@ -173,7 +177,7 @@ public class GameStateManager {
         currentState = newState;
         
         // Inizializza il nuovo livello tramite GameState
-        currentState.enter(gameDescription, output);
+        currentState.enter(gameDescription, output, playerName);
         
         // Imposta la stanza iniziale del livello
         if (currentState.getStartingRoom() != null) {
@@ -189,15 +193,7 @@ public class GameStateManager {
         timeManager.setTempoTotale((int) levelTimeSeconds);
         timeManager.start(); // Riavvia con il nuovo tempo
         
-        // Notifica il cambio di livello
-        output.writeln("\n🎮 LIVELLO: " + currentState.getLevelName(), ColorText.NEON_ORANGE);
-        output.writeln("⏱️ Tempo limite: " + formatTime(currentState.getTimeLimit()), ColorText.CYAN);
-        
-        // Mostra oggetti richiesti se presenti
-        List<Integer> required = currentState.getRequiredObjects();
-        if (!required.isEmpty()) {
-            output.writeln("🎯 Oggetti necessari: " + required.size(), ColorText.YELLOW);
-        }
+        currentState.getLevelDescription(output);
     }
     
     /**
@@ -262,5 +258,26 @@ public class GameStateManager {
      */
     public long getTimeManagerRemainingTime() {
         return timeManager.getTempoRimanente() * 1000L;
+    }
+
+    public String getPlayerName() {
+        return playerName;
+    }
+
+    public void setPlayerName(String playerName) {
+        this.playerName = playerName;
+    }
+
+    public GameDescription getGameDescription() {
+        return gameDescription;
+    }
+
+    public void setGameDescription(GameDescription gameDescription) {
+        this.gameDescription = gameDescription;
+        this.snapshotGameDesc = (GameDescription) gameDescription.clone();
+    }
+
+    public GameDescription getOldGameDescription() {
+        return snapshotGameDesc;
     }
 }

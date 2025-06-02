@@ -48,9 +48,9 @@ public class UseObserver implements GameObserver, Serializable {
 
                 switch (id) {
                     // OGGETTI PROVA 1 - Test Logica
-                    case 3: // Penna di Lorenzo Burdo
+                    case Utils.OBJ_PENNA_ID: // Penna di Lorenzo Burdo
 
-                        if (Utils.getObjectFromInventory(description.getInventory(), 3) != null) {
+                        if (Utils.getObjectFromInventory(description.getInventory(), Utils.OBJ_PENNA_ID) != null) {
                             msg.append("Usi la penna di Lorenzo Burdo per scrivere il test di logica. ");
                             msg.append("La penna scorre fluida sulla carta, quasi magicamente...\n");
                         } else {
@@ -59,8 +59,8 @@ public class UseObserver implements GameObserver, Serializable {
                         interact = true;
                         break;
 
-                    case 4: // Foto di San Nicola astronauta
-                        if (Utils.getObjectFromInventory(description.getInventory(), 4) != null) {
+                    case Utils.OBJ_FOTO_ID: // Foto di San Nicola astronauta
+                        if (Utils.getObjectFromInventory(description.getInventory(), Utils.OBJ_FOTO_ID) != null) {
                             msg.append("Osservi attentamente la foto di San Nicola vestito da astronauta. ");
                             msg.append("Forse nasconde un indizio per le prove future?\n");
                         } else {
@@ -70,8 +70,8 @@ public class UseObserver implements GameObserver, Serializable {
                         break;
 
                     // OGGETTI PROVA 2 - Assemblaggio PC
-                    case 13: // MicroSD
-                        if (Utils.getObjectFromInventory(description.getInventory(), 13) != null) {
+                    case Utils.OBJ_MICROSD_ID: // MicroSD
+                        if (Utils.getObjectFromInventory(description.getInventory(), Utils.OBJ_MICROSD_ID) != null) {
                             msg.append("Una scheda di memoria che potrebbe contenere dati importanti ");
                             msg.append(
                                     "per l'assemblaggio del computer. Sembra essere la scheda madre di cui hai bisogno!\n");
@@ -81,8 +81,8 @@ public class UseObserver implements GameObserver, Serializable {
                         interact = true;
                         break;
 
-                    case 16: // Martello
-                        if (Utils.getObjectFromInventory(description.getInventory(), 16) != null) {
+                    case Utils.OBJ_MARTELLO_ID: // Martello
+                        if (Utils.getObjectFromInventory(description.getInventory(), Utils.OBJ_MARTELLO_ID) != null) {
                             msg.append("Un martello da laboratorio. Potrebbe essere utile per assemblare ");
                             msg.append("o sistemare componenti hardware, ma usalo con cautela!\n");
                         } else {
@@ -91,15 +91,15 @@ public class UseObserver implements GameObserver, Serializable {
                         interact = true;
                         break;
 
-                    case 17: // Sega circolare
+                    case Utils.OBJ_SEGA_CIRCOLARE_ID: // Sega circolare
                         msg.append(
                                 "Una sega circolare affilata per assemblare un pc ? Mhh vedo che qualcuno qui non ti è molto simpatico.., ");
                         msg.append("meglio lasciarla dove sta!\n");
                         interact = true;
                         break;
 
-                    case 18: // CPU
-                        if (Utils.getObjectFromInventory(description.getInventory(), 18) != null) {
+                    case Utils.OBJ_CPU_ID: // CPU
+                        if (Utils.getObjectFromInventory(description.getInventory(), Utils.OBJ_CPU_ID) != null) {
                             msg.append("Il processore principale del computer. Questo è il cervello ");
                             msg.append("che farà funzionare tutto il sistema!\n");
                         } else {
@@ -110,8 +110,8 @@ public class UseObserver implements GameObserver, Serializable {
                         interact = true;
                         break;
 
-                    case 19: // Cavo HDMI
-                        if (Utils.getObjectFromInventory(description.getInventory(), 19) != null) {
+                    case Utils.OBJ_CAVO_HDMI_ID: // Cavo HDMI
+                        if (Utils.getObjectFromInventory(description.getInventory(), Utils.OBJ_CAVO_HDMI_ID) != null) {
                             msg.append("Un cavo per collegare monitor e dispositivi. ");
                             msg.append("Fondamentale per vedere se il PC funziona correttamente!\n");
                         } else {
@@ -122,8 +122,8 @@ public class UseObserver implements GameObserver, Serializable {
                         interact = true;
                         break;
 
-                    case 20: // Mouse
-                        if (Utils.getObjectFromInventory(description.getInventory(), 20) != null) {
+                    case Utils.OBJ_MOUSE_ID: // Mouse
+                        if (Utils.getObjectFromInventory(description.getInventory(), Utils.OBJ_MOUSE_ID) != null) {
                             msg.append("Un mouse per controllare il computer. ");
                             msg.append("Sembra un po' usurato ma dovrebbe ancora funzionare.\n");
                         } else {
@@ -134,8 +134,8 @@ public class UseObserver implements GameObserver, Serializable {
                         interact = true;
                         break;
 
-                    case 21: // Tastiera
-                        if (Utils.getObjectFromInventory(description.getInventory(), 21) != null) {
+                    case Utils.OBJ_TASTIERA_ID: // Tastiera
+                        if (Utils.getObjectFromInventory(description.getInventory(), Utils.OBJ_TASTIERA_ID) != null) {
                             msg.append("Una tastiera vintage. ");
                             msg.append("I tasti sembrano ancora responsivi nonostante l'età.\n");
                         } else {
@@ -146,8 +146,8 @@ public class UseObserver implements GameObserver, Serializable {
                         interact = true;
                         break;
 
-                    case 25: // Set cacciaviti
-                        if (Utils.getObjectFromInventory(description.getInventory(), 25) != null) {
+                    case Utils.OBJ_SET_CACCIAVITI_ID: // Set cacciaviti
+                        if (Utils.getObjectFromInventory(description.getInventory(), Utils.OBJ_SET_CACCIAVITI_ID) != null) {
                             msg.append("Un set di cacciaviti di precisione. ");
                             msg.append("Perfetti per assemblare componenti delicati del computer!\n");
                         } else {
@@ -158,8 +158,8 @@ public class UseObserver implements GameObserver, Serializable {
                         interact = true;
                         break;
 
-                    case 26: // Saldatore
-                        if (Utils.getObjectFromInventory(description.getInventory(), 26) != null) {
+                    case Utils.OBJ_SALDATORE_ID: // Saldatore
+                        if (Utils.getObjectFromInventory(description.getInventory(), Utils.OBJ_SALDATORE_ID) != null) {
                             msg.append("Un saldatore professionale. ");
                             msg.append("Utile per riparazioni elettroniche avanzate, ma richiede esperienza!\n");
                         } else {
@@ -169,8 +169,8 @@ public class UseObserver implements GameObserver, Serializable {
                         interact = true;
                         break;
 
-                    case 27: // Bobina PLA
-                        if (Utils.getObjectFromInventory(description.getInventory(), 27) != null) {
+                    case Utils.OBJ_BOBINA_PLA_ID: // Bobina PLA
+                        if (Utils.getObjectFromInventory(description.getInventory(), Utils.OBJ_BOBINA_PLA_ID) != null) {
                             msg.append("Materiale per stampante 3D. ");
                             msg.append("Potrebbe servire per creare supporti o parti personalizzate!\n");
                         } else {
@@ -181,8 +181,8 @@ public class UseObserver implements GameObserver, Serializable {
                         break;
 
                     // OGGETTI PROVA 3 - Rivoluzione Robot
-                    case 23: // Chiave Rack
-                        AdvObject rack = description.getCurrentRoom().getObject(22);
+                    case Utils.OBJ_CHIAVE_RACK_ID: // Chiave Rack
+                        AdvObject rack = description.getCurrentRoom().getObject(Utils.OBJ_RACK_ID);
                         if (rack != null) {
                             if (rack.isOpen()) {
                                 msg.append("Il rack è già aperto. ");
@@ -196,15 +196,15 @@ public class UseObserver implements GameObserver, Serializable {
                         interact = true;
                         break;
 
-                    case 24: // Pulsante del rack
+                    case Utils.OBJ_PULSANTE_ID: // Pulsante del rack
                         msg.append("ATTENZIONE! Questo pulsante sembra controllare il sistema principale. ");
                         msg.append("Premerlo potrebbe causare il caos totale nel collegio!\n");
                         interact = true;
                         break;
 
                     // OGGETTI BONUS/UTILITÀ
-                    case 14: // Chiavi auto del Direttore
-                        if (Utils.getObjectFromInventory(description.getInventory(), 14) != null) {
+                    case Utils.OBJ_CHIAVI_AUTO_ID: // Chiavi auto del Direttore
+                        if (Utils.getObjectFromInventory(description.getInventory(), Utils.OBJ_CHIAVI_AUTO_ID) != null) {
                             msg.append("Le chiavi della macchina del Direttore. ");
                             msg.append("Se non vieni ammesso, potresti sempre rubar... no, meglio di no!\n");
                         } else {
@@ -214,8 +214,8 @@ public class UseObserver implements GameObserver, Serializable {
                         interact = true;
                         break;
 
-                    case 15: // Forbici
-                        if (Utils.getObjectFromInventory(description.getInventory(), 15) != null) {
+                    case Utils.OBJ_FORBICI_ID: // Forbici
+                        if (Utils.getObjectFromInventory(description.getInventory(), Utils.OBJ_FORBICI_ID) != null) {
                             msg.append("Un paio di forbici affilate. ");
                             msg.append("Potrebbero tornare utili per tagliare cavi o imballaggi.\n");
                         } else {
@@ -225,8 +225,8 @@ public class UseObserver implements GameObserver, Serializable {
                         interact = true;
                         break;
 
-                    case 7: // Pantaloni Sporchi
-                        if (Utils.getObjectFromInventory(description.getInventory(), 7) != null) {
+                    case Utils.OBJ_PANTALONI_ID: // Pantaloni Sporchi
+                        if (Utils.getObjectFromInventory(description.getInventory(), Utils.OBJ_PANTALONI_ID) != null) {
                             msg.append("Pantaloni sporchi di una sostanza strana...");
                             msg.append("Sembra che qualcuno abbia fatto un pasticcio qui!\n");
                             msg.append("Meglio non toccarli, potrebbero essere infetti!\n");
@@ -237,8 +237,8 @@ public class UseObserver implements GameObserver, Serializable {
                         interact = true;
                         break;
 
-                    case 6: // Cappotto vecchio
-                        if (Utils.getObjectFromInventory(description.getInventory(), 6) != null) {
+                    case Utils.OBJ_CAPPOTTO_ID: // Cappotto vecchio
+                        if (Utils.getObjectFromInventory(description.getInventory(), Utils.OBJ_CAPPOTTO_ID) != null) {
                             msg.append("Indossi il cappotto. Sembra che ti stia a pennello !");
                             msg.append("Potrebbe aiutarti nelle prove successive!\n");
                         } else {
@@ -248,8 +248,8 @@ public class UseObserver implements GameObserver, Serializable {
                         interact = true;
                         break;
 
-                    case 8: // Bastone per anziani
-                        if (Utils.getObjectFromInventory(description.getInventory(), 8) != null) {
+                    case Utils.OBJ_BASTONE_ID: // Bastone per anziani
+                        if (Utils.getObjectFromInventory(description.getInventory(), Utils.OBJ_BASTONE_ID) != null) {
                             msg.append("Usi il bastone per anziani come supporto. ");
                             msg.append("Ti fa sentire più saggio, ma forse anche più vecchio!\n");
                         } else {
@@ -258,8 +258,8 @@ public class UseObserver implements GameObserver, Serializable {
                         }
                         interact = true;
                         break;
-                    case 50:
-                        boolean hasFlipper = Utils.getObjectFromInventory(description.getInventory(), 50) != null;
+                    case Utils.OBJ_FLIPPER_ZERO_ID:
+                        boolean hasFlipper = Utils.getObjectFromInventory(description.getInventory(), Utils.OBJ_FLIPPER_ZERO_ID) != null;
                         if (hasFlipper) {    
                             if (flipperWindow != null && flipperWindow.isVisible()) {
                                 msg.append("[RED]Il Flipper Zero è già attivo! Completa prima l'operazione in corso.[/]\n");
@@ -280,6 +280,7 @@ public class UseObserver implements GameObserver, Serializable {
                             msg.append("Hai avuto per caso un'illuminazione da [HOT_PINK]San Josè Maria[/]?\nNO NO Flipper? Hai rotto il ca***!\n");
                         }
                         interact = true;
+                        break;
                     default:
                         // Gestione generica per oggetti non specificamente programmati
                         msg.append("Esamini ").append(obj.getName()).append(". ");

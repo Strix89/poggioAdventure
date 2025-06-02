@@ -49,7 +49,7 @@ public class MoveObserver implements GameObserver, Serializable {
             nextRoom = currentRoom.getLinkedRoom();
 
             if (nextRoom.isForbidden()) {
-                return "Non puoi andare li la stanza sembra essere bloccata a chiave!";
+                return "\nNon puoi andare li la stanza sembra essere [RED]bloccata[/] a chiave!";
             }
             description.setCurrentRoom(nextRoom);
             return "Hai cambiato piano! Sei ora in: " + currentRoom.getLinkedRoom().getName();

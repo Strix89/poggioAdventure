@@ -397,7 +397,7 @@ public class CLIMenu implements MenuManager {
      */
     @Override
     public void exit() {
-        output.writeln("\nGrazie per aver giocato a PoggioAdventure! Uscita...", ColorText.GREEN);
-        Utils.exitApplication(); // Chiama il metodo statico per uscire (probabilmente fa System.exit)
+        output.write("\nGrazie per aver giocato a PoggioAdventure!", ColorText.GREEN);
+        Utils.exitApplication();
     }
 }

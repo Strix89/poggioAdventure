@@ -144,28 +144,28 @@ public class Engine {
         }
         getGameColoredVersion();
         output.writeln(this.output instanceof GUIOutputHandler ? game.getGUIWelcomeMsg() : game.getCLIWelcomeMsg(), ColorText.WHITE);
-        output.write(" \nTi trovi qui: ", ColorText.WHITE);
-        output.writeln(game.getCurrentRoom().getName(), ColorText.BRIGHT_YELLOW);
-        output.writeln(game.getCurrentRoom().getDescription(), ColorText.WHITE);
-        printCursor();
         timeManager = new TimeManager();
         gameTime = StopWatch.getInstance();
         gameTime.start();
         gameContext = new GameContext(input, output, errorHandler, logTemp, gameTime);
-        // Inizializza GameStateManager con gestione errori
+        
         try {
             gameStateManager = new GameStateManager(
                 game,
                 output,
                 timeManager, 
+                "[PLAYER]" + playerName + "[/]",
                 this::handleGameCompleted, 
-                this::handleGameReset      
+                this::handleGameReset
             );
             gameStateManager.startGame();
         } catch (Exception e) {
             errorHandler.handleFatalError("Errore durante inizializzazione GameStateManager", e);
             Utils.exitApplication(Utils.EXIT_CODE_INITIALIZATION_ERROR);
         }
+        output.write(" \nTi trovi qui: ", ColorText.WHITE);
+        output.writeln(game.getCurrentRoom().getName(), ColorText.BRIGHT_YELLOW);
+        printCursor();
     }
 
     /**
@@ -193,7 +193,7 @@ public class Engine {
             game.getCurrentRoom().getObjects(), game.getInventory());
 
         if (outputs.isEmpty()) {
-            output.writeln("Non capisco quello che mi vuoi dire.", ColorText.ERROR);
+            output.writeln("\nNon capisco quello che mi vuoi dire.", ColorText.ERROR);
         } else {
             boolean commandExecuted = false;
             for (ParserOutput p : outputs) {

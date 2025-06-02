@@ -39,7 +39,7 @@ public class OpenObserver implements GameObserver, Serializable {
 
             // Se non ci sono oggetti validi
             if (allObjects.isEmpty()) {
-                msg.append("Non c'è niente da aprire qui.");
+                msg.append("Non c'è niente da [NEON_ORANGE]aprire[/] qui.");
                 return msg.toString();
             }
 
@@ -48,17 +48,17 @@ public class OpenObserver implements GameObserver, Serializable {
                 if (obj == null) continue;
 
                 if (!obj.isOpenable()) {
-                    msg.append("Non puoi aprire questo oggetto: ").append(obj.getName()).append("\n");
+                    msg.append("Non puoi [NEON_ORANGE]aprire[/] questo oggetto: ").append(obj.getName()).append("\n");
                     continue;
                 }
 
                 if (obj.isOpen()) {
-                    msg.append(obj.getName()).append(" è già aperto.\n");
+                    msg.append(obj.getName()).append(" è già [NEON_ORANGE]aperto[/].\n");
                     continue;
                 }
 
                 obj.setOpen(true);
-                msg.append("Hai aperto: ").append(obj.getName()).append("\n");
+                msg.append("Hai [NEON_ORANGE]aperto[/]: ").append(obj.getName()).append("\n");
 
                 // Gestione dei contenitori
                 if (obj instanceof AdvObjectContainer) {
@@ -80,7 +80,7 @@ public class OpenObserver implements GameObserver, Serializable {
 
             // Se nessun oggetto è stato effettivamente aperto
             if (!interacted) {
-                msg.append("Non ci sono oggetti che puoi aprire.");
+                msg.append("Non ci sono oggetti che puoi [NEON_ORANGE]aprire[/].");
             }
         }
 

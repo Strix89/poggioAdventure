@@ -52,8 +52,6 @@ public class PoggioAdventureDesc extends GameDescription implements GameObservab
     @Override
     public void init() throws Exception {
         messages.clear();
-        // Inizializza la mappa del gioco
-        this.getGameMap().addElementsToGameDescription(); // Aggiungi tutte le stanze alla mappa del gioco
 
         // Comandi del gioco
         Command nord = new Command(CommandType.NORD, "nord");
@@ -131,10 +129,6 @@ public class PoggioAdventureDesc extends GameDescription implements GameObservab
         this.attach(useObserver);
         GameObserver talkObserver = new TalkObserver();
         this.attach(talkObserver);
-
-        // Inizializza la stanza iniziale del gioco (ora la stanza iniziale viene
-        // recuperata dalla GameMap)
-        setCurrentRoom(this.getGameMap().getStartingRoom()); // Imposta la stanza iniziale come la prima stanza del primo piano
     }
 
     /**

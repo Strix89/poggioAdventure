@@ -471,7 +471,7 @@ public class UI_Game extends UI_Abstract {
             UI_Game gameScreen = new UI_Game();
             gameScreen.setVisible(true);
             gameScreen.startCountdown(300);
-            gameScreen.updateRoomImage("./resources/img/room1.jpg");
+            gameScreen.updateRoomImage("./resources/img/Hall.jpg");
         });
     }
 }

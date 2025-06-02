@@ -98,7 +98,8 @@ public enum ColorText {
     WARNING("\u001B[93m", new Color(255, 200, 0)),   // Avvertimenti
     ERROR("\u001B[91m", new Color(255, 80, 80)),     // Messaggi di errore
     SUCCESS("\u001B[92m", new Color(50, 220, 50)),   // Operazioni riuscite
-    HIGHLIGHT("\u001B[95m", new Color(255, 150, 255)); // Evidenziazioni
+    HIGHLIGHT("\u001B[95m", new Color(255, 150, 255)),// Evidenziazioni
+    PLAYER("\u001B[34m", new Color(0, 120, 215)); // Colore per il giocatore
 
     private final String ansiCode;    // Codice ANSI per terminali
     private final Color swingColor;   // Colore Swing per GUI

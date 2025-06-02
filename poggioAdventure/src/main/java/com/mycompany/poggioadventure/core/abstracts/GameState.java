@@ -14,34 +14,63 @@ import java.util.List;
  *   <li>Logica di transizione tra livelli</li>
  * </ul>
  */
-public interface GameState {
+public abstract class GameState {
     
+    private final long timeLimit; // Tempo massimo consentito per il livello (in millisecondi)
+    private Room startingRoom = null;
+    private final List<Integer> requiredIDObjects;
+    private final List<Integer> forbidenIDObjects;
+
+    public GameState(long timeLimit, Room startingRoom, List<Integer> requiredIDObjects, List<Integer> forbiddenIDObjects) {
+        this.timeLimit = timeLimit;
+        this.requiredIDObjects = requiredIDObjects;
+        this.forbidenIDObjects = forbiddenIDObjects;
+        this.startingRoom = startingRoom;
+    }
+
+    public GameState(long timeLimit, List<Integer> requiredIDObjects, List<Integer> forbiddenIDObjects) {
+        this.timeLimit = timeLimit;
+        this.requiredIDObjects = requiredIDObjects;
+        this.forbidenIDObjects = forbiddenIDObjects;
+    }
     /**
      * Inizializza il livello corrente senza dipendenze da Engine.
      * 
      * @param gameDescription Stato del gioco da configurare
      * @param output Handler per messaggi all'utente
+     * @param playerName Nome del giocatore
      */
-    void enter(GameDescription gameDescription, OutputHandler output);
+    public abstract void enter(GameDescription gameDescription, OutputHandler output, String playerName);
     
     /**
      * Restituisce la stanza iniziale per questo livello.
      * @return Stanza di partenza del livello
      */
-    Room getStartingRoom();
-    
+    public Room getStartingRoom(){
+        return startingRoom;
+    }
+
     /**
-     * Restituisce gli oggetti richiesti nell'inventario per completare il livello.
-     * @return Lista degli ID degli oggetti necessari
+     * imposta la stanza iniziale per questo livello.
      */
-    List<Integer> getRequiredObjects();
+    public void setStartingRoom(Room startingRoom){
+        this.startingRoom = startingRoom;
+    }
+
+    public List<Integer> getRequiredIDObjects() {
+        return requiredIDObjects;
+    }
+
+    public List<Integer> getForbidenIDObjects() {
+        return forbidenIDObjects;
+    }
     
     /**
      * Verifica se il livello è stato completato con successo.
      * @param game Stato corrente del gioco
      * @return true se il livello è completato
      */
-    boolean isCompleted(GameDescription game);
+    public abstract boolean isCompleted(GameDescription game);
     
     /**
      * Verifica se si è verificata una condizione di fallimento.
@@ -49,37 +78,45 @@ public interface GameState {
      * @param elapsedTime Tempo trascorso nel livello (in millisecondi)
      * @return true se il livello è fallito
      */
-    boolean isFailureConditionMet(GameDescription game, long elapsedTime);
+    public abstract boolean isFailureConditionMet(GameDescription game, long elapsedTime);
     
     /**
      * Gestisce il successo del livello tramite callback.
      * @param onSuccess Callback da eseguire per la transizione al livello successivo
      */
-    void handleSuccess(Runnable onSuccess);
+    public abstract void handleSuccess(Runnable onSuccess);
     
     /**
      * Gestisce il fallimento del livello tramite callback.
      * @param failureType Tipo di fallimento
      * @param onFailure Callback da eseguire per gestire il fallimento
      */
-    void handleFailure(FailureType failureType, Runnable onFailure);
+    public abstract void handleFailure(FailureType failureType, Runnable onFailure);
     
     /**
      * Restituisce il nome identificativo del livello.
      * @return Nome del livello
      */
-    String getLevelName();
+    public abstract String getLevelName();
     
     /**
      * Restituisce il tempo massimo consentito per questo livello (in millisecondi).
      * @return Tempo limite del livello
      */
-    long getTimeLimit();
+    public long getTimeLimit(){
+        return timeLimit;
+    }
+
+    /**
+     * Stampa una descrizione del livello corrente.
+     * @return Tempo trascorso
+     */
+    public abstract void getLevelDescription(OutputHandler output);
     
     /**
      * Tipi di fallimento possibili
      */
-    enum FailureType {
+    public enum FailureType {
         LIGHT,  // Reset del livello corrente
         SEVERE  // Reset completo del gioco
     }
