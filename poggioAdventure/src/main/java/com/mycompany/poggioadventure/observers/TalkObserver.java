@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.mycompany.poggioadventure.core.abstracts.GameDescription;
 import com.mycompany.poggioadventure.core.utils.GameContext;
+import com.mycompany.poggioadventure.core.utils.Utils;
 import com.mycompany.poggioadventure.model.*;
 import com.mycompany.poggioadventure.parser.*;
 
@@ -56,32 +57,52 @@ public class TalkObserver implements GameObserver, Serializable {
                         msg.append("\n[NPC]").append(npc.getName()).append("[/] ti dà:\n");
                         for (AdvObject item : npc.getItemsToGive()) {
                             description.getInventory().add(item);
-                            msg.append("- ").append(item.getName()).append("\n");
+                            msg.append("- [ITEM]").append(item.getName()).append("[/]\n");
                         }
                     }
                     npc.setHasInteracted(true);
 
                     if (npc.getTest() != null) {
                         if (npc.isTestCompleted()) {
-                            msg.append("[NPC]" + npc.getName() + "[/]").append(": \"Hai già superato questo test!\"\n");
+                            msg.append("[NPC]" + npc.getName() + "[/]").append(": \"Hai già [GREEN]superato[/] questo test!\"\n");
                         } else {
-                            // Controlla se c'è una sessione fallita (anche se non più attiva)
-                            if (npc.getActiveTestSession() != null && npc.getActiveTestSession().isFailed()) {
-                                msg.append("[NPC]" + npc.getName() + "[/]").append(": \"Vuoi riprovare il test?\"\n");
-                            }
-                            
-                            if (npc.startTestSession()) {
-                                gameContext.getOutputHandler().writeln(msg.toString());
-                                msg.setLength(0);
-
-                                boolean testPassed = npc.getActiveTestSession().executeTest(
-                                    gameContext.getOutputHandler(), 
-                                    gameContext.getInputHandler(),
-                                    npc.getName());
+                            // Verifica se il giocatore ha gli oggetti richiesti
+                            List<AdvObject> requiredObjects = npc.getTest().getRequiredObjects();
+                            if (!hasAllRequiredObjects(description.getInventory(), requiredObjects)) {
+                                // Mostra messaggio di oggetti mancanti con i nomi
+                                List<AdvObject> missingObjects = getMissingObjects(description.getInventory(), requiredObjects);
+                                msg.append("[NPC]" + npc.getName() + "[/]").append(": \"Non puoi affrontare questo test senza gli [ITEM]oggetti[/] necessari!\"\n");
                                 
-                                if (testPassed && npc.hasRewardObject()) {
-                                    description.getInventory().add(npc.getRewardObject());
-                                    npc.setTestCompleted(testPassed);
+                                if (!missingObjects.isEmpty()) {
+                                    msg.append("Ti servono ancora: ");
+                                    // Formatta la lista dei nomi degli oggetti mancanti
+                                    String formattedList = missingObjects.stream()
+                                        .map(reqObject -> "[ITEM]" + reqObject.getName() + "[/]")
+                                        .collect(java.util.stream.Collectors.joining(", "));
+                                    msg.append(formattedList).append("\n");
+                                } else {
+                                    msg.append("Controlla il tuo [NEON_ORANGE]inventario[/].\n");
+                                }
+                            } else {
+                                // Il giocatore ha tutti gli oggetti richiesti, può procedere con il test
+                                // Controlla se c'è una sessione fallita (anche se non più attiva)
+                                if (npc.getActiveTestSession() != null && npc.getActiveTestSession().isFailed()) {
+                                    msg.append("[NPC]" + npc.getName() + "[/]").append(": \"Vuoi [OLIVE]riprovare[/] il test?\"\n");
+                                }
+                                
+                                if (npc.startTestSession()) {
+                                    gameContext.getOutputHandler().writeln(msg.toString());
+                                    msg.setLength(0);
+
+                                    boolean testPassed = npc.getActiveTestSession().executeTest(
+                                        gameContext.getOutputHandler(), 
+                                        gameContext.getInputHandler(),
+                                        npc.getName());
+                                    
+                                    if (testPassed && npc.hasRewardObject()) {
+                                        description.getInventory().add(npc.getRewardObject());
+                                        npc.setTestCompleted(testPassed);
+                                    }
                                 }
                             }
                         }
@@ -92,5 +113,40 @@ public class TalkObserver implements GameObserver, Serializable {
             }
         }
         return msg.toString();
+    }
+
+    /**
+     * Trova gli oggetti mancanti confrontando gli oggetti richiesti con l'inventario.
+     * 
+     * @param inventory Lista degli oggetti nell'inventario
+     * @param requiredObjects Lista degli oggetti richiesti dal test
+     * @return Lista degli oggetti mancanti con i loro nomi
+     */
+    private List<AdvObject> getMissingObjects(List<AdvObject> inventory, List<AdvObject> requiredObjects) {
+        if (requiredObjects == null || requiredObjects.isEmpty()) {
+            return new java.util.ArrayList<>();
+        }
+        
+        return requiredObjects.stream()
+            .filter(required -> inventory.stream()
+                .noneMatch(invObj -> invObj.getId() == required.getId()))
+            .collect(java.util.stream.Collectors.toList());
+    }
+
+    /**
+     * Verifica se il giocatore ha tutti gli oggetti richiesti nell'inventario.
+     * 
+     * @param inventory Lista degli oggetti nell'inventario
+     * @param requiredObjects Lista degli oggetti richiesti
+     * @return true se ha tutti gli oggetti richiesti
+     */
+    private boolean hasAllRequiredObjects(List<AdvObject> inventory, List<AdvObject> requiredObjects) {
+        if (requiredObjects == null || requiredObjects.isEmpty()) {
+            return true;
+        }
+        
+        return requiredObjects.stream()
+            .allMatch(required -> inventory.stream()
+                .anyMatch(invObj -> invObj.getId() == required.getId()));
     }
 }

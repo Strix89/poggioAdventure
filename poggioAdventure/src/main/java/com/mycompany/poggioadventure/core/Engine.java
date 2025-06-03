@@ -165,6 +165,7 @@ public class Engine {
         }
         output.write(" \nTi trovi qui: ", ColorText.WHITE);
         output.writeln(game.getCurrentRoom().getName(), ColorText.BRIGHT_YELLOW);
+        
         printCursor();
     }
 
@@ -348,9 +349,6 @@ public class Engine {
             gameTime.start();
         }
     }
-
-    // Metodi di accesso e modifica (getters/setters) seguono...
-    // [Documentazione simile per i restanti metodi...]
     
     /**
      * Restituisce il parser dei comandi.

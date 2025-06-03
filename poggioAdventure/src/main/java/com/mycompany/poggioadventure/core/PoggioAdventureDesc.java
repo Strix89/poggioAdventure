@@ -55,28 +55,28 @@ public class PoggioAdventureDesc extends GameDescription implements GameObservab
 
         // Comandi del gioco
         Command nord = new Command(CommandType.NORD, "nord");
-        nord.setAlias(new String[] { "n", "N", "Nord", "NORD", "Su", "su", "sù", "sù", "sopra", "Sopra"});
+        nord.setAlias(new String[] { "n", "su", "sopra"});
         getCommands().add(nord);
 
         Command iventory = new Command(CommandType.INVENTORY, "inventario");
-        iventory.setAlias(new String[] { "inv" });
+        iventory.setAlias(new String[] { "inv", "inventory", "i"});
         getCommands().add(iventory);
 
         Command sud = new Command(CommandType.SOUTH, "sud");
-        sud.setAlias(new String[] { "s", "S", "Sud", "SUD", "Giù", "giu", "giù", "giù", "sotto", "Sotto"});
+        sud.setAlias(new String[] { "s", "giù", "giu", "sotto"});
         getCommands().add(sud);
 
         Command est = new Command(CommandType.EAST, "est");
-        est.setAlias(new String[] { "e", "E", "Est", "EST", "Destra", "destra"});
+        est.setAlias(new String[] { "e", "destra"});
         getCommands().add(est);
 
         Command ovest = new Command(CommandType.WEST, "ovest");
-        ovest.setAlias(new String[] { "o", "O", "Ovest", "OVEST", "Sinistra", "sinistra"});
+        ovest.setAlias(new String[] { "o", "sinistra"});
         getCommands().add(ovest);
 
         Command end = new Command(CommandType.END, "end");
         end.setAlias(
-                new String[] { "end", "fine", "esci", "muori", "ammazzati", "ucciditi", "suicidati", "exit", "basta" });
+                new String[] { "fine", "esci", "muori", "ammazzati", "ucciditi", "suicidati", "exit", "basta" });
         getCommands().add(end);
 
         Command look = new Command(CommandType.LOOK_AT, "osserva");
@@ -84,27 +84,27 @@ public class PoggioAdventureDesc extends GameDescription implements GameObservab
         getCommands().add(look);
 
         Command pickup = new Command(CommandType.PICK_UP, "raccogli");
-        pickup.setAlias(new String[] { "prendi" });
+        pickup.setAlias(new String[] { "prendi" , "pick"});
         getCommands().add(pickup);
 
         Command open = new Command(CommandType.OPEN, "apri");
-        open.setAlias(new String[] {});
+        open.setAlias(new String[] {"open"});
         getCommands().add(open);
 
         Command push = new Command(CommandType.PUSH, "premi");
-        push.setAlias(new String[] { "spingi", "attiva" });
+        push.setAlias(new String[] { "spingi", "attiva", "push"});
         getCommands().add(push);
 
         Command use = new Command(CommandType.USE, "usa");
-        use.setAlias(new String[] { "utilizza", "combina" });
+        use.setAlias(new String[] { "utilizza", "combina"});
         getCommands().add(use);
 
         Command save = new Command(CommandType.SAVE, "salva");
-        save.setAlias(new String[]{"salva"});
+        save.setAlias(new String[]{"save", "salva-gioco", "save-game"});
         getCommands().add(save);
 
         Command talk = new Command(CommandType.TALK, "parla");
-        talk.setAlias(new String[]{"dialoga", "chiedi", "conversa"});
+        talk.setAlias(new String[]{"dialoga", "chiedi", "conversa", "ask"});
         getCommands().add(talk);
         
         //Observer

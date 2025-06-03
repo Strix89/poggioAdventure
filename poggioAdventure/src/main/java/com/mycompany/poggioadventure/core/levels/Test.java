@@ -1,5 +1,6 @@
 package com.mycompany.poggioadventure.core.levels;
 
+import com.mycompany.poggioadventure.model.AdvObject;
 import java.io.Serializable;
 import java.util.List;
 
@@ -14,6 +15,7 @@ public class Test implements Serializable {
     private final int maxWrongAnswers;
     private final String successMessage;
     private final String failureMessage;
+    private final List<AdvObject> requiredObjects;
     
     /**
      * Costruttore per un test.
@@ -26,11 +28,27 @@ public class Test implements Serializable {
      */
     public Test(String testName, List<Question> questions, int maxWrongAnswers, 
                 String successMessage, String failureMessage) {
+        this(testName, questions, maxWrongAnswers, successMessage, failureMessage, null);
+    }
+
+    /**
+     * Costruttore per un test con oggetti richiesti.
+     * 
+     * @param testName Nome del test
+     * @param questions Lista delle domande
+     * @param maxWrongAnswers Numero massimo di risposte sbagliate consentite
+     * @param successMessage Messaggio mostrato in caso di successo
+     * @param failureMessage Messaggio mostrato in caso di fallimento
+     * @param requiredObjects Lista degli oggetti richiesti (può essere null)
+     */
+    public Test(String testName, List<Question> questions, int maxWrongAnswers, 
+                String successMessage, String failureMessage, List<AdvObject> requiredObjects) {
         this.testName = testName;
         this.questions = questions;
         this.maxWrongAnswers = maxWrongAnswers;
         this.successMessage = successMessage;
         this.failureMessage = failureMessage;
+        this.requiredObjects = requiredObjects;
     }
     
     public String getTestName() {
@@ -40,7 +58,7 @@ public class Test implements Serializable {
     public List<Question> getQuestions() {
         return questions;
     }
-    
+
     public int getMaxWrongAnswers() {
         return maxWrongAnswers;
     }
@@ -52,25 +70,55 @@ public class Test implements Serializable {
     public String getFailureMessage() {
         return failureMessage;
     }
-    
+
     /**
-     * Conta il numero di risposte sbagliate.
+     * Restituisce la lista degli oggetti richiesti per effettuare il test.
+     * 
+     * @return Lista degli oggetti richiesti (può essere null)
+     */
+    public List<AdvObject> getRequiredObjects() {
+        return requiredObjects;
+    }
+
+    /**
+     * Restituisce la lista degli ID degli oggetti richiesti per compatibilità.
+     * 
+     * @return Lista degli ID degli oggetti richiesti (può essere null)
+     */
+    public List<Integer> getRequiredObjectIds() {
+        if (requiredObjects == null) {
+            return null;
+        }
+        return requiredObjects.stream()
+            .map(AdvObject::getId)
+            .collect(java.util.stream.Collectors.toList());
+    }
+
+    /**
+     * Verifica se il test ha oggetti richiesti.
+     * 
+     * @return true se ci sono oggetti richiesti
+     */
+    public boolean hasRequiredObjects() {
+        return java.util.Optional.ofNullable(requiredObjects)
+            .map(list -> !list.isEmpty())
+            .orElse(false);
+    }
+
+    /**
+     * Conta il numero di risposte sbagliate usando Stream API.
      * 
      * @param answers Lista degli indici delle risposte date
      * @return Numero di risposte sbagliate
      */
     public int countWrongAnswers(List<Integer> answers) {
-        int wrongCount = 0;
-        for (int i = 0; i < Math.min(questions.size(), answers.size()); i++) {
-            if (!questions.get(i).isCorrectAnswer(answers.get(i))) {
-                wrongCount++;
-            }
-        }
-        return wrongCount;
+        return (int) java.util.stream.IntStream.range(0, Math.min(questions.size(), answers.size()))
+            .filter(i -> !questions.get(i).isCorrectAnswer(answers.get(i)))
+            .count();
     }
-    
+
     /**
-     * Verifica se il test è stato superato (errori <= limite).
+     * Verifica se il test è stato superato usando lambda.
      * 
      * @param answers Lista degli indici delle risposte date
      * @return true se il test è stato superato

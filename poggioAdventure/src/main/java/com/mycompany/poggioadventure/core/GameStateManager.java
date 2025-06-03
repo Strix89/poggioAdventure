@@ -54,6 +54,7 @@ public class GameStateManager {
         this.gameDescription = gameDescription;
         this.output = output;
         this.timeManager = timeManager;
+        this.playerName = playerName;
         this.onGameCompleted = onGameCompleted;
         this.onGameReset = onGameReset;
         snapshotGameDesc = (GameDescription) gameDescription.clone();
@@ -78,7 +79,7 @@ public class GameStateManager {
         
         // Verifica timeout usando TimeManager
         if (timeManager.getTempoRimanente() <= 0 || elapsedTime >= currentState.getTimeLimit()) {
-            output.writeln("\n⏰ TEMPO SCADUTO! Ricominciando dall'inizio...", ColorText.RED);
+            output.writeln("\n[RED]⏰ TEMPO SCADUTO![/] Ricominciando dall'inizio...");
             currentState.handleFailure(GameState.FailureType.SEVERE, this::resetGame);
             return;
         }
@@ -193,7 +194,7 @@ public class GameStateManager {
         timeManager.setTempoTotale((int) levelTimeSeconds);
         timeManager.start(); // Riavvia con il nuovo tempo
         
-        currentState.getLevelDescription(output);
+        currentState.getLevelDescription(output, playerName);
     }
     
     /**

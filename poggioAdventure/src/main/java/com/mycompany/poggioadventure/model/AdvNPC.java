@@ -44,7 +44,7 @@ public class AdvNPC extends AdvObject {
      * @param imagePathForNPC
      */
     public AdvNPC(int id, String name, String description, String imagePathForNPC) {
-        super(id, name, imagePathForNPC, description);
+        super(id, name, description, imagePathForNPC);
         setPickupable(false); // L'NPC non può essere prelevato
     }
     

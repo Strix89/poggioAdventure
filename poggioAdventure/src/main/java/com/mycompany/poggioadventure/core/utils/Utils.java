@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import com.mycompany.poggioadventure.core.abstracts.GameDescription;
 import com.mycompany.poggioadventure.model.AdvObject;
+import com.mycompany.poggioadventure.model.AdvObjectContainer;
+import com.mycompany.poggioadventure.model.Room;
 
 /**
  * Classe che raccoglie utility methods e costanti di sistema.
@@ -26,7 +29,7 @@ public class Utils {
     public static final int NEXT_LEVEL_ID = 1000; // ID per l'oggetto di transizione al livello successivo
     public static final int WIN_GAME_ID = 1001; // ID per l'oggetto di vittoria del gioco
 
-    public static final long LEVEL_1_TIME_LIMIT = 5 * 60 * 1000; // Limite di tempo per il livello 1 (5 minuti in millisecondi)
+    public static final long LEVEL_1_TIME_LIMIT = 10 * 60 * 1000; // Limite di tempo per il livello 1 (5 minuti in millisecondi)
     public static final List<Integer> LEVEL_1_REQUIRED_OBJECTS = List.of(1, 2, 3); // ID oggetti richiesti per il livello 1
     public static final List<Integer> LEVEL_1_FORBIDDEN_OBJECTS = List.of(4, 5); // ID oggetti proibiti per il livello 2
 
@@ -35,6 +38,9 @@ public class Utils {
     // === NPC ===
     public static final int NPC_GENERIC_ID = 0;  // NPC generico
     public static final int NPC_GUIDO_ID = 1;    // Guido - nano portinaio
+    public static final int NPC_DONMATTEO_ID = 28; // Don Matteo - prete
+    public static final int NPC_DIRETTOREGALILEO_ID = 29; // Direttore in Galileo
+    public static final int NPC_TUTOR_ID = 30; // Tutor 
     
     // === OGGETTI PRINCIPALI ===
     public static final int OBJ_POST_IT_ID = 2;        // Post-it con istruzioni
@@ -173,5 +179,38 @@ public class Utils {
         AdvObject nextLevelAdvObject = new AdvObject(OBJ_NEXT_LEVEL_ID, "Prossimo Livello");
         nextLevelAdvObject.setVisible(false);
         return nextLevelAdvObject;
+    }
+
+    /**
+     * Verifica se l'utente ha tutti gli oggetti necessari nell'inventario.
+     * 
+     * @param inventory Lista degli oggetti nell'inventario del giocatore
+     * @param requiredObjectIds Lista degli ID degli oggetti richiesti (può essere null o vuota)
+     * @return true se ha tutti gli oggetti richiesti o se non ci sono oggetti richiesti
+     */
+    public static boolean hasRequiredObjects(List<AdvObject> inventory, List<Integer> requiredObjectIds) {
+        // Se non ci sono oggetti richiesti, il test può essere effettuato
+        return requiredObjectIds == null || requiredObjectIds.isEmpty() ||
+               requiredObjectIds.stream()
+                   .allMatch(requiredId -> inventory.stream()
+                       .anyMatch(obj -> obj.getId() == requiredId));
+    }
+
+    /**
+     * Restituisce una lista degli oggetti mancanti dall'inventario.
+     * 
+     * @param inventory Lista degli oggetti nell'inventario del giocatore
+     * @param requiredObjectIds Lista degli ID degli oggetti richiesti
+     * @return Lista degli ID degli oggetti mancanti
+     */
+    public static List<Integer> getMissingObjects(List<AdvObject> inventory, List<Integer> requiredObjectIds) {
+        if (requiredObjectIds == null || requiredObjectIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        
+        return requiredObjectIds.stream()
+            .filter(requiredId -> inventory.stream()
+                .noneMatch(obj -> obj.getId() == requiredId))
+            .collect(java.util.stream.Collectors.toList());
     }
 }

@@ -61,9 +61,7 @@ public abstract class GameDescription implements Serializable {
      * @return
      */
     public List<AdvObject> getInventory() {
-        return inventory.stream()
-                .filter(obj -> obj.isVisible())
-                .collect(Collectors.toList());
+        return inventory;
     }
 
     /**

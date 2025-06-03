@@ -152,7 +152,6 @@ public class TestSession implements Serializable {
         outputHandler.writeln("=".repeat(50), ColorText.LIGHT_ORANGE);
         outputHandler.writeln("\t" + test.getTestName(), ColorText.LIGHT_ORANGE);
         outputHandler.writeln("=".repeat(50), ColorText.LIGHT_ORANGE);
-        outputHandler.writeln("[NPC]" + npcName + "[/]: Cominciamo!", ColorText.WHITE);
         outputHandler.writeln("Puoi commettere massimo " + test.getMaxWrongAnswers() + " errori.", ColorText.WARNING);
         outputHandler.writeln("Digita '[RED]q[/]', '[RED]quit[/]' o '[RED]esci[/]' per abbandonare il test.\n", ColorText.WHITE);
         
@@ -240,7 +239,7 @@ public class TestSession implements Serializable {
         if (isFailed) {
             outputHandler.writeln("[ERROR]❌[/] FALLITO! [NPC]" + npcName + "[/]: " + test.getFailureMessage(), ColorText.WHITE);
         } else if (isCompleted) {
-            outputHandler.writeln("[SUCCESS]✅[/] [NPC]" + npcName + "[/]: " + test.getSuccessMessage(), ColorText.WHITE);
+            outputHandler.writeln("[SUCCESS]✅[/] SUPERATO! [NPC]" + npcName + "[/]: " + test.getSuccessMessage(), ColorText.WHITE);
         } else {
             outputHandler.writeln("ℹ️ TEST NON COMPLETATO.", ColorText.WARNING);
         }

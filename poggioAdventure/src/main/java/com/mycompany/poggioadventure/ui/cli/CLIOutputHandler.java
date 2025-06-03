@@ -24,7 +24,6 @@ public class CLIOutputHandler implements OutputHandler {
             boolean isLastLine = (i == lineList.size() - 1);
             
             if (IMAGE_TAG_PATTERN.matcher(line).matches()) {
-                output.append("[Immagine non disponibile in CLI]\n");
                 continue;
             }
             

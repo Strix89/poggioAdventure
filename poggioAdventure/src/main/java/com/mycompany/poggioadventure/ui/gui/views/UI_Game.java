@@ -15,6 +15,8 @@ import com.mycompany.poggioadventure.persistence.LoggerInput;
 import com.mycompany.poggioadventure.persistence.ResourceLoader;
 import javax.swing.*;
 import javax.swing.border.Border;
+import javax.swing.text.StyledDocument;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;

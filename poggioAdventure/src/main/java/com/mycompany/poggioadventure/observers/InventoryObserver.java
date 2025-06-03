@@ -14,6 +14,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Metodo che permette di visualizzare l'inventario del giocatore
@@ -37,32 +38,43 @@ public class InventoryObserver implements GameObserver, Serializable {
      * 
      * @param description La descrizione del gioco
      * @param parserOutput L'output del parser
-     * @param output L'handler per l'output
+     * @param gameContext Il contesto del gioco
      * @return Stringa vuota per GUI, descrizione testuale per CLI
      */
     @Override
     public String update(GameDescription description, ParserOutput parserOutput, GameContext gameContext) {
         StringBuilder msg = new StringBuilder();
-        OutputHandler output = gameContext.getOutputHandler(); // Ottiene l'output handler dal contesto del gioco
+        OutputHandler output = gameContext.getOutputHandler();
         
         if (parserOutput.getCommand().getType() == CommandType.INVENTORY) {
             if (output instanceof GUIOutputHandler) {
                 // Versione GUI: Mostra/Aggiorna la finestra dell'inventario
                 handleGUIInventory(description);
-                return ""; // Non è necessario restituire una stringa per la GUI
+                return "";
             } else {
                 // Versione CLI: Restituisce la descrizione testuale dell'inventario
-                if (description.getInventory().isEmpty()) {
-                    msg.append("Il tuo inventario è vuoto!");
-                } else {
-                    msg.append("Nel tuo inventario ci sono:\n");
-                    for (AdvObject o : description.getInventory()) {
-                        msg.append("[yellow]").append(o.getName()).append("[/]").append(": ").append(o.getDescription()).append("\n");
-                    }
-                }
+                List<AdvObject> visibleInventory = getVisibleInventory(description.getInventory());
+                return buildCLIInventoryMessage(visibleInventory);
             }
         }
         return msg.toString();
+    }
+    
+    /**
+     * Costruisce il messaggio dell'inventario per CLI usando lambda
+     * @param visibleInventory Lista degli oggetti visibili
+     * @return Stringa formattata per l'inventario
+     */
+    private String buildCLIInventoryMessage(List<AdvObject> visibleInventory) {
+        if (visibleInventory.isEmpty()) {
+            return "Il tuo inventario è vuoto!";
+        }
+        
+        String inventoryContent = visibleInventory.stream()
+            .map(obj -> "-[ITEM]" + obj.getName() + "[/]: " + obj.getDescription())
+            .collect(java.util.stream.Collectors.joining("\n"));
+        
+        return "Nel tuo inventario ci sono:\n" + inventoryContent;
     }
     
     /**
@@ -73,35 +85,67 @@ public class InventoryObserver implements GameObserver, Serializable {
      * @param description La descrizione del gioco
      */
     private void handleGUIInventory(GameDescription description) {
-        this.gameDescription = description; // Salva il riferimento alla descrizione del gioco
+        this.gameDescription = description;
         
-        if (inventoryWindow == null || !inventoryWindow.isVisible()) {
-            // Crea una nuova finestra dell'inventario
-            inventoryWindow = new UI_Inventory();
-            inventoryWindow.addObjectsToScroller(description.getInventory());
-            
-            // Aggiunge un listener per sapere quando la finestra viene chiusa
-            inventoryWindow.addWindowListener(new WindowAdapter() {
-                @Override
-                public void windowClosed(WindowEvent e) {
-                    stopUpdateTimer(); // Ferma il timer quando la finestra viene chiusa
-                    inventoryWindow = null;
-                }
-            });
-            
-            // Avvia il timer per l'aggiornamento automatico
-            startUpdateTimer();
-            
-            // Mostra la finestra
-            inventoryWindow.setVisible(true);
+        if (isInventoryWindowClosed()) {
+            createAndShowInventoryWindow(description);
         } else {
-            // La finestra esiste già, la porta in primo piano
-            inventoryWindow.toFront();
-            
-            // Assicura che il timer sia attivo
-            if (updateTimer == null || !updateTimer.isRunning()) {
-                startUpdateTimer();
+            bringInventoryToFront();
+        }
+    }
+    
+    /**
+     * Verifica se la finestra dell'inventario è chiusa o non visibile
+     * @return true se la finestra è chiusa
+     */
+    private boolean isInventoryWindowClosed() {
+        return inventoryWindow == null || !inventoryWindow.isVisible();
+    }
+    
+    /**
+     * Crea e mostra una nuova finestra dell'inventario
+     * @param description La descrizione del gioco
+     */
+    private void createAndShowInventoryWindow(GameDescription description) {
+        List<AdvObject> visibleInventory = getVisibleInventory(description.getInventory());
+        
+        inventoryWindow = new UI_Inventory();
+        inventoryWindow.addObjectsToScroller(visibleInventory);
+        
+        // Aggiunge un listener lambda per la chiusura della finestra
+        inventoryWindow.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+                cleanupInventoryWindow();
             }
+        });
+        
+        startUpdateTimer();
+        inventoryWindow.setVisible(true);
+    }
+    
+    /**
+     * Porta la finestra dell'inventario in primo piano
+     */
+    private void bringInventoryToFront() {
+        inventoryWindow.toFront();
+        ensureTimerIsRunning();
+    }
+    
+    /**
+     * Pulisce le risorse quando la finestra viene chiusa
+     */
+    private void cleanupInventoryWindow() {
+        stopUpdateTimer();
+        inventoryWindow = null;
+    }
+    
+    /**
+     * Assicura che il timer sia in esecuzione
+     */
+    private void ensureTimerIsRunning() {
+        if (updateTimer == null || !updateTimer.isRunning()) {
+            startUpdateTimer();
         }
     }
     
@@ -109,7 +153,6 @@ public class InventoryObserver implements GameObserver, Serializable {
      * Avvia il timer per l'aggiornamento automatico dell'inventario
      */
     private void startUpdateTimer() {
-        // Crea e avvia il timer solo se non esiste già
         if (updateTimer == null || !updateTimer.isRunning()) {
             updateTimer = new Timer(UPDATE_INTERVAL, e -> updateInventory());
             updateTimer.start();
@@ -132,12 +175,21 @@ public class InventoryObserver implements GameObserver, Serializable {
      */
     private void updateInventory() {
         if (inventoryWindow != null && inventoryWindow.isVisible() && gameDescription != null) {
-            // Crea una copia della lista per evitare problemi di concorrenza
-            List<AdvObject> currentInventory = new ArrayList<>(gameDescription.getInventory());
-            inventoryWindow.addObjectsToScroller(currentInventory);
+            List<AdvObject> visibleInventory = getVisibleInventory(gameDescription.getInventory());
+            inventoryWindow.addObjectsToScroller(new ArrayList<>(visibleInventory));
         } else {
-            // Se la finestra è stata chiusa o non è più visibile, ferma il timer
             stopUpdateTimer();
         }
+    }
+
+    /**
+     * Filtra l'inventario per ottenere solo gli oggetti visibili usando Stream API
+     * @param inventory Lista completa dell'inventario
+     * @return Lista degli oggetti visibili
+     */
+    private List<AdvObject> getVisibleInventory(List<AdvObject> inventory) {
+        return inventory.stream()
+                .filter(AdvObject::isVisible)
+                .collect(java.util.stream.Collectors.toList());
     }
 }

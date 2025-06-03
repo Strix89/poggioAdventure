@@ -84,7 +84,7 @@ public class AdvObject implements Serializable {
      * @param image
      * @param description
      */
-    public AdvObject(int id, String name, String image, String description) {
+    public AdvObject(int id, String name, String description, String image) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -102,7 +102,7 @@ public class AdvObject implements Serializable {
      * @param description
      * @param alias
      */
-    public AdvObject(int id, String name, String image, String description, Set<String> alias) {
+    public AdvObject(int id, String name, String description, String image, Set<String> alias) {
         this.id = id;
         this.name = name;
         this.description = description;

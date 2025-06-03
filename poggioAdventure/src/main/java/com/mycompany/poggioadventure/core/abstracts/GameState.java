@@ -111,7 +111,7 @@ public abstract class GameState {
      * Stampa una descrizione del livello corrente.
      * @return Tempo trascorso
      */
-    public abstract void getLevelDescription(OutputHandler output);
+    public abstract void getLevelDescription(OutputHandler output, String playerName);
     
     /**
      * Tipi di fallimento possibili

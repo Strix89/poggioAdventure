@@ -263,10 +263,28 @@ public class UI_Inventory extends UI_Abstract {
             imageObjects.add(noImageLabel, BorderLayout.CENTER);
         }
 
-        descriptionArea.setText(obj.getDescription());
+        // Pulisce la descrizione dai tag colore prima di visualizzarla
+        String cleanDescription = removeColorTags(obj.getDescription());
+        descriptionArea.setText(cleanDescription);
         descriptionArea.setCaretPosition(0);
         revalidate();
         repaint();
+    }
+
+    /**
+     * Rimuove i tag colore dal testo nel formato [COLORE]testo[/].
+     * @param text Testo con potenziali tag colore
+     * @return Testo pulito senza tag colore
+     */
+    private String removeColorTags(String text) {
+        if (text == null || text.isEmpty()) {
+            return text;
+        }
+        
+        // Rimuove i tag colore nel formato [COLORE]testo[/]
+        return text.replaceAll("\\[([A-Za-z_]+)\\](.*?)\\[/\\]", "$2")
+                  .replaceAll("\\[([A-Za-z_]+)\\]", "")  // Rimuove tag apertura senza chiusura
+                  .replaceAll("\\[/\\]", "");            // Rimuove tag chiusura senza apertura
     }
 
     // ============== METODI OVERRIDE ==============

@@ -37,6 +37,8 @@ public class Command implements Serializable {
     public Command(CommandType type, String name) {
         this.type = type;
         this.name = name;
+        this.alias = new HashSet<>();
+        this.alias.add(name);
     }
 
     /**
@@ -48,7 +50,8 @@ public class Command implements Serializable {
     public Command(CommandType type, String name, Set<String> alias) {
         this.type = type;
         this.name = name;
-        this.alias = alias;
+        this.alias = new HashSet<>(alias);
+        this.alias.add(name);
     }
 
     /**
@@ -72,7 +75,8 @@ public class Command implements Serializable {
      * @param alias
      */
     public void setAlias(Set<String> alias) {
-        this.alias = alias;
+        this.alias = new HashSet<>(alias);
+        this.alias.add(name);
     }
 
     /**
@@ -81,6 +85,7 @@ public class Command implements Serializable {
      */
     public void setAlias(String[] alias) {
         this.alias = new HashSet<>(Arrays.asList(alias));
+        this.alias.add(name);
     }
 
     /**

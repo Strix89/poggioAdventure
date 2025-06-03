@@ -35,7 +35,7 @@ public class PickUpObserver implements GameObserver, Serializable {
             List<AdvObject> objectsToPick = parserOutput.getRoomObjects();
 
             if (objectsToPick == null || objectsToPick.isEmpty()) {
-                msg.append("Non c'è niente da raccogliere qui.");
+                msg.append("Non c'è niente da [NEON_ORANGE]raccogliere[/] qui.");
             } else {
                 for (AdvObject obj : objectsToPick) {
                     boolean foundAndPicked = false;
@@ -45,27 +45,27 @@ public class PickUpObserver implements GameObserver, Serializable {
                         if (obj.isPickupable()) {
                             description.getCurrentRoom().getObjects().remove(obj);
                             description.getInventory().add(obj);
-                            msg.append("Hai raccolto: ").append(obj.getDescription()).append("\n");
+                            msg.append("Hai [NEON_ORANGE]raccolto[/]: ").append(obj.getDescription()).append("[/]\n");
                             foundAndPicked = true;
                         } else {
-                            msg.append("Non puoi raccogliere questo oggetto: ").append(obj.getName()).append("\n");
+                            msg.append("Non puoi [NEON_ORANGE]raccogliere[/] questo oggetto: [ITEM]").append(obj.getName()).append("[/]\n");
                             foundAndPicked = true;
                         }
                     } else {
                         // Se non è in stanza, cerco dentro contenitori aperti
                         for (AdvObject containerObj : description.getCurrentRoom().getObjects()) {
                             if (containerObj instanceof AdvObjectContainer) {
-                                msg.append("Controllo in ").append(containerObj.getName()).append("\n"); //DEBUG
+                                msg.append("[NEON_ORANGE]_[/]Controllo in [ITEM]").append(containerObj.getName()).append("[/]\n"); //DEBUG
                                 AdvObjectContainer container = (AdvObjectContainer) containerObj;
                                 if (container.isOpen() && container.getList().contains(obj)) {
                                     if (obj.isPickupable()) {
                                         container.getList().remove(obj);
                                         description.getInventory().add(obj);
-                                        msg.append("Hai raccolto: ").append(obj.getDescription()).append("\n");
+                                        msg.append("Hai raccolto:").append(obj.getDescription()).append("\n");
                                         foundAndPicked = true;
                                         break;
                                     } else {
-                                        msg.append("Non puoi raccogliere questo oggetto: ").append(obj.getName()).append("\n");
+                                        msg.append("Non puoi [NEON_ORANGE]raccogliere[/] questo oggetto: [ITEM]").append(obj.getName()).append("\n");
                                         foundAndPicked = true;
                                         break;
                                     }
@@ -75,7 +75,7 @@ public class PickUpObserver implements GameObserver, Serializable {
                     }
 
                     if (!foundAndPicked) {
-                        msg.append("Non vedo ").append(obj.getName()).append(" qui.\n");
+                        msg.append("Non vedo [ITEM]").append(obj.getName()).append("[/] qui.\n");
                     }
                 }
             }

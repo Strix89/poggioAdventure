@@ -114,11 +114,17 @@ public class Room implements Serializable {
 
     /**
      * Aggiunge un oggetto con un'etichetta personalizzata per il comando "guarda"
+     * Se l'etichetta è null o vuota, usa la descrizione dell'oggetto
      */
     public void addObject(AdvObject object, String lookLabel) {
         addObject(object);
         if (object != null && lookLabel != null && !lookLabel.trim().isEmpty()) {
             this.objectLookLabels.put(object.getId(), lookLabel.trim());
+        } else if (lookLabel == null || lookLabel.trim().isEmpty()) {
+            String description = object.getDescription();
+            if (description != null && !description.trim().isEmpty()) {
+                this.objectLookLabels.put(object.getId(), description.trim());
+            }
         }
     }
 
@@ -180,6 +186,35 @@ public class Room implements Serializable {
      */
     public String getObjectLookLabel(int objectId) {
         return this.objectLookLabels.get(objectId);
+    }
+
+    /**
+     * Modifica l'etichetta personalizzata di un oggetto esistente
+     * @param objectId ID dell'oggetto
+     * @param newLookLabel Nuova etichetta da assegnare
+     * @return true se l'etichetta è stata modificata, false se l'oggetto non aveva un'etichetta
+     */
+    public boolean modifyObjectLookLabel(int objectId, String newLookLabel) {
+        if (this.objectLookLabels.containsKey(objectId)) {
+            if (newLookLabel != null && !newLookLabel.trim().isEmpty()) {
+                this.objectLookLabels.put(objectId, newLookLabel.trim());
+                return true;
+            } else {
+                // Se la nuova etichetta è vuota, rimuovi l'etichetta
+                this.objectLookLabels.remove(objectId);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Elimina completamente l'etichetta personalizzata di un oggetto
+     * @param objectId ID dell'oggetto
+     * @return true se l'etichetta è stata rimossa, false se non esisteva
+     */
+    public boolean removeObjectLookLabel(int objectId) {
+        return this.objectLookLabels.remove(objectId) != null;
     }
 
     // --- METODO PRINCIPALE: DESCRIZIONE DINAMICA DELLA STANZA ---
@@ -293,13 +328,13 @@ public class Room implements Serializable {
 
             // Distingui tra NPC e oggetti normali
             if (obj instanceof AdvNPC) {
-                displayText = "[NPC]" + name + "[/]";
+                displayText = "-[NPC]" + name + "[/]";
                 if (label != null) {
                     displayText += ": [ " + label + " ]";
                 }
                 npcDescriptions.add(displayText);
             } else {
-                displayText = "[ITEM]" + name + "[/]";
+                displayText = "-[ITEM]" + name + "[/]";
                 if (label != null) {
                     displayText += ": [ " + label + " ]";
                 }

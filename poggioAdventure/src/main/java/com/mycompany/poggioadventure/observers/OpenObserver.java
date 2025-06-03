@@ -58,6 +58,7 @@ public class OpenObserver implements GameObserver, Serializable {
                 }
 
                 obj.setOpen(true);
+                description.getCurrentRoom().removeObjectLookLabel(obj.getId());
                 msg.append("Hai [NEON_ORANGE]aperto[/]: ").append(obj.getName()).append("\n");
 
                 // Gestione dei contenitori
@@ -68,9 +69,9 @@ public class OpenObserver implements GameObserver, Serializable {
                     if (container.getList().isEmpty()) {
                         msg.append("Ma non contiene nulla.\n");
                     } else {
-                        msg.append(container.getName()).append(" contiene:\n");
+                        msg.append("[ITEM]"+ container.getName()).append("[/] contiene:\n");
                         for (AdvObject inner : container.getList()) {
-                            msg.append(" - ").append(inner.getName()).append(": ").append(inner.getDescription()).append("\n");
+                            msg.append(" - ").append("[ITEM]" + inner.getName()).append("[/]: ").append(inner.getDescription()).append("\n");
                         }
                     }
                 }
