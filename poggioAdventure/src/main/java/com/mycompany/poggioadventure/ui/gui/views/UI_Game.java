@@ -15,7 +15,6 @@ import com.mycompany.poggioadventure.persistence.LoggerInput;
 import com.mycompany.poggioadventure.persistence.ResourceLoader;
 import javax.swing.*;
 import javax.swing.border.Border;
-import javax.swing.text.StyledDocument;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -58,9 +57,7 @@ public class UI_Game extends UI_Abstract {
     private JLabel playerNameLabel;
 
     // ============== GESTIONE TEMPO ==============
-    private Timer countdownTimer;
-    private Timer gameTimer;
-    private int remainingSeconds;
+    private Timer mainTimer;
     private Engine gameEngine;
 
     // ============== COSTRUTTORI ==============
@@ -313,32 +310,44 @@ public class UI_Game extends UI_Abstract {
     // ============== GESTIONE GAMEPLAY ==============
     
     private void setupTimers() {
-        gameTimer = new Timer(1000, e -> updateGameTime());
-        gameTimer.start();
-    }
-
-    private void updateGameTime() {
-        timeLabel.setText("Tempo: " + gameEngine.getFormattedGameTime());
+        // Ferma i timer precedenti se esistono
+        if (mainTimer != null) {
+            mainTimer.stop();
+        }
+        
+        // Crea un unico timer che aggiorna tutto simultaneamente
+        mainTimer = new Timer(1000, e -> updateAllTimeDisplays());
+        mainTimer.start();
     }
 
     /**
-     * Avvia il countdown per il livello corrente.
-     * @param seconds Durata iniziale in secondi
+     * Aggiorna simultaneamente tutti i display temporali per garantire sincronizzazione.
      */
-    public void startCountdown(int seconds) {
-        remainingSeconds = seconds;
-        countdownTimer = new Timer(1000, e -> {
-            if (remainingSeconds <= 0) {
-                countdownTimer.stop();
+    private void updateAllTimeDisplays() {
+        if (gameEngine != null) {
+            // Aggiorna il tempo di gioco totale
+            timeLabel.setText("Tempo: " + gameEngine.getFormattedGameTime());
+            
+            // Aggiorna il countdown del livello
+            if (gameEngine.getGameStateManager() != null) {
+                long remainingSecondsCurrentLevel = gameEngine.getGameStateManager().getCurrentLevelRemainingTimeSeconds();
+                
+                if (remainingSecondsCurrentLevel >= 0) {
+                    String countdownText = String.format("%02d:%02d",
+                            TimeUnit.SECONDS.toMinutes(remainingSecondsCurrentLevel),
+                            remainingSecondsCurrentLevel % 60);
+                    countdownLabel.setText("Countdown: " + countdownText);
+                } else {
+                    countdownLabel.setText("Countdown: 00:00");
+                }
             } else {
-                remainingSeconds--;
-                countdownLabel.setText("Countdown: " + 
-                    String.format("%02d:%02d", 
-                        TimeUnit.SECONDS.toMinutes(remainingSeconds), 
-                        remainingSeconds % 60));
+                countdownLabel.setText("Countdown: --:--");
             }
-        });
-        countdownTimer.start();
+        } else {
+            // Se non c'è engine, mostra valori di default
+            timeLabel.setText("Tempo: 00:00:00");
+            countdownLabel.setText("Countdown: --:--");
+        }
     }
 
     /**
@@ -434,8 +443,9 @@ public class UI_Game extends UI_Abstract {
     // ============== METODI DI CHIUSURA ==============
     
     private void shutdown() {
-        if (countdownTimer != null) countdownTimer.stop();
-        if (gameTimer != null) gameTimer.stop();
+        if (mainTimer != null) {
+            mainTimer.stop();
+        }
     }
 
     @Override
@@ -458,12 +468,24 @@ public class UI_Game extends UI_Abstract {
         return gameEngine;
     }
 
+    /**
+     * Aggiorna l'engine e riavvia i timer sincronizzati.
+     */
     public void setGameEngine(Engine gameEngine) {
         this.playerNameLabel.setText(gameEngine.getPlayerName());
         this.gameEngine = gameEngine;
+
+        // Ferma e riavvia i timer per garantire sincronizzazione
+        if (mainTimer != null) {
+            mainTimer.stop();
+        }
+        
+        // Riavvia il timer unificato con il nuovo engine
+        setupTimers();
+
         Room currentRoom = gameEngine.getGame().getCurrentRoom();
-            if (currentRoom != null && currentRoom.getImagePath() != null) {
-                updateRoomImage(currentRoom.getImagePath());
+        if (currentRoom != null && currentRoom.getImagePath() != null) {
+            updateRoomImage(currentRoom.getImagePath());
         }
     }
 
@@ -472,7 +494,6 @@ public class UI_Game extends UI_Abstract {
         EventQueue.invokeLater(() -> {
             UI_Game gameScreen = new UI_Game();
             gameScreen.setVisible(true);
-            gameScreen.startCountdown(300);
             gameScreen.updateRoomImage("./resources/img/Hall.jpg");
         });
     }

@@ -67,8 +67,7 @@ public class EngineFactory {
      */
     public static Engine createFromSave(GameDescription savedGame, String playerName,
                                        OutputHandler output, InputHandler input, 
-                                       ErrorHandler errorHandler, LoggerInput logger, 
-                                       TimeManager time, long gameTime) {
+                                       ErrorHandler errorHandler, LoggerInput logger, long gameTime) {
         // Crea l'engine con lo stato salvato
         Engine gameEngine = new Engine(savedGame, playerName, output, input, errorHandler, logger);
         if (output instanceof CLIOutputHandler) {
@@ -76,8 +75,6 @@ public class EngineFactory {
         } else{ 
             savedGame.getGameMap().alterateNPCImages(false);
         }
-        // Ripristina lo stato temporale
-        gameEngine.setTimeManager(time);
         gameEngine.setGameTime(gameTime);
         
         return gameEngine;

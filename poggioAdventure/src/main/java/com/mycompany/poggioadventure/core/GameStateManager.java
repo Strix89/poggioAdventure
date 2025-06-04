@@ -49,11 +49,10 @@ public class GameStateManager {
      * @param onGameReset Callback per reset gioco
      */
     public GameStateManager(GameDescription gameDescription, OutputHandler output, 
-                           TimeManager timeManager, String playerName, Runnable onGameCompleted, 
+                           String playerName, Runnable onGameCompleted, 
                            Runnable onGameReset) {
         this.gameDescription = gameDescription;
         this.output = output;
-        this.timeManager = timeManager;
         this.playerName = playerName;
         this.onGameCompleted = onGameCompleted;
         this.onGameReset = onGameReset;
@@ -78,7 +77,7 @@ public class GameStateManager {
         long elapsedTime = System.currentTimeMillis() - levelStartTime;
         
         // Verifica timeout usando TimeManager
-        if (timeManager.getTempoRimanente() <= 0 || elapsedTime >= currentState.getTimeLimit()) {
+        if (timeManager.getTempoRimanente() <= 0) {
             output.writeln("\n[RED]⏰ TEMPO SCADUTO![/] Ricominciando dall'inizio...");
             currentState.handleFailure(GameState.FailureType.SEVERE, this::resetGame);
             return;
@@ -187,14 +186,21 @@ public class GameStateManager {
         
         // Registra l'inizio del livello
         levelStartTime = System.currentTimeMillis();
+
+        long levelTimeMillis = currentState.getTimeLimit(); // Ottieni il tempo del livello in millisecondi
+
+        if (timeManager == null) {
+            // Inizializza TimeManager se non già fatto
+            timeManager = new TimeManager(levelTimeMillis);
+        } else {
+            // Configura TimeManager per questo livello
+            timeManager.stop(); // Ferma il timer corrente
+            // setTempoTotale(int) accetta secondi, quindi convertiamo
+            timeManager.setTempoTotale((int) (levelTimeMillis / 1000));
+        }
+        timeManager.start();
         
-        // Configura TimeManager per questo livello (ora con metodo corretto)
-        long levelTimeSeconds = currentState.getTimeLimit() / 1000;
-        timeManager.stop(); // Ferma il timer corrente
-        timeManager.setTempoTotale((int) levelTimeSeconds);
-        timeManager.start(); // Riavvia con il nuovo tempo
-        
-        currentState.getLevelDescription(output, playerName);
+        currentState.getLevelDescription(output, playerName, String.valueOf(timeManager.getTempoRimanente() / 60));
     }
     
     /**
@@ -222,22 +228,47 @@ public class GameStateManager {
         // Ferma il TimeManager
         timeManager.stop();
         
-        // Statistiche finali usando TimeManager (metodo corretto)
-        output.writeln("⏱️ Tempo totale: " + formatTime(timeManager.getTempoTrascorso() * 1000), ColorText.CYAN);
-        
         // Notifica Engine per completamento
         if (onGameCompleted != null) {
             onGameCompleted.run();
         }
     }
-    
-    /**
-     * Formatta il tempo in formato leggibile.
-     */
-    private String formatTime(long milliseconds) {
-        long minutes = milliseconds / 60000;
-        long seconds = (milliseconds % 60000) / 1000;
-        return String.format("%02d:%02d", minutes, seconds);
+
+    public void restoreFromSave(int savedLevelIndex, long savedLevelElapsedTime) {
+        this.currentLevelIndex = savedLevelIndex;
+        
+        // Assicurati che l'indice sia valido
+        if (currentLevelIndex >= 0 && currentLevelIndex < levels.length) {
+            currentState = levels[currentLevelIndex];
+            
+            // Ripristina il tempo di inizio del livello
+            levelStartTime = System.currentTimeMillis() - savedLevelElapsedTime;
+            
+            // Configura il TimeManager con il tempo rimanente corretto
+            long levelTimeLimit = currentState.getTimeLimit(); // in millisecondi
+            long remainingTime = levelTimeLimit - savedLevelElapsedTime;
+            
+            if (remainingTime > 0) {
+                // C'è ancora tempo rimanente
+                if (timeManager != null) {
+                    timeManager.stop(); // Ferma il thread del timer precedente, se esistente
+                }
+                // Crea una nuova istanza di TimeManager.
+                // Il costruttore TimeManager(long) imposta tempoTrascorso a 0 e tempoTotale a remainingTime.
+                // remainingTime è già in millisecondi, come richiesto dal costruttore.
+                timeManager = new TimeManager(remainingTime); 
+                timeManager.start();
+
+                String remainingTimeFormatted = String.format("%02d:%02d", 
+                    timeManager.getTempoRimanente() / 60, 
+                    timeManager.getTempoRimanente() % 60);
+                output.writeln("Ti rimangono: [RED]" + remainingTimeFormatted + "[/] minuti per completare il livello.", ColorText.YELLOW);
+            } else {
+                // Il tempo è scaduto, gestisci timeout
+                output.writeln("\n[RED]⏰ TEMPO SCADUTO durante il caricamento![/] Resettando il livello...", ColorText.RED);
+                resetCurrentLevel();
+            }
+        }
     }
     
     // Getters
@@ -247,13 +278,16 @@ public class GameStateManager {
         return System.currentTimeMillis() - levelStartTime; 
     }
     
-    public long getCurrentLevelRemainingTime() { 
-        if (currentState == null) return 0;
-        return Math.max(0, currentState.getTimeLimit() - getCurrentLevelElapsedTime()); 
-    }
-    
     public int getCurrentLevelIndex() { return currentLevelIndex; }
     
+    /**
+     * Restituisce il tempo rimanente del TimeManager in secondi (per UI).
+     */
+    public long getCurrentLevelRemainingTimeSeconds() {
+        if (timeManager == null) return 0;
+        return timeManager.getTempoRimanente(); // getTempoRimanente() già restituisce secondi
+    }
+
     /**
      * Restituisce il tempo rimanente del TimeManager in millisecondi.
      */

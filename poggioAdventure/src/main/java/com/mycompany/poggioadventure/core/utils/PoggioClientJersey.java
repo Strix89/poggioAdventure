@@ -274,7 +274,6 @@ public class PoggioClientJersey {
              if (statusCode == failCode) {
                  // Legge il corpo dell'errore (se presente) per analisi più approfondita
                  String errorBody = safeReadEntity(response);
-                 System.err.println("Errore Atteso [" + operation + " " + username + "]: Status=" + statusCode + ", Body=" + errorBody);
 
                  // Mappa i codici specifici all'enum ApiClientResult
                  switch (statusCode) {

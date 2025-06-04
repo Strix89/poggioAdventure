@@ -296,7 +296,6 @@ public class CLIMenu implements MenuManager {
                         saveToLoad, // Nome del salvataggio da caricare
                         // Callback onSuccess: eseguito se il caricamento riesce
                         engine -> {
-                            output.writeln("Caricamento completato!", ColorText.GREEN);
                             engine.startGameLoop(); // Avvia il loop del gioco con l'engine caricato
                         },
                         // Callback onError: eseguito se il caricamento fallisce

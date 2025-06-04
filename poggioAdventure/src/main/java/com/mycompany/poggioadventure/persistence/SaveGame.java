@@ -3,6 +3,7 @@ package com.mycompany.poggioadventure.persistence;
 // Import delle classi Core del gioco
 import com.mycompany.poggioadventure.core.utils.TimeManager; // Gestore del tempo di gioco
 import com.mycompany.poggioadventure.core.Engine; // Motore principale del gioco
+import com.mycompany.poggioadventure.core.GameStateManager;
 import com.mycompany.poggioadventure.core.abstracts.GameDescription; // Descrizione astratta dello stato del gioco
 import com.mycompany.poggioadventure.core.utils.ApiClientResult;
 import com.mycompany.poggioadventure.core.utils.EngineFactory; // Factory per creare istanze di Engine
@@ -203,9 +204,17 @@ public class SaveGame {
                 // Scrive gli oggetti nell'ordine PRESTABILITO e CRITICO
                 out.writeObject(engine.getPlayerName());        // 1. Username (String)
                 out.writeObject(engine.getGame());              // 2. Stato Gioco (GameDescription)
-                out.writeObject(engine.getTimeManager());       // 3. Gestore Tempo (TimeManager)
-                out.writeObject(engine.getLongGameTime());      // 4. Tempo Trascorso (long) -> Autoboxing a Long
-                out.writeObject(engine.getLogger().getFileName()); // 5. Nome File Log (String)
+                out.writeObject(engine.getLongGameTime());      // 3. Tempo Trascorso (long) -> Autoboxing a Long
+                out.writeObject(engine.getLogger().getFileName()); // 4. Nome File Log (String)
+                // AGGIUNTO: Salva lo stato del livello corrente e del TimeManager
+                GameStateManager gsm = engine.getGameStateManager();
+                if (gsm != null) {
+                    out.writeObject(gsm.getCurrentLevelIndex());    // 5. Indice livello corrente (int)
+                    out.writeObject(gsm.getCurrentLevelElapsedTime()); // 6. Tempo trascorso nel livello (long)
+                } else {
+                    out.writeObject(0);    // 5. Livello 0 se GSM è null
+                    out.writeObject(0L);   // 6. Tempo 0 se GSM è null
+                }
             }
             output.writeln("\nGioco salvato con successo come: " + fileName, ColorText.GREEN);
 
@@ -282,9 +291,12 @@ public class SaveGame {
             // --- Deserializzazione: L'ORDINE È CRITICO e deve matchare saveGame ---
             String playerName = (String) in.readObject();             // 1. Legge playerName
             GameDescription game = (GameDescription) in.readObject(); // 2. Legge GameDescription
-            TimeManager timeManager = (TimeManager) in.readObject();  // 3. Legge TimeManager
-            long gameTime = (long) in.readObject();                   // 4. Legge gameTime (unboxing da Long)
-            String logFileName = (String) in.readObject();            // 5. Legge logFileName
+            long gameTime = (long) in.readObject();                   // 3. Legge gameTime (unboxing da Long)
+            String logFileName = (String) in.readObject();            // 4. Legge logFileName
+
+            // AGGIUNTO: Legge lo stato del livello
+            int currentLevelIndex = (int) in.readObject();            // 5. Indice livello corrente
+            long levelElapsedTime = (long) in.readObject();             // 6. Tempo trascorso nel livello corrente
 
             // --- Verifica e Creazione Logger ---
             // Controlla l'integrità/esistenza del file di log associato PRIMA di creare l'engine
@@ -302,8 +314,14 @@ public class SaveGame {
             Engine engine = EngineFactory.createFromSave(
                 game, playerName, output, input,
                 errorHandler, logger, // Passa il logger appena creato
-                timeManager, gameTime
+                gameTime
             );
+
+            // AGGIUNTO: Ripristina lo stato del GameStateManager
+            GameStateManager gsm = engine.getGameStateManager();
+            if (gsm != null) {
+                gsm.restoreFromSave(currentLevelIndex, levelElapsedTime);
+            }
 
             // --- Successo ---
             // Esegue il callback di successo passando l'engine pronto all'uso
@@ -457,11 +475,10 @@ public class SaveGame {
             // Legge e scarta i primi 4 oggetti secondo l'ordine definito in saveGame
             in.readObject(); // 1. Salta playerName (String)
             in.readObject(); // 2. Salta game (GameDescription)
-            in.readObject(); // 3. Salta timeManager (TimeManager)
-            in.readObject(); // 4. Salta gameTime (Long)
+            in.readObject(); // 3. Salta gameTime (Long)
 
-            // Legge il quinto oggetto, che dovrebbe essere il nome del file di log
-            String logFileName = (String) in.readObject(); // 5. Legge logFileName (String)
+            // Legge il quarto oggetto, che dovrebbe essere il nome del file di log
+            String logFileName = (String) in.readObject(); // 4. Legge logFileName (String)
 
             // Converte la stringa del nome file in un oggetto Path
             // Presume che logFileName contenga un percorso valido o solo il nome file.

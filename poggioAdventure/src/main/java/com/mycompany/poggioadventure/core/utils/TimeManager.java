@@ -26,7 +26,7 @@ public class TimeManager implements Runnable, Serializable {
     // Flag che indica se il timer è attualmente in esecuzione
     private boolean inEsecuzione;
     // Riferimento al thread che esegue il countdown
-    private Thread thread;
+    private transient Thread thread;
 
     /**
      * Costruttore di default: utilizza i valori predefiniti per tempo totale e intervallo.
@@ -46,6 +46,19 @@ public class TimeManager implements Runnable, Serializable {
     public TimeManager(long tempoTotale, long intervallo) {
         this.tempoTotale = tempoTotale;
         this.intervallo = intervallo;
+        this.tempoTrascorso = 0;
+        this.inEsecuzione = false;
+    }
+
+    /**
+     * Costruttore che accetta solo il tempo totale, utilizzando l'intervallo predefinito.
+     * Questo è utile per scenari in cui si desidera un countdown standard senza specificare l'intervallo.
+     *
+     * @param tempoTotale durata totale del timer in millisecondi
+     */
+    public TimeManager(long tempoTotale) {
+        this.tempoTotale = tempoTotale;
+        this.intervallo = INTERVALLO_DEFAULT; // Usa l'intervallo predefinito
         this.tempoTrascorso = 0;
         this.inEsecuzione = false;
     }

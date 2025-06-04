@@ -1,7 +1,6 @@
 package com.mycompany.poggioadventure.core;
 
 import com.mycompany.poggioadventure.core.abstracts.GameDescription;
-import com.mycompany.poggioadventure.core.utils.TimeManager;
 import com.mycompany.poggioadventure.core.utils.GameContext;
 import com.mycompany.poggioadventure.core.utils.StopWatch;
 import com.mycompany.poggioadventure.persistence.LoggerInput;
@@ -83,11 +82,6 @@ public class Engine {
     private ErrorHandler errorHandler;
     
     /**
-     * Gestore del tempo di gioco (ore/giorni/stagioni)
-     */
-    private TimeManager timeManager;
-    
-    /**
      * Logger per registrare l'attività di gioco
      */
     private LoggerInput logger;
@@ -144,7 +138,6 @@ public class Engine {
         }
         getGameColoredVersion();
         output.writeln(this.output instanceof GUIOutputHandler ? game.getGUIWelcomeMsg() : game.getCLIWelcomeMsg(), ColorText.WHITE);
-        timeManager = new TimeManager();
         gameTime = StopWatch.getInstance();
         gameTime.start();
         gameContext = new GameContext(input, output, errorHandler, logTemp, gameTime);
@@ -153,7 +146,6 @@ public class Engine {
             gameStateManager = new GameStateManager(
                 game,
                 output,
-                timeManager, 
                 "[PLAYER]" + playerName + "[/]",
                 this::handleGameCompleted, 
                 this::handleGameReset
@@ -372,22 +364,6 @@ public class Engine {
      */
     public GameDescription getGame(){
         return game;
-    }
-    
-    /**
-     * Imposta il gestore del tempo di gioco.
-     * @param t Nuova istanza di TimeManager
-     */
-    public void setTimeManager(TimeManager t){
-        this.timeManager = t;
-    }
-    
-    /**
-     * Restituisce il gestore del tempo di gioco.
-     * @return Istanza di TimeManager
-     */
-    public TimeManager getTimeManager(){
-        return timeManager;
     }
     
     /**

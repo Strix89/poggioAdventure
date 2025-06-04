@@ -508,14 +508,14 @@ public class Level1State extends GameState {
     }
 
     @Override
-    public void getLevelDescription(OutputHandler output, String playerName) {
+    public void getLevelDescription(OutputHandler output, String playerName, String remainingTime) {
         output.writeln("IMAGE:" + ResourceLoader.IMG_PATH.resolve("DirettoreIngresso.png").toString());
         output.writeln(this.getLevelName(), ColorText.TURQUOISE);
         output.writeln("[NPC]Direttore[/]: \"Ciao " + playerName + " benvenuto a Poggiolevante!\"");
         output.writeln("[NPC]Direttore[/]: \"Sono il Direttore di questo collegio e saro io a supervisionare la tua ammissione\"");
         output.writeln("[NPC]Direttore[/]: \"Per iniziare, devi superare un test di logica. Devo capire quanto sei intelligente e se sei quindi adatto a questo posto\n\tSpero tu abbia una [ITEM] penna[/] con te, ti servirà per il test!\"");
         output.writeln("[NPC]Direttore[/]: \"Successivamente dovrai superare una prova tecnica nel nostro laboratoio, devo capire se hai conoscenze elettroniche/informatiche.\"");
-        output.writeln("[NPC]Direttore[/]: \"Hai [RED]" + String.valueOf((getTimeLimit() / 1000) / 60)+ "[/] minuti per venire a fare il test,\n\t se non verrai saprò che non ti interessa questo posto.\"");
+        output.writeln("[NPC]Direttore[/]: \"Hai [RED]" + remainingTime + "[/] minuti per venire a fare il test,\n\t se non verrai saprò che non ti interessa questo posto.\"");
         output.writeln("[NPC]Direttore[/]: \"Ci vediamo nella stanza Galileo. [SALMON]Mh Mh MH!!![/]\"");
     }
 }
