@@ -436,7 +436,7 @@ public class Level1State extends GameState {
         hallway.setEast(craftRoom);
         craftRoom.setWest(hallway);
         hallway.setNorth(entryLab);
-        //hallway.setForbidden(true); // Decommentare quando in produzione
+        hallway.setForbidden(true);
         entryLab.setSouth(hallway);
         entryLab.setEast(lab5);
         lab5.setWest(entryLab);
