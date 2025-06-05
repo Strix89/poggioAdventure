@@ -133,7 +133,7 @@ public class Level1State extends GameState {
                 "Test di Logica e Ragionamento", // Nome del test
                 questions,                        // Lista domande
                 2,                               
-                "[SALMON]Mh Mh MH!! Hai dimostrato ottime capacità logiche e di ragionamento! Però potevi fare meglio secondo me",
+                "[SALMON]Mh Mh MH!![/] Hai dimostrato ottime capacità logiche e di ragionamento! Però potevi fare meglio secondo me",
                 "[RED]😞[/]Sei un idiota!!",
                 requiredObjectsForTestLogic
         );

@@ -360,7 +360,7 @@ public class SaveGame {
      * @param err Il gestore {@link ErrorHandler} per registrare eventuali errori durante l'eliminazione locale.
      * @return {@code true} se l'operazione sul server ha successo E almeno uno dei file locali (.log o .dat) viene eliminato; {@code false} altrimenti.
      */
-    public static boolean deleteSave(String saveName, ErrorHandler err) {
+    public static boolean deleteSave(String saveName, ErrorHandler err, boolean deletePlayer) {
         Path savePath = SAVE_DIR.resolve(saveName + ".dat");
         String saveUsername = SaveGame.getUsernameFromSave(saveName); // Estrae username dal file .dat
         boolean logDeleted = false;
@@ -374,38 +374,38 @@ public class SaveGame {
         }
 
         try {
-            // --- Fase 1: Eliminazione Utente dal Server ---
-            gameClient = new PoggioClientJersey();
-            ApiClientResult result = gameClient.deletePlayer(saveUsername); // Chiama API DELETE /players/{username}
-            gameClient.close(); // Chiude il client dopo la chiamata
-
             // Controlla l'esito della chiamata API
-            switch(result){
-                case SUCCESS_OK:
-                    // Utente eliminato con successo dal server, procedi con eliminazione locale
-                     // err.handleInfo("Utente " + saveUsername + " eliminato dal server."); // Log opzionale
-                    break;
-                case USER_NOT_FOUND:
-                    // Utente non trovato sul server, potrebbe essere uno stato inconsistente.
-                    // Procediamo comunque con l'eliminazione locale.
-                     err.handleRecoverableError("Utente " + saveUsername + " non trovato sul server durante eliminazione salvataggio.");
-                    break;
-                // Gestione esplicita degli errori API che interrompono l'operazione
-                case INVALID_INPUT_CLIENT: // Non dovrebbe accadere se saveUsername non è null
-                     throw new Exception("Errore API deletePlayer: Input client invalido (username: " + saveUsername + ")");
-                case CONNECTION_ERROR:
-                     throw new Exception("Errore API deletePlayer: Errore di comunicazione con il server.");
-                case UNAUTHORIZED:
-                     throw new Exception("Errore API deletePlayer: Non autorizzato (API Key errata?).");
-                case SERVER_ERROR:
-                    throw new Exception("Errore API deletePlayer: Errore interno del server.");
-                case UNKNOWN_ERROR:
-                     throw new Exception("Errore API deletePlayer: Errore sconosciuto dal server.");
-                default:
-                    // Gestisce eventuali nuovi valori enum non previsti
-                     throw new Exception("Errore API deletePlayer: Risultato API non gestito (" + result + ")");
-            } // Fine switch risultato API
-
+            if (deletePlayer) {
+                // --- Fase 1: Eliminazione Utente dal Server ---
+                gameClient = new PoggioClientJersey();
+                ApiClientResult result = gameClient.deletePlayer(saveUsername); // Chiama API DELETE /players/{username}
+                gameClient.close(); // Chiude il client dopo la chiamata
+                switch(result){
+                    case SUCCESS_OK:
+                        // Utente eliminato con successo dal server, procedi con eliminazione locale
+                        // err.handleInfo("Utente " + saveUsername + " eliminato dal server."); // Log opzionale
+                        break;
+                    case USER_NOT_FOUND:
+                        // Utente non trovato sul server, potrebbe essere uno stato inconsistente.
+                        // Procediamo comunque con l'eliminazione locale.
+                        err.handleRecoverableError("Utente " + saveUsername + " non trovato sul server durante eliminazione salvataggio.");
+                        break;
+                    // Gestione esplicita degli errori API che interrompono l'operazione
+                    case INVALID_INPUT_CLIENT: // Non dovrebbe accadere se saveUsername non è null
+                        throw new Exception("Errore API deletePlayer: Input client invalido (username: " + saveUsername + ")");
+                    case CONNECTION_ERROR:
+                        throw new Exception("Errore API deletePlayer: Errore di comunicazione con il server.");
+                    case UNAUTHORIZED:
+                        throw new Exception("Errore API deletePlayer: Non autorizzato (API Key errata?).");
+                    case SERVER_ERROR:
+                        throw new Exception("Errore API deletePlayer: Errore interno del server.");
+                    case UNKNOWN_ERROR:
+                        throw new Exception("Errore API deletePlayer: Errore sconosciuto dal server.");
+                    default:
+                        // Gestisce eventuali nuovi valori enum non previsti
+                        throw new Exception("Errore API deletePlayer: Risultato API non gestito (" + result + ")");
+                } // Fine switch risultato API
+            }
             // --- Fase 2: Eliminazione File Locali (Log e Save) ---
             // Trova il nome/percorso del file di log associato leggendolo dal .dat
             Path logFilePath = findLogFileName(savePath); // Può restituire null

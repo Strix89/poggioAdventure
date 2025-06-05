@@ -1,7 +1,9 @@
 package com.mycompany.poggioadventure.core;
 
 import com.mycompany.poggioadventure.core.abstracts.GameDescription;
+import com.mycompany.poggioadventure.core.utils.ApiClientResult;
 import com.mycompany.poggioadventure.core.utils.GameContext;
+import com.mycompany.poggioadventure.core.utils.PoggioClientJersey;
 import com.mycompany.poggioadventure.core.utils.StopWatch;
 import com.mycompany.poggioadventure.persistence.LoggerInput;
 import com.mycompany.poggioadventure.parser.Parser;
@@ -9,6 +11,7 @@ import com.mycompany.poggioadventure.parser.ParserOutput;
 import com.mycompany.poggioadventure.ui.InputHandler;
 import com.mycompany.poggioadventure.ui.OutputHandler;
 import com.mycompany.poggioadventure.ui.cli.CLIInputHandler;
+import com.mycompany.poggioadventure.ui.cli.CLIMenu;
 import com.mycompany.poggioadventure.ui.ColorText;
 import com.mycompany.poggioadventure.ui.ErrorHandler;
 import com.mycompany.poggioadventure.persistence.ResourceLoader;
@@ -18,6 +21,8 @@ import com.mycompany.poggioadventure.model.AdvObject;
 import com.mycompany.poggioadventure.parser.CommandType;
 import com.mycompany.poggioadventure.model.Room;
 import com.mycompany.poggioadventure.ui.gui.GUIOutputHandler;
+import com.mycompany.poggioadventure.ui.gui.views.UI_Game;
+import com.mycompany.poggioadventure.ui.gui.views.UI_Init;
 
 import java.io.File;
 import java.io.IOException;
@@ -426,8 +431,250 @@ public class Engine {
      * Callback per gestire il completamento del gioco.
      */
     private void handleGameCompleted() {
-        output.writeln("🎊 Il gioco è terminato con successo!", ColorText.GOLD);
-        // Altre azioni di cleanup o salvataggio finale
+        // Ferma il cronometro di gioco
+        gameTime.stop();
+        saveGame();
+        
+
+        output.writeln("\nGIOCO TERMINATO", ColorText.EMERALD);
+
+        // Pausa di 3 secondi prima di chiudere
+        try {
+            Thread.sleep(2000); // 3000ms = 3 secondi
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt(); // Ripristina lo stato di interruzione
+        }
+
+        // Invio dati vittoria al server
+        sendVictoryDataToServer();
+
+        // Pausa di 1 secondo prima delle operazioni di pulizia
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        deleteCurrentSaveEndGame();
+        LoggerInput.deleteLogFile(logger.getPathFile());
+
+        // Pausa di 2 secondi prima di chiudere
+        try {
+            Thread.sleep(2000); // 2000ms = 2 secondi
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt(); // Ripristina lo stato di interruzione
+        }
+
+        output.writeln("Tempo di gioco: " + getFormattedGameTime(), ColorText.WHITE);
+        output.writeln("Grazie per aver giocato a poggioAdventure!", ColorText.GREEN);
+
+        // Pausa di 2 secondi prima di chiudere
+        try {
+            Thread.sleep(2000); // 2000ms = 2 secondi
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt(); // Ripristina lo stato di interruzione
+        }
+
+        returnToAppropriateMenu();
+    }
+
+    /**
+     * Metodo che determina automaticamente a quale menu tornare in base al tipo di OutputHandler.
+     */
+    private void returnToAppropriateMenu() {
+        if (output instanceof GUIOutputHandler) {
+            returnToGUIMenu();
+        } else {
+            returnToCLIMenu();
+        }
+    }
+
+    /**
+     * Gestisce il ritorno al menu GUI.
+     */
+    private void returnToGUIMenu() {
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            try {
+                // Chiudi la finestra di gioco corrente
+                for (java.awt.Window window : java.awt.Window.getWindows()) {
+                    if (window instanceof UI_Game && window.isVisible()) {
+                        window.dispose();
+                        break;
+                    }
+                }
+                
+                // Apri il menu principale GUI
+                new UI_Init().setVisible(true);
+                
+            } catch (Exception e) {
+                errorHandler.handleRecoverableError("Errore durante ritorno al menu GUI: " + e.getMessage());
+                // Fallback: esci dall'applicazione
+                Utils.exitApplication(Utils.EXIT_CODE_SUCCESS);
+            }
+        });
+    }
+
+    /**
+     * Gestisce il ritorno al menu CLI.
+     */
+    private void returnToCLIMenu() {
+        output.writeln("\nTornando al menu principale...", ColorText.CYAN);
+        
+        // Per CLI, interrompi semplicemente il thread corrente
+        // Il controllo tornerà automaticamente al CLIMenu che ha chiamato startGameLoop()
+        Thread.currentThread().interrupt();
+    }
+
+
+    /**
+     * Elimina il salvataggio corrente associato a questo Engine.
+     * 
+     * <p>Il salvataggio viene identificato tramite il nome del giocatore.
+     * Gestisce tutti i possibili scenari di errore durante l'eliminazione.
+     * 
+     * @return true se l'eliminazione ha avuto successo completo, false altrimenti
+     */
+    public boolean deleteCurrentSaveEndGame() {
+        if (playerName == null || playerName.trim().isEmpty()) {
+            errorHandler.handleRecoverableError("Impossibile eliminare: nome giocatore non valido");
+            return false;
+        }
+        
+        try {
+            // Cerca il salvataggio corrispondente al nome del giocatore
+            List<String> saveList = SaveGame.getSaveList();
+            
+            // Verifica se la lista dei salvataggi è stata recuperata correttamente
+            if (saveList.isEmpty()) {
+                output.writeln("Nessun salvataggio disponibile da eliminare.", ColorText.YELLOW);
+                return true; // Tecnicamente successo, non c'è nulla da eliminare
+            }
+            
+            String targetSave = null;
+            
+            for (String saveName : saveList) {
+                try {
+                    String saveUsername = SaveGame.getUsernameFromSave(saveName);
+                    if (saveUsername != null && playerName.equals(saveUsername)) {
+                        targetSave = saveName;
+                        break;
+                    }
+                } catch (Exception e) {
+                    // Log dell'errore ma continua a cercare negli altri salvataggi
+                    errorHandler.handleRecoverableError("Errore lettura salvataggio '" + saveName + "': " + e.getMessage());
+                    continue;
+                }
+            }
+            
+            if (targetSave == null) {
+                output.writeln("Nessun salvataggio trovato per il giocatore: " + playerName, ColorText.YELLOW);
+                return true; // Tecnicamente successo, non c'è nulla da eliminare
+            }
+            
+            // Tenta l'eliminazione con gestione dettagliata degli errori
+            try {
+                boolean deleted = SaveGame.deleteSave(targetSave, errorHandler, false);
+                
+                if (deleted) {
+                    output.writeln("Salvataggio '" + targetSave + "' eliminato con successo!", ColorText.GREEN);
+                    return true;
+                } else {
+                    // deleteSave ha restituito false - gli errori specifici sono già stati
+                    // gestiti tramite errorHandler all'interno di deleteSave
+                    output.writeln("Eliminazione del salvataggio '" + targetSave + "' non completata.", ColorText.ERROR);
+                    output.writeln("Controlla i messaggi di errore precedenti per dettagli.", ColorText.YELLOW);
+                    return false;
+                }
+                
+            } catch (Exception deleteException) {
+                // Cattura eventuali eccezioni non gestite da deleteSave
+                String errorMsg = "Errore imprevisto durante eliminazione di '" + targetSave + "': " + deleteException.getMessage();
+                errorHandler.handleRecoverableError(errorMsg);
+                output.writeln("Eliminazione fallita per errore imprevisto.", ColorText.ERROR);
+                return false;
+            }
+            
+        } catch (Exception generalException) {
+            // Cattura errori durante il recupero della lista salvataggi o altre operazioni
+            String errorMsg = "Errore durante l'accesso ai salvataggi: " + generalException.getMessage();
+            errorHandler.handleRecoverableError(errorMsg);
+            output.writeln("Impossibile accedere ai salvataggi per l'eliminazione.", ColorText.ERROR);
+            return false;
+        }
+    }
+
+    /**
+     * Invia i dati della vittoria al server tramite PoggioClientJersey.
+     * 
+     * <p>Gestisce l'invio del punteggio e del file di log associato alla partita vincente.
+     * In caso di errore, mostra un messaggio all'utente ma non interrompe il flusso.
+     */
+    private void sendVictoryDataToServer() {
+        PoggioClientJersey gameClient = null;
+        
+        try {
+            output.writeln("Invio dati vittoria al server...", ColorText.CYAN);
+            
+            // Prepara i dati della vittoria
+            String currentDate = java.time.LocalDate.now().toString(); // Formato: YYYY-MM-DD
+            String currentTime = java.time.LocalTime.now().format(
+                java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss")
+            ); // Formato: HH:mm:ss
+            long gameDurationMs = gameTime.getElapsedSeconds() * 1000; // Converti in millisecondi
+            String logFilePath = logger.getPathFile().toString();
+            
+            // Crea il client e invia i dati
+            gameClient = new PoggioClientJersey();
+            ApiClientResult result = gameClient.recordVictoryWithLog(
+                playerName, 
+                currentDate, 
+                currentTime, 
+                gameDurationMs, 
+                logFilePath
+            );
+
+            // Gestisci il risultato
+            switch (result) {
+                case SUCCESS_OK -> {
+                    output.writeln("✅ Vittoria registrata con successo sul server!", ColorText.GREEN);
+                    output.writeln("Il tuo punteggio è stato aggiunto alla classifica.", ColorText.YELLOW);
+                }
+                case USER_NOT_FOUND -> {
+                    output.writeln("⚠️ Utente non trovato sul server. Dati non registrati.", ColorText.ORANGE);
+                }
+                case LOG_ALREADY_EXISTS -> {
+                    output.writeln("⚠️ Log già esistente per questa vittoria.", ColorText.ORANGE);
+                }
+                case FILE_ERROR -> {
+                    output.writeln("❌ Errore file di log. Impossibile inviare i dati.", ColorText.ERROR);
+                }
+                case CONNECTION_ERROR -> {
+                    output.writeln("❌ Errore di connessione al server.", ColorText.ERROR);
+                    output.writeln("I tuoi dati di vittoria non sono stati registrati online.", ColorText.YELLOW);
+                }
+                case UNAUTHORIZED -> {
+                    output.writeln("❌ Non autorizzato. Verifica configurazione server.", ColorText.ERROR);
+                }
+                default -> {
+                    output.writeln("❌ Errore sconosciuto durante registrazione vittoria: " + result, ColorText.ERROR);
+                }
+            }
+        } catch (Exception e) {
+            // Gestisce eccezioni impreviste
+            output.writeln("❌ Errore imprevisto durante invio dati al server:", ColorText.ERROR);
+            output.writeln(e.getMessage(), ColorText.ERROR);
+            errorHandler.handleRecoverableError("Errore invio dati vittoria: " + e.getMessage());
+            
+        } finally {
+            // Assicura sempre la chiusura del client
+            if (gameClient != null) {
+                try {
+                    gameClient.close();
+                } catch (Exception e) {
+                    // Ignora errori di chiusura
+                }
+            }
+        }
     }
 
     /**

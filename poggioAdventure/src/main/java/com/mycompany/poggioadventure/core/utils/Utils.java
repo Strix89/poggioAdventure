@@ -4,10 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import com.mycompany.poggioadventure.core.abstracts.GameDescription;
 import com.mycompany.poggioadventure.model.AdvObject;
-import com.mycompany.poggioadventure.model.AdvObjectContainer;
-import com.mycompany.poggioadventure.model.Room;
 
 /**
  * Classe che raccoglie utility methods e costanti di sistema.
@@ -30,8 +27,9 @@ public class Utils {
     public static final int WIN_GAME_ID = 1001; // ID per l'oggetto di vittoria del gioco
 
     public static final long LEVEL_1_TIME_LIMIT = 10 * 60 * 1000; // Limite di tempo per il livello 1 (5 minuti in millisecondi)
-    public static final List<Integer> LEVEL_1_REQUIRED_OBJECTS = List.of(1, 2, 3); // ID oggetti richiesti per il livello 1
-    public static final List<Integer> LEVEL_1_FORBIDDEN_OBJECTS = List.of(4, 5); // ID oggetti proibiti per il livello 2
+    public static final int OBJ_LEVEL1_COMPLETE_ID = 100;  // Completamento livello 1
+    public static final List<Integer> LEVEL_1_REQUIRED_OBJECTS = List.of(OBJ_LEVEL1_COMPLETE_ID); // ID oggetti richiesti per il livello 1
+    public static final List<Integer> LEVEL_1_FORBIDDEN_OBJECTS = List.of(); // ID oggetti proibiti per il livello 2
 
     // ==================== ID OGGETTI E NPC ====================
     
@@ -72,8 +70,7 @@ public class Utils {
     public static final int OBJ_BOBINA_PLA_ID = 27;    // Bobina filamento PLA
     
     // === OGGETTI SPECIALI ===
-    public static final int OBJ_FLIPPER_ZERO_ID = 50;      // FlipperZero tecnomagico
-    public static final int OBJ_LEVEL1_COMPLETE_ID = 100;  // Completamento livello 1
+    public static final int OBJ_FLIPPER_ZERO_ID = 50;      // FlipperZero
     
     // === OGGETTI SISTEMA ===
     public static final int OBJ_RESET_LEVEL_ID = 998;      // Reset livello

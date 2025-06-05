@@ -190,6 +190,12 @@ public class CLIMenu implements MenuManager {
                         );
                         // Avvia il loop principale del gioco (questa chiamata bloccherà finché la partita non finisce)
                         engine.startGameLoop();
+                        // Quando il controllo torna qui, gestisci l'interruzione se presente
+                        if (Thread.currentThread().isInterrupted()) {
+                            // Il thread è stato interrotto dal completamento del gioco
+                            // Non propagare l'interruzione, lascia che il menu continui
+                            Thread.interrupted(); // Pulisce il flag di interruzione
+                        }
                     } catch (Exception ex) {
                         // Gestisce errori critici durante la creazione dell'engine o l'avvio del gioco
                         errorHan.handleFatalError("Errore o uscita: ", ex);
@@ -212,6 +218,11 @@ public class CLIMenu implements MenuManager {
                     break; // Torna al menu principale
             }
         } catch (Exception e) {
+            if (e.getCause() instanceof InterruptedException || 
+                Thread.currentThread().isInterrupted()) {
+                // Interruzione normale dal completamento del gioco
+                Thread.interrupted(); // Pulisce il flag
+            }
             // Cattura eccezioni impreviste durante l'interazione con il client API
             errorHan.handleRecoverableError("Errore imprevisto durante la verifica utente: " + e.getMessage());
             if (gameClient != null) {
@@ -266,7 +277,7 @@ public class CLIMenu implements MenuManager {
 
                     if (confirm.equals("s")) {
                         // Chiama il metodo di eliminazione in SaveGame
-                        if (SaveGame.deleteSave(saveName, errorHan)) {
+                        if (SaveGame.deleteSave(saveName, errorHan, true)) {
                             output.writeln("Salvataggio '" + saveName + "' eliminato con successo.", ColorText.GREEN);
                             // Ricarica e mostra di nuovo la lista aggiornata dei salvataggi (ricorsione)
                             return;
@@ -296,7 +307,27 @@ public class CLIMenu implements MenuManager {
                         saveToLoad, // Nome del salvataggio da caricare
                         // Callback onSuccess: eseguito se il caricamento riesce
                         engine -> {
-                            engine.startGameLoop(); // Avvia il loop del gioco con l'engine caricato
+                            try {
+                                engine.startGameLoop(); // Avvia il loop del gioco con l'engine caricato
+                                
+                                // Quando il controllo torna qui, gestisci l'interruzione se presente
+                                if (Thread.currentThread().isInterrupted()) {
+                                    // Il thread è stato interrotto dal completamento del gioco
+                                    // Non propagare l'interruzione, lascia che il menu continui
+                                    Thread.interrupted(); // Pulisce il flag di interruzione
+                                }
+                                
+                            } catch (Exception ex) {
+                                // Gestisce errori durante il gioco caricato
+                                if (ex.getCause() instanceof InterruptedException || 
+                                    Thread.currentThread().isInterrupted()) {
+                                    // Interruzione normale dal completamento del gioco
+                                    Thread.interrupted(); // Pulisce il flag
+                                } else {
+                                    // Errore reale durante il gioco
+                                    errorHan.handleRecoverableError("Errore durante il gioco: " + ex.getMessage());
+                                }
+                            }
                         },
                         // Callback onError: eseguito se il caricamento fallisce
                         error -> {

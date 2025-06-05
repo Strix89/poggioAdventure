@@ -151,7 +151,7 @@ public class UI_LoadGame extends UI_Abstract {
             JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
-            if (SaveGame.deleteSave(saveName, new GUIErrorHandler())) {
+            if (SaveGame.deleteSave(saveName, new GUIErrorHandler(), true)) {
                 saveSlots = SaveGame.getSaveList();
                 saveList.setListData(saveSlots.toArray(String[]::new));
                 JOptionPane.showMessageDialog(this, "Salvataggio eliminato!");

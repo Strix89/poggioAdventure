@@ -7,6 +7,7 @@ import com.mycompany.poggioadventure.core.utils.TimeManager;
 import com.mycompany.poggioadventure.core.utils.Utils;
 import com.mycompany.poggioadventure.ui.ColorText;
 import com.mycompany.poggioadventure.ui.OutputHandler;
+import com.mycompany.poggioadventure.ui.gui.GUIOutputHandler;
 import com.mycompany.poggioadventure.model.AdvObject;
 
 import java.util.List;
@@ -222,15 +223,38 @@ public class GameStateManager {
      * Gestisce il completamento dell'intero gioco.
      */
     private void handleGameCompletion() {
-        output.writeln("\n🎉 CONGRATULAZIONI! Hai completato tutti i livelli!", ColorText.GREEN);
-        output.writeln("🏆 Sei riuscito a superare tutte le prove di Poggio Adventure!", ColorText.GOLD);
+        // Ferma il TimeManager prima di mostrare i messaggi
+        if (timeManager != null) {
+            timeManager.stop();
+        }
         
-        // Ferma il TimeManager
-        timeManager.stop();
+        output.writeln("\n" + "=".repeat(60), ColorText.GOLD);
+        output.writeln("🎉 CONGRATULAZIONI! HAI COMPLETATO POGGIO ADVENTURE! 🎉", ColorText.GREEN);
+        output.writeln("=".repeat(60), ColorText.GOLD);
+        output.writeln("");
+        output.writeln("🏆 Sei riuscito a superare tutte le prove di Poggiolevante!", ColorText.CYAN);
+        output.writeln("💎 Hai dimostrato di avere le competenze necessarie per entrare nel collegio!", ColorText.YELLOW);
+        output.writeln("");
         
-        // Notifica Engine per completamento
-        if (onGameCompleted != null) {
-            onGameCompleted.run();
+        output.writeln("=".repeat(60), ColorText.GOLD);
+        
+        // Per GUI, esegui il callback in un thread separato per evitare di bloccare l'EDT
+        if (output instanceof GUIOutputHandler) {
+            // Esegui il callback in un thread separato
+            if (onGameCompleted != null) {
+                new Thread(() -> {
+                    try {
+                        Thread.sleep(2000); // Pausa per permettere la lettura dei messaggi
+                        onGameCompleted.run();
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                }, "GameCompletionHandler").start();
+            }
+        } else {
+            if (onGameCompleted != null) {
+                onGameCompleted.run();
+            }
         }
     }
 

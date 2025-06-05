@@ -67,7 +67,7 @@ public class LoggerInput {
      *   <li>Il nome segua il formato UUID + "_Input.txt"</li>
      * </ul>
      */
-    protected static final String LOGS_DIR_PATTERN = 
+    public static final String LOGS_DIR_PATTERN = 
         Pattern.quote(LOGS_DIRECTORY.toString().replace(File.separatorChar, '/')) + 
         "/[a-f0-9-]{36}_Input\\.txt";
 
