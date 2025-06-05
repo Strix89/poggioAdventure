@@ -10,7 +10,7 @@ import com.mycompany.poggioadventure.core.Engine; // Motore principale del gioco
 import com.mycompany.poggioadventure.core.utils.ApiClientResult;
 import com.mycompany.poggioadventure.core.utils.EngineFactory; // Factory per creare istanze di Engine
 import com.mycompany.poggioadventure.core.abstracts.MenuManager; // Interfaccia che questa classe implementa
-import com.mycompany.poggioadventure.core.utils.PoggioClientJersey; // Client per l'API del server
+import com.mycompany.poggioadventure.core.utils.PoggioClientJersey;
 import com.mycompany.poggioadventure.persistence.LoggerInput; // Gestore/Logger per input/eventi
 import com.mycompany.poggioadventure.persistence.RankingEntryDTO; // DTO per i dati della classifica
 import com.mycompany.poggioadventure.persistence.ResourceLoader;
@@ -356,6 +356,7 @@ public class CLIMenu implements MenuManager {
     /**
      * Mostra la classifica dei giocatori recuperandola dal server tramite
      * {@link PoggioClientJersey}. Formatta e stampa la classifica sulla console.
+     * Offre la possibilità di scaricare i log dei giocatori.
      * Attende un input dall'utente prima di tornare al menu principale.
      */
     @Override
@@ -363,62 +364,174 @@ public class CLIMenu implements MenuManager {
         output.writeln("\n=== CLASSIFICA GIOCATORI ===", ColorText.YELLOW);
         output.writeln("Recupero dati dal server...", ColorText.CYAN);
 
-        PoggioClientJersey gameClient = null; // Dichiarato fuori per chiusura in finally (implicito qui)
-        List<RankingEntryDTO> ranking = null; // Inizializza a null
+        PoggioClientJersey gameClient = null;
+        List<RankingEntryDTO> ranking = null;
 
         try {
-            // --- Chiama il client per ottenere la classifica ---
             gameClient = new PoggioClientJersey();
-            ranking = gameClient.getRanking(); // Questo metodo è progettato per restituire lista vuota in caso di errore, non lanciare eccezioni qui
-            gameClient.close(); // Chiude il client
+            ranking = gameClient.getRanking();
+            gameClient.close();
         } catch (Exception e) {
-            // Cattura eccezioni impreviste durante creazione/chiusura client o (meno probabile) chiamata getRanking
-             errorHan.handleRecoverableError("Errore imprevisto durante comunicazione con server per classifica: " + e.getMessage());
+            errorHan.handleRecoverableError("Errore imprevisto durante comunicazione con server per classifica: " + e.getMessage());
             if (gameClient != null) {
                 try { gameClient.close(); } catch(Exception ce) {/* ignora */}
             }
-            // Lascia ranking a null per indicare errore grave
         }
 
-
-        // --- Gestisci e Stampa il risultato ---
+        // Gestisci e Stampa il risultato
         if (ranking == null) {
-             // Errore grave non gestito dal client (es. eccezione imprevista sopra)
-              output.writeln("\nErrore critico durante il recupero della classifica.", ColorText.ERROR);
+            output.writeln("\nErrore critico durante il recupero della classifica.", ColorText.ERROR);
         } else if (ranking.isEmpty()) {
-            // Lista vuota: può significare "nessun punteggio" oppure errore recuperabile gestito dal client getRanking.
             output.writeln("\nNessun dato disponibile per la classifica.", ColorText.ORANGE);
             output.writeln("(Potrebbe non esserci alcun punteggio registrato o esserci stato un problema temporaneo con il server).", ColorText.ORANGE);
         } else {
-            // La classifica contiene dati: stampala formattata
-            // Intestazione della tabella
-            output.writeln(String.format("\n%-4s %-20s %-12s %-10s %s", "#", "Username", "Data", "Ora", "Punteggio"), ColorText.CYAN);
-            output.writeln("-----------------------------------------------------------------", ColorText.CYAN);
-
-            // Itera sulla lista ricevuta e stampa ogni voce
-            int position = 1; // Contatore per la posizione in classifica
-            for (RankingEntryDTO entry : ranking) {
-                // Gestione sicura di valori potenzialmente nulli dal DTO
-                String dateStr = (entry.getData() != null) ? entry.getData().toString() : "N/D";
-                String timeStr = (entry.getOra() != null) ? entry.getOra().toString() : "N/D";
-                String scoreStr = (entry.getPunteggio() != null) ? entry.getPunteggio().toString() : "N/A";
-
-                // Stampa la riga formattata
-                output.writeln(String.format("%-4d %-20s %-12s %-10s %s",
-                    position++,          // Posizione
-                    entry.getUsername(), // Username
-                    dateStr,             // Data
-                    timeStr,             // Ora
-                    scoreStr             // Punteggio
-                ), ColorText.WHITE);
-            }
-            // Riga di chiusura tabella
-            output.writeln("-----------------------------------------------------------------", ColorText.CYAN);
+            // Stampa la classifica
+            displayRankingTable(ranking);
+            
+            // Offri opzione di scaricamento log
+            offerLogDownloadOption(ranking);
         }
 
-        // Pausa: attende che l'utente prema Invio per tornare al menu principale
+        // Pausa finale
         output.write("\nPremi Invio per tornare al menu principale...", ColorText.WHITE);
-        scanner.getInput(); // Consuma l'input (attende Invio)
+        scanner.getInput();
+    }
+
+    /**
+     * Stampa la tabella della classifica formattata.
+     * 
+     * @param ranking Lista delle entry della classifica
+     */
+    private void displayRankingTable(List<RankingEntryDTO> ranking) {
+        // Intestazione della tabella
+        output.writeln(String.format("\n%-4s %-20s %-12s %-10s %s", "#", "Username", "Data", "Ora", "Punteggio"), ColorText.CYAN);
+        output.writeln("-----------------------------------------------------------------", ColorText.CYAN);
+
+        // Itera sulla lista ricevuta e stampa ogni voce
+        int position = 1;
+        for (RankingEntryDTO entry : ranking) {
+            String dateStr = (entry.getData() != null) ? entry.getData().toString() : "N/D";
+            String timeStr = (entry.getOra() != null) ? entry.getOra().toString() : "N/D";
+            String scoreStr = (entry.getPunteggio() != null) ? entry.getPunteggio().toString() : "N/A";
+
+            output.writeln(String.format("%-4d %-20s %-12s %-10s %s",
+                position++,
+                entry.getUsername(),
+                dateStr,
+                timeStr,
+                scoreStr
+            ), ColorText.WHITE);
+        }
+        output.writeln("-----------------------------------------------------------------", ColorText.CYAN);
+    }
+
+    /**
+     * Offre l'opzione di scaricare i log dei giocatori dalla classifica.
+     * 
+     * @param ranking Lista delle entry della classifica
+     */
+    private void offerLogDownloadOption(List<RankingEntryDTO> ranking) {
+        output.writeln("\n=== SCARICAMENTO LOG ===", ColorText.YELLOW);
+        output.writeln("Vuoi scaricare il log di qualche giocatore? (s/n)", ColorText.WHITE);
+        
+        String response = scanner.getInput().trim().toLowerCase();
+        
+        if ("s".equals(response) || "si".equals(response) || "yes".equals(response) || "y".equals(response)) {
+            showDownloadMenu(ranking);
+        }
+    }
+
+    /**
+     * Mostra il menu di selezione per il download dei log.
+     * 
+     * @param ranking Lista delle entry della classifica
+     */
+    private void showDownloadMenu(List<RankingEntryDTO> ranking) {
+        while (true) {
+            output.writeln("\n=== SELEZIONE GIOCATORE ===", ColorText.CYAN);
+            output.writeln("Seleziona un giocatore (inserisci il numero di posizione):", ColorText.WHITE);
+            
+            // Mostra lista numerata
+            for (int i = 0; i < ranking.size(); i++) {
+                RankingEntryDTO entry = ranking.get(i);
+                output.writeln(String.format("%d. %s", i + 1, entry.getUsername()), ColorText.YELLOW);
+            }
+            
+            output.writeln("0. Torna alla classifica", ColorText.GRAY);
+            output.write("\nScelta: ", ColorText.WHITE);
+            
+            String input = scanner.getInput().trim();
+            
+            if ("0".equals(input)) {
+                break; // Torna al menu precedente
+            }
+            
+            try {
+                int choice = Integer.parseInt(input);
+                if (choice >= 1 && choice <= ranking.size()) {
+                    RankingEntryDTO selectedEntry = ranking.get(choice - 1);
+                    downloadUserLog(selectedEntry.getUsername());
+                } else {
+                    output.writeln("Selezione non valida. Riprova.", ColorText.ERROR);
+                }
+            } catch (NumberFormatException e) {
+                output.writeln("Inserisci un numero valido.", ColorText.ERROR);
+            }
+        }
+    }
+
+    /**
+     * Scarica il log per un utente specifico.
+     * 
+     * @param username Nome dell'utente di cui scaricare il log
+     */
+    private void downloadUserLog(String username) {
+        output.writeln("\nScaricamento log per: " + username, ColorText.CYAN);
+        
+        PoggioClientJersey gameClient = null;
+        try {
+            gameClient = new PoggioClientJersey();
+            ApiClientResult result = gameClient.downloadLogFile(username);
+            
+            switch (result) {
+                case SUCCESS_OK -> {
+                    output.writeln("Log scaricato con successo!", ColorText.GREEN);
+                    output.writeln("Salvato in: " + ResourceLoader.LOGS_DW_DIRECTORY.resolve(username + "_log.txt"), ColorText.YELLOW);
+                }
+                case USER_NOT_FOUND -> {
+                    output.writeln("Utente non trovato sul server.", ColorText.ERROR);
+                }
+                case FILE_ERROR -> {
+                    output.writeln("Errore durante il salvataggio del file.", ColorText.ERROR);
+                }
+                case CONNECTION_ERROR -> {
+                    output.writeln("Errore di connessione al server.", ColorText.ERROR);
+                }
+                case UNAUTHORIZED -> {
+                    output.writeln("Non autorizzato. Verifica configurazione server.", ColorText.ERROR);
+                }
+                default -> {
+                    output.writeln("Errore sconosciuto: " + result, ColorText.ERROR);
+                }
+            }
+            
+        } catch (Exception e) {
+            output.writeln("Errore imprevisto durante scaricamento:", ColorText.ERROR);
+            output.writeln(e.getMessage(), ColorText.ERROR);
+            errorHan.handleRecoverableError("Errore scaricamento log per " + username + ": " + e.getMessage());
+        } finally {
+            if (gameClient != null) {
+                try {
+                    gameClient.close();
+                } catch (Exception e) {
+                    // Ignora errori di chiusura
+                }
+            }
+        }
+        
+        // Pausa per permettere di leggere il risultato
+        output.write("\nPremi Invio per continuare...", ColorText.WHITE);
+        scanner.getInput();
     }
 
     /**

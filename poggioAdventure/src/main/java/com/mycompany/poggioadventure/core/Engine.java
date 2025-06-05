@@ -11,7 +11,6 @@ import com.mycompany.poggioadventure.parser.ParserOutput;
 import com.mycompany.poggioadventure.ui.InputHandler;
 import com.mycompany.poggioadventure.ui.OutputHandler;
 import com.mycompany.poggioadventure.ui.cli.CLIInputHandler;
-import com.mycompany.poggioadventure.ui.cli.CLIMenu;
 import com.mycompany.poggioadventure.ui.ColorText;
 import com.mycompany.poggioadventure.ui.ErrorHandler;
 import com.mycompany.poggioadventure.persistence.ResourceLoader;
@@ -222,13 +221,6 @@ public class Engine {
             if (gameStateManager != null) {
                 gameStateManager.checkStateAfterCommand();
             }
-
-            // Logging avanzato delle modifiche di stato
-            boolean roomChanged = !previousRoom.equals(game.getCurrentRoom());
-            boolean inventoryChanged = !previousInventory.equals(game.getInventory());
-            boolean objectsChanged = !previousObjInRoom.equals(game.getCurrentRoom().getObjects());
-            boolean isLookCommand = outputs.stream()
-                .anyMatch(p -> p.getCommand() != null && p.getCommand().getType() == CommandType.LOOK_AT);
         }
         printCursor();
     }
@@ -611,6 +603,7 @@ public class Engine {
      */
     private void sendVictoryDataToServer() {
         PoggioClientJersey gameClient = null;
+        java.nio.file.Path tempLogFile = null;
         
         try {
             output.writeln("Invio dati vittoria al server...", ColorText.CYAN);
@@ -621,16 +614,19 @@ public class Engine {
                 java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss")
             ); // Formato: HH:mm:ss
             long gameDurationMs = gameTime.getElapsedSeconds() * 1000; // Converti in millisecondi
-            String logFilePath = logger.getPathFile().toString();
             
-            // Crea il client e invia i dati
+            // Crea un file di log temporaneo decrittato per l'invio al server
+            String originalLogPath = logger.getPathFile().toString();
+            tempLogFile = createDecryptedTempLogFile(originalLogPath);
+            
+            // Crea il client e invia i dati con il file decrittato
             gameClient = new PoggioClientJersey();
             ApiClientResult result = gameClient.recordVictoryWithLog(
                 playerName, 
                 currentDate, 
                 currentTime, 
                 gameDurationMs, 
-                logFilePath
+                tempLogFile.toString()
             );
 
             // Gestisci il risultato
@@ -666,6 +662,15 @@ public class Engine {
             errorHandler.handleRecoverableError("Errore invio dati vittoria: " + e.getMessage());
             
         } finally {
+            // Elimina il file temporaneo decrittato
+            if (tempLogFile != null) {
+                try {
+                    java.nio.file.Files.deleteIfExists(tempLogFile);
+                } catch (Exception e) {
+                    // Ignora errori di eliminazione del file temporaneo
+                }
+            }
+            
             // Assicura sempre la chiusura del client
             if (gameClient != null) {
                 try {
@@ -675,6 +680,37 @@ public class Engine {
                 }
             }
         }
+    }
+
+    /**
+     * Crea un file temporaneo con il contenuto del log decrittato per l'invio al server.
+     * 
+     * @param originalLogPath Percorso del file di log originale (criptato)
+     * @return Path del file temporaneo decrittato
+     * @throws Exception Se si verificano errori durante la creazione o decrittazione
+     */
+    private java.nio.file.Path createDecryptedTempLogFile(String originalLogPath) throws Exception {
+        // Legge e decodifica il contenuto del log originale
+        List<String> decryptedCommands = LoggerInput.readAndDecodeLogFile(originalLogPath);
+        
+        // Crea un file temporaneo nella directory dei log scaricati
+        java.nio.file.Path tempFile = java.nio.file.Files.createTempFile(
+            ResourceLoader.LOGS_DW_DIRECTORY, 
+            playerName + "_temp_", 
+            "_decrypted.txt"
+        );
+        
+        // Scrive i comandi decrittati nel file temporaneo
+        java.nio.file.Files.write(
+            tempFile, 
+            decryptedCommands, 
+            java.nio.charset.StandardCharsets.UTF_8,
+            java.nio.file.StandardOpenOption.CREATE,
+            java.nio.file.StandardOpenOption.WRITE,
+            java.nio.file.StandardOpenOption.TRUNCATE_EXISTING
+        );
+        
+        return tempFile;
     }
 
     /**

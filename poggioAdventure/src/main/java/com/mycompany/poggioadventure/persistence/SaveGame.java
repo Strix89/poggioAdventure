@@ -1,7 +1,6 @@
 package com.mycompany.poggioadventure.persistence;
 
 // Import delle classi Core del gioco
-import com.mycompany.poggioadventure.core.utils.TimeManager; // Gestore del tempo di gioco
 import com.mycompany.poggioadventure.core.Engine; // Motore principale del gioco
 import com.mycompany.poggioadventure.core.GameStateManager;
 import com.mycompany.poggioadventure.core.abstracts.GameDescription; // Descrizione astratta dello stato del gioco
