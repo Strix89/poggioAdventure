@@ -31,7 +31,7 @@ public class GameStateManager {
     
     // Callback per comunicare con Engine senza dipendenza diretta
     private Runnable onGameCompleted;
-    private Runnable onGameReset;
+    private Runnable onGameLoss;
     
     // Sequenza predefinita dei livelli
     private final GameState[] levels = {
@@ -51,12 +51,12 @@ public class GameStateManager {
      */
     public GameStateManager(GameDescription gameDescription, OutputHandler output, 
                            String playerName, Runnable onGameCompleted, 
-                           Runnable onGameReset) {
+                           Runnable onGameLoss) {
         this.gameDescription = gameDescription;
         this.output = output;
         this.playerName = playerName;
         this.onGameCompleted = onGameCompleted;
-        this.onGameReset = onGameReset;
+        this.onGameLoss = onGameLoss;
         snapshotGameDesc = (GameDescription) gameDescription.clone();
     }
     
@@ -75,13 +75,16 @@ public class GameStateManager {
     public void checkStateAfterCommand() {
         if (currentState == null) return;
         
-        long elapsedTime = System.currentTimeMillis() - levelStartTime;
-        
         // Verifica timeout usando TimeManager
         if (timeManager.getTempoRimanente() <= 0) {
             output.writeln("\n[RED]⏰ TEMPO SCADUTO![/] Ricominciando dall'inizio...");
-            currentState.handleFailure(GameState.FailureType.SEVERE, this::resetGame);
+            currentState.handleFailure(this::resetGame);
             return;
+        }
+
+        // Verifica condizioni di fallimento - sempre reset completo
+        if (currentState.isFailureConditionMet(gameDescription)) {
+            currentState.handleFailure(this::handleGameLoss);
         }
         
         // Verifica completamento tramite oggetti nell'inventario
@@ -96,12 +99,35 @@ public class GameStateManager {
             currentState.handleSuccess(this::advanceToNextLevel);
             return;
         }
-        
-        // Verifica condizioni di fallimento
-        if (currentState.isFailureConditionMet(gameDescription, elapsedTime)) {
-            GameState.FailureType failureType = determinFailureType();
-            currentState.handleFailure(failureType, 
-                failureType == GameState.FailureType.SEVERE ? this::resetGame : this::resetCurrentLevel);
+    }
+    
+    /**
+     * Gestisce la perdita totale del gioco.
+     * Mostra messaggi di game over e delega a Engine per la gestione finale.
+     */
+    private void handleGameLoss() {
+        // Ferma il TimeManager
+        if (timeManager != null) {
+            timeManager.stop();
+        }
+        // Per GUI, esegui il callback in un thread separato per evitare di bloccare l'EDT
+        if (output instanceof GUIOutputHandler) {
+            // Esegui il callback in un thread separato
+            if (onGameLoss != null) {
+                new Thread(() -> {
+                    try {
+                        Thread.sleep(2000); // Pausa per permettere la lettura dei messaggi
+                        onGameLoss.run();
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                }, "GameLossHandler").start();
+            }
+        } else {
+            // Per CLI, esegui direttamente
+            if (onGameLoss != null) {
+                onGameLoss.run();
+            }
         }
     }
     
@@ -165,9 +191,9 @@ public class GameStateManager {
         transitionToLevel(levels[currentLevelIndex]);
         
         // Notifica Engine per reset completo
-        if (onGameReset != null) {
-            onGameReset.run();
-        }
+        //if (onGameReset != null) {
+            //onGameReset.run();
+        //}
     }
     
     /**
@@ -202,21 +228,6 @@ public class GameStateManager {
         timeManager.start();
         
         currentState.getLevelDescription(output, playerName, String.valueOf(timeManager.getTempoRimanente() / 60));
-    }
-    
-    /**
-     * Determina il tipo di fallimento basandosi sul contesto.
-     */
-    private GameState.FailureType determinFailureType() {
-        // Logica per determinare se il fallimento è grave o lieve
-        // Per timeout defaultiamo a SEVERE (reset completo)
-        long elapsedTime = System.currentTimeMillis() - levelStartTime;
-        
-        if (elapsedTime >= currentState.getTimeLimit() * 0.9) {
-            return GameState.FailureType.SEVERE; // Vicino al timeout
-        }
-        
-        return GameState.FailureType.LIGHT; // Fallimento recoverable
     }
     
     /**

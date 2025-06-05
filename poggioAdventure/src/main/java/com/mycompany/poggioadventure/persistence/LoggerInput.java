@@ -312,4 +312,35 @@ public class LoggerInput {
                filename.matches("[a-f0-9-]{36}_Input\\.txt") &&
                Files.isRegularFile(logPath);
     }
+
+    /**
+     * Crea un file temporaneo con il contenuto del log decrittato per l'invio al server.
+     * 
+     * @param originalLogPath Percorso del file di log originale (criptato)
+     * @return Path del file temporaneo decrittato
+     * @throws Exception Se si verificano errori durante la creazione o decrittazione
+     */
+    public static Path createDecryptedTempLogFile(String originalLogPath, String playerName) throws Exception {
+        // Legge e decodifica il contenuto del log originale
+        List<String> decryptedCommands = LoggerInput.readAndDecodeLogFile(originalLogPath);
+        
+        // Crea un file temporaneo nella directory dei log scaricati
+        java.nio.file.Path tempFile = java.nio.file.Files.createTempFile(
+            ResourceLoader.LOGS_DW_DIRECTORY, 
+            playerName + "_temp_", 
+            "_decrypted.txt"
+        );
+        
+        // Scrive i comandi decrittati nel file temporaneo
+        java.nio.file.Files.write(
+            tempFile, 
+            decryptedCommands, 
+            java.nio.charset.StandardCharsets.UTF_8,
+            java.nio.file.StandardOpenOption.CREATE,
+            java.nio.file.StandardOpenOption.WRITE,
+            java.nio.file.StandardOpenOption.TRUNCATE_EXISTING
+        );
+        
+        return tempFile;
+    }
 }

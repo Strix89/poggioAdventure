@@ -5,6 +5,8 @@ import com.mycompany.poggioadventure.parser.ParserOutput;
 import com.mycompany.poggioadventure.model.AdvObject;
 import com.mycompany.poggioadventure.parser.CommandType;
 import com.mycompany.poggioadventure.core.utils.GameContext;
+import com.mycompany.poggioadventure.core.utils.Utils;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -166,13 +168,12 @@ public class PushObserver implements GameObserver, Serializable {
              * e porta all'espulsione per inadeguatezza tecnica.
              */
             else if (hasMartello && hasCPU) {
-                msg.append("DISASTRO! Hai usato il martello sulla CPU delicata!\n");
-                msg.append("*CRACK* Il processore si è frantumato in mille pezzi!\n");
-                msg.append("Le scintille volano ovunque danneggiando altri componenti!\n");
-                msg.append("Il direttore ti guarda inorridito... E successivamente ti comunica..!\n");
-                msg.append("GAME OVER - Sei stato espulso per incompetenza tecnica!\n");
+                msg.append("[RED]DISASTRO[/]! Hai usato il martello sulla CPU delicata!\n");
+                msg.append("[RED]*CRACK*[/] Il processore si è frantumato in mille pezzi!\n");
+                msg.append("Non puoi più montarlo nel computer\n");
+                msg.append("[NPC]Direttore[/]: [RED]GAME OVER[/] - Non puoi essere ammesso sei un [RED]idiota[/]!\n");
                 specialCombinationHandled = true;
-                // TODO: Implementare logica per Game Over nel sistema principale
+                description.getInventory().add(Utils.buildLoseGameObject());
             }
 
             // ===== COMPORTAMENTI DIVERTENTI (NON DANNOSI) =====

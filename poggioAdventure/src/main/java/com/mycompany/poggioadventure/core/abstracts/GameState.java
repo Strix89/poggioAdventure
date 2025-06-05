@@ -78,7 +78,7 @@ public abstract class GameState {
      * @param elapsedTime Tempo trascorso nel livello (in millisecondi)
      * @return true se il livello è fallito
      */
-    public abstract boolean isFailureConditionMet(GameDescription game, long elapsedTime);
+    public abstract boolean isFailureConditionMet(GameDescription game);
     
     /**
      * Gestisce il successo del livello tramite callback.
@@ -91,7 +91,7 @@ public abstract class GameState {
      * @param failureType Tipo di fallimento
      * @param onFailure Callback da eseguire per gestire il fallimento
      */
-    public abstract void handleFailure(FailureType failureType, Runnable onFailure);
+    public abstract void handleFailure(Runnable onFailure);
     
     /**
      * Restituisce il nome identificativo del livello.
@@ -112,12 +112,4 @@ public abstract class GameState {
      * @return Tempo trascorso
      */
     public abstract void getLevelDescription(OutputHandler output, String playerName, String remaininTime);
-    
-    /**
-     * Tipi di fallimento possibili
-     */
-    public enum FailureType {
-        LIGHT,  // Reset del livello corrente
-        SEVERE  // Reset completo del gioco
-    }
 }

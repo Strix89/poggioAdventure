@@ -345,14 +345,14 @@ public class Room implements Serializable {
         // === STAMPA OGGETTI ===
         if (!itemDescriptions.isEmpty()) {
             dynamicLook.append("\n[ITEM]Noti[/] i seguenti [ITEM]oggetti[/]: \n");
-            dynamicLook.append(String.join(", ", itemDescriptions));
+            dynamicLook.append(String.join("\n", itemDescriptions));
             dynamicLook.append(!npcDescriptions.isEmpty() ? "\n" : "");
         }
 
         // === STAMPA NPC ===
         if (!npcDescriptions.isEmpty()) {
             dynamicLook.append("\n[NPC]Noti[/] delle [NPC]persone[/] qui: \n");
-            dynamicLook.append(String.join(", ", npcDescriptions));
+            dynamicLook.append(String.join("\n", npcDescriptions));
         }
 
         // === MESSAGGIO DI FALLBACK ===

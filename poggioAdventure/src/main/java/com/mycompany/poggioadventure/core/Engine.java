@@ -152,7 +152,7 @@ public class Engine {
                 output,
                 "[PLAYER]" + playerName + "[/]",
                 this::handleGameCompleted, 
-                this::handleGameReset
+                this::handleGameLoss
             );
             gameStateManager.startGame();
         } catch (Exception e) {
@@ -568,13 +568,12 @@ public class Engine {
                 boolean deleted = SaveGame.deleteSave(targetSave, errorHandler, false);
                 
                 if (deleted) {
-                    output.writeln("Salvataggio '" + targetSave + "' eliminato con successo!", ColorText.GREEN);
+                    output.writeln("Salvataggio '" + targetSave + "' eliminato con successo!", ColorText.YELLOW);
                     return true;
                 } else {
                     // deleteSave ha restituito false - gli errori specifici sono già stati
                     // gestiti tramite errorHandler all'interno di deleteSave
                     output.writeln("Eliminazione del salvataggio '" + targetSave + "' non completata.", ColorText.ERROR);
-                    output.writeln("Controlla i messaggi di errore precedenti per dettagli.", ColorText.YELLOW);
                     return false;
                 }
                 
@@ -617,7 +616,7 @@ public class Engine {
             
             // Crea un file di log temporaneo decrittato per l'invio al server
             String originalLogPath = logger.getPathFile().toString();
-            tempLogFile = createDecryptedTempLogFile(originalLogPath);
+            tempLogFile = LoggerInput.createDecryptedTempLogFile(originalLogPath, playerName);
             
             // Crea il client e invia i dati con il file decrittato
             gameClient = new PoggioClientJersey();
@@ -636,31 +635,27 @@ public class Engine {
                     output.writeln("Il tuo punteggio è stato aggiunto alla classifica.", ColorText.YELLOW);
                 }
                 case USER_NOT_FOUND -> {
-                    output.writeln("⚠️ Utente non trovato sul server. Dati non registrati.", ColorText.ORANGE);
+                    output.writeln("Utente non trovato sul server. Dati non registrati.", ColorText.ORANGE);
                 }
                 case LOG_ALREADY_EXISTS -> {
-                    output.writeln("⚠️ Log già esistente per questa vittoria.", ColorText.ORANGE);
+                    output.writeln("Log già esistente per questa vittoria.", ColorText.ORANGE);
                 }
                 case FILE_ERROR -> {
-                    output.writeln("❌ Errore file di log. Impossibile inviare i dati.", ColorText.ERROR);
+                    output.writeln("Errore file di log. Impossibile inviare i dati.", ColorText.ERROR);
                 }
                 case CONNECTION_ERROR -> {
-                    output.writeln("❌ Errore di connessione al server.", ColorText.ERROR);
+                    output.writeln("Errore di connessione al server.", ColorText.ERROR);
                     output.writeln("I tuoi dati di vittoria non sono stati registrati online.", ColorText.YELLOW);
                 }
                 case UNAUTHORIZED -> {
-                    output.writeln("❌ Non autorizzato. Verifica configurazione server.", ColorText.ERROR);
+                    output.writeln("Non autorizzato. Verifica configurazione server.", ColorText.ERROR);
                 }
                 default -> {
-                    output.writeln("❌ Errore sconosciuto durante registrazione vittoria: " + result, ColorText.ERROR);
+                    output.writeln("Errore sconosciuto durante registrazione vittoria: " + result, ColorText.ERROR);
                 }
             }
         } catch (Exception e) {
-            // Gestisce eccezioni impreviste
-            output.writeln("❌ Errore imprevisto durante invio dati al server:", ColorText.ERROR);
-            output.writeln(e.getMessage(), ColorText.ERROR);
-            errorHandler.handleRecoverableError("Errore invio dati vittoria: " + e.getMessage());
-            
+            errorHandler.handleRecoverableError("Errore invio dati vittoria: " + e.getMessage());       
         } finally {
             // Elimina il file temporaneo decrittato
             if (tempLogFile != null) {
@@ -683,45 +678,82 @@ public class Engine {
     }
 
     /**
-     * Crea un file temporaneo con il contenuto del log decrittato per l'invio al server.
-     * 
-     * @param originalLogPath Percorso del file di log originale (criptato)
-     * @return Path del file temporaneo decrittato
-     * @throws Exception Se si verificano errori durante la creazione o decrittazione
+     * Gestisce la perdita totale del gioco.
+     * Salva il gioco, elimina i salvataggi e torna al menu principale.
      */
-    private java.nio.file.Path createDecryptedTempLogFile(String originalLogPath) throws Exception {
-        // Legge e decodifica il contenuto del log originale
-        List<String> decryptedCommands = LoggerInput.readAndDecodeLogFile(originalLogPath);
+    private void handleGameLoss() {
+        // Ferma il cronometro di gioco
+        gameTime.stop();
+
+        saveGame();
         
-        // Crea un file temporaneo nella directory dei log scaricati
-        java.nio.file.Path tempFile = java.nio.file.Files.createTempFile(
-            ResourceLoader.LOGS_DW_DIRECTORY, 
-            playerName + "_temp_", 
-            "_decrypted.txt"
-        );
+        // Pausa per permettere la lettura dei messaggi
+        try {
+            Thread.sleep(2000); // 3 secondi
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
         
-        // Scrive i comandi decrittati nel file temporaneo
-        java.nio.file.Files.write(
-            tempFile, 
-            decryptedCommands, 
-            java.nio.charset.StandardCharsets.UTF_8,
-            java.nio.file.StandardOpenOption.CREATE,
-            java.nio.file.StandardOpenOption.WRITE,
-            java.nio.file.StandardOpenOption.TRUNCATE_EXISTING
-        );
+        output.writeln("Eliminazione salvataggi... [RED]Non li meriti[/]!!", ColorText.YELLOW);
+        deleteCurrentSaveEndGame();
+        deletePlayerFromServer();
+        try {
+            Thread.sleep(2000); // 3 secondi
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        LoggerInput.deleteLogFile(logger.getPathFile());
         
-        return tempFile;
+        // Pausa finale prima di tornare al menu
+        try {
+            Thread.sleep(3000); // 2 secondi
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        returnToAppropriateMenu();
     }
 
     /**
-     * Callback per gestire il reset del gioco.
+     * Elimina il giocatore dal database del server.
+     * Questo metodo viene chiamato quando il giocatore perde definitivamente.
      */
-    private void handleGameReset() {
-        // Reset dello stato di Engine se necessario
+    private void deletePlayerFromServer() {
+        PoggioClientJersey gameClient = null;
+        
         try {
-            this.game.init(); // Re-inizializza il gioco
-        } catch (Exception e) {
-            errorHandler.handleFatalError("Errore durante reset del gioco", e);
+            output.writeln("Eliminazione dal database del server...", ColorText.YELLOW);
+            
+            gameClient = new PoggioClientJersey();
+            ApiClientResult result = gameClient.deletePlayer(playerName);
+            
+            // Gestisci il risultato dell'eliminazione
+            switch (result) {
+                case SUCCESS_OK -> {}
+                case USER_NOT_FOUND -> {}
+                case CONNECTION_ERROR -> {
+                    output.writeln("Errore di connessione al server durante eliminazione.", ColorText.ERROR);
+                    output.writeln("Il giocatore potrebbe essere ancora presente nel database online.", ColorText.YELLOW);
+                }
+                case UNAUTHORIZED -> {
+                    output.writeln("Non autorizzato per eliminazione dal server.", ColorText.ERROR);
+                }
+                default -> {
+                    output.writeln("Errore sconosciuto durante eliminazione dal server: " + result, ColorText.ERROR);
+                }
+            }
+            } catch (Exception e) {
+            // Gestisce eccezioni impreviste
+            errorHandler.handleRecoverableError("Errore eliminazione giocatore dal server: " + e.getMessage());
+            
+        } finally {
+            // Assicura sempre la chiusura del client
+            if (gameClient != null) {
+                try {
+                    gameClient.close();
+                } catch (Exception e) {
+                    // Ignora errori di chiusura
+                }
+            }
         }
     }
 

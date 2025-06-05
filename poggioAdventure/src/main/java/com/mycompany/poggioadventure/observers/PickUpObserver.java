@@ -35,7 +35,7 @@ public class PickUpObserver implements GameObserver, Serializable {
             List<AdvObject> objectsToPick = parserOutput.getRoomObjects();
 
             if (objectsToPick == null || objectsToPick.isEmpty()) {
-                msg.append("Non c'è niente da [NEON_ORANGE]raccogliere[/] qui.");
+                msg.append("Non c'è niente da [NEON_ORANGE]raccogliere[/] con quel nome, [PINK]GAY[/].");
             } else {
                 for (AdvObject obj : objectsToPick) {
                     boolean foundAndPicked = false;
@@ -45,7 +45,7 @@ public class PickUpObserver implements GameObserver, Serializable {
                         if (obj.isPickupable()) {
                             description.getCurrentRoom().getObjects().remove(obj);
                             description.getInventory().add(obj);
-                            msg.append("Hai [NEON_ORANGE]raccolto[/]: ").append(obj.getDescription()).append("[/]\n");
+                            msg.append("Hai [NEON_ORANGE]raccolto[/]: ").append(obj.getDescription()).append("\n");
                             foundAndPicked = true;
                         } else {
                             msg.append("Non puoi [NEON_ORANGE]raccogliere[/] questo oggetto: [ITEM]").append(obj.getName()).append("[/]\n");
@@ -61,7 +61,7 @@ public class PickUpObserver implements GameObserver, Serializable {
                                     if (obj.isPickupable()) {
                                         container.getList().remove(obj);
                                         description.getInventory().add(obj);
-                                        msg.append("Hai raccolto:").append(obj.getDescription()).append("\n");
+                                        msg.append("Hai [NEON_ORANGE]raccolto[/]: ").append(obj.getDescription()).append("\n");
                                         foundAndPicked = true;
                                         break;
                                     } else {

@@ -26,10 +26,13 @@ public class Utils {
     public static final int NEXT_LEVEL_ID = 1000; // ID per l'oggetto di transizione al livello successivo
     public static final int WIN_GAME_ID = 1001; // ID per l'oggetto di vittoria del gioco
 
+    public static final int OBJ_LOSE_GAME_ID = 999;        // Perdita gioco
+    public static final int OBJ_WIN_GAME_ID = 1001;        // Vittoria gioco
+
     public static final long LEVEL_1_TIME_LIMIT = 10 * 60 * 1000; // Limite di tempo per il livello 1 (5 minuti in millisecondi)
     public static final int OBJ_LEVEL1_COMPLETE_ID = 100;  // Completamento livello 1
     public static final List<Integer> LEVEL_1_REQUIRED_OBJECTS = List.of(OBJ_LEVEL1_COMPLETE_ID); // ID oggetti richiesti per il livello 1
-    public static final List<Integer> LEVEL_1_FORBIDDEN_OBJECTS = List.of(); // ID oggetti proibiti per il livello 2
+    public static final List<Integer> LEVEL_1_FORBIDDEN_OBJECTS = List.of(OBJ_LOSE_GAME_ID); // ID oggetti proibiti per il livello 2
 
     // ==================== ID OGGETTI E NPC ====================
     
@@ -71,12 +74,6 @@ public class Utils {
     
     // === OGGETTI SPECIALI ===
     public static final int OBJ_FLIPPER_ZERO_ID = 50;      // FlipperZero
-    
-    // === OGGETTI SISTEMA ===
-    public static final int OBJ_RESET_LEVEL_ID = 998;      // Reset livello
-    public static final int OBJ_LOSE_GAME_ID = 999;        // Perdita gioco
-    public static final int OBJ_NEXT_LEVEL_ID = 1000;      // Prossimo livello
-    public static final int OBJ_WIN_GAME_ID = 1001;        // Vittoria gioco
 
     /**
      * Parsa una stringa rimuovendo le stopwords.
@@ -131,18 +128,6 @@ public class Utils {
     }
 
     /**
-     * Crea un oggetto AdvObject per il reset del livello.
-     * Questo oggetto non è visibile e serve solo come segnaposto.
-     * 
-     * @return Un oggetto AdvObject per il reset del livello
-     */
-    public static AdvObject buildResetObject() {
-        AdvObject resetAdvObject = new AdvObject(OBJ_RESET_LEVEL_ID, "Reset Livello");
-        resetAdvObject.setVisible(false);
-        return resetAdvObject;
-    }
-
-    /**
      * Crea un oggetto AdvObject per la vittoria del gioco.
      * Questo oggetto non è visibile e serve solo come segnaposto.
      * 
@@ -164,18 +149,6 @@ public class Utils {
         AdvObject loseAdvObject = new AdvObject(OBJ_LOSE_GAME_ID, "Perdita di Gioco");
         loseAdvObject.setVisible(false);
         return loseAdvObject;
-    }
-
-    /**
-     * Crea un oggetto AdvObject per il passaggio al livello successivo.
-     * Questo oggetto non è visibile e serve solo come segnaposto.
-     * 
-     * @return Un oggetto AdvObject per il passaggio al livello successivo
-     */
-    public static AdvObject buildNextLevelObject() {
-        AdvObject nextLevelAdvObject = new AdvObject(OBJ_NEXT_LEVEL_ID, "Prossimo Livello");
-        nextLevelAdvObject.setVisible(false);
-        return nextLevelAdvObject;
     }
 
     /**
@@ -209,5 +182,11 @@ public class Utils {
             .filter(requiredId -> inventory.stream()
                 .noneMatch(obj -> obj.getId() == requiredId))
             .collect(java.util.stream.Collectors.toList());
+    }
+
+    public static AdvObject buildLoseGameObject(String name){
+        AdvObject loseAdvObject = new AdvObject(OBJ_LOSE_GAME_ID, name);
+        loseAdvObject.setVisible(false);
+        return loseAdvObject;
     }
 }

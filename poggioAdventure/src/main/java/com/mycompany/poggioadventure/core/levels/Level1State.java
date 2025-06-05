@@ -393,7 +393,7 @@ public class Level1State extends GameState {
         Room hallway = new Room(6, "Disimpegno", "Ti trovi al 2° piano in un disimpegno.");
         hallway.setImagePath(ResourceLoader.IMG_PATH.resolve("Disimpegno.png").toString());
         
-        Room craftRoom = new Room(7, "Stanza di Pino", "Sei nel laboratorio di Pino.");
+        Room craftRoom = new Room(7, "Stanza di del Manutentore", "Sei nel laboratorio di Pino.");
         craftRoom.setImagePath(ResourceLoader.IMG_PATH.resolve("LabPino.png").toString());
         craftRoom.addObject(segaCircolare, null);
         craftRoom.addObject(martello, null);
@@ -436,7 +436,7 @@ public class Level1State extends GameState {
         hallway.setEast(craftRoom);
         craftRoom.setWest(hallway);
         hallway.setNorth(entryLab);
-        hallway.setForbidden(true);
+        //hallway.setForbidden(true); // Decommentare quando in produzione
         entryLab.setSouth(hallway);
         entryLab.setEast(lab5);
         lab5.setWest(entryLab);
@@ -479,10 +479,8 @@ public class Level1State extends GameState {
     }
     
     @Override
-    public boolean isFailureConditionMet(GameDescription game, long elapsedTime) {
-        // Fallimento se il tempo è scaduto o altre condizioni specifiche del livello
-        return elapsedTime >= getTimeLimit() || 
-               game.getInventory().stream()
+    public boolean isFailureConditionMet(GameDescription game) {
+        return  game.getInventory().stream()
                    .mapToInt(obj -> obj.getId())
                    .boxed()
                    .collect(java.util.stream.Collectors.toSet())
@@ -497,8 +495,7 @@ public class Level1State extends GameState {
     }
     
     @Override
-    public void handleFailure(FailureType failureType, Runnable onFailure) {
-        // Esegue il callback appropriato per il tipo di fallimento
+    public void handleFailure(Runnable onFailure) {
         onFailure.run();
     }
     
