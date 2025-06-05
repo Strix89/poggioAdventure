@@ -209,7 +209,6 @@ public class UI_Rank extends UI_Abstract {
      * @param errorMessage Il messaggio di errore (se presente)
      */
     private void showDownloadResult(String username, boolean success, String errorMessage) {
-        JOptionPane rootPane = new JOptionPane();
         
         if (success) {
             JOptionPane.showMessageDialog(this,

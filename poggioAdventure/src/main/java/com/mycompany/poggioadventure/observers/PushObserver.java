@@ -21,8 +21,8 @@ import java.util.List;
  * <ul>
  *   <li><b>Pulsante Rack (ID: 24)</b> - GAME OVER: Causa chaos robotico nel collegio</li>
  *   <li><b>Martello + CPU (ID: 16+18)</b> - GAME OVER: Distrugge componenti delicati</li>
- *   <li><b>Foto San Nicola + Bobina PLA (ID: 4+27)</b> - Comportamento divertente: Crea reliquia tecnologica</li>
- *   <li><b>Bastone + Tastiera (ID: 8+21)</b> - Comportamento divertente: Gaming per anziani</li>
+ *   <li><b>Foto San Nicola + Bobina PLA (ID: 4+27)</b> - Crea reliquia tecnologica</li>
+ *   <li><b>Bastone + Tastiera (ID: 8+21)</b> - Gaming per anziani</li>
  * </ul>
  * 
  * <h3>Logica di Funzionamento:</h3>
@@ -156,7 +156,7 @@ public class PushObserver implements GameObserver, Serializable {
                 msg.append("Il Direttore Michele ti caccia immediatamente dal collegio!\n");
                 msg.append("GAME OVER - La tua ammissione è stata revocata!\n");
                 specialCombinationHandled = true;
-                // TODO: Implementare logica per Game Over nel sistema principale
+                description.getInventory().add(Utils.buildLoseGameObject());
             }
             
             /**

@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.mycompany.poggioadventure.core.abstracts.GameDescription;
 import com.mycompany.poggioadventure.core.utils.GameContext;
-import com.mycompany.poggioadventure.core.utils.Utils;
 import com.mycompany.poggioadventure.model.*;
 import com.mycompany.poggioadventure.parser.*;
 
