@@ -447,6 +447,7 @@ public class Engine {
             Thread.currentThread().interrupt();
         }
 
+        output.writeln("Eliminazione salvataggi... [RED]Non ti servono[/]!!", ColorText.YELLOW);
         deleteCurrentSaveEndGame();
         LoggerInput.deleteLogFile(logger.getPathFile());
 
