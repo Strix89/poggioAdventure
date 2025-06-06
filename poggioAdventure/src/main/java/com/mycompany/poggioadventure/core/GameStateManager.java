@@ -309,7 +309,7 @@ public class GameStateManager {
 
     public void restoreFromSave(int savedLevelIndex, long savedLevelElapsedTime, GameDescription savedLevelSnapshot) {
         this.currentLevelIndex = savedLevelIndex;
-        this.levelSnapshot = savedLevelSnapshot; // Ripristina lo snapshot per eventuali reset
+        this.levelSnapshot = (GameDescription) savedLevelSnapshot.clone(); 
         
         // Assicurati che l'indice sia valido
         if (currentLevelIndex >= 0 && currentLevelIndex < levels.length) {
@@ -338,7 +338,9 @@ public class GameStateManager {
                 String remainingTimeFormatted = String.format("%02d:%02d", 
                     timeManager.getTempoRimanente() / 60, 
                     timeManager.getTempoRimanente() % 60);
-                 currentState.getLevelDescription(output, playerName, String.valueOf(remainingTimeFormatted));
+                currentState.getLevelDescription(output, playerName, String.valueOf(remainingTimeFormatted));
+                output.write(" \nTi trovi qui: ", ColorText.WHITE);
+                output.writeln(gameDescription.getCurrentRoom().getName(), ColorText.BRIGHT_YELLOW);
             } else {
                 // Il tempo è scaduto, gestisci timeout
                 output.writeln("\n[RED]⏰ TEMPO SCADUTO durante il caricamento![/] Resettando il livello...", ColorText.RED);

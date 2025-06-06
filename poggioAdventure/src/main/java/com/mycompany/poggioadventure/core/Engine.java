@@ -141,7 +141,6 @@ public class Engine {
             Utils.exitApplication(Utils.EXIT_CODE_RESOURCE_ERROR);
         }
         getGameColoredVersion();
-        output.writeln(this.output instanceof GUIOutputHandler ? game.getGUIWelcomeMsg() : game.getCLIWelcomeMsg(), ColorText.WHITE);
         gameTime = StopWatch.getInstance();
         gameTime.start();
         gameContext = new GameContext(input, output, errorHandler, logTemp, gameTime);
@@ -155,14 +154,15 @@ public class Engine {
                 this::handleGameLoss
             );
             if (!fromSave){
+                output.writeln(this.output instanceof GUIOutputHandler ? game.getGUIWelcomeMsg() : game.getCLIWelcomeMsg(), ColorText.WHITE);
                 gameStateManager.startGame();
+                output.write(" \nTi trovi qui: ", ColorText.WHITE);
+                output.writeln(game.getCurrentRoom().getName(), ColorText.BRIGHT_YELLOW);
             }
         } catch (Exception e) {
             errorHandler.handleFatalError("Errore durante inizializzazione GameStateManager", e);
             Utils.exitApplication(Utils.EXIT_CODE_INITIALIZATION_ERROR);
         }
-        output.write(" \nTi trovi qui: ", ColorText.WHITE);
-        output.writeln(game.getCurrentRoom().getName(), ColorText.BRIGHT_YELLOW);
         
         printCursor();
     }
