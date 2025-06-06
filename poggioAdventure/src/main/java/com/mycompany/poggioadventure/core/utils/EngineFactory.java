@@ -69,7 +69,7 @@ public class EngineFactory {
                                        OutputHandler output, InputHandler input, 
                                        ErrorHandler errorHandler, LoggerInput logger, long gameTime) {
         // Crea l'engine con lo stato salvato
-        Engine gameEngine = new Engine(savedGame, playerName, output, input, errorHandler, logger);
+        Engine gameEngine = new Engine(savedGame, playerName, output, input, errorHandler, logger, true);
         if (output instanceof CLIOutputHandler) {
             savedGame.getGameMap().alterateNPCImages(true);
         } else{ 

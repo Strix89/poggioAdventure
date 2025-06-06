@@ -125,7 +125,7 @@ public class Engine {
      * @param errorHandler Gestore degli errori
      * @param logger Logger per l'attività di gioco
      */
-    public Engine(GameDescription game, String playerName, OutputHandler output, InputHandler input, ErrorHandler errorHandler, LoggerInput logger) {
+    public Engine(GameDescription game, String playerName, OutputHandler output, InputHandler input, ErrorHandler errorHandler, LoggerInput logger, boolean fromSave) {
         this.game = game;
         this.playerName = playerName;
         this.output = output;
@@ -154,7 +154,9 @@ public class Engine {
                 this::handleGameCompleted, 
                 this::handleGameLoss
             );
-            gameStateManager.startGame();
+            if (!fromSave){
+                gameStateManager.startGame();
+            }
         } catch (Exception e) {
             errorHandler.handleFatalError("Errore durante inizializzazione GameStateManager", e);
             Utils.exitApplication(Utils.EXIT_CODE_INITIALIZATION_ERROR);
@@ -163,6 +165,10 @@ public class Engine {
         output.writeln(game.getCurrentRoom().getName(), ColorText.BRIGHT_YELLOW);
         
         printCursor();
+    }
+
+    public Engine(GameDescription game, String playerName, OutputHandler output, InputHandler input, ErrorHandler errorHandler, LoggerInput logger) {
+        this(game, playerName, output, input, errorHandler, logger, false);
     }
 
     /**

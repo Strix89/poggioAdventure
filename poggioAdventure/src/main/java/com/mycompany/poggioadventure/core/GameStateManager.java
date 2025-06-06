@@ -333,10 +333,12 @@ public class GameStateManager {
                 timeManager = new TimeManager(remainingTime); 
                 timeManager.start();
 
+                output.writeln();
+
                 String remainingTimeFormatted = String.format("%02d:%02d", 
                     timeManager.getTempoRimanente() / 60, 
                     timeManager.getTempoRimanente() % 60);
-                output.writeln("Ti rimangono: [RED]" + remainingTimeFormatted + "[/] minuti per completare il livello.", ColorText.YELLOW);
+                 currentState.getLevelDescription(output, playerName, String.valueOf(remainingTimeFormatted));
             } else {
                 // Il tempo è scaduto, gestisci timeout
                 output.writeln("\n[RED]⏰ TEMPO SCADUTO durante il caricamento![/] Resettando il livello...", ColorText.RED);
