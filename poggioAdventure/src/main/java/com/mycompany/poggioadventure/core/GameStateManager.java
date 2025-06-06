@@ -22,7 +22,7 @@ public class GameStateManager {
     
     private GameState currentState;
     private GameDescription gameDescription;
-    private GameDescription snapshotGameDesc;
+    private GameDescription levelSnapshot; // Snapshot per reset del livello
     private String playerName;
     private OutputHandler output;
     private TimeManager timeManager;
@@ -45,9 +45,8 @@ public class GameStateManager {
      * 
      * @param gameDescription Stato del gioco
      * @param output Handler per output utente
-     * @param timeManager Gestore del tempo di gioco
      * @param onGameCompleted Callback per completamento gioco
-     * @param onGameReset Callback per reset gioco
+     * @param onGameLoss Callback per perdita gioco
      */
     public GameStateManager(GameDescription gameDescription, OutputHandler output, 
                            String playerName, Runnable onGameCompleted, 
@@ -57,7 +56,7 @@ public class GameStateManager {
         this.playerName = playerName;
         this.onGameCompleted = onGameCompleted;
         this.onGameLoss = onGameLoss;
-        snapshotGameDesc = (GameDescription) gameDescription.clone();
+        this.levelSnapshot = null;
     }
     
     /**
@@ -65,7 +64,8 @@ public class GameStateManager {
      */
     public void startGame() {
         currentLevelIndex = 0;
-        transitionToLevel(levels[currentLevelIndex]);
+        // Primo livello - crea snapshot
+        transitionToLevel(levels[currentLevelIndex], true);
     }
     
     /**
@@ -77,12 +77,12 @@ public class GameStateManager {
         
         // Verifica timeout usando TimeManager
         if (timeManager.getTempoRimanente() <= 0) {
-            output.writeln("\n[RED]⏰ TEMPO SCADUTO![/] Ricominciando dall'inizio...");
-            currentState.handleFailure(this::resetGame);
+            output.writeln("\n[RED]⏰ TEMPO SCADUTO![/] Ricominciando dal checkpoint del livello...");
+            resetCurrentLevel();
             return;
         }
 
-        // Verifica condizioni di fallimento - sempre reset completo
+        // Verifica condizioni di fallimento - reset del livello
         if (currentState.isFailureConditionMet(gameDescription)) {
             currentState.handleFailure(this::handleGameLoss);
         }
@@ -164,42 +164,78 @@ public class GameStateManager {
             // Gioco completato!
             handleGameCompletion();
         } else {
-            transitionToLevel(levels[currentLevelIndex]);
+            // Avanza al livello successivo - crea nuovo snapshot
+            transitionToLevel(levels[currentLevelIndex], true);
         }
     }
     
     /**
-     * Reset del livello corrente.
+     * Reset del livello corrente al checkpoint salvato.
      */
     public void resetCurrentLevel() {
-        if (currentState != null) {
+        if (currentState != null && levelSnapshot != null) {
             output.writeln("\n🔄 Resetting livello: " + currentState.getLevelName(), ColorText.YELLOW);
-            transitionToLevel(currentState);
+            
+            // Ferma il TimeManager
+            if (timeManager != null) {
+                timeManager.stop();
+            }
+            
+            // Ripristina la GameDescription dal snapshot usando i nuovi setter
+            gameDescription.setInventory(Utils.cloneList(levelSnapshot.getInventory()));
+            gameDescription.setCommands(Utils.cloneList(levelSnapshot.getCommands()));
+            gameDescription.setCurrentRoom(levelSnapshot.getCurrentRoom());
+            
+            // Per la GameMap, copiamo il contenuto invece di sostituire l'istanza
+            GameMap snapshotMap = levelSnapshot.getGameMap();
+            if (snapshotMap != null) {
+                gameDescription.getGameMap().getAllFloors().clear();
+                for (int i = 0; i < snapshotMap.getAllFloors().size(); i++) {
+                    if (i < gameDescription.getGameMap().getAllFloors().size()) {
+                        gameDescription.getGameMap().getAllFloors().get(i).clear();
+                        gameDescription.getGameMap().getAllFloors().get(i).addAll(
+                            Utils.cloneList(snapshotMap.getAllFloors().get(i))
+                        );
+                    } else {
+                        gameDescription.getGameMap().getAllFloors().add(
+                            Utils.cloneList(snapshotMap.getAllFloors().get(i))
+                        );
+                    }
+                }
+            }
+            
+            // Reset del TimeManager al tempo limite del livello
+            long levelTimeMillis = currentState.getTimeLimit();
+            timeManager = new TimeManager(levelTimeMillis);
+            timeManager.start();
+            
+            // Registra il nuovo inizio del livello
+            levelStartTime = System.currentTimeMillis();
+            
+            // Mostra informazioni di reset
+            long timeInMinutes = timeManager.getTempoRimanente() / 60;
+            
+            // Mostra la descrizione del livello dopo il reset
+            output.writeln("=".repeat(50), ColorText.YELLOW);
+            currentState.getLevelDescription(output, playerName, String.valueOf(timeInMinutes));
+            output.writeln("=".repeat(50), ColorText.YELLOW);
+            
+            // Mostra la stanza corrente
+            if (gameDescription.getCurrentRoom() != null) {
+                output.writeln("\nTi trovi qui: [YELLOW]" + gameDescription.getCurrentRoom().getName() + "[/]", ColorText.WHITE);
+                output.writeln("================================================", ColorText.WHITE);
+                output.writeln(gameDescription.getCurrentRoom().getDescription(), ColorText.WHITE);
+            }
         }
-    }
-    
-    /**
-     * Reset completo del gioco.
-     */
-    public void resetGame() {
-        output.writeln("\n💀 GAME OVER! Ricominciando dall'inizio...", ColorText.RED);
-        currentLevelIndex = 0;
-        
-        // Reset del TimeManager usando il nuovo metodo
-        timeManager.restart();
-        
-        transitionToLevel(levels[currentLevelIndex]);
-        
-        // Notifica Engine per reset completo
-        //if (onGameReset != null) {
-            //onGameReset.run();
-        //}
     }
     
     /**
      * Gestisce la transizione verso un nuovo livello.
+     * 
+     * @param newState Il nuovo stato/livello
+     * @param createSnapshot Se true, crea un nuovo snapshot per il reset
      */
-    private void transitionToLevel(GameState newState) {
+    private void transitionToLevel(GameState newState, boolean createSnapshot) {
         // Imposta il nuovo stato
         currentState = newState;
         
@@ -211,18 +247,20 @@ public class GameStateManager {
             gameDescription.setCurrentRoom(currentState.getStartingRoom());
         }
         
+        // Crea lo snapshot SOLO se è un nuovo livello
+        if (createSnapshot) {
+            levelSnapshot = (GameDescription) gameDescription.clone();
+        }
+        
         // Registra l'inizio del livello
         levelStartTime = System.currentTimeMillis();
 
-        long levelTimeMillis = currentState.getTimeLimit(); // Ottieni il tempo del livello in millisecondi
+        long levelTimeMillis = currentState.getTimeLimit();
 
         if (timeManager == null) {
-            // Inizializza TimeManager se non già fatto
             timeManager = new TimeManager(levelTimeMillis);
         } else {
-            // Configura TimeManager per questo livello
-            timeManager.stop(); // Ferma il timer corrente
-            // setTempoTotale(int) accetta secondi, quindi convertiamo
+            timeManager.stop();
             timeManager.setTempoTotale((int) (levelTimeMillis / 1000));
         }
         timeManager.start();
@@ -269,8 +307,9 @@ public class GameStateManager {
         }
     }
 
-    public void restoreFromSave(int savedLevelIndex, long savedLevelElapsedTime) {
+    public void restoreFromSave(int savedLevelIndex, long savedLevelElapsedTime, GameDescription savedLevelSnapshot) {
         this.currentLevelIndex = savedLevelIndex;
+        this.levelSnapshot = savedLevelSnapshot; // Ripristina lo snapshot per eventuali reset
         
         // Assicurati che l'indice sia valido
         if (currentLevelIndex >= 0 && currentLevelIndex < levels.length) {
@@ -342,12 +381,7 @@ public class GameStateManager {
         return gameDescription;
     }
 
-    public void setGameDescription(GameDescription gameDescription) {
-        this.gameDescription = gameDescription;
-        this.snapshotGameDesc = (GameDescription) gameDescription.clone();
-    }
-
-    public GameDescription getOldGameDescription() {
-        return snapshotGameDesc;
+    public GameDescription getLevelSnapshot() {
+        return levelSnapshot;
     }
 }

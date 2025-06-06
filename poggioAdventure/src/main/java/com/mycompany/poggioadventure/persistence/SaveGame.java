@@ -210,9 +210,11 @@ public class SaveGame {
                 if (gsm != null) {
                     out.writeObject(gsm.getCurrentLevelIndex());    // 5. Indice livello corrente (int)
                     out.writeObject(gsm.getCurrentLevelElapsedTime()); // 6. Tempo trascorso nel livello (long)
+                    out.writeObject(gsm.getLevelSnapshot());   // 7. Snapshot GameDescription per reset (GameDescription)
                 } else {
                     out.writeObject(0);    // 5. Livello 0 se GSM è null
                     out.writeObject(0L);   // 6. Tempo 0 se GSM è null
+                    out.writeObject(null); // 7. Nessun snapshot
                 }
             }
             output.writeln("\nGioco salvato con successo come: " + fileName, ColorText.GREEN);
@@ -296,6 +298,7 @@ public class SaveGame {
             // AGGIUNTO: Legge lo stato del livello
             int currentLevelIndex = (int) in.readObject();            // 5. Indice livello corrente
             long levelElapsedTime = (long) in.readObject();             // 6. Tempo trascorso nel livello corrente
+            GameDescription levelSnapshot = (GameDescription) in.readObject(); // 7. Snapshot per reset
 
             // --- Verifica e Creazione Logger ---
             // Controlla l'integrità/esistenza del file di log associato PRIMA di creare l'engine
@@ -316,10 +319,10 @@ public class SaveGame {
                 gameTime
             );
 
-            // AGGIUNTO: Ripristina lo stato del GameStateManager
+            // AGGIUNTO: Ripristina lo stato del GameStateManager con snapshot
             GameStateManager gsm = engine.getGameStateManager();
             if (gsm != null) {
-                gsm.restoreFromSave(currentLevelIndex, levelElapsedTime);
+                gsm.restoreFromSave(currentLevelIndex, levelElapsedTime, levelSnapshot);
             }
 
             // --- Successo ---
@@ -471,7 +474,7 @@ public class SaveGame {
         }
         // Usa try-with-resources per chiudere automaticamente l'ObjectInputStream
         try (ObjectInputStream in = new ObjectInputStream(Files.newInputStream(savePath))) {
-            // Legge e scarta i primi 4 oggetti secondo l'ordine definito in saveGame
+            // Legge e scarta i primi 6 oggetti secondo l'ordine definito in saveGame
             in.readObject(); // 1. Salta playerName (String)
             in.readObject(); // 2. Salta game (GameDescription)
             in.readObject(); // 3. Salta gameTime (Long)

@@ -2,16 +2,12 @@ package com.mycompany.poggioadventure.core.abstracts;
 
 import com.mycompany.poggioadventure.core.GameMap;
 import com.mycompany.poggioadventure.core.utils.GameContext;
+import com.mycompany.poggioadventure.core.utils.Utils;
 import com.mycompany.poggioadventure.parser.ParserOutput;
 import com.mycompany.poggioadventure.model.AdvObject;
 import com.mycompany.poggioadventure.parser.Command;
 import com.mycompany.poggioadventure.model.Room;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,6 +60,48 @@ public abstract class GameDescription implements Serializable {
     }
 
     /**
+     * Imposta la lista dell'inventario.
+     * Utilizzato per il ripristino dello stato durante il reset dei livelli.
+     * 
+     * @param inventory Nuova lista di oggetti nell'inventario
+     */
+    public void setInventory(List<AdvObject> inventory) {
+        this.inventory.clear();
+        if (inventory != null) {
+            this.inventory.addAll(inventory);
+        }
+    }
+
+    /**
+     * Imposta la lista dei comandi disponibili.
+     * Utilizzato per il ripristino dello stato durante il reset dei livelli.
+     * 
+     * @param commands Nuova lista di comandi
+     */
+    public void setCommands(List<Command> commands) {
+        this.commands.clear();
+        if (commands != null) {
+            this.commands.addAll(commands);
+        }
+    }
+
+    /**
+     * Imposta la mappa di gioco.
+     * Utilizzato per il ripristino dello stato durante il reset dei livelli.
+     * 
+     * @param gameMap Nuova mappa di gioco
+     */
+    public void setGameMap(GameMap gameMap) {
+        // Non possiamo sostituire l'istanza final, ma possiamo copiare il contenuto
+        if (gameMap != null) {
+            this.gameMap.getAllFloors().clear();
+            for (int i = 0; i < gameMap.getAllFloors().size(); i++) {
+                this.gameMap.getAllFloors().add(new ArrayList<>(gameMap.getAllFloors().get(i)));
+            }
+        }
+    }
+
+    /**
      *
      * @throws Exception
      */
@@ -94,21 +132,8 @@ public abstract class GameDescription implements Serializable {
      * Crea una copia profonda usando la serializzazione.
      * @return Una nuova istanza clonata
      */
-    public GameDescription clone() {
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ObjectOutputStream oos = new ObjectOutputStream(baos);
-            oos.writeObject(this);
-            oos.close();
-            
-            ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-            ObjectInputStream ois = new ObjectInputStream(bais);
-            GameDescription cloned = (GameDescription) ois.readObject();
-            ois.close();
-            
-            return cloned;
-        } catch (IOException | ClassNotFoundException e) {
-            throw new RuntimeException("Errore durante la clonazione", e);
-        }
+    @Override
+    public Object clone() {
+        return Utils.deepClone(this);
     }
 }

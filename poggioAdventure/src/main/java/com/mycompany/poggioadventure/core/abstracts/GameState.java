@@ -1,7 +1,9 @@
 package com.mycompany.poggioadventure.core.abstracts;
 
+import com.mycompany.poggioadventure.core.utils.Utils;
 import com.mycompany.poggioadventure.model.Room;
 import com.mycompany.poggioadventure.ui.OutputHandler;
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -14,7 +16,7 @@ import java.util.List;
  *   <li>Logica di transizione tra livelli</li>
  * </ul>
  */
-public abstract class GameState {
+public abstract class GameState implements Serializable {
     
     private final long timeLimit; // Tempo massimo consentito per il livello (in millisecondi)
     private Room startingRoom = null;
@@ -112,4 +114,11 @@ public abstract class GameState {
      * @return Tempo trascorso
      */
     public abstract void getLevelDescription(OutputHandler output, String playerName, String remaininTime);
+
+    /**
+     * Clona questo GameState utilizzando il metodo generico in Utils.
+     */
+    public GameState clone() {
+        return Utils.deepClone(this);
+    }
 }

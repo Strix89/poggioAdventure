@@ -1,7 +1,15 @@
 package com.mycompany.poggioadventure.core.utils;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.mycompany.poggioadventure.model.AdvObject;
@@ -29,7 +37,7 @@ public class Utils {
     public static final int OBJ_LOSE_GAME_ID = 999;        // Perdita gioco
     public static final int OBJ_WIN_GAME_ID = 1001;        // Vittoria gioco
 
-    public static final long LEVEL_1_TIME_LIMIT = 10 * 60 * 1000; // Limite di tempo per il livello 1 (5 minuti in millisecondi)
+    public static final long LEVEL_1_TIME_LIMIT = 1 * 60 * 1000; // Limite di tempo per il livello 1 (5 minuti in millisecondi)
     public static final int OBJ_LEVEL1_COMPLETE_ID = 100;  // Completamento livello 1
     public static final List<Integer> LEVEL_1_REQUIRED_OBJECTS = List.of(OBJ_LEVEL1_COMPLETE_ID); // ID oggetti richiesti per il livello 1
     public static final List<Integer> LEVEL_1_FORBIDDEN_OBJECTS = List.of(OBJ_LOSE_GAME_ID); // ID oggetti proibiti per il livello 2
@@ -188,5 +196,59 @@ public class Utils {
         AdvObject loseAdvObject = new AdvObject(OBJ_LOSE_GAME_ID, name);
         loseAdvObject.setVisible(false);
         return loseAdvObject;
+    }
+
+    /**
+     * Esegue un deep clone di un oggetto utilizzando la serializzazione Java.
+     * L'oggetto deve implementare Serializable.
+     * 
+     * @param <T> Tipo dell'oggetto da clonare
+     * @param obj Oggetto da clonare
+     * @return Deep clone dell'oggetto
+     * @throws RuntimeException se il cloning fallisce
+     */
+    @SuppressWarnings("unchecked")
+    public static <T extends Serializable> T deepClone(T obj) {
+        if (obj == null) return null;
+        
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+             ObjectOutputStream oos = new ObjectOutputStream(baos)) {
+            
+            oos.writeObject(obj);
+            oos.flush();
+            
+            try (ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+                 ObjectInputStream ois = new ObjectInputStream(bais)) {
+                
+                return (T) ois.readObject();
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            throw new RuntimeException("Errore durante il cloning dell'oggetto: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Clona una lista di oggetti Serializable.
+     * 
+     * @param <T> Tipo degli elementi della lista
+     * @param list Lista da clonare
+     * @return Deep clone della lista
+     */
+    public static <T extends Serializable> List<T> cloneList(List<T> list) {
+        if (list == null) return null;
+        return deepClone(new ArrayList<>(list));
+    }
+
+    /**
+     * Clona una mappa di oggetti Serializable.
+     * 
+     * @param <K> Tipo delle chiavi
+     * @param <V> Tipo dei valori
+     * @param map Mappa da clonare
+     * @return Deep clone della mappa
+     */
+    public static <K extends Serializable, V extends Serializable> Map<K, V> cloneMap(Map<K, V> map) {
+        if (map == null) return null;
+        return deepClone(new HashMap<>(map));
     }
 }
