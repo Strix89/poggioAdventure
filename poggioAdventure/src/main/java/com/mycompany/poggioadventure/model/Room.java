@@ -347,6 +347,15 @@ public class Room implements Serializable {
                 if (label != null) {
                     displayText += ": [ " + label + " ]";
                 }
+                
+                // Aggiungi contenuto se è un contenitore aperto
+                if (obj instanceof AdvObjectContainer) {
+                    AdvObjectContainer container = (AdvObjectContainer) obj;
+                    if (container.isOpen()) {
+                        displayText += getContainerContentDescription(container);
+                    }
+                }
+                
                 itemDescriptions.add(displayText);
             }
         }
@@ -373,6 +382,27 @@ public class Room implements Serializable {
         }
         
         return dynamicLook.toString().trim();
+    }
+
+    /**
+     * Genera la descrizione del contenuto di un contenitore aperto
+     * @param container Il contenitore di cui mostrare il contenuto
+     * @return Stringa formattata con il contenuto del contenitore
+     */
+    private String getContainerContentDescription(AdvObjectContainer container) {
+        if (container.getList().isEmpty()) {
+            return "\n  [OLIVE]Contiene[/]: nulla";
+        }
+        
+        StringBuilder contentDesc = new StringBuilder(":");
+        for (AdvObject innerObj : container.getList()) {
+            contentDesc.append("\n    • [ITEM]")
+                      .append(innerObj.getName())
+                      .append("[/]: [ ")
+                      .append(innerObj.getDescription() + " ]");
+        }
+        
+        return contentDesc.toString();
     }
 
     // --- METODI DI UTILITÀ ---

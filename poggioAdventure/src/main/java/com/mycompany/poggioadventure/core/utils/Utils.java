@@ -42,6 +42,16 @@ public class Utils {
     public static final List<Integer> LEVEL_1_REQUIRED_OBJECTS = List.of(OBJ_LEVEL1_COMPLETE_ID); // ID oggetti richiesti per il livello 1
     public static final List<Integer> LEVEL_1_FORBIDDEN_OBJECTS = List.of(OBJ_LOSE_GAME_ID); // ID oggetti proibiti per il livello 2
 
+    public static final long LEVEL_2_TIME_LIMIT = 10 * 60 * 1000; // Limite di tempo per il livello 2 (10 minuti in millisecondi)
+    public static final int OBJ_LEVEL2_COMPLETE_ID = 200;  // Completamento livello 2
+    public static final List<Integer> LEVEL_2_REQUIRED_OBJECTS = List.of(OBJ_LEVEL2_COMPLETE_ID); // ID oggetti richiesti per il livello 2
+    public static final List<Integer> LEVEL_2_FORBIDDEN_OBJECTS = List.of(OBJ_LOSE_GAME_ID); // ID oggetti proibiti per il livello 2
+
+    public static final long LEVEL_3_TIME_LIMIT = 10 * 60 * 1000; // Limite di tempo per il livello 3 (10 minuti in millisecondi)
+    public static final int OBJ_LEVEL3_COMPLETE_ID = 300;  // Completamento livello 3
+    public static final List<Integer> LEVEL_3_REQUIRED_OBJECTS = List.of(OBJ_LEVEL3_COMPLETE_ID); // ID oggetti richiesti per il livello 3
+    public static final List<Integer> LEVEL_3_FORBIDDEN_OBJECTS = List.of(OBJ_LOSE_GAME_ID); // ID oggetti proibiti per il livello 3
+
     // ==================== ID OGGETTI E NPC ====================
     
     // === NPC ===
