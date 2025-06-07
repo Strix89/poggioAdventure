@@ -62,6 +62,23 @@ public class GameMap implements Serializable{
         return null;
     }
 
+    /**
+     * Trova una stanza per ID in tutti i piani.
+     * 
+     * @param roomId ID della stanza da cercare
+     * @return La stanza trovata o null se non esiste
+     */
+    public Room findRoomById(int roomId) {
+        for (List<Room> floor : allFloors) {
+            for (Room room : floor) {
+                if (room.getId() == roomId) {
+                    return room;
+                }
+            }
+        }
+        return null;
+    }
+
     public List<List<Room>> getAllFloors() {
         return allFloors;
     }

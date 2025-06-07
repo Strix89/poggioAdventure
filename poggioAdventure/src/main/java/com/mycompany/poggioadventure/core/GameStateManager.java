@@ -9,6 +9,7 @@ import com.mycompany.poggioadventure.ui.ColorText;
 import com.mycompany.poggioadventure.ui.OutputHandler;
 import com.mycompany.poggioadventure.ui.gui.GUIOutputHandler;
 import com.mycompany.poggioadventure.model.AdvObject;
+import com.mycompany.poggioadventure.model.Room;
 
 import java.util.List;
 
@@ -22,7 +23,9 @@ public class GameStateManager {
     
     private GameState currentState;
     private GameDescription gameDescription;
-    private GameDescription levelSnapshot; // Snapshot per reset del livello
+    private GameMap levelMapSnapshot; // Snapshot della mappa per reset del livello
+    private List<AdvObject> levelInventorySnapshot; // Snapshot dell'inventario per reset del livello
+    private Room levelStartingRoomSnapshot; // Snapshot della stanza iniziale del livello per reset
     private String playerName;
     private OutputHandler output;
     private TimeManager timeManager;
@@ -56,7 +59,8 @@ public class GameStateManager {
         this.playerName = playerName;
         this.onGameCompleted = onGameCompleted;
         this.onGameLoss = onGameLoss;
-        this.levelSnapshot = null;
+        this.levelMapSnapshot = null;
+        this.levelInventorySnapshot = null;
     }
     
     /**
@@ -173,7 +177,7 @@ public class GameStateManager {
      * Reset del livello corrente al checkpoint salvato.
      */
     public void resetCurrentLevel() {
-        if (currentState != null && levelSnapshot != null) {
+        if (currentState != null && levelMapSnapshot != null && levelInventorySnapshot != null) {
             output.writeln("\n🔄 Resetting livello: " + currentState.getLevelName(), ColorText.YELLOW);
             
             // Ferma il TimeManager
@@ -181,25 +185,33 @@ public class GameStateManager {
                 timeManager.stop();
             }
             
-            // Ripristina la GameDescription dal snapshot usando i nuovi setter
-            gameDescription.setInventory(Utils.cloneList(levelSnapshot.getInventory()));
-            gameDescription.setCommands(Utils.cloneList(levelSnapshot.getCommands()));
-            gameDescription.setCurrentRoom(levelSnapshot.getCurrentRoom());
+            // CAMBIATO: Ripristina inventario e mappa usando i metodi di GameDescription
+            gameDescription.setInventory(Utils.cloneList(levelInventorySnapshot));
+            gameDescription.setGameMap((GameMap) Utils.deepClone(levelMapSnapshot));
             
-            // Per la GameMap, copiamo il contenuto invece di sostituire l'istanza
-            GameMap snapshotMap = levelSnapshot.getGameMap();
-            if (snapshotMap != null) {
-                gameDescription.getGameMap().getAllFloors().clear();
-                for (int i = 0; i < snapshotMap.getAllFloors().size(); i++) {
-                    if (i < gameDescription.getGameMap().getAllFloors().size()) {
-                        gameDescription.getGameMap().getAllFloors().get(i).clear();
-                        gameDescription.getGameMap().getAllFloors().get(i).addAll(
-                            Utils.cloneList(snapshotMap.getAllFloors().get(i))
-                        );
+            // CAMBIATO: Ripristina la stanza corrente usando lo snapshot della stanza iniziale
+            if (levelStartingRoomSnapshot != null) {
+                // Trova la stanza corrispondente nella mappa ripristinata
+                Room restoredRoom = gameDescription.getGameMap().findRoomById(levelStartingRoomSnapshot.getId());
+                if (restoredRoom != null) {
+                    gameDescription.setCurrentRoom(restoredRoom);
+                    // Aggiorna anche il GameState con la stanza iniziale ripristinata
+                    currentState.setStartingRoom(restoredRoom);
+                } else {
+                    // Fallback: clona la stanza iniziale snapshot se non trovata nella mappa
+                    Room clonedStartingRoom = (Room) Utils.deepClone(levelStartingRoomSnapshot);
+                    gameDescription.setCurrentRoom(clonedStartingRoom);
+                    currentState.setStartingRoom(clonedStartingRoom);
+                }
+            } else {
+                // Fallback: usa la stanza corrente del GameState se non c'è snapshot
+                Room startingRoom = currentState.getStartingRoom();
+                if (startingRoom != null) {
+                    Room restoredRoom = gameDescription.getGameMap().findRoomById(startingRoom.getId());
+                    if (restoredRoom != null) {
+                        gameDescription.setCurrentRoom(restoredRoom);
                     } else {
-                        gameDescription.getGameMap().getAllFloors().add(
-                            Utils.cloneList(snapshotMap.getAllFloors().get(i))
-                        );
+                        gameDescription.setCurrentRoom(startingRoom);
                     }
                 }
             }
@@ -247,9 +259,12 @@ public class GameStateManager {
             gameDescription.setCurrentRoom(currentState.getStartingRoom());
         }
         
-        // Crea lo snapshot SOLO se è un nuovo livello
+        // CAMBIATO: Crea snapshot separati SOLO se è un nuovo livello
         if (createSnapshot) {
-            levelSnapshot = (GameDescription) gameDescription.clone();
+            levelMapSnapshot = (GameMap) Utils.deepClone(gameDescription.getGameMap());
+            levelInventorySnapshot = Utils.cloneList(gameDescription.getInventory());
+            // AGGIUNTO: Crea snapshot della stanza iniziale del livello
+            levelStartingRoomSnapshot = (Room) Utils.deepClone(currentState.getStartingRoom());
         }
         
         // Registra l'inizio del livello
@@ -307,9 +322,12 @@ public class GameStateManager {
         }
     }
 
-    public void restoreFromSave(int savedLevelIndex, long savedLevelElapsedTime, GameDescription savedLevelSnapshot) {
+    public void restoreFromSave(int savedLevelIndex, long savedLevelElapsedTime, GameMap savedLevelMapSnapshot, List<AdvObject> savedLevelInventorySnapshot, Room savedLevelStartingRoomSnapshot) {
         this.currentLevelIndex = savedLevelIndex;
-        this.levelSnapshot = (GameDescription) savedLevelSnapshot.clone(); 
+        // CAMBIATO: Ripristina snapshot separati invece di GameDescription completo
+        this.levelMapSnapshot = (GameMap) Utils.deepClone(savedLevelMapSnapshot); 
+        this.levelInventorySnapshot = Utils.cloneList(savedLevelInventorySnapshot);
+        this.levelStartingRoomSnapshot = (Room) Utils.deepClone(savedLevelStartingRoomSnapshot);
         
         // Assicurati che l'indice sia valido
         if (currentLevelIndex >= 0 && currentLevelIndex < levels.length) {
@@ -385,7 +403,15 @@ public class GameStateManager {
         return gameDescription;
     }
 
-    public GameDescription getLevelSnapshot() {
-        return levelSnapshot;
+    public GameMap getLevelMapSnapshot() {
+        return levelMapSnapshot;
+    }
+
+    public List<AdvObject> getLevelInventorySnapshot() {
+        return levelInventorySnapshot;
+    }
+
+    public Room getLevelStartingRoomSnapshot() {
+        return levelStartingRoomSnapshot;
     }
 }

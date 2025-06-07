@@ -2,11 +2,14 @@ package com.mycompany.poggioadventure.persistence;
 
 // Import delle classi Core del gioco
 import com.mycompany.poggioadventure.core.Engine; // Motore principale del gioco
+import com.mycompany.poggioadventure.core.GameMap;
 import com.mycompany.poggioadventure.core.GameStateManager;
 import com.mycompany.poggioadventure.core.abstracts.GameDescription; // Descrizione astratta dello stato del gioco
 import com.mycompany.poggioadventure.core.utils.ApiClientResult;
 import com.mycompany.poggioadventure.core.utils.EngineFactory; // Factory per creare istanze di Engine
 import com.mycompany.poggioadventure.core.utils.PoggioClientJersey; // Client per API REST PoggioServer
+import com.mycompany.poggioadventure.model.AdvObject;
+import com.mycompany.poggioadventure.model.Room;
 import com.mycompany.poggioadventure.ui.InputHandler; // Gestore input utente
 import com.mycompany.poggioadventure.ui.OutputHandler; // Gestore output utente
 import com.mycompany.poggioadventure.ui.ColorText; // Utility per testo colorato
@@ -143,9 +146,13 @@ public class SaveGame {
      * <ul>
      * <li>{@code String playerName}</li>
      * <li>{@code GameDescription game}</li>
-     * <li>{@code TimeManager timeManager}</li>
      * <li>{@code long gameTime} (tempo di gioco trascorso)</li>
      * <li>{@code String logFileName} (percorso/nome del file di log associato)</li>
+     * <li>{@code int currentLevelIndex} (indice livello corrente)</li>
+     * <li>{@code long levelElapsedTime} (tempo trascorso nel livello)</li>
+     * <li>{@code GameMap levelMapSnapshot} (snapshot mappa per reset)</li>
+     * <li>{@code List<AdvObject> levelInventorySnapshot} (snapshot inventario per reset)</li>
+     * <li>{@code Room levelStartingRoom} (stanza iniziale del livello per reset)</li>
      * </ul>
      *
      * @param engine L'istanza del motore di gioco {@link Engine} il cui stato deve essere salvato.
@@ -210,11 +217,16 @@ public class SaveGame {
                 if (gsm != null) {
                     out.writeObject(gsm.getCurrentLevelIndex());    // 5. Indice livello corrente (int)
                     out.writeObject(gsm.getCurrentLevelElapsedTime()); // 6. Tempo trascorso nel livello (long)
-                    out.writeObject(gsm.getLevelSnapshot());   // 7. Snapshot GameDescription per reset (GameDescription)
+                    // CAMBIATO: Salva snapshot separati invece di GameDescription completo
+                    out.writeObject(gsm.getLevelMapSnapshot());   // 7. Snapshot GameMap per reset (GameMap)
+                    out.writeObject(gsm.getLevelInventorySnapshot()); // 8. Snapshot inventario per reset (List<AdvObject>)
+                    out.writeObject(gsm.getLevelStartingRoomSnapshot()); // 9. Snapshot stanza iniziale per reset (Room)
                 } else {
                     out.writeObject(0);    // 5. Livello 0 se GSM è null
                     out.writeObject(0L);   // 6. Tempo 0 se GSM è null
-                    out.writeObject(null); // 7. Nessun snapshot
+                    out.writeObject(null); // 7. Nessun snapshot mappa
+                    out.writeObject(null); // 8. Nessun snapshot inventario
+                    out.writeObject(null); // 9. Nessun snapshot stanza iniziale
                 }
             }
             output.writeln("\nGioco salvato con successo come: " + fileName, ColorText.GREEN);
@@ -298,7 +310,11 @@ public class SaveGame {
             // AGGIUNTO: Legge lo stato del livello
             int currentLevelIndex = (int) in.readObject();            // 5. Indice livello corrente
             long levelElapsedTime = (long) in.readObject();             // 6. Tempo trascorso nel livello corrente
-            GameDescription levelSnapshot = (GameDescription) in.readObject(); // 7. Snapshot per reset
+            // CAMBIATO: Legge snapshot separati invece di GameDescription completo
+            GameMap levelMapSnapshot = (GameMap) in.readObject(); // 7. Snapshot mappa per reset
+            @SuppressWarnings("unchecked")
+            List<AdvObject> levelInventorySnapshot = (List<AdvObject>) in.readObject(); // 8. Snapshot inventario per reset
+            Room levelStartingRoomSnapshot = (Room) in.readObject(); // 9. Snapshot stanza iniziale per reset
 
             // --- Verifica e Creazione Logger ---
             // Controlla l'integrità/esistenza del file di log associato PRIMA di creare l'engine
@@ -319,10 +335,10 @@ public class SaveGame {
                 gameTime
             );
 
-            // AGGIUNTO: Ripristina lo stato del GameStateManager con snapshot
+            // AGGIUNTO: Ripristina lo stato del GameStateManager con snapshot separati
             GameStateManager gsm = engine.getGameStateManager();
             if (gsm != null) {
-                gsm.restoreFromSave(currentLevelIndex, levelElapsedTime, levelSnapshot);
+                gsm.restoreFromSave(currentLevelIndex, levelElapsedTime, levelMapSnapshot, levelInventorySnapshot, levelStartingRoomSnapshot);
             }
 
             // --- Successo ---
@@ -448,14 +464,14 @@ public class SaveGame {
     /**
      * Estrae il nome/percorso del file di log associato da un file di salvataggio (.dat)
      * senza deserializzare l'intero contenuto del file.
-     * Legge gli oggetti serializzati in sequenza fino a raggiungere il quinto oggetto,
+     * Legge gli oggetti serializzati in sequenza fino a raggiungere il quarto oggetto,
      * che per convenzione (vedi {@code saveGame}) è il nome del file di log (String).
      *
      * <p>Tecnica utilizzata: Deserializzazione Parziale.
      * <ul>
      * <li>Apre un {@link ObjectInputStream} sul file .dat.</li>
-     * <li>Chiama {@code in.readObject()} per 4 volte per "saltare" i primi 4 oggetti (playerName, game, timeManager, gameTime).</li>
-     * <li>Legge il quinto oggetto e lo casta a {@code String} (il nome del log).</li>
+     * <li>Chiama {@code in.readObject()} per 3 volte per "saltare" i primi 3 oggetti (playerName, game, gameTime).</li>
+     * <li>Legge il quarto oggetto e lo casta a {@code String} (il nome del log).</li>
      * <li>Converte la stringa in un oggetto {@link Path}.</li>
      * </ul>
      * ATTENZIONE: Questo metodo è molto fragile. Se l'ordine o il tipo degli oggetti
@@ -474,7 +490,7 @@ public class SaveGame {
         }
         // Usa try-with-resources per chiudere automaticamente l'ObjectInputStream
         try (ObjectInputStream in = new ObjectInputStream(Files.newInputStream(savePath))) {
-            // Legge e scarta i primi 6 oggetti secondo l'ordine definito in saveGame
+            // Legge e scarta i primi 3 oggetti secondo l'ordine definito in saveGame
             in.readObject(); // 1. Salta playerName (String)
             in.readObject(); // 2. Salta game (GameDescription)
             in.readObject(); // 3. Salta gameTime (Long)

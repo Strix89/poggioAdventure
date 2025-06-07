@@ -140,6 +140,15 @@ public class Room implements Serializable {
     }
     
     /**
+     * Override toString per debugging del reset
+     */
+    @Override
+    public String toString() {
+        return String.format("Room[id=%d, name='%s', objects=%d]", 
+            id, name, objectsInRoom.size());
+    }
+
+    /**
      * Cerca un oggetto per nome o alias
      */
     public AdvObject getObjectByName(String name) {

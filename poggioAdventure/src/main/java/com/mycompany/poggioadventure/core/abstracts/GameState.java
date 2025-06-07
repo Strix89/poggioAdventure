@@ -53,7 +53,8 @@ public abstract class GameState implements Serializable {
     }
 
     /**
-     * imposta la stanza iniziale per questo livello.
+     * Imposta la stanza iniziale per questo livello.
+     * @param startingRoom La nuova stanza iniziale
      */
     public void setStartingRoom(Room startingRoom){
         this.startingRoom = startingRoom;
@@ -77,7 +78,6 @@ public abstract class GameState implements Serializable {
     /**
      * Verifica se si è verificata una condizione di fallimento.
      * @param game Stato corrente del gioco
-     * @param elapsedTime Tempo trascorso nel livello (in millisecondi)
      * @return true se il livello è fallito
      */
     public abstract boolean isFailureConditionMet(GameDescription game);

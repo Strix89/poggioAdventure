@@ -95,8 +95,18 @@ public abstract class GameDescription implements Serializable {
         // Non possiamo sostituire l'istanza final, ma possiamo copiare il contenuto
         if (gameMap != null) {
             this.gameMap.getAllFloors().clear();
+            // Copia correttamente ogni piano e le sue stanze
             for (int i = 0; i < gameMap.getAllFloors().size(); i++) {
-                this.gameMap.getAllFloors().add(new ArrayList<>(gameMap.getAllFloors().get(i)));
+                List<Room> originalFloor = gameMap.getAllFloors().get(i);
+                List<Room> clonedFloor = new ArrayList<>();
+                
+                // Clona ogni stanza del piano
+                for (Room room : originalFloor) {
+                    Room clonedRoom = (Room) Utils.deepClone(room);
+                    clonedFloor.add(clonedRoom);
+                }
+                
+                this.gameMap.getAllFloors().add(clonedFloor);
             }
         }
     }
