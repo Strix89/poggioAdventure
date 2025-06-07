@@ -362,58 +362,58 @@ public class Level1State extends GameState {
         flipper.setAlias(new String[] {"flipper", "tecnomagia"});
         flipper.setPickupable(true);
 
-        Room entry = new Room(0, "Ingresso", "Ti trovi nell'ingresso di Poggiolevante");
+        Room entry = new Room(Utils.ROOM_ENTRY_ID, "Ingresso", "Ti trovi nell'ingresso di Poggiolevante");
         entry.addObject(guido, null);
         entry.setImagePath(ResourceLoader.IMG_PATH.resolve("Ingresso.png").toString());
         entry.addObject(post_it, "C'è un post-it attaccato alla porta con delle istruzioni.");
 
-        Room hall = new Room(1, "Hall", "Ti trovi nella Hall di PoggioLevante.");
+        Room hall = new Room(Utils.ROOM_HALL_ID, "Hall", "Ti trovi nella Hall di PoggioLevante.");
         hall.setImagePath(ResourceLoader.IMG_PATH.resolve("Hall.png").toString());
         hall.addObject(armadioHall, "C'è un armadio di legno chiuso.");
 
-        Room reception = new Room(2, "Portineria", "Ti trovi nella portineria.");
+        Room reception = new Room(Utils.ROOM_RECEPTION_ID, "Portineria", "Ti trovi nella portineria.");
         reception.setImagePath(ResourceLoader.IMG_PATH.resolve("Portineria.png").toString());
         reception.addObject(forbici, null);
         reception.addObject(chiaveRack, null);
 
-        Room corridor = new Room(3, "Corridoio", "Ti trovi nel corridoio del primo piano.");
+        Room corridor = new Room(Utils.ROOM_CORRIDOR_ID, "Corridoio", "Ti trovi nel corridoio del primo piano.");
         corridor.setImagePath(ResourceLoader.IMG_PATH.resolve("Corridoio.png").toString());
         corridor.addObject(vetrina, "C'è una vetrina di legno chiusa.");
 
-        Room galileo = new Room(4, "Galileo", "Sei nella stanza Galileo");
+        Room galileo = new Room(Utils.ROOM_GALILEO_ID, "Galileo", "Sei nella stanza Galileo");
         galileo.setImagePath(ResourceLoader.IMG_PATH.resolve("Galileo.png").toString());        
         galileo.addObject(foto, "C'è una foto con una figura religiosa strana");
 
-        Room office = new Room(5, "Direzione", "Sei in direzione");
+        Room office = new Room(Utils.ROOM_OFFICE_ID, "Direzione", "Sei in direzione");
         office.setImagePath(ResourceLoader.IMG_PATH.resolve("Direzione.png").toString());
         office.addObject(microSD, null);
         office.addObject(chiaviAuto, null);
 
         // Secondo piano (indice 1)
-        Room hallway = new Room(6, "Disimpegno", "Ti trovi al 2° piano in un disimpegno.");
+        Room hallway = new Room(Utils.ROOM_HALLWAY_ID, "Disimpegno", "Ti trovi al 2° piano in un disimpegno.");
         hallway.setImagePath(ResourceLoader.IMG_PATH.resolve("Disimpegno.png").toString());
         
-        Room craftRoom = new Room(7, "Stanza di del Manutentore", "Sei nel laboratorio di Pino.");
+        Room craftRoom = new Room(Utils.ROOM_CRAFT_ROOM_ID, "Stanza di del Manutentore", "Sei nel laboratorio di Pino.");
         craftRoom.setImagePath(ResourceLoader.IMG_PATH.resolve("LabPino.png").toString());
         craftRoom.addObject(segaCircolare, null);
         craftRoom.addObject(martello, null);
         craftRoom.addObject(contenitore, null);
         
-        Room entryLab = new Room(8, "Ingresso Laboratorio", "Ti trovi nell'ingresso del laboratorio.");
+        Room entryLab = new Room(Utils.ROOM_ENTRY_LAB_ID, "Ingresso Laboratorio", "Ti trovi nell'ingresso del laboratorio.");
         entryLab.setImagePath(ResourceLoader.IMG_PATH.resolve("Lab.png").toString());
         entryLab.addObject(rack, "C'è un armadio rack chiuso.");
 
-        Room lab5 = new Room(9, "Laboratorio 5", "Sei nel laboratorio 5.");
+        Room lab5 = new Room(Utils.ROOM_LAB5_ID, "Laboratorio 5", "Sei nel laboratorio 5.");
         lab5.setImagePath(ResourceLoader.IMG_PATH.resolve("Lab5.png").toString());
         
-        Room corridorLab = new Room(10, "Corridoio Laboratorio", "Sei nel corridoio del laboratorio.");
+        Room corridorLab = new Room(Utils.ROOM_CORRIDOR_LAB_ID, "Corridoio Laboratorio", "Sei nel corridoio del laboratorio.");
         corridorLab.setImagePath(ResourceLoader.IMG_PATH.resolve("Lab2.png").toString());
         
-        Room lab3D = new Room(11, "Laboratorio 3D", "Sei nel laboratorio per stampe 3D.");
+        Room lab3D = new Room(Utils.ROOM_LAB3D_ID, "Laboratorio 3D", "Sei nel laboratorio per stampe 3D.");
         lab3D.setImagePath(ResourceLoader.IMG_PATH.resolve("Lab3D.png").toString());
         lab3D.addObject(bobbinaPLA, null);
         
-        Room electronicsLab = new Room(12, "Laboratorio Elettronica", "Sei nel laboratorio di elettronica.");
+        Room electronicsLab = new Room(Utils.ROOM_ELECTRONICS_LAB_ID, "Laboratorio Elettronica", "Sei nel laboratorio di elettronica.");
         electronicsLab.setImagePath(ResourceLoader.IMG_PATH.resolve("LabE.png").toString());
         electronicsLab.addObject(setCacciaviti, null);
         electronicsLab.addObject(saldatore, null);

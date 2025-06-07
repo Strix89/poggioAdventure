@@ -35,14 +35,13 @@ public class Utils {
     public static final int WIN_GAME_ID = 1001; // ID per l'oggetto di vittoria del gioco
 
     public static final int OBJ_LOSE_GAME_ID = 999;        // Perdita gioco
-    public static final int OBJ_WIN_GAME_ID = 1001;        // Vittoria gioco
 
     public static final long LEVEL_1_TIME_LIMIT = 1 * 60 * 1000; // Limite di tempo per il livello 1 (5 minuti in millisecondi)
     public static final int OBJ_LEVEL1_COMPLETE_ID = 100;  // Completamento livello 1
     public static final List<Integer> LEVEL_1_REQUIRED_OBJECTS = List.of(OBJ_LEVEL1_COMPLETE_ID); // ID oggetti richiesti per il livello 1
     public static final List<Integer> LEVEL_1_FORBIDDEN_OBJECTS = List.of(OBJ_LOSE_GAME_ID); // ID oggetti proibiti per il livello 2
 
-    public static final long LEVEL_2_TIME_LIMIT = 10 * 60 * 1000; // Limite di tempo per il livello 2 (10 minuti in millisecondi)
+    public static final long LEVEL_2_TIME_LIMIT = 1 * 60 * 1000; // Limite di tempo per il livello 2 (10 minuti in millisecondi)
     public static final int OBJ_LEVEL2_COMPLETE_ID = 200;  // Completamento livello 2
     public static final List<Integer> LEVEL_2_REQUIRED_OBJECTS = List.of(OBJ_LEVEL2_COMPLETE_ID); // ID oggetti richiesti per il livello 2
     public static final List<Integer> LEVEL_2_FORBIDDEN_OBJECTS = List.of(OBJ_LOSE_GAME_ID); // ID oggetti proibiti per il livello 2
@@ -92,6 +91,25 @@ public class Utils {
     
     // === OGGETTI SPECIALI ===
     public static final int OBJ_FLIPPER_ZERO_ID = 50;      // FlipperZero
+
+    // ==================== ID STANZE ====================
+    
+    // === PRIMO PIANO ===
+    public static final int ROOM_ENTRY_ID = 0;             // Ingresso
+    public static final int ROOM_HALL_ID = 1;              // Hall
+    public static final int ROOM_RECEPTION_ID = 2;         // Portineria
+    public static final int ROOM_CORRIDOR_ID = 3;          // Corridoio
+    public static final int ROOM_GALILEO_ID = 4;           // Galileo
+    public static final int ROOM_OFFICE_ID = 5;            // Direzione
+    
+    // === SECONDO PIANO ===
+    public static final int ROOM_HALLWAY_ID = 6;           // Disimpegno
+    public static final int ROOM_CRAFT_ROOM_ID = 7;        // Stanza del Manutentore
+    public static final int ROOM_ENTRY_LAB_ID = 8;         // Ingresso Laboratorio
+    public static final int ROOM_LAB5_ID = 9;              // Laboratorio 5
+    public static final int ROOM_CORRIDOR_LAB_ID = 10;     // Corridoio Laboratorio
+    public static final int ROOM_LAB3D_ID = 11;            // Laboratorio 3D
+    public static final int ROOM_ELECTRONICS_LAB_ID = 12;  // Laboratorio Elettronica
 
     /**
      * Parsa una stringa rimuovendo le stopwords.
@@ -143,18 +161,6 @@ public class Utils {
      */
     public static void exitApplication() {
         exitApplication(EXIT_CODE_SUCCESS);
-    }
-
-    /**
-     * Crea un oggetto AdvObject per la vittoria del gioco.
-     * Questo oggetto non è visibile e serve solo come segnaposto.
-     * 
-     * @return Un oggetto AdvObject per la vittoria del gioco
-     */
-    public static AdvObject buildWinGameObject() {
-        AdvObject winAdvObject = new AdvObject(OBJ_WIN_GAME_ID, "Vittoria di Gioco");
-        winAdvObject.setVisible(false);
-        return winAdvObject;
     }
 
     /**

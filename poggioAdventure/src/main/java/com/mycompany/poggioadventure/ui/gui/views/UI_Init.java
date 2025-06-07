@@ -296,7 +296,7 @@ public class UI_Init extends UI_Abstract implements MenuManager {
     
     @Override
     public void exit() {
-        dispose();
+        Utils.exitApplication(Utils.EXIT_CODE_SUCCESS);
     }
 
     // ============== UTILITY ==============

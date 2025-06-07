@@ -3,11 +3,13 @@ package com.mycompany.poggioadventure.core;
 import com.mycompany.poggioadventure.core.abstracts.GameDescription;
 import com.mycompany.poggioadventure.core.abstracts.GameState;
 import com.mycompany.poggioadventure.core.levels.Level1State;
+import com.mycompany.poggioadventure.core.levels.Level2State;
 import com.mycompany.poggioadventure.core.utils.TimeManager;
 import com.mycompany.poggioadventure.core.utils.Utils;
 import com.mycompany.poggioadventure.ui.ColorText;
 import com.mycompany.poggioadventure.ui.OutputHandler;
 import com.mycompany.poggioadventure.ui.gui.GUIOutputHandler;
+
 import com.mycompany.poggioadventure.model.AdvObject;
 import com.mycompany.poggioadventure.model.Room;
 
@@ -39,7 +41,7 @@ public class GameStateManager {
     // Sequenza predefinita dei livelli
     private final GameState[] levels = {
         new Level1State(Utils.LEVEL_1_TIME_LIMIT, Utils.LEVEL_1_REQUIRED_OBJECTS, Utils.LEVEL_1_FORBIDDEN_OBJECTS),
-        //new Level2State(), 
+        new Level2State(Utils.LEVEL_2_TIME_LIMIT, Utils.LEVEL_2_REQUIRED_OBJECTS, Utils.LEVEL_2_FORBIDDEN_OBJECTS) 
         //new Level3State()
     };
     
@@ -195,13 +197,10 @@ public class GameStateManager {
                 Room restoredRoom = gameDescription.getGameMap().findRoomById(levelStartingRoomSnapshot.getId());
                 if (restoredRoom != null) {
                     gameDescription.setCurrentRoom(restoredRoom);
-                    // Aggiorna anche il GameState con la stanza iniziale ripristinata
-                    currentState.setStartingRoom(restoredRoom);
                 } else {
                     // Fallback: clona la stanza iniziale snapshot se non trovata nella mappa
                     Room clonedStartingRoom = (Room) Utils.deepClone(levelStartingRoomSnapshot);
                     gameDescription.setCurrentRoom(clonedStartingRoom);
-                    currentState.setStartingRoom(clonedStartingRoom);
                 }
             } else {
                 // Fallback: usa la stanza corrente del GameState se non c'è snapshot
@@ -263,7 +262,6 @@ public class GameStateManager {
         if (createSnapshot) {
             levelMapSnapshot = (GameMap) Utils.deepClone(gameDescription.getGameMap());
             levelInventorySnapshot = Utils.cloneList(gameDescription.getInventory());
-            // AGGIUNTO: Crea snapshot della stanza iniziale del livello
             levelStartingRoomSnapshot = (Room) Utils.deepClone(currentState.getStartingRoom());
         }
         
@@ -272,15 +270,15 @@ public class GameStateManager {
 
         long levelTimeMillis = currentState.getTimeLimit();
 
-        if (timeManager == null) {
-            timeManager = new TimeManager(levelTimeMillis);
-        } else {
+       // Ferma il timer precedente se esiste
+        if (timeManager != null) {
             timeManager.stop();
-            timeManager.setTempoTotale((int) (levelTimeMillis / 1000));
         }
-        timeManager.start();
         
+        // Crea sempre un nuovo TimeManager per garantire reset completo
+        timeManager = new TimeManager(levelTimeMillis);
         currentState.getLevelDescription(output, playerName, String.valueOf(timeManager.getTempoRimanente() / 60));
+        timeManager.start();
     }
     
     /**
