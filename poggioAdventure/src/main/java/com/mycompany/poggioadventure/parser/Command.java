@@ -1,15 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.mycompany.poggioadventure.parser;
-
-/* Classe di tipo Entity che serve per definire per ogni tipo di comando (CommandType),
-    il nome e gli eventuali alias. Per "costruire" i comandi in un certo senso,
-    è possibile confrontare poi i comandi tramite il metodo "equals"
-    @TODO Modificare gli equals con le lambda espression?
-*/
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -18,21 +7,41 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- *
- * @author pierpaolo
+ * Entità comando con tipo, nome e sistema alias per riconoscimento input flessibile.
+ * 
+ * <p>Rappresenta comando di gioco identificato da tipo enum e nomi alternativi
+ * per supportare variazioni linguistiche nell'input utente. Implementa
+ * uguaglianza basata esclusivamente su tipo per matching efficiente.
+ * 
+ * <p><b>Caratteristiche:</b>
+ * <ul>
+ *   <li>Tipo comando immutabile per classificazione</li>
+ *   <li>Nome primario e set alias per riconoscimento</li>
+ *   <li>Auto-inclusione nome negli alias per coerenza</li>
+ *   <li>Equality basata su tipo per performance</li>
+ *   <li>Serializzazione per persistenza parsing</li>
+ * </ul>
+ * 
+ * <p><b>Pattern:</b> Value Object per identità comando, Entity per
+ * raggruppamento varianti linguistiche.
  */
 public class Command implements Serializable {
 
+    /** Tipo comando immutabile per classificazione */
     private final CommandType type;
 
+    /** Nome primario del comando */
     private final String name;
 
+    /** Set alias per riconoscimento varianti input */
     private Set<String> alias;
 
     /**
-     *
-     * @param type
-     * @param name
+     * Costruttore base con tipo e nome.
+     * Inizializza automaticamente alias contenente il nome.
+     * 
+     * @param type Tipo comando per classificazione
+     * @param name Nome primario comando
      */
     public Command(CommandType type, String name) {
         this.type = type;
@@ -42,10 +51,12 @@ public class Command implements Serializable {
     }
 
     /**
-     *
-     * @param type
-     * @param name
-     * @param alias
+     * Costruttore completo con alias predefiniti.
+     * Aggiunge automaticamente nome agli alias per coerenza.
+     * 
+     * @param type Tipo comando per classificazione
+     * @param name Nome primario comando
+     * @param alias Set alias iniziali
      */
     public Command(CommandType type, String name, Set<String> alias) {
         this.type = type;
@@ -54,25 +65,20 @@ public class Command implements Serializable {
         this.alias.add(name);
     }
 
-    /**
-     *
-     * @return
-     */
+    /** Restituisce nome primario comando */
     public String getName() {
         return name;
     }
 
-    /**
-     *
-     * @return
-     */
+    /** Restituisce set completo alias per matching */
     public Set<String> getAlias() {
         return alias;
     }
 
     /**
-     *
-     * @param alias
+     * Aggiorna alias da set preservando nome primario.
+     * 
+     * @param alias Nuovi alias da impostare
      */
     public void setAlias(Set<String> alias) {
         this.alias = new HashSet<>(alias);
@@ -80,26 +86,21 @@ public class Command implements Serializable {
     }
 
     /**
-     *
-     * @param alias
+     * Aggiorna alias da array preservando nome primario.
+     * 
+     * @param alias Array nuovi alias
      */
     public void setAlias(String[] alias) {
         this.alias = new HashSet<>(Arrays.asList(alias));
         this.alias.add(name);
     }
 
-    /**
-     *
-     * @return
-     */
+    /** Restituisce tipo comando immutabile */
     public CommandType getType() {
         return type;
     }
 
-    /**
-     *
-     * @return
-     */
+    /** Hash code basato su tipo per collezioni efficienti */
     @Override
     public int hashCode() {
         int hash = 3;
@@ -108,9 +109,8 @@ public class Command implements Serializable {
     }
 
     /**
-     *
-     * @param obj
-     * @return
+     * Uguaglianza basata esclusivamente su tipo comando.
+     * Permette matching indipendente da nome/alias specifici.
      */
     @Override
     public boolean equals(Object obj) {
@@ -129,5 +129,4 @@ public class Command implements Serializable {
         }
         return true;
     }
-
 }

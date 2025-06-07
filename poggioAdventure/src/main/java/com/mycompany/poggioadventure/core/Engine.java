@@ -33,97 +33,56 @@ import java.util.Set;
 import java.util.stream.IntStream;
 
 /**
- * Classe core dell'applicazione che gestisce il ciclo di vita del gioco.
+ * Core engine dell'adventure game che implementa il pattern MVC e gestisce il ciclo di vita completo.
+ *
+ * <p><b>Architettura:</b>
+ * <ul>
+ *   <li>Facade Pattern: interfaccia unificata per tutti i sottosistemi</li>
+ *   <li>Command Pattern: elaborazione comandi attraverso parser dedicato</li>
+ *   <li>Observer Pattern: notifiche di stato tra componenti</li>
+ *   <li>Strategy Pattern: gestori I/O intercambiabili (CLI/GUI)</li>
+ * </ul>
  *
  * <p><b>Responsabilità principali:</b>
  * <ul>
- *   <li>Gestione del ciclo principale di gioco</li>
- *   <li>Elaborazione dei comandi giocatore</li>
- *   <li>Coordinamento tra modello, view e controller</li>
- *   <li>Gestione del tempo di gioco</li>
- *   <li>Salvataggio e caricamento stato gioco</li>
- * </ul>
- *
- * <p><b>Design Pattern utilizzati:</b>
- * <ul>
- *   <li>Facade Pattern: fornisce un'interfaccia semplificata ai sottosistemi</li>
- *   <li>Observer Pattern: notifica cambiamenti di stato alla view</li>
- *   <li>Singleton Pattern: gestione del cronometro di gioco</li>
+ *   <li>Coordinamento tra parser, modello e view</li>
+ *   <li>Gestione stato di sessione e persistenza</li>
+ *   <li>Monitoraggio tempo di gioco e metriche</li>
+ *   <li>Integrazione con servizi esterni (API, database)</li>
  * </ul>
  *
  * @version 1.3
- * @author [Autore originale non specificato]
  */
 public class Engine {
-    /**
-     * Istanza del modello di gioco contenente lo stato attuale
-     */
     private final GameDescription game;
-    
-    /**
-     * Parser per interpretare i comandi testuali
-     */
     private Parser parser;
-    
-    /**
-     * Nome del giocatore corrente
-     */
     private String playerName;
-    
-    /**
-     * Gestore dell'output grafico/testuale
-     */
     private OutputHandler output;
-    
-    /**
-     * Gestore dell'input da utente
-     */
     private InputHandler inputHandler;
-    
-    /**
-     * Gestore centralizzato degli errori
-     */
     private ErrorHandler errorHandler;
-    
-    /**
-     * Logger per registrare l'attività di gioco
-     */
     private LoggerInput logger;
-    
-    /**
-     * Cronometro per il tempo di sessione
-     */
     private final StopWatch gameTime;
     
-    /**
-     * Buffer temporaneo per i comandi da loggare
-     */
+    /** Buffer thread-safe per comandi pendenti da loggare */
     private List<String> logTemp;
 
-    /**
-     * GameStateManager per gestione livelli senza dipendenze circolari
-     */
+    /** Delegato per gestione stati di gioco senza dipendenze circolari */
     private GameStateManager gameStateManager;
 
+    /** Contesto condiviso tra componenti per dependency injection */
     private GameContext gameContext;
     
     /**
-     * Costruttore principale dell'Engine.
+     * Inizializza l'engine con tutti i componenti necessari.
+     * Carica risorse critiche e prepara l'ambiente di gioco.
      *
-     * <p><b>Operazioni eseguite:</b>
-     * <ol>
-     *   <li>Inizializza i componenti fondamentali</li>
-     *   <li>Carica le stopwords per il parser</li>
-     *   <li>Visualizza il messaggio di benvenuto</li>
-     *   <li>Avvia il cronometro di gioco</li>
-     * </ol>
-     *
-     * @param game Il modello di gioco da gestire
-     * @param playerName Nome del giocatore
-     * @param output Gestore dell'output
-     * @param input Gestore dell'input
-     * @param errorHandler Gestore degli errori
-     * @param logger Logger per l'attività di gioco
+     * @param game Modello del mondo di gioco
+     * @param playerName Identificativo univoco del giocatore
+     * @param output Strategia di output (CLI/GUI)
+     * @param input Strategia di input (CLI/GUI)
+     * @param errorHandler Gestore centralizzato degli errori
+     * @param logger Sistema di logging delle azioni
+     * @param fromSave Flag che indica se è un caricamento da salvataggio
      */
     public Engine(GameDescription game, String playerName, OutputHandler output, InputHandler input, ErrorHandler errorHandler, LoggerInput logger, boolean fromSave) {
         this.game = game;
@@ -133,6 +92,8 @@ public class Engine {
         this.inputHandler = input;
         this.logger = logger; 
         this.logTemp = Collections.synchronizedList(new ArrayList<>());
+        
+        // Inizializzazione parser con stopwords per migliorare parsing NLP
         try {
             Set<String> stopWords = ResourceLoader.loadFileListInSet(new File(ResourceLoader.STOPWORDS_PATH.toString()));
             parser = new Parser(stopWords);
@@ -140,11 +101,13 @@ public class Engine {
             this.errorHandler.handleFatalError("Caricamento risorse fallito", ex);
             Utils.exitApplication(Utils.EXIT_CODE_RESOURCE_ERROR);
         }
+        
         getGameColoredVersion();
         gameTime = StopWatch.getInstance();
         gameTime.start();
         gameContext = new GameContext(input, output, errorHandler, logTemp, gameTime);
         
+        // Inizializzazione GameStateManager con callback pattern per eventi di gioco
         try {
             gameStateManager = new GameStateManager(
                 game,
@@ -154,6 +117,8 @@ public class Engine {
                 this::handleGameLoss,
                 this::saveGame
             );
+            
+            // Solo per nuove partite, non per caricamenti
             if (!fromSave){
                 output.writeln(this.output instanceof GUIOutputHandler ? game.getGUIWelcomeMsg() : game.getCLIWelcomeMsg(), ColorText.WHITE);
                 gameStateManager.startGame();
@@ -173,18 +138,10 @@ public class Engine {
     }
 
     /**
-     * Elabora un comando ricevuto dal giocatore.
+     * Elabora comando del giocatore con supporto per comandi multipli e rollback.
+     * Implementa il pattern Command con validazione e logging automatico.
      *
-     * <p><b>Flusso operativo:</b>
-     * <ol>
-     *   <li>Registra il comando nel buffer dei log</li>
-     *   <li>Analizza il comando con il parser</li>
-     *   <li>Esegue l'azione corrispondente</li>
-     *   <li>Gestisce condizioni di vittoria/fine gioco</li>
-     *   <li>Aggiorna l'interfaccia utente</li>
-     * </ol>
-     *
-     * @param command Stringa contenente il comando da elaborare
+     * @param command Stringa contenente uno o più comandi separati da ';'
      */
     public void processCommand(String command) {
         logTemp.add(command);
@@ -233,14 +190,8 @@ public class Engine {
     }
 
     /**
-     * Avvia il ciclo principale di gioco.
-     *
-     * <p>Continua a elaborare comandi finché:
-     * <ul>
-     *   <li>Il giocatore non esce volontariamente</li>
-     *   <li>Non viene raggiunta una condizione di vittoria</li>
-     *   <li>Non si verifica un errore irreversibile</li>
-     * </ul>
+     * Main game loop con gestione robusta delle interruzioni.
+     * Continua fino a terminazione volontaria o condizioni di fine gioco.
      */
     public void startGameLoop() {
         try {
@@ -264,35 +215,18 @@ public class Engine {
         }
     }
 
-    /**
-     * Restituisce il gestore dell'output corrente.
-     * @return Istanza di OutputHandler
-     */
     public OutputHandler getOutput() {
         return output;
     }
 
-    /**
-     * Stampa il prompt dei comandi nell'interfaccia CLI.
-     *
-     * <p>Viene visualizzato solo quando l'input handler è di tipo CLI.
-     */
+    /** Visualizza prompt comandi solo per interfaccia CLI */
     private void printCursor(){
         if (inputHandler instanceof CLIInputHandler) {
             output.write("\n[NEON_ORANGE]?>[/] ", ColorText.WHITE);
         }
     }
 
-    /**
-     * Visualizza la versione colorata del titolo del gioco.
-     *
-     * <p>Applica uno schema di colori predefinito:
-     * <ul>
-     *   <li>Prima e ultima riga: blu navy</li>
-     *   <li>Seconda riga: rosso</li>
-     *   <li>Altre righe: giallo</li>
-     * </ul>
-     */
+    /** Applica schema colori predefinito al titolo del gioco */
     private void getGameColoredVersion() {
         String version = this.output instanceof GUIOutputHandler ? game.getGUIGameVersion() : game.getCLIGameVersion();
 
@@ -318,16 +252,8 @@ public class Engine {
     }
 
     /**
-     * Salva lo stato corrente del gioco.
-     *
-     * <p><b>Operazioni eseguite:</b>
-     * <ol>
-     *   <li>Ferma temporaneamente il cronometro</li>
-     *   <li>Scrive i log pendenti</li>
-     *   <li>Serializza lo stato di gioco</li>
-     *   <li>Pulisce il buffer dei log</li>
-     *   <li>Riavvia il cronometro</li>
-     * </ol>
+     * Persiste stato completo di gioco con gestione transazionale.
+     * Sincronizza timer, log e stato del mondo di gioco.
      */
     public void saveGame() {
         gameTime.stop();
@@ -427,7 +353,7 @@ public class Engine {
     }
 
     /**
-     * Callback per gestire il completamento del gioco.
+     * Callback per vittoria: persiste dati, comunica con server, cleanup risorse.
      */
     private void handleGameCompleted() {
         // Ferma il cronometro di gioco
@@ -478,9 +404,7 @@ public class Engine {
         returnToAppropriateMenu();
     }
 
-    /**
-     * Metodo che determina automaticamente a quale menu tornare in base al tipo di OutputHandler.
-     */
+    /** Strategy pattern per determinare il tipo di menu di ritorno */
     private void returnToAppropriateMenu() {
         if (output instanceof GUIOutputHandler) {
             returnToGUIMenu();
@@ -489,9 +413,7 @@ public class Engine {
         }
     }
 
-    /**
-     * Gestisce il ritorno al menu GUI.
-     */
+    /** Gestione thread-safe del ritorno al menu GUI */
     private void returnToGUIMenu() {
         javax.swing.SwingUtilities.invokeLater(() -> {
             try {
@@ -514,9 +436,7 @@ public class Engine {
         });
     }
 
-    /**
-     * Gestisce il ritorno al menu CLI.
-     */
+    /** Ritorno al menu CLI tramite interruzione thread */
     private void returnToCLIMenu() {
         output.writeln("\nTornando al menu principale...", ColorText.CYAN);
         
@@ -525,14 +445,10 @@ public class Engine {
         Thread.currentThread().interrupt();
     }
 
-
     /**
-     * Elimina il salvataggio corrente associato a questo Engine.
+     * Elimina salvataggio associato al giocatore corrente con gestione errori robusta.
      * 
-     * <p>Il salvataggio viene identificato tramite il nome del giocatore.
-     * Gestisce tutti i possibili scenari di errore durante l'eliminazione.
-     * 
-     * @return true se l'eliminazione ha avuto successo completo, false altrimenti
+     * @return true se eliminazione completata con successo
      */
     public boolean deleteCurrentSaveEndGame() {
         if (playerName == null || playerName.trim().isEmpty()) {
@@ -603,10 +519,8 @@ public class Engine {
     }
 
     /**
-     * Invia i dati della vittoria al server tramite PoggioClientJersey.
-     * 
-     * <p>Gestisce l'invio del punteggio e del file di log associato alla partita vincente.
-     * In caso di errore, mostra un messaggio all'utente ma non interrompe il flusso.
+     * Invia metriche di vittoria al server con gestione robusta delle risorse.
+     * Crea file log temporaneo decrittato per trasmissione sicura.
      */
     private void sendVictoryDataToServer() {
         PoggioClientJersey gameClient = null;
@@ -686,8 +600,7 @@ public class Engine {
     }
 
     /**
-     * Gestisce la perdita totale del gioco.
-     * Salva il gioco, elimina i salvataggi e torna al menu principale.
+     * Callback per sconfitta: cleanup completo e rimozione dal database.
      */
     private void handleGameLoss() {
         // Ferma il cronometro di gioco
@@ -721,10 +634,7 @@ public class Engine {
         returnToAppropriateMenu();
     }
 
-    /**
-     * Elimina il giocatore dal database del server.
-     * Questo metodo viene chiamato quando il giocatore perde definitivamente.
-     */
+    /** Rimuove giocatore dal database server in caso di sconfitta definitiva */
     private void deletePlayerFromServer() {
         PoggioClientJersey gameClient = null;
         
@@ -765,10 +675,6 @@ public class Engine {
         }
     }
 
-    /**
-     * Restituisce il GameStateManager.
-     * @return Istanza del GameStateManager
-     */
     public GameStateManager getGameStateManager() {
         return gameStateManager;
     }

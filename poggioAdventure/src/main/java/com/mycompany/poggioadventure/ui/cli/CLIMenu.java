@@ -1,70 +1,67 @@
 package com.mycompany.poggioadventure.ui.cli;
 
-// Import utility e classi di base
-import com.mycompany.poggioadventure.core.utils.Utils; // Utility generiche (es. per uscire)
-import com.mycompany.poggioadventure.ui.ColorText; // Utility per output colorato su console
+import com.mycompany.poggioadventure.core.utils.Utils;
+import com.mycompany.poggioadventure.ui.ColorText;
 
-// Import classi di persistenza e stato gioco
-import com.mycompany.poggioadventure.persistence.SaveGame; // Gestore salvataggi (statico)
-import com.mycompany.poggioadventure.core.Engine; // Motore principale del gioco
+import com.mycompany.poggioadventure.persistence.SaveGame;
+import com.mycompany.poggioadventure.core.Engine;
 import com.mycompany.poggioadventure.core.utils.ApiClientResult;
-import com.mycompany.poggioadventure.core.utils.EngineFactory; // Factory per creare istanze di Engine
-import com.mycompany.poggioadventure.core.abstracts.MenuManager; // Interfaccia che questa classe implementa
+import com.mycompany.poggioadventure.core.utils.EngineFactory;
+import com.mycompany.poggioadventure.core.abstracts.MenuManager;
 import com.mycompany.poggioadventure.core.utils.PoggioClientJersey;
-import com.mycompany.poggioadventure.persistence.LoggerInput; // Gestore/Logger per input/eventi
-import com.mycompany.poggioadventure.persistence.RankingEntryDTO; // DTO per i dati della classifica
+import com.mycompany.poggioadventure.persistence.LoggerInput;
+import com.mycompany.poggioadventure.persistence.RankingEntryDTO;
 import com.mycompany.poggioadventure.persistence.ResourceLoader;
-// Import interfacce/classi UI e gestione errori
-import com.mycompany.poggioadventure.ui.InputHandler; // Interfaccia per gestione input
-import com.mycompany.poggioadventure.ui.OutputHandler; // Interfaccia per gestione output
-import com.mycompany.poggioadventure.ui.ErrorHandler; // Interfaccia per gestione errori
+import com.mycompany.poggioadventure.ui.InputHandler;
+import com.mycompany.poggioadventure.ui.OutputHandler;
+import com.mycompany.poggioadventure.ui.ErrorHandler;
 
 import java.io.IOException;
-// Import standard Java
-import java.util.List; // Per gestire liste (es. lista salvataggi, classifica)
+import java.util.List;
 
 /**
- * Implementazione per interfaccia a riga di comando (Command Line Interface - CLI)
- * del gestore dei menu del gioco ({@link MenuManager}).
- * Gestisce tutte le interazioni utente relative ai menu tramite la console,
- * presentando opzioni testuali e leggendo input da tastiera.
- * Include la gestione del menu principale, la creazione di una nuova partita,
- * il caricamento/eliminazione di partite salvate e la visualizzazione della classifica.
- *
- * @author Strix89
+ * Implementazione CLI del sistema menu con gestione completa UI console.
+ * 
+ * <p>Gestisce navigazione menu principale, creazione/caricamento partite,
+ * visualizzazione classifica e download log con interfaccia testuale colorata.
+ * Integra validazioni server per user management e gestione graceful errori.
+ * 
+ * <p><b>Funzionalità principali:</b>
+ * <ul>
+ *   <li>Menu principale con ASCII art e navigazione interattiva</li>
+ *   <li>Creazione nuove partite con validazione user esistenza</li>
+ *   <li>Sistema caricamento/eliminazione salvataggi con conferme</li>
+ *   <li>Classifica online con download log giocatori</li>
+ *   <li>Gestione shutdown hook per cleanup risorse</li>
+ * </ul>
+ * 
+ * <p><b>Pattern implementati:</b>
+ * <ul>
+ *   <li>Strategy: implementazione CLI di MenuManager</li>
+ *   <li>Facade: semplificazione accesso a Engine/SaveGame/API</li>
+ *   <li>Observer: gestione eventi shutdown per cleanup</li>
+ * </ul>
  */
 public class CLIMenu implements MenuManager {
 
-    /**
-     * Handler responsabile della scrittura dell'output sulla console.
-     * Utilizza l'implementazione specifica {@link CLIOutputHandler}. Final perché inizializzato nel costruttore.
-     */
+    /** Handler output console con supporto colori */
     private final OutputHandler output;
 
-    /**
-     * Handler responsabile della lettura dell'input utente dalla console.
-     * Utilizza l'implementazione specifica {@link CLIInputHandler}. Final perché inizializzato nel costruttore.
-     */
+    /** Handler input console per acquisizione comandi */
     private final InputHandler scanner;
 
-    /**
-     * Handler responsabile della gestione e visualizzazione degli errori nella console.
-     * Utilizza l'implementazione specifica {@link CLIErrorHandler}. Final perché inizializzato nel costruttore.
-     */
+    /** Handler errori centralizzato per logging e recovery */
     private final ErrorHandler errorHan;
 
     /**
-     * Costruttore di CLIMenu.
-     * Inizializza gli handler finali per l'input, l'output e la gestione degli errori
-     * con le implementazioni concrete specifiche per l'ambiente a riga di comando.
+     * Inizializza handlers CLI e carica risorse necessarie.
+     * Configura ambiente console con gestione errori fatali.
      */
     public CLIMenu() {
-        // Istanzia gli handler specifici per la CLI
         this.output = new CLIOutputHandler();
         this.scanner = new CLIInputHandler();
         this.errorHan = new CLIErrorHandler();
 
-        // Carica le risorse necessarie per l'interfaccia CLI
         try {
             ResourceLoader.loadResourcesForCLI();
         } catch (IOException ex) {
@@ -73,15 +70,19 @@ public class CLIMenu implements MenuManager {
         }
     }
 
+    /**
+     * Mostra menu principale con loop interattivo e ASCII art.
+     * Configura shutdown hook per cleanup automatico risorse e gestisce
+     * navigazione tra opzioni con error recovery.
+     */
     @Override
     public void showMainMenu() {
         Thread mainThread = Thread.currentThread();
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             output.writeln("\n\nUscita dal gioco...\n", ColorText.CRIMSON);
             ResourceLoader.cleanOrphanedLogs();
-            mainThread.interrupt(); // Interrompe il thread principale
+            mainThread.interrupt();
             
-            // Piccola pausa per permettere al thread principale di gestire l'interruzione
             try {
                 Thread.sleep(100);
             } catch (InterruptedException ie) {
@@ -89,7 +90,7 @@ public class CLIMenu implements MenuManager {
             }
         }));
         
-        // ASCII Art colorata
+        // ASCII Art rendering
         output.writeln("", ColorText.WHITE);
         output.writeln("                ██████╗  ██████╗  ██████╗  ██████╗ ██╗ ██████╗               ", ColorText.BRIGHT_RED);
         output.writeln("                ██╔══██╗██╔═══██╗██╔════╝ ██╔════╝ ██║██╔═══██╗              ", ColorText.BRIGHT_RED);
@@ -106,124 +107,100 @@ public class CLIMenu implements MenuManager {
         output.writeln("╚═╝  ╚═╝╚═════╝   ╚═══╝  ╚══════╝╚═╝  ╚═══╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝╚══════╝", ColorText.BRIGHT_BLUE);
         output.writeln("                                                                             ", ColorText.WHITE);
         
-        // Titolo colorato: POGGIO in blu, ADVENTURE in rosso
         output.write("\n[BRIGHT_RED]=================================[/] [BRIGHT_BLUE]TEXT[/][WHITE] -[/]", ColorText.NAVY);
         output.write(" [BRIGHT_RED]GAME[/]", ColorText.NAVY);
         output.writeln(" [BRIGHT_RED]================================[/]", ColorText.NAVY);
 
-        // Loop infinito per mostrare ripetutamente il menu principale
+        // Loop navigazione menu principale
         try{
             while(true) {
-                // Stampa le opzioni del menu
                 output.writeln("\nMenu Principale:", ColorText.WHITE);
                 output.writeln("[YELLOW]1)[/] Nuova Partita", ColorText.WHITE);
                 output.writeln("[YELLOW]2)[/] Carica Partita", ColorText.WHITE);
                 output.writeln("[YELLOW]3)[/] Classifica", ColorText.WHITE);
                 output.writeln("[BRIGHT_YELLOW]4)[/] Esci", ColorText.WHITE);
-                output.write(" \nSeleziona un'opzione: ", ColorText.WHITE); // Prompt per l'utente
+                output.write(" \nSeleziona un'opzione: ", ColorText.WHITE);
 
                 String choice = scanner.getInput();
-                // Esegue l'azione corrispondente alla scelta
                 switch(choice) {
-                case "1": // Nuova Partita
+                case "1":
                     showNewGame();
-                    break; // Torna al loop del menu dopo che showNewGame termina
-                case "2": // Carica Partita
-                    showLoadGame();
-                    break; // Torna al loop del menu dopo che showLoadGame termina
-                case "3": // Classifica
-                    showRanking();
-                    break; // Torna al loop del menu dopo che showRanking termina
-                case "4": // Esci
-                    exit(); // Chiama il metodo per terminare l'applicazione
-                    // Nota: exit() probabilmente non ritorna, quindi il loop termina de facto.
                     break;
-                default: // Scelta non valida
+                case "2":
+                    showLoadGame();
+                    break;
+                case "3":
+                    showRanking();
+                    break;
+                case "4":
+                    exit();
+                    break;
+                default:
                     output.writeln("Opzione non valida. Riprova.", ColorText.ERROR);
-                    // Il loop continua, mostrando di nuovo il menu
                     break;
                 }
             }
         } catch (Exception e) {
-            return; // In caso di eccezione, esce dal loop del menu principale
+            return;
         }
     }
 
     /**
-     * Gestisce il flusso per iniziare una nuova partita.
-     * Chiede all'utente di inserire un nome giocatore, verifica tramite API
-     * che l'utente non esista già sul server, e se non esiste, crea una nuova
-     * istanza del gioco tramite {@link EngineFactory} e avvia il loop principale del gioco.
-     * Gestisce gli errori di comunicazione con il server o il caso in cui l'utente esista già.
+     * Gestisce creazione nuova partita con validazione server user esistenza.
+     * Verifica tramite API che username non esista, crea Engine via Factory
+     * e avvia game loop con gestione interruzioni thread.
      */
     @Override
     public void showNewGame() {
-        output.write("\nInserisci nome giocatore: ", ColorText.WHITE); // Prompt per il nome
-        String name = scanner.getInput(); // Legge il nome inserito
+        output.write("\nInserisci nome giocatore: ", ColorText.WHITE);
+        String name = scanner.getInput();
 
-        // Validazione base: il nome non dovrebbe essere vuoto
         if (name == null || name.trim().isEmpty()) {
             errorHan.handleRecoverableError("Errore: Il nome giocatore non può essere vuoto.");
-            return; // Torna al menu precedente (main menu)
+            return;
         }
 
-        PoggioClientJersey gameClient = null; // Dichiarato qui per poterlo chiudere nel blocco switch/finally implicito
+        PoggioClientJersey gameClient = null;
         try {
-            // Verifica se l'utente esiste già sul server
+            // Validazione esistenza user via API
             gameClient = new PoggioClientJersey();
             ApiClientResult result = gameClient.checkUserExists(name);
-            gameClient.close(); // Chiude il client subito dopo la chiamata
+            gameClient.close();
 
-            // Gestisce l'esito della verifica
             switch(result){
                 case USER_NOT_FOUND:
-                    // L'utente NON esiste sul server: OK per creare nuova partita
                     output.writeln("Creazione nuova partita per " + name + "...", ColorText.GREEN);
                     try {
-                        // Crea una nuova istanza dell'Engine tramite la factory
                         Engine engine = EngineFactory.createNewGame(
-                            name,           // Nome giocatore
-                            output,         // Handler output
-                            scanner,        // Handler input
-                            errorHan,       // Handler errori
-                            new LoggerInput(errorHan) // Nuovo logger per la partita
+                            name, output, scanner, errorHan, new LoggerInput(errorHan)
                         );
-                        // Avvia il loop principale del gioco (questa chiamata bloccherà finché la partita non finisce)
                         engine.startGameLoop();
-                        // Quando il controllo torna qui, gestisci l'interruzione se presente
+                        
                         if (Thread.currentThread().isInterrupted()) {
-                            // Il thread è stato interrotto dal completamento del gioco
-                            // Non propagare l'interruzione, lascia che il menu continui
-                            Thread.interrupted(); // Pulisce il flag di interruzione
+                            Thread.interrupted();
                         }
                     } catch (Exception ex) {
-                        // Gestisce errori critici durante la creazione dell'engine o l'avvio del gioco
                         errorHan.handleFatalError("Errore o uscita: ", ex);
                     }
-                    break; // Fine caso USER_NOT_FOUND
+                    break;
 
                 case SUCCESS_OK:
-                    // L'utente esiste GIA' sul server: non si può creare una nuova partita con questo nome
                     errorHan.handleRecoverableError("Errore: L'utente '" + name + "' esiste già. Prova a caricare una partita o scegli un nome diverso.");
-                    break; // Torna al menu principale
+                    break;
 
                 case CONNECTION_ERROR:
-                    // Errore di connessione durante la verifica
                     errorHan.handleRecoverableError("Errore: Impossibile comunicare con il server per verificare l'utente.");
-                    break; // Torna al menu principale
+                    break;
 
                 default:
-                    // Altro errore (es. UNKNOWN_ERROR, UNAUTHORIZED) restituito dal client
                     errorHan.handleRecoverableError("Errore sconosciuto durante la comunicazione con il server (" + result + ").");
-                    break; // Torna al menu principale
+                    break;
             }
         } catch (Exception e) {
             if (e.getCause() instanceof InterruptedException || 
                 Thread.currentThread().isInterrupted()) {
-                // Interruzione normale dal completamento del gioco
-                Thread.interrupted(); // Pulisce il flag
+                Thread.interrupted();
             }
-            // Cattura eccezioni impreviste durante l'interazione con il client API
             errorHan.handleRecoverableError("Errore imprevisto durante la verifica utente: " + e.getMessage());
             if (gameClient != null) {
                 try { gameClient.close(); } catch (Exception ce) { /* ignora errore chiusura */ }
@@ -232,132 +209,100 @@ public class CLIMenu implements MenuManager {
     }
 
     /**
-     * Mostra la lista dei salvataggi disponibili e permette all'utente di
-     * selezionarne uno da caricare o da eliminare.
-     * Utilizza {@link SaveGame} per ottenere la lista e per eseguire le operazioni
-     * di caricamento o eliminazione.
+     * Gestisce caricamento/eliminazione salvataggi con interfaccia numerata.
+     * Supporta syntax '!numero' per eliminazione con conferma utente.
+     * Utilizza callback pattern per gestione successo/errore loading.
      */
     @Override
     public void showLoadGame() {
-        // Ottiene la lista dei nomi dei salvataggi (già ordinati dal più recente)
         List<String> saves = SaveGame.getSaveList();
 
-        // Controlla se ci sono salvataggi
         if (saves.isEmpty()) {
             output.writeln("\nNessun salvataggio disponibile.", ColorText.ORANGE);
-            // Breve pausa prima di tornare al menu principale
              output.write("\nPremi Invio per continuare...", ColorText.WHITE);
              scanner.getInput();
-            return; // Torna al menu principale
+            return;
         }
 
-        // Mostra l'elenco numerato dei salvataggi
+        // Rendering lista salvataggi numerata
         output.writeln(" \n=== SALVATAGGI DISPONIBILI ===", ColorText.YELLOW);
         for (int i = 0; i < saves.size(); i++) {
-            // Mostra numero indice (partendo da 1) e nome del salvataggio
             output.writeln((i + 1) + ") " + saves.get(i), ColorText.WHITE);
         }
 
-        // Chiede all'utente di scegliere un'azione (caricare o eliminare)
         output.write(" \nSeleziona il numero del salvataggio da caricare (es: 2)\n" +
                      "oppure inserisci '!' seguito dal numero per ELIMINARE (es: !2): ", ColorText.WHITE);
-        String input = scanner.getInput().trim(); // Legge l'input e rimuove spazi extra
+        String input = scanner.getInput().trim();
 
         try {
             if (input.startsWith("!")) {
-                // --- Modalità Eliminazione ---
-                // Estrae il numero dopo il '!'
-                int selectedIndex = Integer.parseInt(input.substring(1)) - 1; // Converte in indice base 0
+                // Modalità eliminazione con conferma
+                int selectedIndex = Integer.parseInt(input.substring(1)) - 1;
 
-                // Verifica che l'indice sia valido
                 if (selectedIndex >= 0 && selectedIndex < saves.size()) {
-                    String saveName = saves.get(selectedIndex); // Ottiene il nome del salvataggio selezionato
+                    String saveName = saves.get(selectedIndex);
                     output.write("Sei sicuro di voler eliminare '" + saveName + "'? (s/N): ", ColorText.RED);
                     String confirm = scanner.getInput().trim().toLowerCase();
 
                     if (confirm.equals("s")) {
-                        // Chiama il metodo di eliminazione in SaveGame
                         if (SaveGame.deleteSave(saveName, errorHan, true)) {
                             output.writeln("Salvataggio '" + saveName + "' eliminato con successo.", ColorText.GREEN);
-                            // Ricarica e mostra di nuovo la lista aggiornata dei salvataggi (ricorsione)
                             return;
                         } else {
-                            // deleteSave ha restituito false (errore durante eliminazione)
-                            // l'errore specifico dovrebbe essere stato già loggato da deleteSave tramite errorHan
                             output.writeln("Eliminazione fallita per '" + saveName + "'. Controlla i log per dettagli.", ColorText.ERROR);
                         }
                     } else {
                         output.writeln("Eliminazione annullata.", ColorText.YELLOW);
                     }
                 } else {
-                    // L'indice inserito non è valido
                     output.writeln("Numero di salvataggio non valido.", ColorText.ERROR);
                 }
             } else {
-                // --- Modalità Caricamento ---
-                // Converte l'input numerico in indice base 0
+                // Modalità caricamento con callback success/error
                 int selectedIndex = Integer.parseInt(input) - 1;
 
-                // Verifica che l'indice sia valido
                 if (selectedIndex >= 0 && selectedIndex < saves.size()) {
                     String saveToLoad = saves.get(selectedIndex);
                     output.writeln("\nCaricamento di '" + saveToLoad + "'...", ColorText.CYAN);
-                    // Chiama il metodo di caricamento in SaveGame, passando i callback
+                    
                     SaveGame.loadSave(
-                        saveToLoad, // Nome del salvataggio da caricare
-                        // Callback onSuccess: eseguito se il caricamento riesce
+                        saveToLoad,
                         engine -> {
                             try {
-                                engine.startGameLoop(); // Avvia il loop del gioco con l'engine caricato
+                                engine.startGameLoop();
                                 
-                                // Quando il controllo torna qui, gestisci l'interruzione se presente
                                 if (Thread.currentThread().isInterrupted()) {
-                                    // Il thread è stato interrotto dal completamento del gioco
-                                    // Non propagare l'interruzione, lascia che il menu continui
-                                    Thread.interrupted(); // Pulisce il flag di interruzione
+                                    Thread.interrupted();
                                 }
                                 
                             } catch (Exception ex) {
-                                // Gestisce errori durante il gioco caricato
                                 if (ex.getCause() instanceof InterruptedException || 
                                     Thread.currentThread().isInterrupted()) {
-                                    // Interruzione normale dal completamento del gioco
-                                    Thread.interrupted(); // Pulisce il flag
+                                    Thread.interrupted();
                                 } else {
-                                    // Errore reale durante il gioco
                                     errorHan.handleRecoverableError("Errore durante il gioco: " + ex.getMessage());
                                 }
                             }
                         },
-                        // Callback onError: eseguito se il caricamento fallisce
                         error -> {
-                            // Mostra il messaggio di errore fornito da loadSave
                             errorHan.handleRecoverableError("Errore durante il caricamento: " + error);
                         },
-                        // Passa gli handler necessari per ricostruire l'engine
-                        errorHan, // Usa l'istanza corrente di ErrorHandler
-                        scanner,
-                        output
+                        errorHan, scanner, output
                     );
                 } else {
-                    // L'indice inserito non è valido
                     output.writeln("Numero di salvataggio non valido.", ColorText.ERROR);
                 }
             }
         } catch (NumberFormatException e) {
-            // L'input non era un numero valido (né un numero preceduto da '!')
             output.writeln("Input non valido. Inserisci un numero o '!numero'.", ColorText.ERROR);
         } catch (Exception e) {
-             // Cattura altre eccezioni impreviste durante il processo di load/delete
              errorHan.handleRecoverableError("Errore imprevisto nel menu di caricamento: " + e.getMessage());
         }
     }
 
     /**
-     * Mostra la classifica dei giocatori recuperandola dal server tramite
-     * {@link PoggioClientJersey}. Formatta e stampa la classifica sulla console.
-     * Offre la possibilità di scaricare i log dei giocatori.
-     * Attende un input dall'utente prima di tornare al menu principale.
+     * Mostra classifica online con opzione download log giocatori.
+     * Recupera dati via API REST e formatta tabella con gestione errori.
      */
     @Override
     public void showRanking() {
@@ -378,36 +323,29 @@ public class CLIMenu implements MenuManager {
             }
         }
 
-        // Gestisci e Stampa il risultato
         if (ranking == null) {
             output.writeln("\nErrore critico durante il recupero della classifica.", ColorText.ERROR);
         } else if (ranking.isEmpty()) {
             output.writeln("\nNessun dato disponibile per la classifica.", ColorText.ORANGE);
             output.writeln("(Potrebbe non esserci alcun punteggio registrato o esserci stato un problema temporaneo con il server).", ColorText.ORANGE);
         } else {
-            // Stampa la classifica
             displayRankingTable(ranking);
-            
-            // Offri opzione di scaricamento log
             offerLogDownloadOption(ranking);
         }
 
-        // Pausa finale
         output.write("\nPremi Invio per tornare al menu principale...", ColorText.WHITE);
         scanner.getInput();
     }
 
     /**
-     * Stampa la tabella della classifica formattata.
+     * Renderizza tabella classifica formattata con headers e alignment.
      * 
-     * @param ranking Lista delle entry della classifica
+     * @param ranking Lista entries classifica da visualizzare
      */
     private void displayRankingTable(List<RankingEntryDTO> ranking) {
-        // Intestazione della tabella
         output.writeln(String.format("\n%-4s %-20s %-12s %-10s %s", "#", "Username", "Data", "Ora", "Punteggio"), ColorText.CYAN);
         output.writeln("-----------------------------------------------------------------", ColorText.CYAN);
 
-        // Itera sulla lista ricevuta e stampa ogni voce
         int position = 1;
         for (RankingEntryDTO entry : ranking) {
             String dateStr = (entry.getData() != null) ? entry.getData().toString() : "N/D";
@@ -415,20 +353,16 @@ public class CLIMenu implements MenuManager {
             String scoreStr = (entry.getPunteggio() != null) ? entry.getPunteggio().toString() : "N/A";
 
             output.writeln(String.format("%-4d %-20s %-12s %-10s %s",
-                position++,
-                entry.getUsername(),
-                dateStr,
-                timeStr,
-                scoreStr
+                position++, entry.getUsername(), dateStr, timeStr, scoreStr
             ), ColorText.WHITE);
         }
         output.writeln("-----------------------------------------------------------------", ColorText.CYAN);
     }
 
     /**
-     * Offre l'opzione di scaricare i log dei giocatori dalla classifica.
+     * Offre opzione download log con input validation.
      * 
-     * @param ranking Lista delle entry della classifica
+     * @param ranking Lista players per selezione download
      */
     private void offerLogDownloadOption(List<RankingEntryDTO> ranking) {
         output.writeln("\n=== SCARICAMENTO LOG ===", ColorText.YELLOW);
@@ -442,9 +376,9 @@ public class CLIMenu implements MenuManager {
     }
 
     /**
-     * Mostra il menu di selezione per il download dei log.
+     * Menu selezione player per download log con navigazione numerata.
      * 
-     * @param ranking Lista delle entry della classifica
+     * @param ranking Lista players disponibili
      */
     private void showDownloadMenu(List<RankingEntryDTO> ranking) {
         while (true) {
@@ -481,9 +415,9 @@ public class CLIMenu implements MenuManager {
     }
 
     /**
-     * Scarica il log per un utente specifico.
+     * Esegue download log specifico user con gestione completa risultati API.
      * 
-     * @param username Nome dell'utente di cui scaricare il log
+     * @param username Target user per download log
      */
     private void downloadUserLog(String username) {
         output.writeln("\nScaricamento log per: " + username, ColorText.CYAN);
@@ -529,15 +463,11 @@ public class CLIMenu implements MenuManager {
             }
         }
         
-        // Pausa per permettere di leggere il risultato
         output.write("\nPremi Invio per continuare...", ColorText.WHITE);
         scanner.getInput();
     }
 
-    /**
-     * Termina l'applicazione PoggioAdventure.
-     * Delega l'operazione alla utility {@link Utils#exitApplication()}.
-     */
+    /** Termina applicazione con messaggio farewell */
     @Override
     public void exit() {
         output.write("\nGrazie per aver giocato a PoggioAdventure!", ColorText.GREEN);

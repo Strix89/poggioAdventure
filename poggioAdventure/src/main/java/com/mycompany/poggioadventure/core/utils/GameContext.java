@@ -6,83 +6,47 @@ import com.mycompany.poggioadventure.ui.InputHandler;
 import com.mycompany.poggioadventure.ui.OutputHandler;
 
 /**
- * Context Object che incapsula tutte le informazioni di contesto necessarie
- * agli observer e ai sottosistemi del gioco per funzionare correttamente.
+ * Context Object che incapsula componenti core del sistema di gioco.
  * 
- * <p>Implementa il pattern Context Object per evitare il passaggio di
- * numerosi parametri tra i vari componenti del sistema.
+ * <p>Evita il passaggio di molteplici parametri tra sottosistemi fornendo
+ * accesso centralizzato a handler I/O, gestione errori e logging temporaneo.
+ * Garantisce thread-safety attraverso immutabilità dei riferimenti.
  * 
- * <p><b>Responsabilità principali:</b>
+ * <p><b>Responsabilità:</b>
  * <ul>
- *   <li>Fornire accesso centralizzato ai componenti core del gioco</li>
- *   <li>Mantenere i riferimenti ai gestori di I/O ed errori</li>
- *   <li>Gestire il log temporaneo delle operazioni</li>
- *   <li>Fornire accesso al cronometro di gioco</li>
+ *   <li>Accesso centralizzato ai gestori I/O e errori</li>
+ *   <li>Gestione buffer temporaneo per logging</li>
+ *   <li>Riferimento al cronometro di sessione</li>
  * </ul>
  * 
- * <p><b>Pattern utilizzati:</b>
- * <ul>
- *   <li>Context Object: incapsula informazioni di contesto</li>
- *   <li>Immutable Object: tutti i campi sono final per thread-safety</li>
- * </ul>
- * 
- * <p><b>Utilizzo tipico:</b>
- * <pre>{@code
- * GameContext context = new GameContext(gameDesc, input, output, error, log, timer);
- * // Passa il context agli observer invece di parametri multipli
- * observer.update(gameDescription, parserOutput, context);
- * }</pre>
- * 
- * @author Strix89
- * @version 1.0
- * @since 1.0
+ * <p><b>Pattern:</b> Context Object, Immutable Object per thread-safety
  */
 public class GameContext {
 
-    /** 
-     * Gestore dell'output verso l'interfaccia utente.
-     * Può essere CLI o GUI-based.
-     */
+    /** Gestore output verso interfaccia utente (CLI/GUI) */
     private final OutputHandler outputHandler;
     
-    /** 
-     * Gestore dell'input dall'interfaccia utente.
-     * Astrae la fonte dell'input (console, GUI, ecc.).
-     */
+    /** Gestore input da interfaccia utente */
     private final InputHandler inputHandler;
     
-    /** 
-     * Gestore centralizzato degli errori del sistema.
-     * Gestisce sia errori recuperabili che fatali.
-     */
+    /** Gestore centralizzato errori di sistema */
     private final ErrorHandler errorHandler;
     
-    /** 
-     * Buffer temporaneo per i comandi e le operazioni da loggare.
-     * Utilizzato per raccogliere informazioni prima del flush sul logger.
-     */
+    /** Buffer temporaneo per raccolta comandi da loggare */
     private final List<String> templog;
     
-    /** 
-     * Cronometro di gioco per misurare il tempo di sessione.
-     * Implementa il pattern Singleton per consistenza globale.
-     */
+    /** Cronometro di gioco per misurazione tempo sessione */
     private final StopWatch stopWatch;
     
     /**
-     * Costruttore che inizializza il context con tutti i componenti necessari.
+     * Inizializza context con tutti i componenti necessari per il funzionamento.
+     * Tutti i parametri sono memorizzati come final per garantire immutabilità.
      * 
-     * <p>Tutti i parametri sono validati e memorizzati come final per
-     * garantire immutabilità e thread-safety del context.
-     * 
-     * @param gameDescription Il modello principale del gioco
-     * @param inputHandler Gestore dell'input utente
-     * @param outputHandler Gestore dell'output verso l'utente
-     * @param errorHandler Gestore degli errori di sistema
-     * @param templog Buffer temporaneo per il logging
+     * @param inputHandler Gestore input utente
+     * @param outputHandler Gestore output verso utente
+     * @param errorHandler Gestore errori sistema
+     * @param templog Buffer temporaneo logging
      * @param stopWatch Cronometro di gioco
-     * 
-     * @throws IllegalArgumentException se uno dei parametri richiesti è null
      */
     public GameContext(InputHandler inputHandler, OutputHandler outputHandler, 
                       ErrorHandler errorHandler, List<String> templog, StopWatch stopWatch) {
@@ -93,50 +57,30 @@ public class GameContext {
         this.stopWatch = stopWatch;
     }
     
-    /**
-     * Restituisce il gestore dell'output.
-     * 
-     * @return L'istanza di OutputHandler per scrivere verso l'interfaccia
-     */
+    /** Restituisce gestore output per scrittura verso interfaccia */
     public OutputHandler getOutputHandler() { 
         return outputHandler; 
     }
     
-    /**
-     * Restituisce il gestore degli errori.
-     * 
-     * @return L'istanza di ErrorHandler per la gestione centralizzata degli errori
-     */
+    /** Restituisce gestore errori per gestione centralizzata */
     public ErrorHandler getErrorHandler() { 
         return errorHandler; 
     }
     
-    /**
-     * Restituisce il buffer temporaneo dei log.
-     * 
-     * <p>Questo buffer viene utilizzato per raccogliere comandi e operazioni
-     * prima di scriverli definitivamente nei file di log.
-     * 
-     * @return Lista mutabile dei messaggi temporanei di log
+    /** 
+     * Restituisce buffer temporaneo log per raccolta comandi.
+     * Buffer mutabile utilizzato prima del flush definitivo su file.
      */
     public List<String> getTemplog() { 
         return templog; 
     }
     
-    /**
-     * Restituisce il cronometro di gioco.
-     * 
-     * @return L'istanza di StopWatch per misurare il tempo di sessione
-     */
+    /** Restituisce cronometro per misurazione tempo sessione */
     public StopWatch getStopWatch() { 
         return stopWatch; 
     }
     
-    /**
-     * Restituisce il gestore dell'input.
-     * 
-     * @return L'istanza di InputHandler per ricevere input dall'utente
-     */
+    /** Restituisce gestore input per ricezione comandi utente */
     public InputHandler getInputHandler() { 
         return inputHandler; 
     }

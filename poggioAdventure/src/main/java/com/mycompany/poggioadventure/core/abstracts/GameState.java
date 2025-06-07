@@ -7,20 +7,32 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * Interfaccia base per il pattern State applicato ai livelli del gioco.
+ * Classe astratta che definisce la struttura e il comportamento di un livello di gioco.
  * 
- * <p>Ogni livello implementa questa interfaccia per definire:
+ * <p>Implementa il pattern State per gestire la logica specifica di ogni livello,
+ * fornendo un contratto uniforme per:
  * <ul>
- *   <li>Stanza iniziale e condizioni di vittoria</li>
- *   <li>Timeout e gestione del tempo</li>
- *   <li>Logica di transizione tra livelli</li>
+ *   <li>Configurazione del livello (tempo limite, oggetti richiesti/vietati)</li>
+ *   <li>Gestione delle condizioni di vittoria e sconfitta</li>
+ *   <li>Callback pattern per transizioni di stato</li>
+ *   <li>Serializzazione per salvataggio/caricamento</li>
  * </ul>
+ * 
+ * <p>Ogni livello concreto deve implementare la propria logica di inizializzazione,
+ * completamento e gestione degli eventi tramite i metodi astratti.
  */
 public abstract class GameState implements Serializable {
     
-    private final long timeLimit; // Tempo massimo consentito per il livello (in millisecondi)
+    /** Tempo massimo consentito per completare il livello (millisecondi) */
+    private final long timeLimit;
+    
+    /** Stanza di spawn del giocatore per questo livello */
     private Room startingRoom = null;
+    
+    /** ID degli oggetti necessari per completare il livello */
     private final List<Integer> requiredIDObjects;
+    
+    /** ID degli oggetti che causano fallimento se raccolti */
     private final List<Integer> forbidenIDObjects;
 
     public GameState(long timeLimit, Room startingRoom, List<Integer> requiredIDObjects, List<Integer> forbiddenIDObjects) {
@@ -35,89 +47,86 @@ public abstract class GameState implements Serializable {
         this.requiredIDObjects = requiredIDObjects;
         this.forbidenIDObjects = forbiddenIDObjects;
     }
+
     /**
-     * Inizializza il livello corrente senza dipendenze da Engine.
+     * Template method per inizializzazione del livello senza dipendenze circolari.
+     * Configura lo stato del mondo, posizione iniziale e parametri specifici.
      * 
-     * @param gameDescription Stato del gioco da configurare
-     * @param output Handler per messaggi all'utente
-     * @param playerName Nome del giocatore
+     * @param gameDescription Stato principale del gioco da configurare
+     * @param output Handler per comunicazione con l'utente
+     * @param playerName Identificativo del giocatore per messaggi personalizzati
      */
     public abstract void enter(GameDescription gameDescription, OutputHandler output, String playerName);
     
-    /**
-     * Restituisce la stanza iniziale per questo livello.
-     * @return Stanza di partenza del livello
-     */
+    /** Restituisce la stanza di partenza configurata per questo livello */
     public Room getStartingRoom(){
         return startingRoom;
     }
 
-    /**
-     * Imposta la stanza iniziale per questo livello.
-     * @param startingRoom La nuova stanza iniziale
-     */
+    /** Imposta la stanza di partenza per questo livello */
     public void setStartingRoom(Room startingRoom){
         this.startingRoom = startingRoom;
     }
 
+    /** Lista degli ID oggetti necessari per completare il livello */
     public List<Integer> getRequiredIDObjects() {
         return requiredIDObjects;
     }
 
+    /** Lista degli ID oggetti vietati che causano fallimento del livello */
     public List<Integer> getForbidenIDObjects() {
         return forbidenIDObjects;
     }
     
     /**
-     * Verifica se il livello è stato completato con successo.
-     * @param game Stato corrente del gioco
-     * @return true se il livello è completato
+     * Valuta se il livello è stato completato con successo.
+     * Implementazioni concrete definiscono condizioni specifiche.
+     * 
+     * @param game Stato corrente del mondo di gioco
+     * @return true se tutte le condizioni di vittoria sono soddisfatte
      */
     public abstract boolean isCompleted(GameDescription game);
     
     /**
-     * Verifica se si è verificata una condizione di fallimento.
-     * @param game Stato corrente del gioco
-     * @return true se il livello è fallito
+     * Verifica se si sono verificate condizioni di fallimento irreversibile.
+     * 
+     * @param game Stato corrente del mondo di gioco
+     * @return true se il livello deve essere considerato fallito
      */
     public abstract boolean isFailureConditionMet(GameDescription game);
     
     /**
-     * Gestisce il successo del livello tramite callback.
-     * @param onSuccess Callback da eseguire per la transizione al livello successivo
+     * Gestisce la transizione di successo tramite callback per evitare dipendenze.
+     * 
+     * @param onSuccess Callback per avanzamento al livello successivo
      */
     public abstract void handleSuccess(Runnable onSuccess);
     
     /**
-     * Gestisce il fallimento del livello tramite callback.
-     * @param failureType Tipo di fallimento
-     * @param onFailure Callback da eseguire per gestire il fallimento
+     * Gestisce il fallimento del livello con callback per azioni appropriate.
+     * 
+     * @param onFailure Callback per gestione sconfitta (reset o game over)
      */
     public abstract void handleFailure(Runnable onFailure);
     
-    /**
-     * Restituisce il nome identificativo del livello.
-     * @return Nome del livello
-     */
+    /** Identificativo univoco del livello per logging e debugging */
     public abstract String getLevelName();
     
-    /**
-     * Restituisce il tempo massimo consentito per questo livello (in millisecondi).
-     * @return Tempo limite del livello
-     */
+    /** Restituisce il tempo limite configurato per questo livello in millisecondi */
     public long getTimeLimit(){
         return timeLimit;
     }
 
     /**
-     * Stampa una descrizione del livello corrente.
-     * @return Tempo trascorso
+     * Visualizza informazioni introduttive del livello con formattazione specifica.
+     * 
+     * @param output Handler per output formattato
+     * @param playerName Nome per personalizzazione messaggi
+     * @param remaininTime Tempo rimanente formattato per display
      */
     public abstract void getLevelDescription(OutputHandler output, String playerName, String remaininTime);
 
-    /**
-     * Clona questo GameState utilizzando il metodo generico in Utils.
-     */
+    /** Crea deep copy del livello utilizzando serializzazione per isolamento completo */
     public GameState clone() {
         return Utils.deepClone(this);
     }

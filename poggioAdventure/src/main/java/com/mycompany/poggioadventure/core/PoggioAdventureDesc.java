@@ -20,47 +20,45 @@ import com.mycompany.poggioadventure.core.abstracts.GameObservable;
 import com.mycompany.poggioadventure.core.utils.GameContext;
 import com.mycompany.poggioadventure.observers.GameObserver;
 
-/**
- * ATTENZIONE: La descrizione del gioco è fatta in modo che qualsiasi gioco
- * debba estendere la classe GameDescription. L'Engine è fatto in modo che possa
- * eseguire qualsiasi gioco che estende GameDescription, in questo modo si
- * possono creare più giochi utilizzando lo stesso Engine.
- *
- * Diverse migliorie possono essere applicate: - la descrizione del gioco
- * potrebbe essere caricate da file o da DBMS in modo da non modificare il
- * codice sorgente - l'utilizzo di file e DBMS non è semplice poiché all'interno
- * del file o del DBMS dovrebbe anche essere codificata la logica del gioco
- * (nextMove) oltre alla descrizione di stanze, oggetti, ecc...
+/** 
+ * Implementazione concreta del motore di gioco per PoggioAdventure.
  * 
+ * <p>Estende {@link GameDescription} fornendo la logica specifica del gioco
+ * e implementa {@link GameObservable} per il sistema di notifiche basato su Observer.
  * 
- * La classe FireHouseGame estende GameDescription che è una classe astratta che contiene la struttura base del gioco
- * e implementa l'interfaccia GameObservable che permette di notificare gli observer quando avviene un'azione.
- *
- * @author pierpaolo & Strix89
+ * <p><b>Responsabilità principali:</b>
+ * <ul>
+ *   <li>Configurazione comandi e alias supportati</li>
+ *   <li>Gestione del ciclo di elaborazione comandi</li>
+ *   <li>Coordinamento degli observer per azioni specifiche</li>
+ *   <li>Generazione di output formattatoper GUI e CLI</li>
+ * </ul>
+ * 
+ * <p>Utilizza un sistema di messaggistica centralizzato per raccogliere
+ * le risposte degli observer e presentarle in modo coerente all'utente.
  */
 public class PoggioAdventureDesc extends GameDescription implements GameObservable {
     
+    /** Registry degli observer registrati per le notifiche */
     private final List<GameObserver> observer = new ArrayList<>();
+    
+    /** Buffer per messaggi di risposta dagli observer */
     private final List<String> messages = new ArrayList<>();
 
     /**
-     * Metodo Init : inizializza il gioco
-     * Questo metodo viene chiamato per inizializzare il gioco.
-     * Vengono definite le stanze, gli oggetti e i comandi che il giocatore può
-     * usare.
+     * Inizializza il sistema di gioco con comandi, alias e observer.
+     * Configura tutti i CommandType supportati e registra gli observer specifici.
+     * 
+     * @throws Exception se l'inizializzazione fallisce
      */
     @Override
     public void init() throws Exception {
         messages.clear();
 
-        // Comandi del gioco
+        // Configurazione comandi di movimento
         Command nord = new Command(CommandType.NORD, "nord");
         nord.setAlias(new String[] { "n", "su", "sopra"});
         getCommands().add(nord);
-
-        Command iventory = new Command(CommandType.INVENTORY, "inventario");
-        iventory.setAlias(new String[] { "inv", "inventory", "i"});
-        getCommands().add(iventory);
 
         Command sud = new Command(CommandType.SOUTH, "sud");
         sud.setAlias(new String[] { "s", "giù", "giu", "sotto"});
@@ -74,11 +72,13 @@ public class PoggioAdventureDesc extends GameDescription implements GameObservab
         ovest.setAlias(new String[] { "o", "sinistra"});
         getCommands().add(ovest);
 
+        // Comandi di sistema
         Command end = new Command(CommandType.END, "end");
         end.setAlias(
                 new String[] { "fine", "esci", "muori", "ammazzati", "ucciditi", "suicidati", "exit", "basta" });
         getCommands().add(end);
 
+        // Comandi di interazione
         Command look = new Command(CommandType.LOOK_AT, "osserva");
         look.setAlias(new String[] { "guarda", "vedi", "trova", "cerca", "descrivi" });
         getCommands().add(look);
@@ -106,35 +106,36 @@ public class PoggioAdventureDesc extends GameDescription implements GameObservab
         Command talk = new Command(CommandType.TALK, "parla");
         talk.setAlias(new String[]{"dialoga", "chiedi", "conversa", "ask"});
         getCommands().add(talk);
+
+        Command iventory = new Command(CommandType.INVENTORY, "inventario");
+        iventory.setAlias(new String[] { "inv", "inventory", "i"});
+        getCommands().add(iventory);
         
-        //Observer
-        /*
-         * Viene utilizzato GameObserver per notificare gli observer quando avviene un'azione.
-         * I vari observer sottostanti creano un'istanza di GameObserver e monitorano le azioni del giocatore
-         * 
-         */
-        GameObserver moveObserver = new MoveObserver(); // si uccuperà di gestire il movimento del giocatore
-        this.attach(moveObserver);
-        GameObserver invObserver = new InventoryObserver(); // si occuperà di gestire l'inventario del giocatore
-        this.attach(invObserver);
-        GameObserver pushObserver = new PushObserver(); // si occuperà di gestire l'azione di premere
-        this.attach(pushObserver);
-        GameObserver lookatObserver = new LookAtObserver(); // si occuperà di gestire l'azione di osservare
-        this.attach(lookatObserver);
-        GameObserver pickupObserver = new PickUpObserver(); // si occuperà di gestire l'azione di raccogliere
-        this.attach(pickupObserver);
-        GameObserver openObserver = new OpenObserver(); // si occuperà di gestire l'azione di aprire
-        this.attach(openObserver);
-        GameObserver useObserver = new UseObserver(); // si occuperà di gestire l'azione di usare
-        this.attach(useObserver);
-        GameObserver talkObserver = new TalkObserver();
-        this.attach(talkObserver);
+        // Registrazione observer specializzati per ogni tipo di azione
+        registerObservers();
     }
 
     /**
-     * Metodo che gestisce il comando successivo
+     * Registra tutti gli observer specializzati per la gestione delle azioni.
+     * Ogni observer gestisce un tipo specifico di comando del giocatore.
+     */
+    private void registerObservers() {
+        attach(new MoveObserver());
+        attach(new InventoryObserver());
+        attach(new PushObserver());
+        attach(new LookAtObserver());
+        attach(new PickUpObserver());
+        attach(new OpenObserver());
+        attach(new UseObserver());
+        attach(new TalkObserver());
+    }
+
+    /**
+     * Elabora una lista di comandi parsati in sequenza.
+     * Notifica gli observer e gestisce l'output di risposta e i cambiamenti di stanza.
      * 
-     * @param out
+     * @param list Lista di comandi parsati da elaborare
+     * @param gameContext Contesto di gioco con handler I/O
      */
     @Override
     public void nextMove(List<ParserOutput> list, GameContext gameContext) {
@@ -143,30 +144,46 @@ public class PoggioAdventureDesc extends GameDescription implements GameObservab
                 gameContext.getOutputHandler().writeln("Non ho capito cosa devo fare! Prova con un altro comando.", ColorText.RED);
                 continue;
             }
-            Room cr = getCurrentRoom();
+            
+            Room currentRoomBefore = getCurrentRoom();
             notifyObservers(p, gameContext);
-            boolean move = !cr.equals(getCurrentRoom()) && getCurrentRoom() != null;
-            if (!messages.isEmpty()) {
-                for (String m : messages) {
-                    if (!m.trim().isEmpty()) {
-                        gameContext.getOutputHandler().writeln(m, ColorText.WHITE);
-                    }
-                }
-                messages.clear();
-            }
-            if (move) {
-                gameContext.getOutputHandler().writeln("\n" + getCurrentRoom().getName(), ColorText.YELLOW);
-                gameContext.getOutputHandler().writeln("================================================", ColorText.WHITE);
-                gameContext.getOutputHandler().writeln(getCurrentRoom().getDescription(), ColorText.WHITE);
+            
+            // Verifica se c'è stato un cambio di stanza
+            boolean hasMovedRoom = !currentRoomBefore.equals(getCurrentRoom()) && getCurrentRoom() != null;
+            
+            // Output dei messaggi raccolti dagli observer
+            flushObserverMessages(gameContext);
+            
+            // Descrizione della nuova stanza se c'è stato movimento
+            if (hasMovedRoom) {
+                displayRoomInfo(gameContext);
             }
         }
     }
 
     /**
-     * Metodo che permette di aggiungere un observer
-     * 
-     * @param o
+     * Invia all'output tutti i messaggi raccolti dagli observer e svuota il buffer.
      */
+    private void flushObserverMessages(GameContext gameContext) {
+        if (!messages.isEmpty()) {
+            for (String message : messages) {
+                if (!message.trim().isEmpty()) {
+                    gameContext.getOutputHandler().writeln(message, ColorText.WHITE);
+                }
+            }
+            messages.clear();
+        }
+    }
+
+    /**
+     * Visualizza le informazioni della stanza corrente dopo un movimento.
+     */
+    private void displayRoomInfo(GameContext gameContext) {
+        gameContext.getOutputHandler().writeln("\n" + getCurrentRoom().getName(), ColorText.YELLOW);
+        gameContext.getOutputHandler().writeln("================================================", ColorText.WHITE);
+        gameContext.getOutputHandler().writeln(getCurrentRoom().getDescription(), ColorText.WHITE);
+    }
+
     @Override
     public void attach(GameObserver o) {
         if (!observer.contains(o)) {
@@ -174,19 +191,14 @@ public class PoggioAdventureDesc extends GameDescription implements GameObservab
         }
     }
 
-    /**
-     * Metodo che permette di rimuovere un observer
-     * 
-     * @param o
-     */
     @Override
     public void detach(GameObserver o) {
         observer.remove(o);
     }
 
     /**
-     * Metodo che permette di notificare gli observer
-     * @param output
+     * Notifica tutti gli observer registrati dell'azione corrente.
+     * Raccoglie le risposte nel buffer dei messaggi per output successivo.
      */
     @Override
     public void notifyObservers(ParserOutput parserOutput, GameContext gameContext) {

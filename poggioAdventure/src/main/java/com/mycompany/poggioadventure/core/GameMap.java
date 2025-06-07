@@ -8,16 +8,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
- * @author MikeRvsso
+ * Gestisce la struttura spaziale del mondo di gioco organizzato su più piani.
+ * 
+ * <p>Fornisce operazioni per:
+ * <ul>
+ *   <li>Aggiunta e ricerca di stanze per ID o nome</li>
+ *   <li>Collegamento bidirezionale tra stanze</li>
+ *   <li>Manipolazione batch degli NPC presenti</li>
+ * </ul>
+ * 
+ * <p>La struttura interna utilizza una lista di piani, dove ogni piano
+ * contiene le stanze associate. Supporta serializzazione per persistenza.
  */
+public class GameMap implements Serializable {
+    /** Struttura multi-piano: ogni elemento è un piano contenente le sue stanze */
+    private final List<List<Room>> allFloors = new ArrayList<>();
 
-public class GameMap implements Serializable{
-    private final List<List<Room>> allFloors = new ArrayList<>(); // Lista di piani
-
+    /**
+     * Inizializza la mappa con due piani vuoti (piano terra e primo piano).
+     */
     public GameMap() {
-        allFloors.add(new ArrayList<>()); // Inizializza primo piano
-        allFloors.add(new ArrayList<>()); // Inizializza secondo piano
+        allFloors.add(new ArrayList<>());
+        allFloors.add(new ArrayList<>());
     }
 
     /**
@@ -34,9 +46,12 @@ public class GameMap implements Serializable{
     }
 
     /**
-     * Collega due stanze su piani diversi.
+     * Stabilisce collegamento bidirezionale tra due stanze.
+     * 
      * @param sourceRoom Stanza di partenza
-     * @param targetRoom Stanza di arrivo
+     * @param targetRoom Stanza di destinazione
+     * @param dir Direzione del collegamento (deve essere cardinale)
+     * @throws IllegalArgumentException se la direzione non è valida
      */
     public void linkFloors(Room sourceRoom, Room targetRoom, CommandType dir) {
         if (!dir.isDirection()) {
@@ -63,9 +78,9 @@ public class GameMap implements Serializable{
     }
 
     /**
-     * Trova una stanza per ID in tutti i piani.
+     * Cerca una stanza per ID in tutti i piani della mappa.
      * 
-     * @param roomId ID della stanza da cercare
+     * @param roomId Identificativo univoco della stanza
      * @return La stanza trovata o null se non esiste
      */
     public Room findRoomById(int roomId) {
@@ -84,9 +99,11 @@ public class GameMap implements Serializable{
     }
     
     /**
-    * Rimuove le immagini da tutti gli NPC presenti nelle stanze del gioco.Utilizza espressioni lambda e stream per l'elaborazione.
-     * @param obscure
-    */
+     * Modifica la visualizzazione delle immagini di tutti gli NPC nella mappa.
+     * Utilizza stream processing per applicare la trasformazione in modo efficiente.
+     * 
+     * @param obscure true per oscurare le immagini, false per mostrarle normalmente
+     */
     public void alterateNPCImages(boolean obscure) {
         allFloors.stream()
             .flatMap(List::stream) // Flattena tutte le stanze in un unico stream

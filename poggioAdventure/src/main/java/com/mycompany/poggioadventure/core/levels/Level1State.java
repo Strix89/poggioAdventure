@@ -17,122 +17,114 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Implementazione del primo livello del gioco.
+ * Primo livello del gioco: introduzione e test di logica.
+ * 
+ * <p>Questo livello introduce il giocatore all'ambiente di Poggiolevante
+ * e presenta la prima sfida: un test di logica con il Direttore.
+ * 
+ * <p><b>Obiettivi:</b>
+ * <ul>
+ *   <li>Familiarizzazione con comandi e ambiente di gioco</li>
+ *   <li>Raccolta della penna necessaria per il test dal Tutor</li>
+ *   <li>Completamento del test di logica con il Direttore</li>
+ *   <li>Esplorazione delle stanze e interazione con NPC</li>
+ * </ul>
+ * 
+ * <p><b>Struttura mondo:</b>
+ * <ul>
+ *   <li><b>Piano Terra</b>: Ingresso, Hall, Portineria, Corridoio, Galileo, Direzione</li>
+ *   <li><b>Primo Piano</b>: Laboratori e stanze tecniche</li>
+ * </ul>
+ * 
+ * <p>Completamento: ottenere oggetto "level1Complete" superando il test di logica.
  */
 public class Level1State extends GameState {
 
+    /** Costruttore base per configurazione livello */
     public Level1State(long timeLimit, List<Integer> requiredObjects, List<Integer> forbiddenObjects) {
         super(timeLimit, requiredObjects, forbiddenObjects);
     }
 
+    /** Costruttore con stanza di partenza personalizzata */
     public Level1State(long timeLimit, Room startingRoom, List<Integer> requiredObjects, List<Integer> forbiddenObjects) {
         super(timeLimit, startingRoom,requiredObjects, forbiddenObjects);
     }
     
+    /**
+     * Inizializza completamente il mondo del primo livello.
+     * Configura NPC, oggetti, stanze, test di logica e connessioni.
+     */
     @Override
     public void enter(GameDescription gameDescription, OutputHandler output, String playerName) {
-        // Primo piano (indice 0)
-        // Aggiungi un NPC alla stanza di ingresso
+        // NPC Guido - Portinaio con indicazioni per il test
         AdvNPC guido = new AdvNPC(Utils.NPC_GUIDO_ID, "Guido", "Un nano sembra essere il portinaio e sembra essere anche \n\t il tipico interista rompiscatole");
         guido.setAlias(new String[] { "guido", "nano", "segretario", "portinaio"});
         guido.setImagePath(ResourceLoader.IMG_PATH.resolve("nano.png").toString());
 
-        // === CONFIGURAZIONE DIALOGHI ===
-        // Dialogo iniziale
         guido.addFirstDialogueLine("Ciao " + playerName +  "! Benvenuto a Poggiolevante!");
         guido.addFirstDialogueLine("Sono Guido, tifi inter per caso? Se si allora sei nel posto giusto!");
         guido.addFirstDialogueLine("Sei qui per l'ammissione? \n\tPer il test ti conviene andare in Galileo, si trova dritto e a destra. Grazieeee!");
-        
-        // Dialogo dopo la prima interazione (prima del test)
         guido.addSubsequentDialogueLine("Ancor do' ste'? Muoviti il direttore ti sta aspettando!");
 
+        // NPC Don Matteo - Sacrestano con supporto spirituale
         AdvNPC donMatteo = new AdvNPC(Utils.NPC_DONMATTEO_ID, "Don. Matteo", "Sembra il sommo Kayoshin di Dragon Ball,\n\t indossa una tunica nera e sta leggendo un libro camminando in maniera strana");
         donMatteo.setAlias(new String[] { "don", "matteo", "prete", "sacerdote" });
-
         donMatteo.setImagePath(ResourceLoader.IMG_PATH.resolve("DonMatteo.png").toString());
         donMatteo.addFirstDialogueLine("Ciao " + playerName + "! Sono Don Matteo, il sacrestano di Poggiolevante.");
         donMatteo.addFirstDialogueLine("Se hai bisogno di consigli spirituali o vuoi confessarti, sono qui per aiutarti.");
-
         donMatteo.addSubsequentDialogueLine("Ricorda, la confessione è un momento importante per riflettere e rinnovare il tuo spirito.");
         donMatteo.addSubsequentDialogueLine("Buona fortuna con il tuo test di logica, " + playerName + "!");
         donMatteo.addSubsequentDialogueLine("Pregherò per te affinché tu possa superarlo con successo.");
 
+        // NPC Direttore - Conduttore del test con personalità particolare
         AdvNPC direttoreGalileo = new AdvNPC(Utils.NPC_DIRETTOREGALILEO_ID, "Direttore", "C'è il direttore, ti sta guardando e senti strani: [SALMON]\"Mh Mh MH[/]!!!\"\n\tmentre ti fissa con gli occhi sbarrati");
         direttoreGalileo.setImagePath(ResourceLoader.IMG_PATH.resolve("DirettoreGalileo.png").toString());
         direttoreGalileo.addFirstDialogueLine("Allora " + playerName + ", ci siamo? Sei pronto per il test di logica?");
         direttoreGalileo.addSubsequentDialogueLine(playerName + " dai dobbiamo sbrigarci, devo andare in bagno, rischio di [BROWN]cagarmi[/] addosso!");
         direttoreGalileo.setAlias(new String[] { "caccone", "cupulino", "cupula" });
 
-        // === CREAZIONE DOMANDE DEL TEST ===
+        // Configurazione domande del test di logica
         
-        // Domanda 1: Logica sequenziale
-        List<String> options1 = Arrays.asList(
-                "32",
-                "28", 
-                "30",
-                "34"
-        );
+        // Domanda sequenza numerica
+        List<String> options1 = Arrays.asList("32", "28", "30", "34");
         Question question1 = new Question(
                 "Trova il numero mancante nella sequenza: 2, 6, 12, 20, ?",
-                options1,
-                0
-        );
+                options1, 0);
 
-        // Domanda 2: Logica spaziale
-        List<String> options2 = Arrays.asList(
-                "Sud-Est",
-                "Nord-Ovest",
-                "Sud-Ovest", 
-                "Nord-Est"
-        );
+        // Domanda logica spaziale
+        List<String> options2 = Arrays.asList("Sud-Est", "Nord-Ovest", "Sud-Ovest", "Nord-Est");
         Question question2 = new Question(
                 "Se cammini verso Nord per 3km, poi verso Est per 4km, in che direzione devi andare per tornare al punto di partenza nel modo più diretto?",
-                options2,
-                2
-        );
+                options2, 2);
 
-        // Domanda 3: Logica deduttiva
-        List<String> options3 = Arrays.asList(
-                "Marco ha i capelli neri",
-                "Luca ha i capelli biondi",
-                "Paolo ha i capelli castani",
-                "Non si può determinare"
-        );
+        // Domanda logica deduttiva
+        List<String> options3 = Arrays.asList("Marco ha i capelli neri", "Luca ha i capelli biondi", "Paolo ha i capelli castani", "Non si può determinare");
         Question question3 = new Question(
                 "Marco, Luca e Paolo hanno capelli di colori diversi: nero, biondo e castano. Marco non ha capelli biondi né neri. Luca non ha capelli castani. Quale affermazione è vera?",
-                options3,
-                2
-        );
+                options3, 2);
 
-        // Domanda 4: Problema del runner e smartwatch
-        List<String> options4 = Arrays.asList(
-                "Lo smartwatch si è rotto",
-                "Ha corso più velocemente del solito",
-                "Ha cambiato la posizione dello smartwatch da un braccio all'altro",
-                "Il percorso era in salita"
-        );
+        // Domanda problema del runner - logica applicata
+        List<String> options4 = Arrays.asList("Lo smartwatch si è rotto", "Ha corso più velocemente del solito", "Ha cambiato la posizione dello smartwatch da un braccio all'altro", "Il percorso era in salita");
         Question question4 = new Question(
                 "Un runner usa sempre lo stesso smartwatch per monitorare i suoi allenamenti. Un giorno, percorrendo esattamente lo stesso percorso di sempre, lo smartwatch registra più chilometri del solito, nonostante abbia corso alla stessa velocità. Qual è la spiegazione più logica?",
-                options4,
-                2
-        );
+                options4, 2);
 
-        // Lista delle domande
         List<Question> questions = Arrays.asList(question1, question2, question3, question4);
 
+        // Penna richiesta per sostenere il test
         AdvObject pen = new AdvObject(Utils.OBJ_PENNA_ID, "Penna", 
                 "Una penna molto particolare, sopra c'è inciso un nome: Lorenzo Burdo\n\t",
                 ResourceLoader.IMG_PATH.resolve("penna.png").toString());
         pen.setAlias(new String[] { "penna", "pen"});
 
-        // === CREAZIONE DEL TEST ===
+        // Configurazione test con requisiti
         List<AdvObject> requiredObjectsForTestLogic = new ArrayList<>();
-        requiredObjectsForTestLogic.add(pen); // Aggiungiamo l'oggetto penna direttamente
+        requiredObjectsForTestLogic.add(pen);
         
         Test logicTest = new Test(
-                "Test di Logica e Ragionamento", // Nome del test
-                questions,                        // Lista domande
-                2,                               
+                "Test di Logica e Ragionamento",
+                questions,
+                2, // Punteggio minimo per superare il test
                 "[SALMON]Mh Mh MH!![/] Hai dimostrato ottime capacità logiche e di ragionamento! Però potevi fare meglio secondo me",
                 "[RED]😞[/]Sei un idiota!!",
                 requiredObjectsForTestLogic
@@ -140,12 +132,12 @@ public class Level1State extends GameState {
 
         direttoreGalileo.setTest(logicTest);
         
-        // === CREAZIONE OGGETTO RICOMPENSA ===
+        // Oggetto ricompensa per completamento livello (invisibile all'inizio)
         AdvObject level1Complete = new AdvObject(Utils.OBJ_LEVEL1_COMPLETE_ID, "level1Complete");
         level1Complete.setVisible(false);
         direttoreGalileo.setRewardObject(level1Complete);
 
-        // Aggiungi un oggetto che l'NPC può dare al giocatore
+        // Post-it con istruzioni di gioco per nuovi giocatori
         AdvObject post_it = new AdvObject(Utils.OBJ_POST_IT_ID, "post-it",
         "\nUn [ITEM]post-it[/] attaccato alla porta con le istruzioni per l'avventura.\n\n" +
         "[EMERALD]=== ISTRUZIONI PER L'AVVENTURA ===[/]\n\n" +
@@ -165,39 +157,35 @@ public class Level1State extends GameState {
         "[NEON_ORANGE]•[/] end/esci - termina il gioco\n",
         ResourceLoader.IMG_PATH.resolve("post_it.png").toString());
         post_it.setAlias(new String[] {"note", "appunto" });
-        post_it.setPickupable(true); // Imposta l'oggetto come raccoglibile
+        post_it.setPickupable(true);
 
+        // NPC Tutor - Fornitore della penna necessaria con dialoghi in dialetto
         AdvNPC tutor = new AdvNPC(Utils.NPC_TUTOR_ID, "Tutor", "C'è un ragazzo rosso in questa stanza, sembra un po' un pingone");
         tutor.setAlias(new String[] { "tutor", "pingone" , "giuseppe"});
-        
-        // === CONFIGURAZIONE DIALOGHI TUTOR ===
-        // Dialoghi iniziali
         tutor.addFirstDialogueLine("Uauà, signurì! Ie so u Tutòr d stu collègge, m chiem Giusepp, tu c si? Si vinùt p le seleziòn?");
         tutor.addFirstDialogueLine("Ah, piacèr " + playerName + ", l'hê mmê pr'vèt u pèn d Matèra?");
         tutor.addFirstDialogueLine("T sèrv na pènn, n'è vèrr? Sènd, pigghj chèst, ié d nu vècchj d stu collègge.");
         tutor.addFirstDialogueLine("Tand n la us mèj.");
-        
-        // Dialoghi successivi
         tutor.addSubsequentDialogueLine("Madònn, c fam ca tègn! T truàss p caso n'anticchj d sòlz agr'dòlc?");
         tutor.setImagePath(ResourceLoader.IMG_PATH.resolve("Tutor.png").toString());
-
         tutor.addItemToGive(pen);
 
+        // Foto decorativa con tema religioso/spaziale
         AdvObject foto = new AdvObject(Utils.OBJ_FOTO_ID, "Foto",
                 "Una foto di San Nicola vestito da Astronauta.\nAnche un Santo può essere un astronauta !",
                 ResourceLoader.IMG_PATH.resolve("SanColino.png").toString());
         foto.setAlias(new String[] { "Foto", "immagine", "picture"});
         foto.setPickupable(true);
-        foto.setPushable(true); // Imposta l'oggetto come spingibile
+        foto.setPushable(true);
 
-        //Definizione oggetto contenitore armadio
+        // Armadio nella hall con contenuto vario
         AdvObjectContainer armadioHall = new AdvObjectContainer(Utils.OBJ_ARMADIO_HALL_ID,"armadio",
                 "Un armadio di legno chiuso. Potrebbe contenere qualcosa di interessante.");
         armadioHall.setAlias(new String[] { "Armadio", "armadietto", "mobile" });
-        armadioHall.setPickupable(false); // Non raccoglibile
-        armadioHall.setOpenable(true); // Imposta l'oggetto come apribile
+        armadioHall.setPickupable(false);
+        armadioHall.setOpenable(true);
 
-        //Oggetti nell'armadio
+        // Vestiti nell'armadio
         AdvObject cappotto = new AdvObject(Utils.OBJ_CAPPOTTO_ID, "Cappotto", 
                 "Un cappotto di pelle, sembra molto costoso.",
                 ResourceLoader.IMG_PATH.resolve("Cappotto.png").toString());
@@ -217,17 +205,17 @@ public class Level1State extends GameState {
                 ResourceLoader.IMG_PATH.resolve("Bastone.png").toString());
         bastone.setAlias(new String[] { "Bastone", "deambulatore", "stick"});
         bastone.setPickupable(true);
-        bastone.setPushable(true); // Imposta l'oggetto come spingibile
+        bastone.setPushable(true);
         armadioHall.add(bastone);
 
-        //Definizione oggetto contenitore vetrina
+        // Vetrina nel corridoio con oggetti religiosi
         AdvObjectContainer vetrina = new AdvObjectContainer(Utils.OBJ_VETRINA_ID,"Vetrina",
                 "Una vetrina di legno chiusa. Potrebbe contenere qualcosa di interessante.");
         vetrina.setAlias(new String[] { "Vetrina", "mobile", "vetrinetta" });
         vetrina.setPickupable(false);
         vetrina.setOpenable(true);
 
-        //Oggetti nella vetrina
+        // Oggetti religiosi nella vetrina
         AdvObject statuetta = new AdvObject(Utils.OBJ_STATUETTA_ID, "Statuetta",
                 "Una statuetta di San Josemaria",
                 ResourceLoader.IMG_PATH.resolve("Statuetta.png").toString());
@@ -248,6 +236,7 @@ public class Level1State extends GameState {
         foglio.setPickupable(false);
         vetrina.add(foglio);
 
+        // Oggetti sparsi per il mondo
         AdvObject microSD = new AdvObject(Utils.OBJ_MICROSD_ID, "MicroSD",
                 "Una MicroSD, potrebbe essere utile successivamente.",
                 ResourceLoader.IMG_PATH.resolve("MicroSD.png").toString());
@@ -266,12 +255,13 @@ public class Level1State extends GameState {
         forbici.setAlias(new String[] { "Forbici", "attrezzo", "strumento"});
         forbici.setPickupable(true);
 
+        // Attrezzi del laboratorio
         AdvObject martello = new AdvObject(Utils.OBJ_MARTELLO_ID, "Martello",
                 "Un martello, ha un manico molto interessante",
                 ResourceLoader.IMG_PATH.resolve("Martello.png").toString());
         martello.setAlias(new String[] { "Martello", "attrezzo", "strumento"});
         martello.setPickupable(true);
-        martello.setPushable(true); // Imposta l'oggetto come spingibile
+        martello.setPushable(true);
 
         AdvObject segaCircolare = new AdvObject(Utils.OBJ_SEGA_CIRCOLARE_ID, "Sega circolare",
                 "Una sega circolare, sembra molto affilata.");
@@ -279,13 +269,14 @@ public class Level1State extends GameState {
         segaCircolare.setPickupable(false);
         segaCircolare.setPushable(true);
 
+        // Contenitore elettronica nel laboratorio
         AdvObjectContainer contenitore = new AdvObjectContainer(Utils.OBJ_CONTENITORE_ID,"Contenitore",
                 "Un contenitore di plastica, sembraa contenere dell'elettronica");
         contenitore.setAlias(new String[] { "Contenitore", "cassetto"});
         contenitore.setPickupable(false);
         contenitore.setOpenable(true);
 
-        //Oggetti nel contenitore
+        // Componenti elettronici nel contenitore
         AdvObject cavoHDMI = new AdvObject(Utils.OBJ_CAVO_HDMI_ID, "CavoHDMI",
                 "Un cavo HDMI",
                 ResourceLoader.IMG_PATH.resolve("CavoHDMI.png").toString());
@@ -305,7 +296,7 @@ public class Level1State extends GameState {
                 ResourceLoader.IMG_PATH.resolve("Tastiera.png").toString());
         tastiera.setAlias(new String[] { "Tastiera", "periferica"});
         tastiera.setPickupable(true);
-        tastiera.setPushable(true); // Imposta l'oggetto come spingibile
+        tastiera.setPushable(true);
         contenitore.add(tastiera);
 
         AdvObject cpu = new AdvObject(Utils.OBJ_CPU_ID, "CPU", 
@@ -316,6 +307,7 @@ public class Level1State extends GameState {
         cpu.setPushable(true);
         contenitore.add(cpu);
 
+        // Rack server (inizialmente chiuso, richiede chiave)
         AdvObjectContainer rack = new AdvObjectContainer(Utils.OBJ_RACK_ID,"Rack",
                 "Un armadio rack, da qui puoi accedere a tutti i server");
         rack.setAlias(new String[] { "Rack", "armadio", "mobile" });
@@ -328,7 +320,7 @@ public class Level1State extends GameState {
         chiaveRack.setAlias(new String[] { "Chiave", "chiavi", "mazzo"});
         chiaveRack.setPickupable(true);
 
-        //Oggetti nel rack
+        // Controlli nel rack
         AdvObject pulsante = new AdvObject(Utils.OBJ_PULSANTE_ID, "Pulsante",
                 "Un pulsante rosso, chissà cosa fa");
         pulsante.setAlias(new String[] { "Pulsante", "bottone", "switch"});
@@ -336,6 +328,7 @@ public class Level1State extends GameState {
         pulsante.setPushable(true);
         rack.add(pulsante);
 
+        // Attrezzi di precisione
         AdvObject setCacciaviti = new AdvObject(Utils.OBJ_SET_CACCIAVITI_ID, "Set cacciaviti",
                 "Un set di cacciaviti di precisione, potrebbe esserti utili.",
                 ResourceLoader.IMG_PATH.resolve("Cacciaviti.png").toString());
@@ -347,8 +340,9 @@ public class Level1State extends GameState {
                 ResourceLoader.IMG_PATH.resolve("Saldatore.png").toString());
         saldatore.setAlias(new String[] { "attrezzo", "saldatrice"});
         saldatore.setPickupable(true);
-        saldatore.setPushable(true); // Imposta l'oggetto come spingibile
+        saldatore.setPushable(true);
 
+        // Materiali per stampa 3D
         AdvObject bobbinaPLA = new AdvObject(Utils.OBJ_BOBINA_PLA_ID, "Bobina",
                 "Una bobina di filamento PLA per stampante 3D",
                 ResourceLoader.IMG_PATH.resolve("BobinaPLA.png").toString());
@@ -356,12 +350,14 @@ public class Level1State extends GameState {
         bobbinaPLA.setPickupable(true);
         bobbinaPLA.setPushable(true);
 
+        // Dispositivo tecnomagico
         AdvObject flipper = new AdvObject(Utils.OBJ_FLIPPER_ZERO_ID, "FlipperZero",
                 "Un oggetto tecnomagico",
                 ResourceLoader.IMG_PATH.resolve("Flipper.png").toString());
         flipper.setAlias(new String[] {"flipper", "tecnomagia"});
         flipper.setPickupable(true);
 
+        // Creazione stanze - Piano terra
         Room entry = new Room(Utils.ROOM_ENTRY_ID, "Ingresso", "Ti trovi nell'ingresso di Poggiolevante");
         entry.addObject(guido, null);
         entry.setImagePath(ResourceLoader.IMG_PATH.resolve("Ingresso.png").toString());
@@ -389,7 +385,7 @@ public class Level1State extends GameState {
         office.addObject(microSD, null);
         office.addObject(chiaviAuto, null);
 
-        // Secondo piano (indice 1)
+        // Creazione stanze - Primo piano (laboratori)
         Room hallway = new Room(Utils.ROOM_HALLWAY_ID, "Disimpegno", "Ti trovi al 2° piano in un disimpegno.");
         hallway.setImagePath(ResourceLoader.IMG_PATH.resolve("Disimpegno.png").toString());
         
@@ -418,7 +414,8 @@ public class Level1State extends GameState {
         electronicsLab.addObject(setCacciaviti, null);
         electronicsLab.addObject(saldatore, null);
         
-        // Collegamenti primo piano
+        // Configurazione collegamenti tra stanze
+        // Piano terra
         entry.setWest(reception);
         reception.setEast(entry);
         entry.setNorth(hall);
@@ -430,13 +427,14 @@ public class Level1State extends GameState {
         corridor.setWest(office);
         office.setEast(corridor);
         office.addObject(tutor, null);
-        // Collegamenti secondo piano
         galileo.setWest(hall);
         galileo.addObject(direttoreGalileo, null);
+        
+        // Primo piano
         hallway.setEast(craftRoom);
         craftRoom.setWest(hallway);
         hallway.setNorth(entryLab);
-        hallway.setForbidden(true);
+        hallway.setForbidden(true); // Area riservata inizialmente
         entryLab.setSouth(hallway);
         entryLab.setEast(lab5);
         lab5.setWest(entryLab);
@@ -446,7 +444,9 @@ public class Level1State extends GameState {
         lab3D.setWest(corridorLab);
         corridorLab.setNorth(electronicsLab);
         electronicsLab.setSouth(corridorLab);
-        // Aggiunta stanze ai piani
+        
+        // Aggiunta stanze alla mappa di gioco
+        // Piano terra (indice 0)
         gameDescription.getGameMap().addRoom(entry, 0);
         gameDescription.getGameMap().addRoom(hall, 0);
         gameDescription.getGameMap().addRoom(reception, 0);
@@ -454,6 +454,7 @@ public class Level1State extends GameState {
         gameDescription.getGameMap().addRoom(galileo, 0);
         gameDescription.getGameMap().addRoom(office, 0);
 
+        // Primo piano (indice 1)
         gameDescription.getGameMap().addRoom(hallway, 1);
         gameDescription.getGameMap().addRoom(craftRoom, 1);
         gameDescription.getGameMap().addRoom(entryLab, 1);
@@ -462,15 +463,19 @@ public class Level1State extends GameState {
         gameDescription.getGameMap().addRoom(lab3D, 1);
         gameDescription.getGameMap().addRoom(electronicsLab, 1);
 
-        // Collegamento tra i piani
+        // Collegamento tra i piani (scala nel corridoio)
         gameDescription.getGameMap().linkFloors(corridor, hallway, CommandType.NORD);
+        
+        // Configurazione punto di partenza
         gameDescription.setCurrentRoom(entry);
         this.setStartingRoom(entry);
     }
     
+    /**
+     * Verifica completamento: possesso di tutti gli oggetti richiesti nell'inventario.
+     */
     @Override
     public boolean isCompleted(GameDescription game) {
-        // Verifica se tutti gli oggetti richiesti sono nell'inventario
         return game.getInventory().stream()
             .mapToInt(obj -> obj.getId())
             .boxed()
@@ -478,6 +483,9 @@ public class Level1State extends GameState {
             .containsAll(this.getRequiredIDObjects());
     }
     
+    /**
+     * Verifica fallimento: possesso di oggetti vietati nell'inventario.
+     */
     @Override
     public boolean isFailureConditionMet(GameDescription game) {
         return  game.getInventory().stream()
@@ -488,12 +496,13 @@ public class Level1State extends GameState {
                    .anyMatch(id -> this.getForbidenIDObjects().contains(id));
     }
     
+    /** Esegue callback per transizione al livello successivo */
     @Override
     public void handleSuccess(Runnable onSuccess) {
-        // Esegue il callback per la transizione al livello successivo
         onSuccess.run();
     }
     
+    /** Esegue callback per gestione fallimento */
     @Override
     public void handleFailure(Runnable onFailure) {
         onFailure.run();
@@ -504,6 +513,9 @@ public class Level1State extends GameState {
         return "Introduzione & Test di Logica - Livello 1";
     }
 
+    /**
+     * Mostra descrizione del livello con dialoghi del Direttore e obiettivi.
+     */
     @Override
     public void getLevelDescription(OutputHandler output, String playerName, String remainingTime) {
         output.writeln("IMAGE:" + ResourceLoader.IMG_PATH.resolve("DirettoreIngresso.png").toString());

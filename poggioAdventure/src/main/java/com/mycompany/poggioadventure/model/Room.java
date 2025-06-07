@@ -8,51 +8,78 @@ import java.util.Map;
 import java.io.Serializable;
 
 /**
- * Rappresenta una stanza nel gioco di avventura.
- * Ogni stanza può contenere oggetti, essere collegata ad altre stanze,
- * e fornire descrizioni dinamiche basate sul suo stato.
- *
- * @author Strix89 & MikeRvsso
+ * Rappresenta una stanza navigabile nel mondo di gioco con gestione dinamica contenuti.
+ * 
+ * <p>Fornisce funzionalità complete per navigazione spaziale, gestione oggetti/NPC,
+ * descrizioni contestuali e collegamenti tra aree. Supporta serializzazione per
+ * salvataggio stato e descrizioni adaptive basate su esplorazione giocatore.
+ * 
+ * <p><b>Funzionalità principali:</b>
+ * <ul>
+ *   <li>Sistema navigazione direzionale (N/S/E/W) con collegamenti speciali</li>
+ *   <li>Gestione dinamica oggetti e NPC con etichette personalizzate</li>
+ *   <li>Descrizioni contestuali basate su stato esplorazione</li>
+ *   <li>Sistema contenitori con visualizzazione contenuto</li>
+ *   <li>Controllo accesso con stanze proibite</li>
+ *   <li>Supporto immagini per rappresentazione visuale</li>
+ * </ul>
+ * 
+ * <p><b>Pattern implementati:</b>
+ * <ul>
+ *   <li>Composite: gestione oggetti e contenitori</li>
+ *   <li>State: tracking esplorazione per descrizioni adaptive</li>
+ *   <li>Strategy: rendering differenziato per oggetti vs NPC</li>
+ * </ul>
  */
 public class Room implements Serializable {
     
     private static final long serialVersionUID = 123456789L;
 
-    // --- ATTRIBUTI PRINCIPALI ---
-    private final int id;                           // Identificatore univoco della stanza
-    private String name;                            // Nome della stanza
-    private String description;                     // Descrizione base della stanza
-    private String baseLookDescription;             // Descrizione alternativa per il comando "guarda"
-    private boolean hasBeenObserved = false;        // Flag per tracciare se il giocatore ha visitato la stanza
-    private boolean isForbidden = false;            // Flag per stanze non accessibili
-    private String imagePath = null;                // Percorso dell'immagine associata alla stanza
-
-    // --- COLLEGAMENTI TRA STANZE ---
-    private Room south = null;                      // Stanza a sud
-    private Room north = null;                      // Stanza a nord  
-    private Room east = null;                       // Stanza a est
-    private Room west = null;                       // Stanza a ovest
+    /** Identificatore univoco immutabile della stanza */
+    private final int id;
     
-    // --- COLLEGAMENTI SPECIALI (per collegare piani diversi) ---
-    private Room linkedRoom = null;                 // Stanza collegata specialmente (es. scale)
-    private CommandType linkedDirection = CommandType.NONE; // Direzione del collegamento speciale
-
-    // --- GESTIONE OGGETTI ---
-    private final List<AdvObject> objectsInRoom = new ArrayList<>();           // Lista oggetti nella stanza
-    private final Map<Integer, String> objectLookLabels = new HashMap<>();     // Etichette personalizzate per oggetti
-
-    // --- COSTRUTTORI ---
+    /** Nome della stanza */
+    private String name;
     
-    /**
-     * Costruttore base con solo ID
-     */
+    /** Descrizione base della stanza */
+    private String description;
+    
+    /** Descrizione alternativa per comando "guarda" */
+    private String baseLookDescription;
+    
+    /** Flag tracking prima visita giocatore */
+    private boolean hasBeenObserved = false;
+    
+    /** Flag controllo accesso (stanze bloccate) */
+    private boolean isForbidden = false;
+    
+    /** Path immagine per rappresentazione visuale */
+    private String imagePath = null;
+
+    /** Collegamenti direzionali standard */
+    private Room south = null;
+    private Room north = null;
+    private Room east = null;
+    private Room west = null;
+    
+    /** Collegamento speciale (es. scale tra piani) */
+    private Room linkedRoom = null;
+    
+    /** Direzione del collegamento speciale */
+    private CommandType linkedDirection = CommandType.NONE;
+
+    /** Oggetti presenti nella stanza */
+    private final List<AdvObject> objectsInRoom = new ArrayList<>();
+    
+    /** Etichette personalizzate per oggetti nel comando "guarda" */
+    private final Map<Integer, String> objectLookLabels = new HashMap<>();
+
+    /** Costruttore minimale con solo ID */
     public Room(int id) {
         this.id = id;
     }
 
-    /**
-     * Costruttore con ID, nome e descrizione
-     */
+    /** Costruttore standard con identificazione e descrizione */
     public Room(int id, String name, String description) {
         this.id = id;
         this.name = name;
@@ -60,9 +87,7 @@ public class Room implements Serializable {
         this.baseLookDescription = null;
     }
 
-    /**
-     * Costruttore completo con descrizione personalizzata per il comando "guarda"
-     */
+    /** Costruttore completo con descrizione personalizzata per comando "guarda" */
     public Room(int id, String name, String description, String baseLook) {
         this.id = id;
         this.name = name;
@@ -70,7 +95,7 @@ public class Room implements Serializable {
         this.baseLookDescription = baseLook;
     }
 
-    // --- GETTER E SETTER ---
+    // === GETTER E SETTER STANDARD ===
     
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
@@ -87,10 +112,16 @@ public class Room implements Serializable {
     public Room getWest() { return west; }
     public void setWest(Room west) { this.west = west; }
     public Room getLinkedRoom() { return linkedRoom; }
+    
+    /**
+     * Configura collegamento speciale con direzione associata.
+     * Utilizzato per scale, ascensori o passaggi non standard.
+     */
     public void setLinkedRoom(Room linkedRoom, CommandType dir) {
         this.linkedRoom = linkedRoom;
         this.linkedDirection = dir;
     }
+    
     public CommandType getLinkedDirection() { return linkedDirection; }
     public int getId() { return id; }
     public String getImagePath() { return imagePath; }
@@ -101,10 +132,12 @@ public class Room implements Serializable {
     public boolean isForbidden() { return isForbidden; }
     public void setForbidden(boolean forbidden) { this.isForbidden = forbidden; }
 
-    // --- GESTIONE OGGETTI ---
+    // === GESTIONE OGGETTI ===
 
     /**
-     * Aggiunge un oggetto alla stanza se non è già presente
+     * Aggiunge oggetto evitando duplicati.
+     * 
+     * @param object Oggetto da aggiungere alla stanza
      */
     public void addObject(AdvObject object) {
         if (object != null && !this.objectsInRoom.contains(object)) {
@@ -113,8 +146,11 @@ public class Room implements Serializable {
     }
 
     /**
-     * Aggiunge un oggetto con un'etichetta personalizzata per il comando "guarda"
-     * Se l'etichetta è null o vuota, usa la descrizione dell'oggetto
+     * Aggiunge oggetto con etichetta personalizzata per comando "guarda".
+     * Fallback su descrizione oggetto se etichetta vuota.
+     * 
+     * @param object Oggetto da aggiungere
+     * @param lookLabel Etichetta personalizzata (opzionale)
      */
     public void addObject(AdvObject object, String lookLabel) {
         addObject(object);
@@ -129,7 +165,10 @@ public class Room implements Serializable {
     }
 
     /**
-     * Rimuove un oggetto dalla stanza e la sua etichetta associata
+     * Rimuove oggetto e etichetta associata dalla stanza.
+     * 
+     * @param object Oggetto da rimuovere
+     * @return true se rimosso con successo
      */
     public boolean removeObject(AdvObject object) {
         if (object != null) {
@@ -139,9 +178,7 @@ public class Room implements Serializable {
         return false;
     }
     
-    /**
-     * Override toString per debugging del reset
-     */
+    /** Rappresentazione debug della stanza */
     @Override
     public String toString() {
         return String.format("Room[id=%d, name='%s', objects=%d]", 
@@ -149,17 +186,18 @@ public class Room implements Serializable {
     }
 
     /**
-     * Cerca un oggetto per nome o alias
+     * Ricerca oggetto per nome o alias con matching flessibile.
+     * 
+     * @param name Nome o alias da cercare
+     * @return Oggetto trovato o null
      */
     public AdvObject getObjectByName(String name) {
         if (name == null) return null;
         
         for (AdvObject obj : objectsInRoom) {
-            // Controllo nome esatto
             if (obj.getName().equalsIgnoreCase(name)) {
                 return obj;
             }
-            // Controllo alias
             if (obj.getAlias() != null && obj.getAlias().contains(name.toLowerCase())) {
                 return obj;
             }
@@ -168,7 +206,10 @@ public class Room implements Serializable {
     }
 
     /**
-     * Cerca un oggetto per ID
+     * Ricerca oggetto per ID specifico.
+     * 
+     * @param id ID oggetto cercato
+     * @return Oggetto trovato o null
      */
     public AdvObject getObject(int id) {
         for (AdvObject o : objectsInRoom) {
@@ -180,7 +221,10 @@ public class Room implements Serializable {
     }
     
     /**
-     * Imposta un'etichetta personalizzata per un oggetto
+     * Configura etichetta personalizzata per oggetto specifico.
+     * 
+     * @param objectId ID oggetto target
+     * @param lookLabel Nuova etichetta (null/vuoto per rimuovere)
      */
     public void setObjectLookLabel(int objectId, String lookLabel) {
         if (lookLabel != null && !lookLabel.trim().isEmpty()) {
@@ -190,18 +234,17 @@ public class Room implements Serializable {
         }
     }
 
-    /**
-     * Recupera l'etichetta personalizzata di un oggetto
-     */
+    /** Recupera etichetta personalizzata oggetto */
     public String getObjectLookLabel(int objectId) {
         return this.objectLookLabels.get(objectId);
     }
 
     /**
-     * Modifica l'etichetta personalizzata di un oggetto esistente
-     * @param objectId ID dell'oggetto
-     * @param newLookLabel Nuova etichetta da assegnare
-     * @return true se l'etichetta è stata modificata, false se l'oggetto non aveva un'etichetta
+     * Modifica etichetta esistente con validazione.
+     * 
+     * @param objectId ID oggetto target
+     * @param newLookLabel Nuova etichetta
+     * @return true se modificata con successo
      */
     public boolean modifyObjectLookLabel(int objectId, String newLookLabel) {
         if (this.objectLookLabels.containsKey(objectId)) {
@@ -209,7 +252,6 @@ public class Room implements Serializable {
                 this.objectLookLabels.put(objectId, newLookLabel.trim());
                 return true;
             } else {
-                // Se la nuova etichetta è vuota, rimuovi l'etichetta
                 this.objectLookLabels.remove(objectId);
                 return true;
             }
@@ -218,52 +260,50 @@ public class Room implements Serializable {
     }
 
     /**
-     * Elimina completamente l'etichetta personalizzata di un oggetto
-     * @param objectId ID dell'oggetto
-     * @return true se l'etichetta è stata rimossa, false se non esisteva
+     * Elimina etichetta personalizzata oggetto.
+     * 
+     * @param objectId ID oggetto target
+     * @return true se rimossa con successo
      */
     public boolean removeObjectLookLabel(int objectId) {
         return this.objectLookLabels.remove(objectId) != null;
     }
 
-    // --- METODO PRINCIPALE: DESCRIZIONE DINAMICA DELLA STANZA ---
+    // === SISTEMA DESCRIZIONE DINAMICA ===
 
     /**
-     * Genera una descrizione completa della stanza includendo:
-     * - Descrizione base o personalizzata
-     * - Direzioni disponibili con nomi delle stanze (se osservate)
-     * - Lista degli oggetti presenti
-     * - Lista degli NPC presenti
+     * Genera descrizione completa contextual della stanza.
+     * Include descrizione base, direzioni disponibili con nomi stanze
+     * esplorate, lista oggetti con etichette e NPC presenti.
+     * 
+     * @return Descrizione formattata con markup colori
      */
     public String getLook() {
         StringBuilder dynamicLook = new StringBuilder();
 
-        // === DESCRIZIONE DELLA STANZA ===
+        // Descrizione base della stanza
         if (this.baseLookDescription != null && !this.baseLookDescription.trim().isEmpty()) {
-            // Usa descrizione personalizzata se disponibile
             dynamicLook.append("\n").append(this.baseLookDescription).append("\n");
         } else if (this.description != null && !this.description.trim().isEmpty()) {
-            // Usa descrizione standard
             dynamicLook.append(this.description).append("\n");
         } else {
-            // Descrizione di fallback
             dynamicLook.append("Ti guardi intorno nella stanza '").append(this.name).append("'.").append("\n");
         }
 
-        // === CONTROLLO DIREZIONI DISPONIBILI ===
+        // Analisi direzioni disponibili
         boolean hasNorth = this.north != null;
         boolean hasSouth = this.south != null;
         boolean hasEast = this.east != null;
         boolean hasWest = this.west != null;
         boolean hasLinked = this.linkedRoom != null && this.linkedDirection != CommandType.NONE;
         
-        // === GENERAZIONE LISTA DIREZIONI ===
+        // Generazione mappa direzioni con indicatori visivi
         if (hasNorth || hasSouth || hasEast || hasWest || hasLinked) {
             dynamicLook.append("\n[BRIGHT_YELLOW]Direzioni[/] disponibili:\n");
             
             List<String> directions = new ArrayList<>();
             
-            // NORD - Freccia su
+            // Direzioni standard con frecce
             if (hasNorth) {
                 String northText = "[BRIGHT_YELLOW]^^[/]";
                 if (this.north.hasBeenObserved()) {
@@ -272,7 +312,6 @@ public class Room implements Serializable {
                 directions.add(northText);
             }
             
-            // SUD - Freccia giù
             if (hasSouth) {
                 String southText = "[BRIGHT_YELLOW]vv[/]";
                 if (this.south.hasBeenObserved()) {
@@ -281,7 +320,6 @@ public class Room implements Serializable {
                 directions.add(southText);
             }
             
-            // OVEST - Freccia sinistra
             if (hasWest) {
                 String westText = "[BRIGHT_YELLOW]<<[/]";
                 if (this.west.hasBeenObserved()) {
@@ -290,7 +328,6 @@ public class Room implements Serializable {
                 directions.add(westText);
             }
             
-            // EST - Freccia destra
             if (hasEast) {
                 String eastText = "[BRIGHT_YELLOW]>>[/]";
                 if (this.east.hasBeenObserved()) {
@@ -299,7 +336,7 @@ public class Room implements Serializable {
                 directions.add(eastText);
             }
             
-            // COLLEGAMENTO SPECIALE - Con asterisco
+            // Collegamenti speciali con asterisco distintivo
             if (hasLinked) {
                 String linkedText = "";
                 switch (this.linkedDirection) {
@@ -317,14 +354,14 @@ public class Room implements Serializable {
                 }
             }
             
-            // Stampa direzioni formattate: | direzione | direzione | direzione |
+            // Formattazione stile tabella per direzioni
             dynamicLook.append("[ORANGE]|[/] ")
                       .append(String.join(" [ORANGE]|[/] ", directions))
                       .append(" [ORANGE]|[/]")
                       .append("\n");
         }
 
-        // === ELABORAZIONE OGGETTI E NPC ===
+        // Categorizzazione oggetti per rendering differenziato
         List<String> itemDescriptions = new ArrayList<>();
         List<String> npcDescriptions = new ArrayList<>();
 
@@ -335,7 +372,7 @@ public class Room implements Serializable {
             String label = this.objectLookLabels.get(obj.getId());
             String displayText;
 
-            // Distingui tra NPC e oggetti normali
+            // Rendering specifico per tipo oggetto
             if (obj instanceof AdvNPC) {
                 displayText = "-[NPC]" + name + "[/]";
                 if (label != null) {
@@ -348,7 +385,7 @@ public class Room implements Serializable {
                     displayText += ": [ " + label + " ]";
                 }
                 
-                // Aggiungi contenuto se è un contenitore aperto
+                // Espansione contenuto per contenitori aperti
                 if (obj instanceof AdvObjectContainer) {
                     AdvObjectContainer container = (AdvObjectContainer) obj;
                     if (container.isOpen()) {
@@ -360,20 +397,20 @@ public class Room implements Serializable {
             }
         }
 
-        // === STAMPA OGGETTI ===
+        // Sezione oggetti con formatting dedicato
         if (!itemDescriptions.isEmpty()) {
             dynamicLook.append("\n[ITEM]Noti[/] i seguenti [ITEM]oggetti[/]: \n");
             dynamicLook.append(String.join("\n", itemDescriptions));
             dynamicLook.append(!npcDescriptions.isEmpty() ? "\n" : "");
         }
 
-        // === STAMPA NPC ===
+        // Sezione NPC con formatting dedicato
         if (!npcDescriptions.isEmpty()) {
             dynamicLook.append("\n[NPC]Noti[/] delle [NPC]persone[/] qui: \n");
             dynamicLook.append(String.join("\n", npcDescriptions));
         }
 
-        // === MESSAGGIO DI FALLBACK ===
+        // Messaggio fallback per stanze vuote
         if (itemDescriptions.isEmpty() && npcDescriptions.isEmpty()) {
             if ((this.baseLookDescription == null || this.baseLookDescription.trim().isEmpty()) &&
                 (this.description != null && this.description.toLowerCase().contains("stanza"))) {
@@ -385,9 +422,11 @@ public class Room implements Serializable {
     }
 
     /**
-     * Genera la descrizione del contenuto di un contenitore aperto
-     * @param container Il contenitore di cui mostrare il contenuto
-     * @return Stringa formattata con il contenuto del contenitore
+     * Genera descrizione dettagliata contenuto contenitore aperto.
+     * Formatta lista oggetti interni con indentazione e markup.
+     * 
+     * @param container Contenitore di cui mostrare contenuto
+     * @return Stringa formattata con contenuto
      */
     private String getContainerContentDescription(AdvObjectContainer container) {
         if (container.getList().isEmpty()) {
@@ -405,13 +444,15 @@ public class Room implements Serializable {
         return contentDesc.toString();
     }
 
-    // --- METODI DI UTILITÀ ---
+    // === OVERRIDE STANDARD ===
 
+    /** Hash code basato su ID per collezioni efficienti */
     @Override
     public int hashCode() { 
         return 83 * id; 
     }
 
+    /** Uguaglianza basata esclusivamente su ID */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;

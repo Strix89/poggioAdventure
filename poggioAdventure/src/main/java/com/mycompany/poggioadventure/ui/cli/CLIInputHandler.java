@@ -6,32 +6,39 @@ import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 /**
- * Implementazione concreta dell'interfaccia InputHandler per interfaccia a riga di comando (CLI).
- * Gestisce l'input dell'utente tramite System.in utilizzando la classe Scanner.
+ * Implementazione CLI per acquisizione input utente da console standard.
  * 
- * @author Strix89
+ * <p>Gestisce input testuale tramite System.in con Scanner dedicato per
+ * interfacce a riga di comando. Fornisce lettura robusta con gestione
+ * errori per stream closure e interruzioni input.
+ * 
+ * <p><b>Caratteristiche:</b>
+ * <ul>
+ *   <li>Singleton Scanner per riutilizzo efficiente risorsa</li>
+ *   <li>Trimming automatico whitespace per input pulito</li>
+ *   <li>Gestione EOF e stream closure con eccezioni appropriate</li>
+ *   <li>Validation stream availability prima di lettura</li>
+ * </ul>
+ * 
+ * <p><b>Pattern:</b> Adapter per standardizzare input console,
+ * Strategy per implementazione specifica CLI dell'InputHandler.
  */
 public class CLIInputHandler implements InputHandler {
     
-    /**
-     * Scanner per la lettura dell'input da console.
-     * Viene inizializzato una sola volta nel costruttore e riutilizzato.
-     */
+    /** Scanner singleton per lettura efficiente da System.in */
     private final Scanner scanner;
 
-    /**
-     * Costruttore che inizializza lo Scanner per leggere da System.in.
-     * System.in rappresenta lo standard input (tipicamente la tastiera).
-     */
+    /** Inizializza Scanner dedicato per standard input console */
     public CLIInputHandler() {
         this.scanner = new Scanner(System.in);
     }
 
     /**
-     * Legge una linea di input dall'utente e la restituisce dopo aver rimosso
-     * gli spazi bianchi iniziali e finali.
+     * Acquisisce linea input da console con validation e sanitization.
+     * Verifica availability stream e gestisce condizioni error gracefully.
      * 
-     * @return Stringa inserita dall'utente, senza spazi iniziali/finali
+     * @return Input utente sanitizzato (trimmed whitespace)
+     * @throws RuntimeException Se stream chiuso o input interrotto
      */
     @Override
     public String getInput() {
@@ -39,11 +46,9 @@ public class CLIInputHandler implements InputHandler {
             if (scanner.hasNextLine()) {
                 return scanner.nextLine().trim();
             } else {
-                // Stream chiuso o EOF
                 throw new RuntimeException("Input stream closed");
             }
         } catch (NoSuchElementException e) {
-            // Gestisce la chiusura improvvisa dell'input
             throw new RuntimeException("Input interrupted", e);
         }
     }

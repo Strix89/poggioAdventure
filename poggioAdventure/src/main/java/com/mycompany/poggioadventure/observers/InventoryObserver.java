@@ -16,29 +16,51 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Metodo che permette di visualizzare l'inventario del giocatore
- * Observer verifica che il comando sia di tipo INVENTORY e restituisce la lista degli oggetti presenti nell'inventario
- * Implementa GameObserver e aggiorna la descrizione del gioco
+ * Observer specializzato per gestione comando inventario con supporto multi-interfaccia.
  * 
- * Supporta aggiornamento automatico ogni 5 secondi per le interfacce GUI.
+ * <p>Implementa visualizzazione adaptive dell'inventario giocatore basata sul tipo
+ * di interfaccia utente. Per GUI fornisce finestra dedicata con aggiornamento
+ * automatico, per CLI restituisce output testuale formattato.
+ * 
+ * <p><b>Funzionalità principali:</b>
+ * <ul>
+ *   <li>Rilevamento automatico tipo interfaccia (GUI vs CLI)</li>
+ *   <li>Finestra GUI con aggiornamento periodico (5s)</li>
+ *   <li>Filtering oggetti visibili con Stream API</li>
+ *   <li>Gestione lifecycle finestra con cleanup automatico</li>
+ *   <li>Serializzazione con campi transient per componenti UI</li>
+ * </ul>
+ * 
+ * <p><b>Pattern implementati:</b>
+ * <ul>
+ *   <li>Observer: reazione a comando INVENTORY</li>
+ *   <li>Strategy: rendering differenziato per tipo interfaccia</li>
+ *   <li>Singleton Window: gestione istanza unica finestra</li>
+ * </ul>
  */
 public class InventoryObserver implements GameObserver, Serializable {
 
-    private transient UI_Inventory inventoryWindow; // Riferimento alla finestra dell'inventario
-    private transient Timer updateTimer; // Timer per l'aggiornamento automatico
-    private static final int UPDATE_INTERVAL = 5000; // 5 secondi in millisecondi
-    private transient GameDescription gameDescription; // Riferimento alla descrizione del gioco
+    /** Riferimento finestra inventario GUI (transient per serializzazione) */
+    private transient UI_Inventory inventoryWindow;
+    
+    /** Timer per aggiornamento automatico finestra GUI */
+    private transient Timer updateTimer;
+    
+    /** Intervallo aggiornamento automatico in millisecondi */
+    private static final int UPDATE_INTERVAL = 5000;
+    
+    /** Riferimento stato gioco per aggiornamenti periodici */
+    private transient GameDescription gameDescription;
 
     /**
-     * Metodo che permette di visualizzare l'inventario del giocatore
-     * Observer verifica che il comando sia di tipo INVENTORY e restituisce la lista degli oggetti presenti nell'inventario
-     * Per interfacce GUI, viene mostrata una finestra grafica che si aggiorna automaticamente
-     * Per interfacce CLI, viene restituita una descrizione testuale
+     * Gestisce comando INVENTORY con rendering adaptive per tipo interfaccia.
+     * GUI: apre/aggiorna finestra dedicata con timer automatico.
+     * CLI: restituisce output testuale formattato con markup.
      * 
-     * @param description La descrizione del gioco
-     * @param parserOutput L'output del parser
-     * @param gameContext Il contesto del gioco
-     * @return Stringa vuota per GUI, descrizione testuale per CLI
+     * @param description Stato corrente mondo di gioco
+     * @param parserOutput Comando parsato con tipo e parametri
+     * @param gameContext Contesto esecuzione con handler I/O
+     * @return Stringa vuota per GUI, descrizione formattata per CLI
      */
     @Override
     public String update(GameDescription description, ParserOutput parserOutput, GameContext gameContext) {
@@ -60,9 +82,11 @@ public class InventoryObserver implements GameObserver, Serializable {
     }
     
     /**
-     * Costruisce il messaggio dell'inventario per CLI usando lambda
-     * @param visibleInventory Lista degli oggetti visibili
-     * @return Stringa formattata per l'inventario
+     * Genera output CLI formattato per inventario utilizzando Stream API.
+     * Applica markup colori per migliorare leggibilità.
+     * 
+     * @param visibleInventory Lista oggetti visibili al giocatore
+     * @return Stringa formattata con elenco oggetti e descrizioni
      */
     private String buildCLIInventoryMessage(List<AdvObject> visibleInventory) {
         if (visibleInventory.isEmpty()) {
@@ -77,11 +101,10 @@ public class InventoryObserver implements GameObserver, Serializable {
     }
     
     /**
-     * Gestisce la visualizzazione dell'inventario per interfacce GUI
-     * Crea una finestra se non esiste, altrimenti la porta in primo piano
-     * Configura un timer per l'aggiornamento automatico
+     * Orchestrazione gestione finestra GUI con pattern Singleton.
+     * Crea nuova finestra se necessario o porta esistente in primo piano.
      * 
-     * @param description La descrizione del gioco
+     * @param description Stato gioco per popolazione iniziale
      */
     private void handleGUIInventory(GameDescription description) {
         this.gameDescription = description;
@@ -93,17 +116,16 @@ public class InventoryObserver implements GameObserver, Serializable {
         }
     }
     
-    /**
-     * Verifica se la finestra dell'inventario è chiusa o non visibile
-     * @return true se la finestra è chiusa
-     */
+    /** Verifica stato finestra per decisioni di creazione/riutilizzo */
     private boolean isInventoryWindowClosed() {
         return inventoryWindow == null || !inventoryWindow.isVisible();
     }
     
     /**
-     * Crea e mostra una nuova finestra dell'inventario
-     * @param description La descrizione del gioco
+     * Factory method per creazione finestra con configurazione completa.
+     * Inizializza contenuto, listener cleanup e timer aggiornamento.
+     * 
+     * @param description Stato gioco per popolazione contenuti
      */
     private void createAndShowInventoryWindow(GameDescription description) {
         List<AdvObject> visibleInventory = getVisibleInventory(description.getInventory());
@@ -111,7 +133,7 @@ public class InventoryObserver implements GameObserver, Serializable {
         inventoryWindow = new UI_Inventory();
         inventoryWindow.addObjectsToScroller(visibleInventory);
         
-        // Aggiunge un listener lambda per la chiusura della finestra
+        // Configurazione cleanup automatico alla chiusura
         inventoryWindow.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosed(WindowEvent e) {
@@ -123,25 +145,19 @@ public class InventoryObserver implements GameObserver, Serializable {
         inventoryWindow.setVisible(true);
     }
     
-    /**
-     * Porta la finestra dell'inventario in primo piano
-     */
+    /** Porta finestra esistente in primo piano e assicura timer attivo */
     private void bringInventoryToFront() {
         inventoryWindow.toFront();
         ensureTimerIsRunning();
     }
     
-    /**
-     * Pulisce le risorse quando la finestra viene chiusa
-     */
+    /** Cleanup risorse alla chiusura finestra per prevenire memory leak */
     private void cleanupInventoryWindow() {
         stopUpdateTimer();
         inventoryWindow = null;
     }
     
-    /**
-     * Assicura che il timer sia in esecuzione
-     */
+    /** Verifica e avvio timer se non già in esecuzione */
     private void ensureTimerIsRunning() {
         if (updateTimer == null || !updateTimer.isRunning()) {
             startUpdateTimer();
@@ -149,7 +165,8 @@ public class InventoryObserver implements GameObserver, Serializable {
     }
     
     /**
-     * Avvia il timer per l'aggiornamento automatico dell'inventario
+     * Inizializzazione timer per aggiornamento periodico contenuti.
+     * Previene creazione timer multipli con controllo stato.
      */
     private void startUpdateTimer() {
         if (updateTimer == null || !updateTimer.isRunning()) {
@@ -158,9 +175,7 @@ public class InventoryObserver implements GameObserver, Serializable {
         }
     }
     
-    /**
-     * Ferma il timer di aggiornamento
-     */
+    /** Terminazione timer con cleanup riferimenti */
     private void stopUpdateTimer() {
         if (updateTimer != null && updateTimer.isRunning()) {
             updateTimer.stop();
@@ -169,8 +184,8 @@ public class InventoryObserver implements GameObserver, Serializable {
     }
     
     /**
-     * Aggiorna la lista degli oggetti nell'inventario
-     * Chiamato periodicamente dal timer
+     * Callback timer per refresh contenuti finestra.
+     * Auto-terminazione se finestra chiusa per efficienza risorse.
      */
     private void updateInventory() {
         if (inventoryWindow != null && inventoryWindow.isVisible() && gameDescription != null) {
@@ -182,9 +197,11 @@ public class InventoryObserver implements GameObserver, Serializable {
     }
 
     /**
-     * Filtra l'inventario per ottenere solo gli oggetti visibili usando Stream API
-     * @param inventory Lista completa dell'inventario
-     * @return Lista degli oggetti visibili
+     * Filtering oggetti inventario con Stream API per visibilità.
+     * Ottimizzazione per non mostrare oggetti sistema o nascosti.
+     * 
+     * @param inventory Lista completa inventario giocatore
+     * @return Lista filtrata oggetti visibili
      */
     private List<AdvObject> getVisibleInventory(List<AdvObject> inventory) {
         return inventory.stream()

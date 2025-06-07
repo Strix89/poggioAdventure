@@ -22,30 +22,38 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Finestra principale del gioco che gestisce l'interfaccia utente completa.
+ * Interfaccia principale gioco GUI con gestione completa gameplay e UI.
  * 
- * <p>Responsabilità principali:
+ * <p>Implementa finestra principale con layout responsive e componenti integrati:
+ * game output area, command input, room images, timers sincronizzati e controls.
+ * Gestisce Engine integration e real-time updates con thread-safe operations.
+ * 
+ * <p><b>Componenti principali:</b>
  * <ul>
- *   <li>Visualizzazione del log di gioco con scrolling</li>
- *   <li>Gestione input comandi del giocatore</li>
- *   <li>Visualizzazione immagini delle stanze</li>
- *   <li>Gestione timer di gioco e countdown</li>
- *   <li>Funzioni di salvataggio / Esci</li>
+ *   <li>Game output area con scrolling automatico</li>
+ *   <li>Command input field con processing real-time</li>
+ *   <li>Room image display con scaling automatico</li>
+ *   <li>Dual timer system: game time + level countdown</li>
+ *   <li>Save/Exit controls con confirmation dialogs</li>
  * </ul>
  * 
- * <p>Estende UI_Abstract per ereditare la struttura base dell'interfaccia.
- * 
- * @author Strix89
+ * <p><b>Pattern implementati:</b>
+ * <ul>
+ *   <li>MVC: UI separata da game logic via Engine</li>
+ *   <li>Observer: real-time updates via Swing Timer</li>
+ *   <li>Template Method: estende UI_Abstract structure</li>
+ *   <li>Factory: Engine creation via EngineFactory</li>
+ * </ul>
  */
 public class UI_Game extends UI_Abstract {
     
-    // ============== COSTANTI LAYOUT ==============
+    // Layout constants per responsive design
     private static final int WINDOW_WIDTH = 1100;
     private static final int WINDOW_HEIGHT = 550;
     private static final float IMAGE_PANEL_RATIO = 0.35f;
     private static final float IMAGE_HEIGHT_RATIO = 0.45f;
 
-    // ============== COMPONENTI UI ==============
+    // Core UI components
     private JTextPane gameOutputArea;
     private JScrollPane outputScrollPane;
     private JTextField commandInput;
@@ -56,39 +64,29 @@ public class UI_Game extends UI_Abstract {
     private JPanel outputImagePane;
     private JLabel playerNameLabel;
 
-    // ============== GESTIONE TEMPO ==============
+    // Game engine integration e timer management
     private Timer mainTimer;
     private Engine gameEngine;
 
-    // ============== COSTRUTTORI ==============
-    
     /**
-     * Crea una nuova finestra di gioco con il nome del giocatore specificato.
-     * @param playerName Nome del giocatore da visualizzare nell'interfaccia
+     * Costruttore principale con player name initialization.
+     * 
+     * @param playerName Nome giocatore per UI display e Engine setup
      */
     public UI_Game(String playerName) {
         super();
         initEngineAfterUI(playerName);
     }
     
-    /**
-     * Costruttore di default per testing o casi speciali.
-     * Utilizza "NONE" come nome giocatore.
-     */
+    /** Costruttore default per testing con placeholder name */
     public UI_Game() {
         super();
         initEngineAfterUI("NONE");
     }
 
-    // ============== INIZIALIZZAZIONE ==============
-    
     /**
-     * Inizializza i componenti dell'interfaccia come richiesto da UI_Abstract.
-     * Configura:
-     * - Layout principale
-     * - Timer di gioco
-     * - Pannelli laterali
-     * - Comportamento finestra
+     * Inizializza componenti UI come richiesto da UI_Abstract.
+     * Configura layout responsive, timer management e window behavior.
      */
     @Override
     protected void initComponents() {
@@ -107,8 +105,10 @@ public class UI_Game extends UI_Abstract {
     }
     
     /**
-     * Inizializza il motore di gioco dopo il setup dell'interfaccia.
-     * @param playerName Nome del giocatore per la partita
+     * Inizializza Engine dopo UI setup con dependency injection pattern.
+     * Configura handlers e establishes initial room state.
+     * 
+     * @param playerName Nome per Engine initialization
      */
     private void initEngineAfterUI(String playerName) {
         OutputHandler guiOutput = new GUIOutputHandler(gameOutputArea);
@@ -117,37 +117,30 @@ public class UI_Game extends UI_Abstract {
         
         try {
             this.gameEngine = EngineFactory.createNewGame(
-                playerName, 
-                guiOutput, 
-                inHandler, 
-                errHandler, 
-                new LoggerInput(errHandler)
+                playerName, guiOutput, inHandler, errHandler, new LoggerInput(errHandler)
             );
         } catch (Exception ex) {
             errHandler.handleFatalError("Errore inizializzazione gioco", ex);
         }
+        
         playerNameLabel.setText(playerName);
         commandInput.addActionListener(e -> processCommand());
         sendButton.addActionListener(e -> processCommand());
+        
         Room startingRoom = gameEngine.getGame().getCurrentRoom();
         if (startingRoom != null && startingRoom.getImagePath() != null) {
             updateRoomImage(startingRoom.getImagePath());
         }
     }
 
-    // ============== CREAZIONE PANNELLI ==============
-    
     /**
-     * Crea il pannello sinistro contenente:
-     * - Area di testo per il log di gioco
-     * - Campo di input per i comandi
-     * - Pulsante di invio
+     * Factory method per left panel con game output e command input.
+     * Configura scrollable text area e input controls con styling.
      */
     private JPanel createLeftPanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setOpaque(false);
 
-        // Configurazione area di output
         gameOutputArea = new JTextPane();
         gameOutputArea.setEditable(false);
         gameOutputArea.setFont(UI_Config.getNormalFont().deriveFont(18f));
@@ -157,7 +150,6 @@ public class UI_Game extends UI_Abstract {
         outputScrollPane = new JScrollPane(gameOutputArea);
         outputScrollPane.setBorder(createSectionBorder("Log Gioco"));
 
-        // Configurazione area di input
         JPanel inputPanel = new JPanel(new BorderLayout(10, 10));
         inputPanel.setOpaque(false);
         
@@ -174,16 +166,14 @@ public class UI_Game extends UI_Abstract {
     }
 
     /**
-     * Crea il pannello destro contenente:
-     * - Immagine della stanza corrente
-     * - Informazioni giocatore e timer
-     * - Pulsanti di controllo
+     * Factory method per right panel con room image, player info e controls.
+     * Implementa layout responsive con image scaling e timer displays.
      */
     private JPanel createRightPanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setOpaque(false);
 
-        // Pannello immagine
+        // Image panel con responsive sizing
         imagePanel = new JPanel(new BorderLayout());
         imagePanel.setBackground(new Color(60, 60, 60));
         
@@ -196,11 +186,10 @@ public class UI_Game extends UI_Abstract {
             (int)(WINDOW_HEIGHT * IMAGE_HEIGHT_RATIO)
         ));
 
-        // Pannello informazioni
+        // Info panel con timer displays
         JPanel infoPanel = new JPanel(new BorderLayout(10, 20));
         infoPanel.setOpaque(false);
 
-        // Configurazione etichette
         JPanel timePanel = new JPanel();
         timePanel.setLayout(new BoxLayout(timePanel, BoxLayout.Y_AXIS));
         timePanel.setOpaque(false);
@@ -209,7 +198,7 @@ public class UI_Game extends UI_Abstract {
         countdownLabel = new JLabel("Countdown: --:--");
         playerNameLabel = new JLabel("NONE"); 
         
-        // Stilizzazione etichette
+        // Styling configuration
         playerNameLabel.setFont(UI_Config.getBoldFont().deriveFont(20f));
         timeLabel.setFont(UI_Config.getNormalFont().deriveFont(16f));
         countdownLabel.setFont(UI_Config.getNormalFont().deriveFont(16f));
@@ -217,7 +206,7 @@ public class UI_Game extends UI_Abstract {
         timeLabel.setForeground(ColorText.WHITE.getSwingColor());
         countdownLabel.setForeground(ColorText.RED.getSwingColor());
 
-        // Layout etichette
+        // Layout assembly con spacing
         JPanel playerNameContainer = new JPanel(new FlowLayout(FlowLayout.CENTER));
         playerNameContainer.setOpaque(false);
         playerNameContainer.add(playerNameLabel);
@@ -236,7 +225,7 @@ public class UI_Game extends UI_Abstract {
         timePanel.add(Box.createVerticalStrut(8)); 
         timePanel.add(countdownLabelPanel);
 
-        // Pulsanti di controllo
+        // Control buttons con event handlers
         JPanel buttonPanel = new JPanel(new GridLayout(1, 2, 10, 0));
         buttonPanel.setOpaque(false);
 
@@ -252,7 +241,6 @@ public class UI_Game extends UI_Abstract {
         buttonPanel.add(saveButton);
         buttonPanel.add(exitButton);
 
-        // Assemblaggio finale
         infoPanel.add(timePanel, BorderLayout.NORTH);
         infoPanel.add(buttonPanel, BorderLayout.CENTER);
 
@@ -262,30 +250,34 @@ public class UI_Game extends UI_Abstract {
         return panel;
     }
 
-    // ============== METODI UTILITY ==============
-    
+    /** Template method implementation per window title */
     @Override
     protected String getWindowTitle() {
         return "PoggioAdventure - Gioco";
     }
 
     /**
-     * Crea un bordo personalizzato per le sezioni UI.
-     * @param title Titolo da mostrare nel bordo
-     * @return Border configurato
+     * Factory method per section borders con title styling.
+     * 
+     * @param title Titolo per border display
+     * @return Border configurato con styling consistente
      */
     private Border createSectionBorder(String title) {
         return BorderFactory.createTitledBorder(
             BorderFactory.createLineBorder(UI_Config.BORDER_COLOR, 2),
-            title,
-            0, 0,
+            title, 0, 0,
             UI_Config.getItalicFont().deriveFont(14f),
             UI_Config.TEXT_COLOR
         );
     }
 
     /**
-     * Crea un pulsante con stile standard e effetti hover.
+     * Factory method per styled buttons con hover effects.
+     * 
+     * @param text Button text
+     * @param bgColor Background color
+     * @param fontSize Font size per text
+     * @return JButton con styling e hover behavior
      */
     private JButton createButton(String text, Color bgColor, float fontSize) {
         JButton button = new JButton(text);
@@ -307,28 +299,27 @@ public class UI_Game extends UI_Abstract {
         return button;
     }
 
-    // ============== GESTIONE GAMEPLAY ==============
-    
+    /**
+     * Configura unified timer per sincronizzazione all time displays.
+     * Evita drift between multiple timers con single update source.
+     */
     private void setupTimers() {
-        // Ferma i timer precedenti se esistono
         if (mainTimer != null) {
             mainTimer.stop();
         }
         
-        // Crea un unico timer che aggiorna tutto simultaneamente
         mainTimer = new Timer(1000, e -> updateAllTimeDisplays());
         mainTimer.start();
     }
 
     /**
-     * Aggiorna simultaneamente tutti i display temporali per garantire sincronizzazione.
+     * Update method per synchronized time displays.
+     * Aggiorna game time e level countdown atomicamente per consistency.
      */
     private void updateAllTimeDisplays() {
         if (gameEngine != null) {
-            // Aggiorna il tempo di gioco totale
             timeLabel.setText("Tempo: " + gameEngine.getFormattedGameTime());
             
-            // Aggiorna il countdown del livello
             if (gameEngine.getGameStateManager() != null) {
                 long remainingSecondsCurrentLevel = gameEngine.getGameStateManager().getCurrentLevelRemainingTimeSeconds();
                 
@@ -344,14 +335,14 @@ public class UI_Game extends UI_Abstract {
                 countdownLabel.setText("Countdown: --:--");
             }
         } else {
-            // Se non c'è engine, mostra valori di default
             timeLabel.setText("Tempo: 00:00:00");
             countdownLabel.setText("Countdown: --:--");
         }
     }
 
     /**
-     * Elabora il comando inserito dal giocatore.
+     * Command processor con Engine delegation e UI updates.
+     * Gestisce input validation, command execution e room state refresh.
      */
     private void processCommand() {
         String command = commandInput.getText().trim();
@@ -370,18 +361,17 @@ public class UI_Game extends UI_Abstract {
     }
 
     /**
-     * Aggiorna l'immagine della stanza visualizzata.
-     * @param imagePath Percorso del file immagine
+     * Updates room image display con error handling e scaling.
+     * Utilizza ResourceLoader per consistent image loading.
+     * 
+     * @param imagePath Path relativo per room image
      */
     public void updateRoomImage(String imagePath) {
         imagePanel.removeAll();
         try {
-            // Usa ResourceLoader invece di ImageIO.read diretto
             BufferedImage image = ResourceLoader.loadImage(imagePath);
             Image scaled = image.getScaledInstance(
-                imagePanel.getWidth(),
-                imagePanel.getHeight(),
-                Image.SCALE_SMOOTH
+                imagePanel.getWidth(), imagePanel.getHeight(), Image.SCALE_SMOOTH
             );
             imagePanel.add(new JLabel(new ImageIcon(scaled)), BorderLayout.CENTER);
         } catch (IOException | IllegalArgumentException ex) {
@@ -394,10 +384,9 @@ public class UI_Game extends UI_Abstract {
         imagePanel.repaint();
     }
 
-    // ============== GESTIONE FILE ==============
-    
     /**
-     * Salva lo stato corrente del gioco in un file.
+     * Async save operation con user feedback via dialogs.
+     * Utilizza background thread per non bloccare EDT.
      */
     private void saveGame() {
         new Thread(() -> {
@@ -405,10 +394,8 @@ public class UI_Game extends UI_Abstract {
                 this.gameEngine.saveGame();
                 SwingUtilities.invokeLater(() -> {
                     JOptionPane.showMessageDialog(
-                        UI_Game.this, 
-                        "Salvataggio completato!", 
-                        "Successo", 
-                        JOptionPane.INFORMATION_MESSAGE
+                        UI_Game.this, "Salvataggio completato!", 
+                        "Successo", JOptionPane.INFORMATION_MESSAGE
                     );
                 });
             } catch (Exception ex) {
@@ -416,8 +403,7 @@ public class UI_Game extends UI_Abstract {
                     JOptionPane.showMessageDialog(
                         UI_Game.this, 
                         "Errore durante il salvataggio:\n" + ex.getMessage(), 
-                        "Errore", 
-                        JOptionPane.ERROR_MESSAGE
+                        "Errore", JOptionPane.ERROR_MESSAGE
                     );
                 });
             }
@@ -425,12 +411,12 @@ public class UI_Game extends UI_Abstract {
     }
 
     /**
-     * Mostra dialogo di conferma per l'uscita dal gioco.
+     * Exit confirmation con optional save before quit.
+     * Gestisce navigation flow verso main menu.
      */
     private void confirmExit() {
         int choice = JOptionPane.showConfirmDialog(this,
-            "Vuoi salvare prima di uscire?",
-            "Conferma uscita",
+            "Vuoi salvare prima di uscire?", "Conferma uscita",
             JOptionPane.YES_NO_CANCEL_OPTION);
 
         if (choice == JOptionPane.YES_OPTION) saveGame();
@@ -440,47 +426,39 @@ public class UI_Game extends UI_Abstract {
         }
     }
 
-    // ============== METODI DI CHIUSURA ==============
-    
+    /** Cleanup method per timer shutdown e resource release */
     private void shutdown() {
         if (mainTimer != null) {
             mainTimer.stop();
         }
     }
 
+    /** Override dispose per guaranteed cleanup */
     @Override
     public void dispose() {
         shutdown();
         super.dispose();
     }
 
-    // ============== GETTER/SETTER ==============
-    
-    public JTextPane getGameOutputArea() {
-        return gameOutputArea;
-    }
-
-    public JTextField getCommandInput() {
-        return commandInput;
-    }
-
-    public Engine getGameEngine() {
-        return gameEngine;
-    }
+    // Accessors per component access
+    public JTextPane getGameOutputArea() { return gameOutputArea; }
+    public JTextField getCommandInput() { return commandInput; }
+    public Engine getGameEngine() { return gameEngine; }
 
     /**
-     * Aggiorna l'engine e riavvia i timer sincronizzati.
+     * Engine setter con timer resync e UI refresh.
+     * Aggiorna player name display e room image per consistency.
+     * 
+     * @param gameEngine Nuovo Engine instance
      */
     public void setGameEngine(Engine gameEngine) {
         this.playerNameLabel.setText(gameEngine.getPlayerName());
         this.gameEngine = gameEngine;
 
-        // Ferma e riavvia i timer per garantire sincronizzazione
         if (mainTimer != null) {
             mainTimer.stop();
         }
         
-        // Riavvia il timer unificato con il nuovo engine
         setupTimers();
 
         Room currentRoom = gameEngine.getGame().getCurrentRoom();
@@ -489,7 +467,7 @@ public class UI_Game extends UI_Abstract {
         }
     }
 
-    // ============== MAIN PER TEST ==============
+    /** Main per testing e development */
     public static void main(String[] args) {
         EventQueue.invokeLater(() -> {
             UI_Game gameScreen = new UI_Game();

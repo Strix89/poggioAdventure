@@ -6,150 +6,173 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Rappresenta un NPC (Personaggio Non Giocante) nell'avventura. Un NPC può avere dialoghi e oggetti da dare al giocatore.
- * La classe estende {@link AdvObject} per ereditare le proprietà comuni di un oggetto.
+ * Personaggio Non Giocante (NPC) con sistema di dialoghi, test e ricompense.
+ * 
+ * <p>Estende AdvObject per ereditare proprietà base, aggiungendo funzionalità
+ * specifiche per interazioni sociali, gestione test interattivi e sistema
+ * di ricompense. Supporta dialoghi contestuali e stato di interazione.
+ * 
+ * <p><b>Funzionalità principali:</b>
+ * <ul>
+ *   <li>Sistema dialoghi differenziati (primo incontro vs successivi)</li>
+ *   <li>Gestione oggetti da donare al giocatore</li>
+ *   <li>Test interattivi con sessioni di stato</li>
+ *   <li>Sistema ricompense per completamento test</li>
+ *   <li>Tracking stato interazioni per personalizzazione</li>
+ * </ul>
+ * 
+ * <p><b>Pattern implementati:</b>
+ * <ul>
+ *   <li>State Machine: gestione stati interazione e test</li>
+ *   <li>Strategy: dialoghi contestuali basati su stato</li>
+ *   <li>Observer: notifica completamento test per ricompense</li>
+ * </ul>
  */
 public class AdvNPC extends AdvObject {
     
-    /** Elenco delle righe di dialogo che l'NPC dice la prima volta che viene interagito. */
+    /** Dialoghi per primo incontro con giocatore */
     private final List<String> firstDialogue = new ArrayList<>();
     
-    /** Elenco delle righe di dialogo che l'NPC dice dopo essere stato interagito. */
+    /** Dialoghi per incontri successivi */
     private final List<String> subsequentDialogue = new ArrayList<>();
     
-    /** Indica se l'NPC è stato interagito dal giocatore. */
+    /** Flag stato interazione con giocatore */
     private boolean hasInteracted = false;
     
-    /** Elenco degli oggetti che l'NPC può dare al giocatore. */
+    /** Oggetti che NPC può donare al giocatore */
     private final List<AdvObject> itemsToGive = new ArrayList<>();
     
-    /** Test che l'NPC può far eseguire al giocatore. */
+    /** Test configurato per questo NPC */
     private Test test = null;
     
-    /** Sessione di test attiva per questo NPC. */
+    /** Sessione test attualmente attiva */
     private TestSession activeTestSession = null;
 
-    /** Indica se il giocatore ha già completato il test. */
+    /** Flag completamento test */
     private boolean testCompleted = false;
     
-    /** Oggetto speciale che viene dato al completamento del test. */
+    /** Oggetto ricompensa per superamento test */
     private AdvObject rewardObject = null;
 
     /**
-     * Costruisce un nuovo NPC con un ID, un nome e una descrizione.Inizializza la proprietà pickupable a false, in quanto l'NPC non è prelevabile.
+     * Costruttore completo con path immagine personalizzato.
+     * Configura NPC come non raccoglibile per preservare presenza nel mondo.
      * 
-     * @param id L'ID dell'NPC.
-     * @param name Il nome dell'NPC.
-     * @param description La descrizione dell'NPC.
-     * @param imagePathForNPC
+     * @param id Identificatore univoco NPC
+     * @param name Nome visualizzato
+     * @param description Descrizione per esaminazione
+     * @param imagePathForNPC Path immagine specifica NPC
      */
     public AdvNPC(int id, String name, String description, String imagePathForNPC) {
         super(id, name, description, imagePathForNPC);
-        setPickupable(false); // L'NPC non può essere prelevato
-    }
-    
-    public AdvNPC(int id, String name, String description) {
-        super(id, name, description);
-        setPickupable(false); // L'NPC non può essere prelevato
+        setPickupable(false);
     }
     
     /**
-     * Aggiunge una riga di dialogo da parte dell'NPC che viene visualizzata la prima volta che il giocatore interagisce con lui.
+     * Costruttore base senza immagine personalizzata.
      * 
-     * @param line La riga di dialogo da aggiungere.
+     * @param id Identificatore univoco NPC
+     * @param name Nome visualizzato  
+     * @param description Descrizione per esaminazione
+     */
+    public AdvNPC(int id, String name, String description) {
+        super(id, name, description);
+        setPickupable(false);
+    }
+    
+    /**
+     * Aggiunge riga dialogo per primo incontro.
+     * Costruisce progressivamente conversazione iniziale.
+     * 
+     * @param line Riga dialogo da aggiungere
      */
     public void addFirstDialogueLine(String line) {
         firstDialogue.add(line);
     }
 
     /**
-     * Aggiunge una riga di dialogo da parte dell'NPC che viene visualizzata dopo la prima interazione.
+     * Aggiunge riga dialogo per incontri successivi.
+     * Permette conversazioni diverse dopo prima interazione.
      * 
-     * @param line La riga di dialogo da aggiungere.
+     * @param line Riga dialogo da aggiungere
      */
     public void addSubsequentDialogueLine(String line) {
         subsequentDialogue.add(line);
     }
 
     /**
-     * Restituisce le righe di dialogo da visualizzare, a seconda che l'NPC sia stato interagito o meno.
-     * Se l'NPC è stato interagito, vengono restituiti i dialoghi successivi; altrimenti, quelli iniziali.
+     * Restituisce dialoghi contestuali basati su stato interazione.
+     * Implementa strategia di dialogo adattivo per maggiore immersione.
      * 
-     * @return La lista di righe di dialogo appropriate.
+     * @return Lista dialoghi appropriati per stato corrente
      */
     public List<String> getDialogue() {
         return hasInteracted ? subsequentDialogue : firstDialogue;
     }
 
     /**
-     * Aggiunge un oggetto che l'NPC può dare al giocatore.
+     * Aggiunge oggetto alla lista doni disponibili.
      * 
-     * @param item L'oggetto da aggiungere alla lista.
+     * @param item Oggetto che NPC può donare
      */
     public void addItemToGive(AdvObject item) {
         itemsToGive.add(item);
     }
 
     /**
-     * Restituisce l'elenco degli oggetti che l'NPC può dare al giocatore.
+     * Restituisce oggetti disponibili per donazione.
      * 
-     * @return La lista degli oggetti che l'NPC può dare.
+     * @return Lista oggetti donabili
      */
     public List<AdvObject> getItemsToGive() {
         return itemsToGive;
     }
 
-    /**
-     * Verifica se l'NPC è stato interagito dal giocatore.
-     * 
-     * @return {@code true} se l'NPC è stato interagito, altrimenti {@code false}.
-     */
+    /** Verifica se NPC è già stato avvicinato dal giocatore */
     public boolean hasInteracted() {
         return hasInteracted;
     }
 
     /**
-     * Imposta lo stato dell'interazione dell'NPC con il giocatore.
+     * Aggiorna stato interazione NPC per personalizzazione dialoghi.
      * 
-     * @param hasInteracted {@code true} se l'NPC è stato interagito, {@code false} altrimenti.
+     * @param hasInteracted true se NPC è stato avvicinato
      */
     public void setHasInteracted(boolean hasInteracted) {
         this.hasInteracted = hasInteracted;
     }
     
-    // ========== METODI PER IL SISTEMA TEST ==========
+    // ========== SISTEMA TEST INTERATTIVI ==========
     
     /**
-     * Imposta il test che l'NPC può far eseguire.
+     * Configura test che NPC può amministrare al giocatore.
      * 
-     * @param test Il test da assegnare all'NPC
+     * @param test Test da assegnare per questo NPC
      */
     public void setTest(Test test) {
         this.test = test;
     }
     
-    /**
-     * Restituisce il test dell'NPC.
-     * 
-     * @return Il test dell'NPC, null se non ne ha uno
-     */
+    /** Restituisce test configurato per questo NPC */
     public Test getTest() {
         return test;
     }
     
     /**
-     * Verifica se l'NPC ha un test disponibile.
+     * Verifica disponibilità test per esecuzione.
+     * Test disponibile solo se configurato e non ancora completato.
      * 
-     * @return true se l'NPC ha un test
+     * @return true se test può essere eseguito
      */
     public boolean hasTest() {
         return test != null && !testCompleted;
     }
     
     /**
-     * Inizia una nuova sessione di test.
+     * Inizializza nuova sessione test se disponibile.
+     * Crea stato di esecuzione per tracking progresso.
      * 
-     * @return true se il test è stato avviato, false se già completato o non disponibile
+     * @return true se sessione avviata con successo
      */
     public boolean startTestSession() {
         if (!hasTest()) {
@@ -160,72 +183,50 @@ public class AdvNPC extends AdvObject {
         return true;
     }
     
-    /**
-     * Verifica se c'è una sessione di test attiva.
-     * 
-     * @return true se la sessione è attiva
-     */
+    /** Verifica presenza sessione test in corso */
     public boolean hasActiveTestSession() {
         return activeTestSession != null && activeTestSession.isActive();
     }
     
-    /**
-     * Restituisce la sessione di test attiva.
-     * 
-     * @return La sessione attiva o null
-     */
+    /** Restituisce sessione test corrente per gestione domande */
     public TestSession getActiveTestSession() {
         return activeTestSession;
     }
     
-    /**
-     * Termina la sessione di test attiva.
-     */
+    /** Termina e pulisce sessione test attiva */
     public void clearTestSession() {
         this.activeTestSession = null;
     }
     
-    /**
-     * Verifica se il test è stato completato.
-     * 
-     * @return true se il test è stato completato
-     */
+    /** Verifica se test è stato completato con successo */
     public boolean isTestCompleted() {
         return testCompleted;
     }
     
     /**
-     * Imposta lo stato di completamento del test.
+     * Aggiorna stato completamento test per controllo ricompense.
      * 
-     * @param testCompleted true se il test è stato completato
+     * @param testCompleted true se test superato
      */
     public void setTestCompleted(boolean testCompleted) {
         this.testCompleted = testCompleted;
     }
     
     /**
-     * Imposta l'oggetto ricompensa per il superamento del test.
+     * Configura ricompensa per superamento test.
      * 
-     * @param rewardObject L'oggetto da dare come ricompensa
+     * @param rewardObject Oggetto da assegnare come premio
      */
     public void setRewardObject(AdvObject rewardObject) {
         this.rewardObject = rewardObject;
     }
     
-    /**
-     * Restituisce l'oggetto ricompensa.
-     * 
-     * @return L'oggetto ricompensa o null
-     */
+    /** Restituisce oggetto ricompensa configurato */
     public AdvObject getRewardObject() {
         return rewardObject;
     }
     
-    /**
-     * Verifica se l'NPC ha un oggetto ricompensa.
-     * 
-     * @return true se ha un oggetto ricompensa
-     */
+    /** Verifica se NPC ha ricompensa configurata per test */
     public boolean hasRewardObject() {
         return rewardObject != null;
     }
