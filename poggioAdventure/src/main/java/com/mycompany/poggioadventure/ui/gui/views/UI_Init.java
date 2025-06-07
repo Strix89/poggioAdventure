@@ -258,6 +258,19 @@ public class UI_Init extends UI_Abstract implements MenuManager {
     public void showRanking() {
         JFrame ranking = new UI_Rank();
         ranking.setLocationRelativeTo(this);
+        // Nasconde la finestra principale
+        setVisible(false);
+        // Aggiunge un listener per quando la classifica viene chiusa
+        ranking.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosed(java.awt.event.WindowEvent e) {
+                // Riporta in primo piano la finestra principale
+                setVisible(true);
+                toFront();
+                requestFocus();
+            }
+        });
+        
         ranking.setVisible(true);
     }
 
@@ -283,7 +296,7 @@ public class UI_Init extends UI_Abstract implements MenuManager {
     
     @Override
     public void exit() {
-        Utils.exitApplication();
+        dispose();
     }
 
     // ============== UTILITY ==============
