@@ -151,7 +151,8 @@ public class Engine {
                 output,
                 "[PLAYER]" + playerName + "[/]",
                 this::handleGameCompleted, 
-                this::handleGameLoss
+                this::handleGameLoss,
+                this::saveGame
             );
             if (!fromSave){
                 output.writeln(this.output instanceof GUIOutputHandler ? game.getGUIWelcomeMsg() : game.getCLIWelcomeMsg(), ColorText.WHITE);

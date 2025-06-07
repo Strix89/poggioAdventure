@@ -37,6 +37,7 @@ public class GameStateManager {
     // Callback per comunicare con Engine senza dipendenza diretta
     private Runnable onGameCompleted;
     private Runnable onGameLoss;
+    private Runnable onSaveGame;
     
     // Sequenza predefinita dei livelli
     private final GameState[] levels = {
@@ -55,12 +56,13 @@ public class GameStateManager {
      */
     public GameStateManager(GameDescription gameDescription, OutputHandler output, 
                            String playerName, Runnable onGameCompleted, 
-                           Runnable onGameLoss) {
+                           Runnable onGameLoss, Runnable onSaveGame) {
         this.gameDescription = gameDescription;
         this.output = output;
         this.playerName = playerName;
         this.onGameCompleted = onGameCompleted;
         this.onGameLoss = onGameLoss;
+        this.onSaveGame = onSaveGame;
         this.levelMapSnapshot = null;
         this.levelInventorySnapshot = null;
     }
@@ -181,7 +183,7 @@ public class GameStateManager {
     public void resetCurrentLevel() {
         if (currentState != null && levelMapSnapshot != null && levelInventorySnapshot != null) {
             output.writeln("\n🔄 Resetting livello: " + currentState.getLevelName(), ColorText.YELLOW);
-            
+
             // Ferma il TimeManager
             if (timeManager != null) {
                 timeManager.stop();
@@ -219,6 +221,12 @@ public class GameStateManager {
             long levelTimeMillis = currentState.getTimeLimit();
             timeManager = new TimeManager(levelTimeMillis);
             timeManager.start();
+
+            // AGGIUNTO: Salva il gioco prima del reset
+            if (onSaveGame != null) {
+                output.writeln("Vedi che sto salvando.. t piacess a essere il 1° in classifica", ColorText.BRIGHT_YELLOW);
+                onSaveGame.run();
+            }
             
             // Registra il nuovo inizio del livello
             levelStartTime = System.currentTimeMillis();
