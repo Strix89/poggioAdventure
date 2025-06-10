@@ -10,74 +10,84 @@ import com.mycompany.poggioadventure.persistence.LoggerInput;
 import com.mycompany.poggioadventure.ui.cli.CLIOutputHandler;
 
 /**
- * Factory per la creazione di istanze del motore di gioco (Engine).
+ * Factory per creazione e configurazione di istanze del motore di gioco.
  * 
- * <p>Responsabilità principali:
+ * <p>Centralizza la logica di inizializzazione dell'Engine fornendo metodi
+ * per creare nuove partite e ripristinare salvataggi esistenti. Gestisce
+ * automaticamente la configurazione degli handler e l'adattamento per
+ * diverse modalità di interfaccia (CLI vs GUI).
+ * 
+ * <p><b>Responsabilità:</b>
  * <ul>
- *   <li>Creazione di nuove partite con stato iniziale</li>
- *   <li>Ripristino di partite salvate</li>
- *   <li>Configurazione degli handler essenziali</li>
+ *   <li>Inizializzazione completa del mondo di gioco</li>
+ *   <li>Configurazione automatica degli handler</li>
+ *   <li>Ripristino stato da salvataggi serializzati</li>
+ *   <li>Adattamento interfaccia per CLI/GUI</li>
  * </ul>
  * 
- * <p>Pattern utilizzati:
+ * <p><b>Pattern implementati:</b>
  * <ul>
- *   <li>Factory Method (per la creazione di Engine)</li>
- *   <li>Dependency Injection</li>
+ *   <li>Factory Method: creazione standardizzata di Engine</li>
+ *   <li>Dependency Injection: configurazione handler esterni</li>
+ *   <li>Template Method: struttura comune per inizializzazione</li>
  * </ul>
- * 
- * @author Strix89
  */
 public class EngineFactory {
 
     /**
-     * Crea un nuovo motore di gioco per una partita iniziale.
+     * Crea nuovo motore di gioco con inizializzazione completa del mondo.
+     * Configura automaticamente le immagini NPC in base al tipo di output.
      * 
-     * @param playerName Nome del giocatore
-     * @param output Handler per l'output di gioco
-     * @param input Handler per l'input del giocatore
-     * @param errorHandler Gestore degli errori
-     * @param logger Logger per tracciamento attività
-     * @return Engine configurato per una nuova partita
-     * @throws Exception Se l'inizializzazione del gioco fallisce
+     * @param playerName Nome del giocatore per personalizzazione
+     * @param output Handler per visualizzazione messaggi e interfaccia
+     * @param input Handler per raccolta input utente
+     * @param errorHandler Gestore centralizzato degli errori
+     * @param logger Sistema di logging per debug e tracciamento
+     * @return Engine completamente configurato per nuova partita
+     * @throws Exception se l'inizializzazione del mondo di gioco fallisce
      */
     public static Engine createNewGame(String playerName, OutputHandler output, 
                                      InputHandler input, ErrorHandler errorHandler, 
                                      LoggerInput logger) throws Exception {
-        // Inizializza la descrizione del gioco
+        // Inizializzazione completa del mondo di gioco
         GameDescription game = new PoggioAdventureDesc();
-        game.init(); // Configura stanze, oggetti e stato iniziale
+        game.init();
+        
+        // Configurazione immagini NPC in base al tipo di interfaccia
         if (output instanceof CLIOutputHandler){
-            game.getGameMap().alterateNPCImages(true);
+            game.getGameMap().alterateNPCImages(true); // Usa ASCII art per CLI
         }
+        
         return new Engine(game, playerName, output, input, errorHandler, logger);
     }
 
     /**
-     * Crea un motore di gioco da un salvataggio esistente.
+     * Ripristina motore di gioco da stato serializzato con configurazione adattiva.
+     * Gestisce la riconfigurazione degli handler e il ripristino del tempo di gioco.
      * 
-     * @param savedGame Stato del gioco salvato
-     * @param playerName Nome del giocatore
-     * @param output Handler per l'output di gioco
-     * @param input Handler per l'input del giocatore
-     * @param errorHandler Gestore degli errori
-     * @param logger Logger per tracciamento attività
-     * @param time Gestore del tempo di gioco
-     * @param gameTime Tempo trascorso nella partita salvata (in millisecondi)
-     * @return Engine configurato con lo stato salvato
+     * @param savedGame Stato del gioco deserializzato da file di salvataggio
+     * @param playerName Nome del giocatore (può differire dal salvataggio originale)
+     * @param output Handler per output configurato per la sessione corrente
+     * @param input Handler per input della sessione corrente
+     * @param errorHandler Gestore errori per la sessione corrente
+     * @param logger Logger per tracciamento della sessione ripristinata
+     * @param gameTime Tempo di gioco accumulato da ripristinare (millisecondi)
+     * @return Engine configurato con stato ripristinato e handler aggiornati
      */
     public static Engine createFromSave(GameDescription savedGame, String playerName,
                                        OutputHandler output, InputHandler input, 
-                                       ErrorHandler errorHandler, LoggerInput logger, 
-                                       TimeManager time, long gameTime) {
-        // Crea l'engine con lo stato salvato
-        Engine gameEngine = new Engine(savedGame, playerName, output, input, errorHandler, logger);
+                                       ErrorHandler errorHandler, LoggerInput logger, long gameTime) {
+        // Creazione engine con flag di ripristino da salvataggio
+        Engine gameEngine = new Engine(savedGame, playerName, output, input, errorHandler, logger, true);
+        
+        // Riconfigurazione adattiva interfaccia NPC
         if (output instanceof CLIOutputHandler) {
-            savedGame.getGameMap().alterateNPCImages(true);
+            savedGame.getGameMap().alterateNPCImages(true);  // ASCII per CLI
         } else{ 
-            savedGame.getGameMap().alterateNPCImages(false);
+            savedGame.getGameMap().alterateNPCImages(false); // Immagini per GUI
         }
-        // Ripristina lo stato temporale
-        gameEngine.setTimeManager(time);
+        
+        // Ripristino tempo di gioco accumulato
         gameEngine.setGameTime(gameTime);
         
         return gameEngine;

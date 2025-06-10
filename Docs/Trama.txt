@@ -28,12 +28,12 @@ NPC: [Guido, tutor, Dottor burdo]
 
 1) Subquest prova 1 (tempo 10 minunti)
 
-1.1 Narrazione,introduzione,obbiettivo. (Guido)  ->(identificazione, documento per far capire all'utente come usare l inventario)
+1.1 Narrazione,introduzione,obbiettivo. (Cupulino)
 1.2 Incontro e spiegazione ,come essere ammessi (Cupulino) 
 1.3 Somministrazione test logica (Cupulino)
-1.3.1 Trovare la penna in una stanza buia per svolger il test (Tutor)
-1.3.2 Start quiz (se time > 10 -> restart prova) *VEDE ACCENDINO 
-1.4 Test superato , lorenzo burdo prensenta il nuovo piano del collegio (laboratorio)
+1.3.1 Trovare la penna nella direzione per svolger il test (Tutor)
+1.3.2 Start quiz (se time > 10 -> restart prova)
+1.4 Test superato , lorenzo burdo prensenta la nuova prova insieme al direttore (Galileo) (Si sblocca l'accesso al disimpegno )
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -65,21 +65,7 @@ Usa flipper zero con inserimento frequenza.
 FINE : Michele si congratula confermando la tua ammissione !! 
 
 
-
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-4) Quest prova BONUS (tempo 15)
-if per ogni oggetto per ptf appartenente inventario vai nella stanza di jbj 
-
-4.0 Gli arriva un bigliettino con su scritto di trovare gli oggetti mancanti e/o dirigersi in stanza di JBJ se li ha trovati già tutti nel corso delle 3 prove
-4.1 La matricola arriva in stanza e jbj si assembla un ptf e invita a consumarlo insieme 
-4.2 Mike the cruel  diventa un androide impossessato da san jose maria
-4.3 Da definire come uccidere the cruel (zzzzzio faaaa wwwwoooo)
-4.n La matricola si risveglia
-
-FINE
-
 
 
 

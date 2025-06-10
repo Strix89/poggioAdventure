@@ -1,10 +1,11 @@
 package com.mycompany.poggioadventure.ui.gui.views;
 
 import com.mycompany.poggioadventure.ui.UI_Abstract;
-import com.mycompany.poggioadventure.core.GameContext;
 import com.mycompany.poggioadventure.core.abstracts.IFlipperCommandProcessor;
-import com.mycompany.poggioadventure.core.FlipperCommandProcessor;
+import com.mycompany.poggioadventure.core.levels.FlipperCommandProcessor;
 import com.mycompany.poggioadventure.core.utils.FlipperResult;
+import com.mycompany.poggioadventure.core.utils.GameContext;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -272,7 +273,7 @@ public class UI_Flipper extends UI_Abstract {
      * Crea un GameContext mock per i test.
      */
     private static GameContext createMockGameContext() {
-        return new GameContext(null, null, null, null, null, null) {
+        return new GameContext(null, null, null, null, null) {
             @Override
             public String toString() {
                 return "MockGameContext per test UI_Flipper";

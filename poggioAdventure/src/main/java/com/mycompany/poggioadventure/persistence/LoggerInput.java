@@ -17,67 +17,45 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * Gestisce la registrazione, recupero e gestione degli input utente in file di log cifrati.
+ * Sistema logging sicuro per registrazione input utente con crittografia Base64.
  * 
- * <p>La classe fornisce un sistema sicuro per:
+ * <p>Gestisce CRUD operations su file log con protezioni di sicurezza integrate:
+ * path traversal prevention, isolamento directory, validazione formati.
+ * Implementa crittografia automatica per protezione dati sensibili.
+ * 
+ * <p><b>Funzionalità principali:</b>
  * <ul>
- *   <li>Registrare input utente in formato cifrato (Base64)</li>
- *   <li>Garantire l'isolamento dei log nella directory dedicata</li>
- *   <li>Generare nomi file univoci basati su UUID</li>
- *   <li>Verificare l'integrità dei log esistenti</li>
- *   <li>Gestire operazioni CRUD (Create, Read, Update, Delete) sui log</li>
+ *   <li>Generazione file log con UUID per unicità</li>
+ *   <li>Crittografia automatica Base64 per input utente</li>
+ *   <li>Validazione pattern filename e sicurezza path</li>
+ *   <li>Verifica integrità dati e decodifica sicura</li>
+ *   <li>Gestione file temporanei per export/sync</li>
  * </ul>
  * 
- * <p><b>Sicurezza:</b> Tutti gli input vengono automaticamente codificati in Base64 prima della scrittura.
- * Vengono implementati controlli per prevenire:
- * <ul>
- *   <li>Path traversal attacks</li>
- *   <li>Accesso a file esterni alla directory dei log</li>
- *   <li>Corruzione dei dati</li>
- * </ul>
+ * <p><b>Sicurezza:</b> Prevenzione path traversal, validazione UUID,
+ * isolamento directory logs, controlli accesso filesystem.
  * 
- * @author Strix89
- * @version 1.1
+ * <p><b>Pattern:</b> Repository per persistenza logs, Factory per
+ * generazione filename, Strategy per encoding/decoding.
  */
 public class LoggerInput {
-    /**
-     * Percorso completo del file di log corrente.
-     * <p>Viene generato automaticamente al momento della creazione dell'istanza
-     * o impostato esplicitamente quando si carica un log esistente.
-     * <p>Il formato del nome file è: {@code [UUID]_Input.txt}
-     */
+    
+    /** Path completo file log corrente */
     private String fileName;
     
-    /**
-     * Gestore degli errori centralizzato per la segnalazione di problemi.
-     * <p>Viene utilizzato per:
-     * <ul>
-     *   <li>Errori di I/O durante le operazioni sui file</li>
-     *   <li>Problemi di creazione directory</li>
-     *   <li>Altri errori runtime critici</li>
-     * </ul>
-     */
+    /** Handler centralizzato per gestione errori */
     private final ErrorHandler errorHandler;
     
-    /**
-     * Pattern regex per validare i nomi dei file di log.
-     * <p>Verifica che:
-     * <ul>
-     *   <li>Il file sia nella directory corretta dei log</li>
-     *   <li>Il nome segua il formato UUID + "_Input.txt"</li>
-     * </ul>
-     */
-    protected static final String LOGS_DIR_PATTERN = 
+    /** Pattern validazione filename log con UUID e estensione standard */
+    public static final String LOGS_DIR_PATTERN = 
         Pattern.quote(LOGS_DIRECTORY.toString().replace(File.separatorChar, '/')) + 
         "/[a-f0-9-]{36}_Input\\.txt";
 
     /**
-     * Costruttore principale per creare un nuovo file di log.
-     * <p>Genera automaticamente un nome file univoco e crea il file fisico.
+     * Costruttore factory per nuovo file log con generazione automatica filename.
+     * Crea directory se necessario e inizializza file fisico.
      * 
-     * @param errorHandler Gestore degli errori (non null)
-     * @throws IllegalArgumentException Se errorHandler è null
-     * @throws IllegalStateException Se la directory dei log non può essere creata
+     * @param errorHandler Handler errori per gestione eccezioni
      */
     public LoggerInput(ErrorHandler errorHandler) {
         if (errorHandler == null) {
@@ -89,12 +67,11 @@ public class LoggerInput {
     }
     
     /**
-     * Costruttore per caricare un file di log esistente.
-     * <p>Non verifica l'esistenza del file fino al primo utilizzo.
+     * Costruttore per caricamento file log esistente.
+     * Non verifica esistenza fino a primo utilizzo per lazy loading.
      * 
-     * @param errorHandler Gestore degli errori (non null)
-     * @param fileName Nome del file di log (relativo alla directory dei log)
-     * @throws IllegalArgumentException Se errorHandler o fileName sono null
+     * @param errorHandler Handler errori per gestione eccezioni
+     * @param fileName Nome file relativo a directory logs
      */
     public LoggerInput(ErrorHandler errorHandler, String fileName) {
         if (errorHandler == null) {
@@ -108,17 +85,14 @@ public class LoggerInput {
     }
 
     /**
-     * Genera un nome file univoco nella directory dei log.
-     * <p>Il nome file segue il formato: {@code [UUID]_Input.txt}
+     * Generatore filename univoco con UUID e pattern standardizzato.
+     * Format: [UUID]_Input.txt nella directory logs dedicata.
      * 
-     * @return Percorso completo del nuovo file
-     * @throws IllegalStateException Se la directory dei log non può essere creata
+     * @return Path completo nuovo file log
      */
     private String generateUniqueFileName() {
         try {
-            // Crea la directory se non esiste
             Files.createDirectories(ResourceLoader.LOGS_DIRECTORY);
-            // Genera nome file con UUID
             Path logPath = ResourceLoader.LOGS_DIRECTORY.resolve(UUID.randomUUID() + "_Input.txt");
             return logPath.toString();
         } catch (IOException ex) {
@@ -128,11 +102,7 @@ public class LoggerInput {
         }
     }
 
-    /**
-     * Crea fisicamente il file di log sul filesystem.
-     * <p>Se il file esiste già, non viene sovrascritto.
-     * In caso di errore, termina l'applicazione con codice di errore.
-     */
+    /** Creazione fisica file log con gestione duplicati */
     private void createLogFile() {
         if (fileName == null) return;
 
@@ -148,16 +118,15 @@ public class LoggerInput {
     }
 
     /**
-     * Registra una lista di comandi nel file di log corrente.
-     * <p>Ogni comando viene codificato in Base64 prima della scrittura.
+     * Persistenza comandi con encoding Base64 automatico.
+     * Append mode per preservare cronologia sessioni.
      * 
-     * @param commands Lista di comandi da registrare (ignorata se null o vuota)
-     * @throws IOException Se si verifica un errore di I/O durante la scrittura
+     * @param commands Lista comandi da persistere
+     * @throws IOException Errori I/O durante scrittura
      */
     public void logInput(List<String> commands) throws IOException {
         if (commands == null || commands.isEmpty()) return;
         
-        // Scrive i comandi codificati in Base64
         Files.write(Path.of(fileName),
             commands.stream()
                 .map(cmd -> Base64.getEncoder().encodeToString(cmd.getBytes()))
@@ -169,13 +138,13 @@ public class LoggerInput {
     }
 
     /**
-     * Legge e decodifica il contenuto di un file di log.
+     * Lettura e decodifica sicura contenuti log con validazione path.
+     * Prevenzione path traversal e controllo integrità encoding.
      * 
-     * @param fileName Percorso completo del file da leggere
-     * @return Lista di comandi decodificati (lista vuota se file non esiste)
-     * @throws IOException Se si verifica un errore di lettura/decodifica
-     * @throws IllegalArgumentException Se fileName è null
-     * @throws SecurityException Se si tenta di leggere file non nella directory dei log
+     * @param fileName Path completo file da decodificare
+     * @return Lista comandi decodificati o lista vuota se file assente
+     * @throws IOException Errori lettura/decodifica
+     * @throws SecurityException Tentativo accesso file non autorizzato
      */
     public static List<String> readAndDecodeLogFile(String fileName) throws IOException {
         if (fileName == null) {
@@ -187,7 +156,7 @@ public class LoggerInput {
             return Collections.emptyList();
         }
         
-        // Verifica sicurezza: solo file nella directory dei log
+        // Controllo sicurezza: isolamento directory logs
         if (!filePath.startsWith(ResourceLoader.LOGS_DIRECTORY.toRealPath())) {
             throw new SecurityException("Tentativo di accesso a file non autorizzato");
         }
@@ -205,16 +174,15 @@ public class LoggerInput {
     }
     
     /**
-     * Elimina un file di log in modo sicuro.
+     * Eliminazione sicura file log con validazione path.
      * 
-     * @param path Percorso completo del file da eliminare
-     * @return true se eliminato con successo, false altrimenti
-     * @throws SecurityException Se si tenta di eliminare file al di fuori della directory dei log
+     * @param path Path file da eliminare
+     * @return true se eliminazione riuscita
+     * @throws SecurityException Tentativo eliminazione file non autorizzato
      */
     public static boolean deleteLogFile(Path path) {
         if (path == null) return false;
         
-        // Verifica sicurezza: solo file nella directory dei log
         if (!path.startsWith(ResourceLoader.LOGS_DIRECTORY)) {
             throw new SecurityException("Tentativo di eliminare file non autorizzato");
         }
@@ -227,22 +195,15 @@ public class LoggerInput {
     }
     
     /**
-     * Verifica l'integrità di un file di log.
-     * <p>Controlla che:
-     * <ul>
-     *   <li>Il file esista</li>
-     *   <li>Ogni riga sia Base64 valido</li>
-     *   <li>Il file sia nella directory corretta</li>
-     * </ul>
+     * Verifica integrità file log: esistenza, validità Base64, path sicuro.
      * 
-     * @param fileName Percorso completo del file da verificare
-     * @return true se il file è valido, false altrimenti
-     * @throws SecurityException Se si tenta di accedere a file non nella directory dei log
+     * @param fileName Path completo file da verificare
+     * @return true se file integro e valido
+     * @throws SecurityException Tentativo accesso file non autorizzato
      */
     public static boolean checkLog(String fileName) {
         Path logPath = Paths.get(fileName);
         
-        // Verifica sicurezza: solo file nella directory dei log
         if (!logPath.startsWith(ResourceLoader.LOGS_DIRECTORY)) {
             throw new SecurityException("Tentativo di accesso a file non autorizzato");
         }
@@ -250,7 +211,6 @@ public class LoggerInput {
         if (!Files.exists(logPath)) return false;
         
         try {
-            // Verifica che ogni riga sia Base64 valido
             Files.readAllLines(logPath).forEach(
                 line -> Base64.getDecoder().decode(line)
             );
@@ -260,30 +220,17 @@ public class LoggerInput {
         }
     }
 
-    /**
-     * Restituisce il percorso completo del file di log corrente.
-     * 
-     * @return Stringa rappresentante il percorso assoluto del file
-     */
+    /** Accessor path completo file log corrente */
     public String getFileName() {
         return fileName;
     }
     
-    /**
-     * Restituisce il Path del file di log corrente.
-     * 
-     * @return Oggetto Path rappresentante il file di log
-     */
+    /** Accessor Path object file log corrente */
     public Path getPathFile() {
         return Paths.get(fileName);
     }
     
-    /**
-     * Imposta un nuovo file di log come file corrente.
-     * 
-     * @param fileName Percorso completo del nuovo file
-     * @throws IllegalArgumentException Se fileName è null
-     */
+    /** Mutator filename con validazione null */
     public void setFileName(String fileName) {
         if (fileName == null) {
             throw new IllegalArgumentException("Nome file non può essere null");
@@ -292,17 +239,11 @@ public class LoggerInput {
     }
     
     /**
-     * Verifica se un Path rappresenta un file di log valido.
-     * <p>Un file è considerato valido se:
-     * <ul>
-     *   <li>Ha estensione "_Input.txt"</li>
-     *   <li>Il nome inizia con un UUID valido</li>
-     *   <li>È un file regolare (non directory/symlink)</li>
-     * </ul>
+     * Validazione filename log: pattern UUID, estensione standard, tipo file regolare.
      * 
-     * @param logPath Path del file da verificare
-     * @return true se il file è valido, false altrimenti
-     * @throws IOException Se si verificano errori di I/O durante la verifica
+     * @param logPath Path da validare
+     * @return true se formato valido e file regolare
+     * @throws IOException Errori accesso filesystem
      */
     public static boolean isValidLogFile(Path logPath) throws IOException {
         if (logPath == null) return false;
@@ -311,5 +252,35 @@ public class LoggerInput {
         return filename.endsWith("_Input.txt") && 
                filename.matches("[a-f0-9-]{36}_Input\\.txt") &&
                Files.isRegularFile(logPath);
+    }
+
+    /**
+     * Factory file temporaneo decrittato per export/sync server.
+     * Decodifica contenuto e crea file temp nella directory download logs.
+     * 
+     * @param originalLogPath Path file log crittato originale
+     * @param playerName Nome giocatore per naming file temp
+     * @return Path file temporaneo decrittato
+     * @throws Exception Errori decodifica o creazione file temp
+     */
+    public static Path createDecryptedTempLogFile(String originalLogPath, String playerName) throws Exception {
+        List<String> decryptedCommands = LoggerInput.readAndDecodeLogFile(originalLogPath);
+        
+        java.nio.file.Path tempFile = java.nio.file.Files.createTempFile(
+            ResourceLoader.LOGS_DW_DIRECTORY, 
+            playerName + "_temp_", 
+            "_decrypted.txt"
+        );
+        
+        java.nio.file.Files.write(
+            tempFile, 
+            decryptedCommands, 
+            java.nio.charset.StandardCharsets.UTF_8,
+            java.nio.file.StandardOpenOption.CREATE,
+            java.nio.file.StandardOpenOption.WRITE,
+            java.nio.file.StandardOpenOption.TRUNCATE_EXISTING
+        );
+        
+        return tempFile;
     }
 }

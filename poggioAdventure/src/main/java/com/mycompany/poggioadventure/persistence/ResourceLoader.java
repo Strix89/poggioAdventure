@@ -3,6 +3,7 @@ package com.mycompany.poggioadventure.persistence;
 import com.mycompany.poggioadventure.core.Engine;
 import com.mycompany.poggioadventure.ui.gui.views.UI_Config;
 import com.mycompany.poggioadventure.core.utils.Utils;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
@@ -328,5 +329,24 @@ public class ResourceLoader {
             Logger.getLogger(ResourceLoader.class.getName())
                 .log(Level.SEVERE, "Pulizia log fallita", ex);
         }
+    }
+
+    /**
+     * Carica le risorse necessarie per l'interfaccia CLI.
+     * <p>Operazioni eseguite:
+     * <ol>
+     *   <li>Verifica/crea directory necessarie</li>
+     *   <li>Pulisce log orfani</li>
+     * </ol>
+     * 
+     * @throws IOException Se fallisce la creazione delle directory critiche
+     */
+    public static void loadResourcesForCLI() throws IOException {
+        // Verifica e crea le directory necessarie
+        checkSavesDirectory();
+        checkLogsDirectory();
+        
+        // Pulizia dei log orfani
+        cleanOrphanedLogs();
     }
 }

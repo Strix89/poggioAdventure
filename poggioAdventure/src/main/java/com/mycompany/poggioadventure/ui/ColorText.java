@@ -44,53 +44,53 @@ public enum ColorText {
     
     // ============== SFUMATURE DI ARANCIONE ==============
     ORANGE("\u001B[38;2;255;165;0m", new Color(255, 165, 0)),            // Standard
-    DARK_ORANGE("\u001B[38;2;255;140;0m", new Color(255, 140, 0)),       // Scuro
-    LIGHT_ORANGE("\u001B[38;2;255;160;122m", new Color(255, 160, 122)),  // Chiaro
-    BURNT_ORANGE("\u001B[38;2;177;73;7m", new Color(177, 73, 7)),        // Bruciato
-    NEON_ORANGE("\u001B[38;2;255;127;39m", new Color(255, 127, 39)),     // Neon
+    DARK_ORANGE("\u001B[38;2;204;85;0m", new Color(204, 85, 0)),         // Molto più scuro
+    LIGHT_ORANGE("\u001B[38;2;255;218;185m", new Color(255, 218, 185)),  // Molto più chiaro
+    BURNT_ORANGE("\u001B[38;2;139;69;19m", new Color(139, 69, 19)),      // Marrone-arancio
+    NEON_ORANGE("\u001B[38;2;255;95;31m", new Color(255, 95, 31)),       // Rosso-arancio vivace
     
     // ============== SFUMATURE DI ROSSO ==============
-    CRIMSON("\u001B[38;2;220;20;60m", new Color(220, 20, 60)),       // Rosso sangue
-    MAROON("\u001B[38;2;128;0;0m", new Color(128, 0, 0)),            // Bordeaux
+    CRIMSON("\u001B[38;2;220;20;60m", new Color(220, 20, 60)),       // Rosa-rosso intenso
+    MAROON("\u001B[38;2;128;0;0m", new Color(128, 0, 0)),            // Rosso molto scuro
     FIREBRICK("\u001B[38;2;178;34;34m", new Color(178, 34, 34)),     // Rosso mattone
-    ROSE("\u001B[38;2;255;192;203m", new Color(255, 192, 203)),      // Rosato
+    ROSE("\u001B[38;2;255;228;225m", new Color(255, 228, 225)),      // Rosa molto tenue
 
     // ============== SFUMATURE DI BLU ==============
-    NAVY("\u001B[38;2;0;0;128m", new Color(0, 0, 128)),              // Blu navy
-    SKYBLUE("\u001B[38;2;135;206;235m", new Color(135, 206, 235)),   // Celeste
-    TURQUOISE("\u001B[38;2;64;224;208m", new Color(64, 224, 208)),   // Turchese
-    INDIGO("\u001B[38;2;75;0;130m", new Color(75, 0, 130)),          // Indaco
+    NAVY("\u001B[38;2;0;0;128m", new Color(0, 0, 128)),              // Blu molto scuro
+    SKYBLUE("\u001B[38;2;135;206;250m", new Color(135, 206, 250)),   // Celeste brillante
+    TURQUOISE("\u001B[38;2;0;206;209m", new Color(0, 206, 209)),     // Verde-blu vivace
+    INDIGO("\u001B[38;2;75;0;130m", new Color(75, 0, 130)),          // Viola-blu scuro
 
     // ============== SFUMATURE DI GIALLO ==============
-    GOLD("\u001B[38;2;255;215;0m", new Color(255, 215, 0)),          // Oro
-    LEMON("\u001B[38;2;255;250;205m", new Color(255, 250, 205)),     // Limone
-    OLIVE("\u001B[38;2;128;128;0m", new Color(128, 128, 0)),         // Oliva
-    SUNFLOWER("\u001B[38;2;244;213;64m", new Color(244, 213, 64)),   // Girasole
+    GOLD("\u001B[38;2;255;215;0m", new Color(255, 215, 0)),          // Oro brillante
+    LEMON("\u001B[38;2;255;255;224m", new Color(255, 255, 224)),     // Giallo molto chiaro
+    OLIVE("\u001B[38;2;107;142;35m", new Color(107, 142, 35)),       // Verde oliva scuro
+    SUNFLOWER("\u001B[38;2;255;218;3m", new Color(255, 218, 3)),     // Giallo puro vivace
     
     // ============== SFUMATURE DI ROSA ==============
     PINK("\u001B[38;2;255;192;203m", new Color(255, 192, 203)),      // Rosa standard
-    HOT_PINK("\u001B[38;2;255;105;180m", new Color(255, 105, 180)),  // Rosa acceso
-    DEEP_PINK("\u001B[38;2;255;20;147m", new Color(255, 20, 147)),   // Rosa intenso
-    LIGHT_PINK("\u001B[38;2;255;182;193m", new Color(255, 182, 193)), // Rosa chiaro
-    SALMON("\u001B[38;2;250;128;114m", new Color(250, 128, 114)),    // Salmone
+    HOT_PINK("\u001B[38;2;255;20;147m", new Color(255, 20, 147)),    // Magenta-rosa intenso
+    DEEP_PINK("\u001B[38;2;199;21;133m", new Color(199, 21, 133)),   // Rosa scuro intenso
+    LIGHT_PINK("\u001B[38;2;255;240;245m", new Color(255, 240, 245)), // Rosa molto tenue
+    SALMON("\u001B[38;2;250;128;114m", new Color(250, 128, 114)),    // Arancio-rosa
     
     // ============== SFUMATURE DI VERDE ==============
-    FOREST_GREEN("\u001B[38;2;34;139;34m", new Color(34, 139, 34)),  // Verde foresta
-    LIME("\u001B[38;2;50;205;50m", new Color(50, 205, 50)),          // Verde lime
-    EMERALD("\u001B[38;2;80;200;120m", new Color(80, 200, 120)),     // Smeraldo
-    MINT("\u001B[38;2;152;251;152m", new Color(152, 251, 152)),      // Verde menta
+    FOREST_GREEN("\u001B[38;2;34;139;34m", new Color(34, 139, 34)),  // Verde scuro
+    LIME("\u001B[38;2;50;205;50m", new Color(50, 205, 50)),          // Verde lime brillante
+    EMERALD("\u001B[38;2;0;201;87m", new Color(0, 201, 87)),         // Verde smeraldo puro
+    MINT("\u001B[38;2;189;252;201m", new Color(189, 252, 201)),      // Verde menta molto chiaro
     
     // ============== SFUMATURE DI VIOLA ==============
-    PURPLE("\u001B[38;2;128;0;128m", new Color(128, 0, 128)),        // Viola standard
-    LAVENDER("\u001B[38;2;230;230;250m", new Color(230, 230, 250)),  // Lavanda
-    VIOLET("\u001B[38;2;138;43;226m", new Color(138, 43, 226)),      // Violetto
-    PLUM("\u001B[38;2;221;160;221m", new Color(221, 160, 221)),      // Prugna
+    PURPLE("\u001B[38;2;128;0;128m", new Color(128, 0, 128)),        // Viola puro
+    LAVENDER("\u001B[38;2;230;230;250m", new Color(230, 230, 250)),  // Viola molto chiaro
+    VIOLET("\u001B[38;2;148;0;211m", new Color(148, 0, 211)),        // Viola intenso
+    PLUM("\u001B[38;2;139;69;139m", new Color(139, 69, 139)),        // Viola-marrone scuro
     
     // ============== COLORI NEUTRI ==============
-    GRAY("\u001B[38;2;128;128;128m", new Color(128, 128, 128)),      // Grigio
-    SILVER("\u001B[38;2;192;192;192m", new Color(192, 192, 192)),    // Argento
-    BEIGE("\u001B[38;2;245;245;220m", new Color(245, 245, 220)),     // Beige
-    BROWN("\u001B[38;2;165;42;42m", new Color(165, 42, 42)),         // Marrone
+    GRAY("\u001B[38;2;128;128;128m", new Color(128, 128, 128)),      // Grigio medio
+    SILVER("\u001B[38;2;192;192;192m", new Color(192, 192, 192)),    // Grigio chiaro
+    BEIGE("\u001B[38;2;245;245;220m", new Color(245, 245, 220)),     // Beige chiaro
+    BROWN("\u001B[38;2;101;67;33m", new Color(101, 67, 33)),         // Marrone scuro
     
     // ============== COLORI SEMANTICI ==============
     NPC("\u001B[36m", new Color(0, 255, 255)),       // Personaggi non giocanti
@@ -98,7 +98,8 @@ public enum ColorText {
     WARNING("\u001B[93m", new Color(255, 200, 0)),   // Avvertimenti
     ERROR("\u001B[91m", new Color(255, 80, 80)),     // Messaggi di errore
     SUCCESS("\u001B[92m", new Color(50, 220, 50)),   // Operazioni riuscite
-    HIGHLIGHT("\u001B[95m", new Color(255, 150, 255)); // Evidenziazioni
+    HIGHLIGHT("\u001B[95m", new Color(255, 150, 255)),// Evidenziazioni
+    PLAYER("\u001B[34m", new Color(0, 120, 215)); // Colore per il giocatore
 
     private final String ansiCode;    // Codice ANSI per terminali
     private final Color swingColor;   // Colore Swing per GUI

@@ -3,45 +3,54 @@ package com.mycompany.poggioadventure.core.utils;
 import java.io.Serializable;
 
 /**
- * La classe TimeManager gestisce il countdown del tempo di gioco utilizzando un thread separato.
- * Implementa Runnable per eseguire la logica di temporizzazione in un thread indipendente.
- * La sua struttura è scalabile perché:
- *  - I valori predefiniti (durata totale ed intervallo) sono definiti come costanti, permettendo di modificarli facilmente.
- *  - La logica di temporizzazione è incapsulata all'interno della classe, rendendo possibile l'estensione per diverse modalità di output
- *    (ad esempio, console, GUI, log su file, ecc.) tramite l'astrazione del meccanismo di aggiornamento.
+ * Gestore temporizzazione per countdown di gioco con esecuzione thread-safe.
+ * 
+ * <p>Implementa countdown configurabile con thread separato per non bloccare
+ * il flusso principale dell'applicazione. Supporta serializzazione per
+ * salvataggio dello stato e operazioni thread-safe per ambienti concorrenti.
+ * 
+ * <p><b>Caratteristiche:</b>
+ * <ul>
+ *   <li>Esecuzione non bloccante in thread dedicato</li>
+ *   <li>Configurazione flessibile di durata e intervalli</li>
+ *   <li>Operazioni thread-safe con sincronizzazione</li>
+ *   <li>Gestione robusta interruzioni thread</li>
+ *   <li>Supporto serializzazione per persistenza stato</li>
+ * </ul>
  */
 public class TimeManager implements Runnable, Serializable {
 
-    // Valore di default: 10 minuti in millisecondi (600.000 ms)
+    /** Durata countdown predefinita: 10 minuti */
     private static final long TEMPO_TOTALE_DEFAULT = 600_000;
-    // Valore di default: aggiornamento ogni 1 secondo (1.000 ms)
+    
+    /** Intervallo aggiornamento predefinito: 1 secondo */
     private static final long INTERVALLO_DEFAULT = 1_000;
 
-    // Durata totale del countdown (in millisecondi)
+    /** Durata totale countdown in millisecondi */
     private long tempoTotale;
-    // Intervallo di aggiornamento del countdown (in millisecondi)
+    
+    /** Intervallo di aggiornamento in millisecondi */
     private long intervallo;
-    // Tempo già trascorso dall'avvio del timer (in millisecondi)
+    
+    /** Tempo trascorso dall'avvio in millisecondi */
     private long tempoTrascorso;
-    // Flag che indica se il timer è attualmente in esecuzione
+    
+    /** Flag stato esecuzione timer */
     private boolean inEsecuzione;
-    // Riferimento al thread che esegue il countdown
-    private Thread thread;
+    
+    /** Thread dedicato per countdown (transient per serializzazione) */
+    private transient Thread thread;
 
-    /**
-     * Costruttore di default: utilizza i valori predefiniti per tempo totale e intervallo.
-     * Questo rende la classe facilmente riutilizzabile senza dover specificare parametri ad ogni istanza.
-     */
+    /** Costruttore con valori predefiniti (10 min, 1 sec intervallo) */
     public TimeManager() {
         this(TEMPO_TOTALE_DEFAULT, INTERVALLO_DEFAULT);
     }
 
     /**
-     * Costruttore parametrizzato: permette di specificare la durata totale e l'intervallo di aggiornamento.
-     * Questo favorisce la scalabilità, in quanto è possibile creare istanze con tempistiche diverse a seconda delle esigenze.
-     *
-     * @param tempoTotale durata totale del timer in millisecondi
-     * @param intervallo intervallo di aggiornamento in millisecondi
+     * Costruttore con configurazione completa di tempistiche.
+     * 
+     * @param tempoTotale Durata totale timer in millisecondi
+     * @param intervallo Intervallo aggiornamento in millisecondi
      */
     public TimeManager(long tempoTotale, long intervallo) {
         this.tempoTotale = tempoTotale;
@@ -51,10 +60,20 @@ public class TimeManager implements Runnable, Serializable {
     }
 
     /**
-     * Avvia il timer in un thread separato.
-     * Il metodo synchronized garantisce che l'avvio del timer sia thread-safe.
-     * L'uso di un thread separato permette di non bloccare il thread principale,
-     * rendendo la classe scalabile anche in ambienti multi-thread (ad es. in GUI).
+     * Costruttore con durata personalizzata e intervallo predefinito.
+     * 
+     * @param tempoTotale Durata totale timer in millisecondi
+     */
+    public TimeManager(long tempoTotale) {
+        this.tempoTotale = tempoTotale;
+        this.intervallo = INTERVALLO_DEFAULT;
+        this.tempoTrascorso = 0;
+        this.inEsecuzione = false;
+    }
+
+    /**
+     * Avvia countdown in thread separato con protezione thread-safe.
+     * Previene avvii multipli simultanei.
      */
     public synchronized void start() {
         if (!inEsecuzione) {
@@ -65,8 +84,8 @@ public class TimeManager implements Runnable, Serializable {
     }
 
     /**
-     * Ferma il timer e interrompe il thread.
-     * Anche questo metodo è synchronized per garantire la corretta gestione della concorrenza.
+     * Ferma countdown e interrompe thread di esecuzione.
+     * Operazione thread-safe per terminazione pulita.
      */
     public synchronized void stop() {
         inEsecuzione = false;
@@ -75,46 +94,61 @@ public class TimeManager implements Runnable, Serializable {
         }
     }
 
+    /** Riavvia countdown azzerando tempo trascorso */
+    public synchronized void restart() {
+        stop();
+        tempoTrascorso = 0;
+        start();
+    }
+
     /**
-     * Metodo eseguito dal thread: aggiorna il countdown ogni intervallo.
-     * Utilizza sequenze ANSI per riscrivere la stessa riga, consentendo di mostrare l'aggiornamento in tempo reale
-     * senza creare nuove righe di output, sebbene questo metodo sia pensato principalmente per output su console.
-     *
-     * La struttura di questo metodo è scalabile perché la logica del countdown è completamente incapsulata,
-     * rendendo semplice l'eventuale override o l'adattamento della visualizzazione (ad es. per una GUI si potrebbe chiamare
-     * un listener anziché stampare direttamente).
+     * Configura durata totale timer convertendo da secondi.
+     * 
+     * @param tempoTotaleSecondi Durata in secondi
+     */
+    public synchronized void setTempoTotale(int tempoTotaleSecondi) {
+        this.tempoTotale = tempoTotaleSecondi * 1000L;
+    }
+
+    /**
+     * Calcola tempo rimanente evitando valori negativi.
+     * 
+     * @return Tempo rimanente in secondi (min 0)
+     */
+    public synchronized long getTempoRimanente() {
+        long rimanente = (tempoTotale - tempoTrascorso) / 1000;
+        return Math.max(0, rimanente);
+    }
+
+    /**
+     * Restituisce tempo trascorso dall'avvio.
+     * 
+     * @return Tempo trascorso in secondi
+     */
+    public synchronized long getTempoTrascorso() {
+        return tempoTrascorso / 1000;
+    }
+
+    /** Verifica se timer è attualmente in esecuzione */
+    public synchronized boolean isRunning() {
+        return inEsecuzione;
+    }
+
+    /**
+     * Loop principale countdown eseguito in thread dedicato.
+     * Gestisce interruzioni per terminazione pulita e aggiorna
+     * progressione temporale ad intervalli configurati.
      */
     @Override
     public void run() {
         while (inEsecuzione && tempoTrascorso < tempoTotale) {
             try {
-                // Attende per l'intervallo specificato
                 Thread.sleep(intervallo);
             } catch (InterruptedException e) {
-                break;
+                break; // Terminazione richiesta
             }
             tempoTrascorso += intervallo;
-            long tempoRimanente = tempoTotale - tempoTrascorso;
-            long secondiTotali = tempoRimanente / 1000;
-            long minuti = secondiTotali / 60;
-            long secondi = secondiTotali % 60;
-
-            // Utilizza le sequenze ANSI:
-            // "\033[F" sposta il cursore una riga in alto
-            // "\033[2K" cancella l'intera riga corrente
-            //System.out.print("\033[F\033[2K");
-            //System.out.println("[Timer] Tempo rimanente: " + minuti + "m " + secondi + "s");
-            // Ripristina il prompt di input (assumendo che sia sempre "?> ")
-            //System.out.print("?> ");
-            //System.out.flush();
         }
-
-        // Se il countdown è terminato, visualizza un messaggio finale e termina l'applicazione
-        if (inEsecuzione && tempoTrascorso >= tempoTotale) {
-            System.out.println("\nIl tempo è scaduto! Il gioco termina qui...");
-            System.exit(0);
-        }
-
         inEsecuzione = false;
     }
 }

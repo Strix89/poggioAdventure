@@ -1,7 +1,7 @@
 package com.mycompany.poggioadventure.observers;
 
-import com.mycompany.poggioadventure.core.GameContext;
 import com.mycompany.poggioadventure.core.abstracts.GameDescription;
+import com.mycompany.poggioadventure.core.utils.GameContext;
 import com.mycompany.poggioadventure.parser.ParserOutput;
 import com.mycompany.poggioadventure.model.AdvObject;
 import com.mycompany.poggioadventure.parser.CommandType;
@@ -16,109 +16,166 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Metodo che permette di visualizzare l'inventario del giocatore
- * Observer verifica che il comando sia di tipo INVENTORY e restituisce la lista degli oggetti presenti nell'inventario
- * Implementa GameObserver e aggiorna la descrizione del gioco
+ * Observer specializzato per gestione comando inventario con supporto multi-interfaccia.
  * 
- * Supporta aggiornamento automatico ogni 5 secondi per le interfacce GUI.
+ * <p>Implementa visualizzazione adaptive dell'inventario giocatore basata sul tipo
+ * di interfaccia utente. Per GUI fornisce finestra dedicata con aggiornamento
+ * automatico, per CLI restituisce output testuale formattato.
+ * 
+ * <p><b>Funzionalità principali:</b>
+ * <ul>
+ *   <li>Rilevamento automatico tipo interfaccia (GUI vs CLI)</li>
+ *   <li>Finestra GUI con aggiornamento periodico (5s)</li>
+ *   <li>Filtering oggetti visibili con Stream API</li>
+ *   <li>Gestione lifecycle finestra con cleanup automatico</li>
+ *   <li>Serializzazione con campi transient per componenti UI</li>
+ * </ul>
+ * 
+ * <p><b>Pattern implementati:</b>
+ * <ul>
+ *   <li>Observer: reazione a comando INVENTORY</li>
+ *   <li>Strategy: rendering differenziato per tipo interfaccia</li>
+ *   <li>Singleton Window: gestione istanza unica finestra</li>
+ * </ul>
  */
 public class InventoryObserver implements GameObserver, Serializable {
 
-    private transient UI_Inventory inventoryWindow; // Riferimento alla finestra dell'inventario
-    private transient Timer updateTimer; // Timer per l'aggiornamento automatico
-    private static final int UPDATE_INTERVAL = 5000; // 5 secondi in millisecondi
-    private transient GameDescription gameDescription; // Riferimento alla descrizione del gioco
+    /** Riferimento finestra inventario GUI (transient per serializzazione) */
+    private transient UI_Inventory inventoryWindow;
+    
+    /** Timer per aggiornamento automatico finestra GUI */
+    private transient Timer updateTimer;
+    
+    /** Intervallo aggiornamento automatico in millisecondi */
+    private static final int UPDATE_INTERVAL = 5000;
+    
+    /** Riferimento stato gioco per aggiornamenti periodici */
+    private transient GameDescription gameDescription;
 
     /**
-     * Metodo che permette di visualizzare l'inventario del giocatore
-     * Observer verifica che il comando sia di tipo INVENTORY e restituisce la lista degli oggetti presenti nell'inventario
-     * Per interfacce GUI, viene mostrata una finestra grafica che si aggiorna automaticamente
-     * Per interfacce CLI, viene restituita una descrizione testuale
+     * Gestisce comando INVENTORY con rendering adaptive per tipo interfaccia.
+     * GUI: apre/aggiorna finestra dedicata con timer automatico.
+     * CLI: restituisce output testuale formattato con markup.
      * 
-     * @param description La descrizione del gioco
-     * @param parserOutput L'output del parser
-     * @param output L'handler per l'output
-     * @return Stringa vuota per GUI, descrizione testuale per CLI
+     * @param description Stato corrente mondo di gioco
+     * @param parserOutput Comando parsato con tipo e parametri
+     * @param gameContext Contesto esecuzione con handler I/O
+     * @return Stringa vuota per GUI, descrizione formattata per CLI
      */
     @Override
     public String update(GameDescription description, ParserOutput parserOutput, GameContext gameContext) {
         StringBuilder msg = new StringBuilder();
-        OutputHandler output = gameContext.getOutputHandler(); // Ottiene l'output handler dal contesto del gioco
+        OutputHandler output = gameContext.getOutputHandler();
         
         if (parserOutput.getCommand().getType() == CommandType.INVENTORY) {
             if (output instanceof GUIOutputHandler) {
                 // Versione GUI: Mostra/Aggiorna la finestra dell'inventario
                 handleGUIInventory(description);
-                return ""; // Non è necessario restituire una stringa per la GUI
+                return "";
             } else {
                 // Versione CLI: Restituisce la descrizione testuale dell'inventario
-                if (description.getInventory().isEmpty()) {
-                    msg.append("Il tuo inventario è vuoto!");
-                } else {
-                    msg.append("Nel tuo inventario ci sono:\n");
-                    for (AdvObject o : description.getInventory()) {
-                        msg.append("[yellow]").append(o.getName()).append("[/]").append(": ").append(o.getDescription()).append("\n");
-                    }
-                }
+                List<AdvObject> visibleInventory = getVisibleInventory(description.getInventory());
+                return buildCLIInventoryMessage(visibleInventory);
             }
         }
         return msg.toString();
     }
     
     /**
-     * Gestisce la visualizzazione dell'inventario per interfacce GUI
-     * Crea una finestra se non esiste, altrimenti la porta in primo piano
-     * Configura un timer per l'aggiornamento automatico
+     * Genera output CLI formattato per inventario utilizzando Stream API.
+     * Applica markup colori per migliorare leggibilità.
      * 
-     * @param description La descrizione del gioco
+     * @param visibleInventory Lista oggetti visibili al giocatore
+     * @return Stringa formattata con elenco oggetti e descrizioni
+     */
+    private String buildCLIInventoryMessage(List<AdvObject> visibleInventory) {
+        if (visibleInventory.isEmpty()) {
+            return "Il tuo inventario è vuoto!";
+        }
+        
+        String inventoryContent = visibleInventory.stream()
+            .map(obj -> "-[ITEM]" + obj.getName() + "[/]: " + obj.getDescription())
+            .collect(java.util.stream.Collectors.joining("\n"));
+        
+        return "Nel tuo inventario ci sono:\n" + inventoryContent;
+    }
+    
+    /**
+     * Orchestrazione gestione finestra GUI con pattern Singleton.
+     * Crea nuova finestra se necessario o porta esistente in primo piano.
+     * 
+     * @param description Stato gioco per popolazione iniziale
      */
     private void handleGUIInventory(GameDescription description) {
-        this.gameDescription = description; // Salva il riferimento alla descrizione del gioco
+        this.gameDescription = description;
         
-        if (inventoryWindow == null || !inventoryWindow.isVisible()) {
-            // Crea una nuova finestra dell'inventario
-            inventoryWindow = new UI_Inventory();
-            inventoryWindow.addObjectsToScroller(description.getInventory());
-            
-            // Aggiunge un listener per sapere quando la finestra viene chiusa
-            inventoryWindow.addWindowListener(new WindowAdapter() {
-                @Override
-                public void windowClosed(WindowEvent e) {
-                    stopUpdateTimer(); // Ferma il timer quando la finestra viene chiusa
-                    inventoryWindow = null;
-                }
-            });
-            
-            // Avvia il timer per l'aggiornamento automatico
-            startUpdateTimer();
-            
-            // Mostra la finestra
-            inventoryWindow.setVisible(true);
+        if (isInventoryWindowClosed()) {
+            createAndShowInventoryWindow(description);
         } else {
-            // La finestra esiste già, la porta in primo piano
-            inventoryWindow.toFront();
-            
-            // Assicura che il timer sia attivo
-            if (updateTimer == null || !updateTimer.isRunning()) {
-                startUpdateTimer();
+            bringInventoryToFront();
+        }
+    }
+    
+    /** Verifica stato finestra per decisioni di creazione/riutilizzo */
+    private boolean isInventoryWindowClosed() {
+        return inventoryWindow == null || !inventoryWindow.isVisible();
+    }
+    
+    /**
+     * Factory method per creazione finestra con configurazione completa.
+     * Inizializza contenuto, listener cleanup e timer aggiornamento.
+     * 
+     * @param description Stato gioco per popolazione contenuti
+     */
+    private void createAndShowInventoryWindow(GameDescription description) {
+        List<AdvObject> visibleInventory = getVisibleInventory(description.getInventory());
+        
+        inventoryWindow = new UI_Inventory();
+        inventoryWindow.addObjectsToScroller(visibleInventory);
+        
+        // Configurazione cleanup automatico alla chiusura
+        inventoryWindow.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+                cleanupInventoryWindow();
             }
+        });
+        
+        startUpdateTimer();
+        inventoryWindow.setVisible(true);
+    }
+    
+    /** Porta finestra esistente in primo piano e assicura timer attivo */
+    private void bringInventoryToFront() {
+        inventoryWindow.toFront();
+        ensureTimerIsRunning();
+    }
+    
+    /** Cleanup risorse alla chiusura finestra per prevenire memory leak */
+    private void cleanupInventoryWindow() {
+        stopUpdateTimer();
+        inventoryWindow = null;
+    }
+    
+    /** Verifica e avvio timer se non già in esecuzione */
+    private void ensureTimerIsRunning() {
+        if (updateTimer == null || !updateTimer.isRunning()) {
+            startUpdateTimer();
         }
     }
     
     /**
-     * Avvia il timer per l'aggiornamento automatico dell'inventario
+     * Inizializzazione timer per aggiornamento periodico contenuti.
+     * Previene creazione timer multipli con controllo stato.
      */
     private void startUpdateTimer() {
-        // Crea e avvia il timer solo se non esiste già
         if (updateTimer == null || !updateTimer.isRunning()) {
             updateTimer = new Timer(UPDATE_INTERVAL, e -> updateInventory());
             updateTimer.start();
         }
     }
     
-    /**
-     * Ferma il timer di aggiornamento
-     */
+    /** Terminazione timer con cleanup riferimenti */
     private void stopUpdateTimer() {
         if (updateTimer != null && updateTimer.isRunning()) {
             updateTimer.stop();
@@ -127,17 +184,28 @@ public class InventoryObserver implements GameObserver, Serializable {
     }
     
     /**
-     * Aggiorna la lista degli oggetti nell'inventario
-     * Chiamato periodicamente dal timer
+     * Callback timer per refresh contenuti finestra.
+     * Auto-terminazione se finestra chiusa per efficienza risorse.
      */
     private void updateInventory() {
         if (inventoryWindow != null && inventoryWindow.isVisible() && gameDescription != null) {
-            // Crea una copia della lista per evitare problemi di concorrenza
-            List<AdvObject> currentInventory = new ArrayList<>(gameDescription.getInventory());
-            inventoryWindow.addObjectsToScroller(currentInventory);
+            List<AdvObject> visibleInventory = getVisibleInventory(gameDescription.getInventory());
+            inventoryWindow.addObjectsToScroller(new ArrayList<>(visibleInventory));
         } else {
-            // Se la finestra è stata chiusa o non è più visibile, ferma il timer
             stopUpdateTimer();
         }
+    }
+
+    /**
+     * Filtering oggetti inventario con Stream API per visibilità.
+     * Ottimizzazione per non mostrare oggetti sistema o nascosti.
+     * 
+     * @param inventory Lista completa inventario giocatore
+     * @return Lista filtrata oggetti visibili
+     */
+    private List<AdvObject> getVisibleInventory(List<AdvObject> inventory) {
+        return inventory.stream()
+                .filter(AdvObject::isVisible)
+                .collect(java.util.stream.Collectors.toList());
     }
 }

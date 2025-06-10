@@ -1,14 +1,14 @@
 package com.mycompany.poggioadventure.observers;
 
-import com.mycompany.poggioadventure.core.GameContext;
 import com.mycompany.poggioadventure.core.abstracts.GameDescription;
+import com.mycompany.poggioadventure.core.levels.FlipperLogic;
+import com.mycompany.poggioadventure.core.utils.GameContext;
 import com.mycompany.poggioadventure.core.utils.Utils;
 import com.mycompany.poggioadventure.parser.ParserOutput;
 import com.mycompany.poggioadventure.ui.ColorText;
 import com.mycompany.poggioadventure.ui.cli.CLIInputHandler;
 import com.mycompany.poggioadventure.ui.gui.views.UI_Flipper;
 import com.mycompany.poggioadventure.model.AdvObject;
-import com.mycompany.poggioadventure.model.FlipperLogic;
 import com.mycompany.poggioadventure.parser.CommandType;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -16,20 +16,47 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * Observer che gestisce il comando USE per utilizzare oggetti nel gioco.
+ * Observer per gestione comando USE con comportamenti specializzati per oggetti di gioco.
  * 
- * Controlla oggetti nell'inventario e nella stanza corrente, fornendo
- * risposte specifiche basate sull'ID dell'oggetto e le tre prove del collegio.
+ * <p>Implementa logica uso oggetti context-aware basata su ID specifici correlati
+ * alle tre prove del collegio. Fornisce feedback dettagliato e gestisce interazioni
+ * speciali come apertura interfacce dedicate (Flipper Zero).
  * 
- * @author pierpaolo & MikeRvsso
- * @version 1.0
- * @see CommandType#USE
+ * <p><b>Categorie oggetti gestite:</b>
+ * <ul>
+ *   <li>Prova 1: Test Logica (penna, foto San Nicola)</li>
+ *   <li>Prova 2: Assemblaggio PC (componenti hardware, strumenti)</li>
+ *   <li>Prova 3: Rivoluzione Robot (chiavi rack, pulsanti controllo)</li>
+ *   <li>Speciali: Flipper Zero con interfaccia dedicata CLI/GUI</li>
+ *   <li>Utility: Oggetti generici con comportamenti standard</li>
+ * </ul>
+ * 
+ * <p><b>Funzionalità avanzate:</b>
+ * <ul>
+ *   <li>Validazione prerequisiti (oggetto in inventario)</li>
+ *   <li>Interfaccia Flipper adaptive CLI/GUI</li>
+ *   <li>Gestione finestre GUI con cleanup automatico</li>
+ *   <li>Feedback contestualizzato per progressione prove</li>
+ * </ul>
+ * 
+ * <p><b>Pattern:</b> Observer per comando USE, Strategy per comportamenti
+ * oggetto-specifici, Factory per interfacce Flipper.
  */
 public class UseObserver implements GameObserver, Serializable {
 
-
+    /** Riferimento finestra Flipper GUI (transient per serializzazione) */
     private transient UI_Flipper flipperWindow;
 
+    /**
+     * Gestisce comando USE con dispatcher basato su ID oggetto.
+     * Implementa validazione prerequisiti e comportamenti specializzati
+     * per ogni categoria di oggetti delle prove collegio.
+     * 
+     * @param description Stato mondo per accesso inventario e stanza
+     * @param parserOutput Comando parsato con oggetti target
+     * @param gameContext Contesto per handler I/O e interfacce speciali
+     * @return Messaggio feedback uso oggetto o errore validazione
+     */
     @Override
     public String update(GameDescription description, ParserOutput parserOutput, GameContext gameContext) {
         StringBuilder msg = new StringBuilder();
@@ -37,20 +64,20 @@ public class UseObserver implements GameObserver, Serializable {
         if (parserOutput.getCommand().getType() == CommandType.USE) {
             boolean interact = false;
 
+            // Unificazione scope ricerca: stanza + inventario
             List<AdvObject> allObjects = parserOutput.getRoomObjects();
             allObjects.addAll(parserOutput.getInvObjects());
 
+            // Processing con dispatcher ID-based
             for (AdvObject obj : allObjects) {
-                if (obj == null)
-                    continue;
+                if (obj == null) continue;
 
                 int id = obj.getId();
 
                 switch (id) {
-                    // OGGETTI PROVA 1 - Test Logica
-                    case 3: // Penna di Lorenzo Burdo
-
-                        if (Utils.getObjectFromInventory(description.getInventory(), 3) != null) {
+                    // === PROVA 1: TEST LOGICA ===
+                    case Utils.OBJ_PENNA_ID:
+                        if (Utils.getObjectFromInventory(description.getInventory(), Utils.OBJ_PENNA_ID) != null) {
                             msg.append("Usi la penna di Lorenzo Burdo per scrivere il test di logica. ");
                             msg.append("La penna scorre fluida sulla carta, quasi magicamente...\n");
                         } else {
@@ -59,8 +86,8 @@ public class UseObserver implements GameObserver, Serializable {
                         interact = true;
                         break;
 
-                    case 4: // Foto di San Nicola astronauta
-                        if (Utils.getObjectFromInventory(description.getInventory(), 4) != null) {
+                    case Utils.OBJ_FOTO_ID:
+                        if (Utils.getObjectFromInventory(description.getInventory(), Utils.OBJ_FOTO_ID) != null) {
                             msg.append("Osservi attentamente la foto di San Nicola vestito da astronauta. ");
                             msg.append("Forse nasconde un indizio per le prove future?\n");
                         } else {
@@ -69,9 +96,9 @@ public class UseObserver implements GameObserver, Serializable {
                         interact = true;
                         break;
 
-                    // OGGETTI PROVA 2 - Assemblaggio PC
-                    case 13: // MicroSD
-                        if (Utils.getObjectFromInventory(description.getInventory(), 13) != null) {
+                    // === PROVA 2: ASSEMBLAGGIO PC ===
+                    case Utils.OBJ_MICROSD_ID:
+                        if (Utils.getObjectFromInventory(description.getInventory(), Utils.OBJ_MICROSD_ID) != null) {
                             msg.append("Una scheda di memoria che potrebbe contenere dati importanti ");
                             msg.append(
                                     "per l'assemblaggio del computer. Sembra essere la scheda madre di cui hai bisogno!\n");
@@ -81,8 +108,8 @@ public class UseObserver implements GameObserver, Serializable {
                         interact = true;
                         break;
 
-                    case 16: // Martello
-                        if (Utils.getObjectFromInventory(description.getInventory(), 16) != null) {
+                    case Utils.OBJ_MARTELLO_ID:
+                        if (Utils.getObjectFromInventory(description.getInventory(), Utils.OBJ_MARTELLO_ID) != null) {
                             msg.append("Un martello da laboratorio. Potrebbe essere utile per assemblare ");
                             msg.append("o sistemare componenti hardware, ma usalo con cautela!\n");
                         } else {
@@ -91,15 +118,14 @@ public class UseObserver implements GameObserver, Serializable {
                         interact = true;
                         break;
 
-                    case 17: // Sega circolare
-                        msg.append(
-                                "Una sega circolare affilata per assemblare un pc ? Mhh vedo che qualcuno qui non ti è molto simpatico.., ");
+                    case Utils.OBJ_SEGA_CIRCOLARE_ID:
+                        msg.append("Una sega circolare affilata per assemblare un pc ? Mhh vedo che qualcuno qui non ti è molto simpatico.., ");
                         msg.append("meglio lasciarla dove sta!\n");
                         interact = true;
                         break;
 
-                    case 18: // CPU
-                        if (Utils.getObjectFromInventory(description.getInventory(), 18) != null) {
+                    case Utils.OBJ_CPU_ID: // CPU
+                        if (Utils.getObjectFromInventory(description.getInventory(), Utils.OBJ_CPU_ID) != null) {
                             msg.append("Il processore principale del computer. Questo è il cervello ");
                             msg.append("che farà funzionare tutto il sistema!\n");
                         } else {
@@ -110,8 +136,8 @@ public class UseObserver implements GameObserver, Serializable {
                         interact = true;
                         break;
 
-                    case 19: // Cavo HDMI
-                        if (Utils.getObjectFromInventory(description.getInventory(), 19) != null) {
+                    case Utils.OBJ_CAVO_HDMI_ID: // Cavo HDMI
+                        if (Utils.getObjectFromInventory(description.getInventory(), Utils.OBJ_CAVO_HDMI_ID) != null) {
                             msg.append("Un cavo per collegare monitor e dispositivi. ");
                             msg.append("Fondamentale per vedere se il PC funziona correttamente!\n");
                         } else {
@@ -122,8 +148,8 @@ public class UseObserver implements GameObserver, Serializable {
                         interact = true;
                         break;
 
-                    case 20: // Mouse
-                        if (Utils.getObjectFromInventory(description.getInventory(), 20) != null) {
+                    case Utils.OBJ_MOUSE_ID: // Mouse
+                        if (Utils.getObjectFromInventory(description.getInventory(), Utils.OBJ_MOUSE_ID) != null) {
                             msg.append("Un mouse per controllare il computer. ");
                             msg.append("Sembra un po' usurato ma dovrebbe ancora funzionare.\n");
                         } else {
@@ -134,8 +160,8 @@ public class UseObserver implements GameObserver, Serializable {
                         interact = true;
                         break;
 
-                    case 21: // Tastiera
-                        if (Utils.getObjectFromInventory(description.getInventory(), 21) != null) {
+                    case Utils.OBJ_TASTIERA_ID: // Tastiera
+                        if (Utils.getObjectFromInventory(description.getInventory(), Utils.OBJ_TASTIERA_ID) != null) {
                             msg.append("Una tastiera vintage. ");
                             msg.append("I tasti sembrano ancora responsivi nonostante l'età.\n");
                         } else {
@@ -146,8 +172,8 @@ public class UseObserver implements GameObserver, Serializable {
                         interact = true;
                         break;
 
-                    case 25: // Set cacciaviti
-                        if (Utils.getObjectFromInventory(description.getInventory(), 25) != null) {
+                    case Utils.OBJ_SET_CACCIAVITI_ID: // Set cacciaviti
+                        if (Utils.getObjectFromInventory(description.getInventory(), Utils.OBJ_SET_CACCIAVITI_ID) != null) {
                             msg.append("Un set di cacciaviti di precisione. ");
                             msg.append("Perfetti per assemblare componenti delicati del computer!\n");
                         } else {
@@ -158,8 +184,8 @@ public class UseObserver implements GameObserver, Serializable {
                         interact = true;
                         break;
 
-                    case 26: // Saldatore
-                        if (Utils.getObjectFromInventory(description.getInventory(), 26) != null) {
+                    case Utils.OBJ_SALDATORE_ID: // Saldatore
+                        if (Utils.getObjectFromInventory(description.getInventory(), Utils.OBJ_SALDATORE_ID) != null) {
                             msg.append("Un saldatore professionale. ");
                             msg.append("Utile per riparazioni elettroniche avanzate, ma richiede esperienza!\n");
                         } else {
@@ -169,8 +195,8 @@ public class UseObserver implements GameObserver, Serializable {
                         interact = true;
                         break;
 
-                    case 27: // Bobina PLA
-                        if (Utils.getObjectFromInventory(description.getInventory(), 27) != null) {
+                    case Utils.OBJ_BOBINA_PLA_ID: // Bobina PLA
+                        if (Utils.getObjectFromInventory(description.getInventory(), Utils.OBJ_BOBINA_PLA_ID) != null) {
                             msg.append("Materiale per stampante 3D. ");
                             msg.append("Potrebbe servire per creare supporti o parti personalizzate!\n");
                         } else {
@@ -180,9 +206,9 @@ public class UseObserver implements GameObserver, Serializable {
                         interact = true;
                         break;
 
-                    // OGGETTI PROVA 3 - Rivoluzione Robot
-                    case 23: // Chiave Rack
-                        AdvObject rack = description.getCurrentRoom().getObject(22);
+                    // === PROVA 3: RIVOLUZIONE ROBOT ===
+                    case Utils.OBJ_CHIAVE_RACK_ID:
+                        AdvObject rack = description.getCurrentRoom().getObject(Utils.OBJ_RACK_ID);
                         if (rack != null) {
                             if (rack.isOpen()) {
                                 msg.append("Il rack è già aperto. ");
@@ -196,15 +222,41 @@ public class UseObserver implements GameObserver, Serializable {
                         interact = true;
                         break;
 
-                    case 24: // Pulsante del rack
+                    case Utils.OBJ_PULSANTE_ID:
                         msg.append("ATTENZIONE! Questo pulsante sembra controllare il sistema principale. ");
                         msg.append("Premerlo potrebbe causare il caos totale nel collegio!\n");
                         interact = true;
                         break;
 
-                    // OGGETTI BONUS/UTILITÀ
-                    case 14: // Chiavi auto del Direttore
-                        if (Utils.getObjectFromInventory(description.getInventory(), 14) != null) {
+                    // === OGGETTO SPECIALE: FLIPPER ZERO ===
+                    case Utils.OBJ_FLIPPER_ZERO_ID:
+                        boolean hasFlipper = Utils.getObjectFromInventory(description.getInventory(), Utils.OBJ_FLIPPER_ZERO_ID) != null;
+                        if (hasFlipper) {    
+                            // Prevenzione istanze multiple GUI
+                            if (flipperWindow != null && flipperWindow.isVisible()) {
+                                msg.append("[RED]Il Flipper Zero è già attivo! Completa prima l'operazione in corso.[/]\n");
+                                break;
+                            }                        
+                            msg.append("[CRIMSON]Attivazione Flipper Zero...[/]");
+                            
+                            // Gestione adaptive interfaccia CLI vs GUI
+                            if (gameContext.getInputHandler() instanceof CLIInputHandler) {
+                                gameContext.getOutputHandler().writeln(msg.toString(), ColorText.WHITE);
+                                msg.setLength(0);
+                                FlipperLogic flipperLogic = new FlipperLogic(gameContext);
+                                flipperLogic.startInteractiveCLISession();
+                            } else {
+                                handleFlipperGUI(gameContext);
+                            }
+                        } else {
+                            msg.append("Hai avuto per caso un'illuminazione da [HOT_PINK]San Josè Maria[/]?\nNO NO Flipper? Hai rotto il ca***!\n");
+                        }
+                        interact = true;
+                        break;
+
+                    // === OGGETTI UTILITY ===
+                    case Utils.OBJ_CHIAVI_AUTO_ID: // Chiavi auto del Direttore
+                        if (Utils.getObjectFromInventory(description.getInventory(), Utils.OBJ_CHIAVI_AUTO_ID) != null) {
                             msg.append("Le chiavi della macchina del Direttore. ");
                             msg.append("Se non vieni ammesso, potresti sempre rubar... no, meglio di no!\n");
                         } else {
@@ -214,8 +266,8 @@ public class UseObserver implements GameObserver, Serializable {
                         interact = true;
                         break;
 
-                    case 15: // Forbici
-                        if (Utils.getObjectFromInventory(description.getInventory(), 15) != null) {
+                    case Utils.OBJ_FORBICI_ID: // Forbici
+                        if (Utils.getObjectFromInventory(description.getInventory(), Utils.OBJ_FORBICI_ID) != null) {
                             msg.append("Un paio di forbici affilate. ");
                             msg.append("Potrebbero tornare utili per tagliare cavi o imballaggi.\n");
                         } else {
@@ -225,8 +277,8 @@ public class UseObserver implements GameObserver, Serializable {
                         interact = true;
                         break;
 
-                    case 7: // Pantaloni Sporchi
-                        if (Utils.getObjectFromInventory(description.getInventory(), 7) != null) {
+                    case Utils.OBJ_PANTALONI_ID: // Pantaloni Sporchi
+                        if (Utils.getObjectFromInventory(description.getInventory(), Utils.OBJ_PANTALONI_ID) != null) {
                             msg.append("Pantaloni sporchi di una sostanza strana...");
                             msg.append("Sembra che qualcuno abbia fatto un pasticcio qui!\n");
                             msg.append("Meglio non toccarli, potrebbero essere infetti!\n");
@@ -237,8 +289,8 @@ public class UseObserver implements GameObserver, Serializable {
                         interact = true;
                         break;
 
-                    case 6: // Cappotto vecchio
-                        if (Utils.getObjectFromInventory(description.getInventory(), 6) != null) {
+                    case Utils.OBJ_CAPPOTTO_ID: // Cappotto vecchio
+                        if (Utils.getObjectFromInventory(description.getInventory(), Utils.OBJ_CAPPOTTO_ID) != null) {
                             msg.append("Indossi il cappotto. Sembra che ti stia a pennello !");
                             msg.append("Potrebbe aiutarti nelle prove successive!\n");
                         } else {
@@ -248,8 +300,8 @@ public class UseObserver implements GameObserver, Serializable {
                         interact = true;
                         break;
 
-                    case 8: // Bastone per anziani
-                        if (Utils.getObjectFromInventory(description.getInventory(), 8) != null) {
+                    case Utils.OBJ_BASTONE_ID: // Bastone per anziani
+                        if (Utils.getObjectFromInventory(description.getInventory(), Utils.OBJ_BASTONE_ID) != null) {
                             msg.append("Usi il bastone per anziani come supporto. ");
                             msg.append("Ti fa sentire più saggio, ma forse anche più vecchio!\n");
                         } else {
@@ -258,30 +310,8 @@ public class UseObserver implements GameObserver, Serializable {
                         }
                         interact = true;
                         break;
-                    case 50:
-                        boolean hasFlipper = Utils.getObjectFromInventory(description.getInventory(), 50) != null;
-                        if (hasFlipper) {    
-                            if (flipperWindow != null && flipperWindow.isVisible()) {
-                                msg.append("[RED]Il Flipper Zero è già attivo! Completa prima l'operazione in corso.[/]\n");
-                                break;
-                            }                        
-                            msg.append("[CRIMSON]Attivazione Flipper Zero...[/]");
-                            
-                            if (gameContext.getInputHandler() instanceof CLIInputHandler) {
-                                // IMPORTANTE: Forza la visualizzazione immediata del messaggio
-                                gameContext.getOutputHandler().writeln(msg.toString(), ColorText.WHITE);
-                                msg.setLength(0); // Svuota il buffer perché è già stato stampato
-                                FlipperLogic flipperLogic = new FlipperLogic(gameContext);
-                                flipperLogic.startInteractiveCLISession();
-                            } else {
-                                handleFlipperGUI(gameContext);
-                            }
-                        } else {
-                            msg.append("Hai avuto per caso un'illuminazione da [HOT_PINK]San Josè Maria[/]?\nNO NO Flipper? Hai rotto il ca***!\n");
-                        }
-                        interact = true;
                     default:
-                        // Gestione generica per oggetti non specificamente programmati
+                        // Fallback generico per oggetti non specializzati
                         msg.append("Esamini ").append(obj.getName()).append(". ");
                         msg.append("Potrebbe essere utile per una delle prove del collegio.\n");
                         interact = true;
@@ -289,6 +319,7 @@ public class UseObserver implements GameObserver, Serializable {
                 }
             }
 
+            // Messaggio fallback per nessuna interazione
             if (!interact) {
                 msg.append("Non ci sono oggetti utilizzabili qui o non hai gli oggetti necessari nell'inventario.");
             }
@@ -297,17 +328,16 @@ public class UseObserver implements GameObserver, Serializable {
     }
 
     /**
-     * Gestisce l'apertura della GUI del Flipper
-     * Crea una finestra se non esiste, altrimenti mostra un messaggio di errore
+     * Factory method per interfaccia GUI Flipper con gestione lifecycle.
+     * Crea finestra dedicata e configura cleanup automatico alla chiusura.
      * 
-     * @param gameContext Il contesto del gioco
+     * @param gameContext Contesto per inizializzazione FlipperLogic
      */
     private void handleFlipperGUI(GameContext gameContext) {
-        // Crea e mostra la finestra del Flipper
         FlipperLogic flipperLogic = new FlipperLogic(gameContext);
-        flipperWindow = flipperLogic.openGUIInterface(); // Ora restituisce l'istanza
+        flipperWindow = flipperLogic.openGUIInterface();
         
-        // Aggiunge un listener per sapere quando la finestra viene chiusa
+        // Configurazione cleanup automatico per prevenire memory leak
         flipperWindow.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosed(WindowEvent e) {

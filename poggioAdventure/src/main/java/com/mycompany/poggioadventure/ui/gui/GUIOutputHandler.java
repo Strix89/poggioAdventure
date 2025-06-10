@@ -17,10 +17,36 @@ import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
+/**
+ * Implementazione GUI per output formattato con supporto rich text e immagini.
+ * 
+ * <p>Gestisce rendering avanzato in JTextPane con processing markup colori,
+ * embedding immagini scalate e gestione thread-safe via Event Dispatch Thread.
+ * Supporta StyledDocument per formattazione complessa e auto-scrolling.
+ * 
+ * <p><b>Funzionalità principali:</b>
+ * <ul>
+ *   <li>Processing markup color blocks per Swing color mapping</li>
+ *   <li>Embedding immagini con scaling automatico proporzionale</li>
+ *   <li>Thread-safe updates via SwingUtilities.invokeLater</li>
+ *   <li>StyledDocument manipulation per rich text formatting</li>
+ *   <li>Auto-caret positioning per scroll automatico</li>
+ * </ul>
+ * 
+ * <p><b>Pattern:</b> Strategy per output GUI, Decorator per text styling,
+ * Observer pattern tramite EDT per UI updates thread-safe.
+ */
 public class GUIOutputHandler implements OutputHandler {
 
+    /** JTextPane target per rendering output formattato */
     private final JTextPane outputPane;
 
+    /**
+     * Inizializza handler con validazione componente target.
+     * 
+     * @param outputPane JTextPane per output rendering
+     * @throws IllegalArgumentException Se outputPane è null
+     */
     public GUIOutputHandler(JTextPane outputPane) {
         if (outputPane == null) {
             throw new IllegalArgumentException("Il componente di output non può essere null");
@@ -28,6 +54,14 @@ public class GUIOutputHandler implements OutputHandler {
         this.outputPane = outputPane;
     }
 
+    /**
+     * Core method per rendering thread-safe con StyledDocument manipulation.
+     * Processa line-by-line per gestire newlines, immagini e color blocks.
+     * Utilizza EDT per garantire thread safety nelle operazioni UI.
+     * 
+     * @param formattedMessage Testo con markup da renderizzare
+     * @param baseColor Colore default per testo senza markup
+     */
     @Override
     public void writeFormatted(String formattedMessage, ColorText baseColor) {
         SwingUtilities.invokeLater(() -> {
@@ -63,6 +97,15 @@ public class GUIOutputHandler implements OutputHandler {
         });
     }
 
+    /**
+     * Processa text segments con color blocks usando regex matching.
+     * Applica Swing Style attributes per ogni segmento colorato identificato.
+     * 
+     * @param text Testo da processare per color styling
+     * @param doc StyledDocument target per inserimento
+     * @param baseColor Colore default per segmenti non marcati
+     * @throws BadLocationException Se inserimento document fallisce
+     */
     private void processStyledText(String text, StyledDocument doc, ColorText baseColor) 
         throws BadLocationException {
         
@@ -90,6 +133,15 @@ public class GUIOutputHandler implements OutputHandler {
         }
     }
 
+    /**
+     * Inserisce text segment con Style attributes specifici per colore.
+     * Crea Style dinamico con mapping ColorText -> Swing Color.
+     * 
+     * @param doc StyledDocument target
+     * @param text Testo da inserire
+     * @param color Colore per styling del testo
+     * @throws BadLocationException Se inserimento fallisce
+     */
     private void addTextSegment(StyledDocument doc, String text, ColorText color) 
         throws BadLocationException {
         
@@ -100,16 +152,22 @@ public class GUIOutputHandler implements OutputHandler {
         }
     }
 
+    /**
+     * Gestisce embedding immagini con scaling automatico e error handling.
+     * Carica immagine via ResourceLoader, applica scaling proporzionale
+     * e inserisce come ImageIcon in StyledDocument.
+     * 
+     * @param imagePath Path relativo immagine da caricare
+     * @param doc StyledDocument per inserimento icona
+     */
     private void handleImage(String imagePath, StyledDocument doc) {
         try {
             BufferedImage image = ResourceLoader.loadImage(imagePath);
             Image scaled = scaleImage(image, 300);
             ImageIcon icon = new ImageIcon(scaled);
 
-            Style style = doc.addStyle("ImageStyle", null);
+            Style style = doc.addStyle("ImageStyle_" + imagePath.hashCode(), null); // Usa un nome di stile univoco
             StyleConstants.setIcon(style, icon);
-            // Rimuoviamo l'allineamento al centro
-            // StyleConstants.setAlignment(style, StyleConstants.ALIGN_CENTER);
 
             // Aggiunge una riga vuota prima dell'immagine
             if (doc.getLength() > 0 && !doc.getText(doc.getLength() - 1, 1).equals("\n")) {
@@ -121,42 +179,58 @@ public class GUIOutputHandler implements OutputHandler {
 
             // Aggiunge una riga vuota dopo l'immagine
             doc.insertString(doc.getLength(), "\n", null);
+            outputPane.setCaretPosition(doc.getLength()); // Assicurati che anche questo sia qui se necessario
         } catch (IOException | BadLocationException ex) {
+            // Considera di mostrare l'errore anche tramite SwingUtilities.invokeLater se GUIErrorHandler lo richiede
             new GUIErrorHandler().handleRecoverableError("Immagine non trovata: " + imagePath);
         }
     }
 
+    /**
+     * Applica scaling proporzionale mantenendo aspect ratio originale.
+     * Utilizza SCALE_SMOOTH per qualità ottimale rendering.
+     * 
+     * @param original BufferedImage sorgente
+     * @param targetWidth Larghezza target per scaling
+     * @return Image scalata con aspect ratio preservato
+     */
     private Image scaleImage(BufferedImage original, int targetWidth) {
         double ratio = (double) targetWidth / original.getWidth();
         int newHeight = (int) (original.getHeight() * ratio);
         return original.getScaledInstance(targetWidth, newHeight, Image.SCALE_SMOOTH);
     }
 
+    /** Wrapper per output singolo con colore specifico */
     @Override
     public void write(String message, ColorText color) {
         writeFormatted(message, color);
     }
     
+    /** Wrapper per output singolo con colore default */
     @Override
     public void write(String message){
         writeFormatted(message, ColorText.RESET);
     }
 
+    /** Wrapper per output con newline e colore specifico */
     @Override
     public void writeln(String message, ColorText color) {
         writeFormatted(message + "\n", color);
     }
     
+    /** Wrapper per output con newline e colore default */
     @Override
     public void writeln(String message) {
         writeFormatted(message + "\n", ColorText.RESET);
     }
 
+    /** Output newline singolo */
     @Override
     public void writeln() {
         writeFormatted("\n", ColorText.RESET);
     }
 
+    /** Clear completo JTextPane content via EDT */
     @Override
     public void clear() {
         SwingUtilities.invokeLater(() -> outputPane.setText(""));
