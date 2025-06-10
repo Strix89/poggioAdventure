@@ -17,6 +17,11 @@ package com.mycompany.poggioadventure.parser;
 public enum CommandType {
     
     /**
+     * 
+     */
+    PUT,
+
+    /**
      *
      */
     TALK,

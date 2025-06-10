@@ -39,12 +39,12 @@ NPC: [Guido, tutor, Dottor burdo]
 
 NPC: [Cupulino, Pino, Luigi D.]
 
-2) Subquest prova 2 (tempo 20 min)
+2) Subquest prova 2 (tempo 15 min)
 
 2.1 Luigi scimmia introduce lab
 2.1.1 Mike introduce seconda prova
 2.2 Assemblare pc
-2.2.1 Ricerca oggetti ( cpu -> lab , ram -> pino , s.m -> data da michele , alimentatore -> pino , pasta t -> lab, dissipatore -> lab, gpu ->lab )
+2.2.1 Ricerca oggetti ( cpu -> lab , ram -> pino , s.m -> data da michele , alimentatore -> pino , pasta t -> lab, dissipatore -> lab, gpu ->lab, ssd -> galileo)
 2.2.2 Assemblaggio pc 
 Oggetti in ordine di assemblaggio : s.m. ,ram, cpu, p.t., dissipatore, gpu, alimentatore )
 Successivamnete collegare cavi ,
