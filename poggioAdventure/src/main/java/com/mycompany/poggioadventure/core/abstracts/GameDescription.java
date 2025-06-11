@@ -153,4 +153,14 @@ public abstract class GameDescription implements Serializable {
     public Object clone() {
         return Utils.deepClone(this);
     }
+
+    /**
+     * Rimuove un oggetto dall'inventario tramite il suo ID.
+     * 
+     * @param id ID dell'oggetto da rimuovere
+     * @return true se l'oggetto è stato trovato e rimosso, false altrimenti
+     */
+    public boolean removeFromInventoryById(int id) {
+        return inventory.removeIf(obj -> obj.getId() == id);
+    }
 }

@@ -2,6 +2,7 @@ package com.mycompany.poggioadventure.observers;
 
 import com.mycompany.poggioadventure.core.abstracts.GameDescription;
 import com.mycompany.poggioadventure.core.levels.FlipperLogic;
+import com.mycompany.poggioadventure.core.levels.PcAssemblyHelper;
 import com.mycompany.poggioadventure.core.utils.GameContext;
 import com.mycompany.poggioadventure.core.utils.Utils;
 import com.mycompany.poggioadventure.parser.ParserOutput;
@@ -9,6 +10,7 @@ import com.mycompany.poggioadventure.ui.ColorText;
 import com.mycompany.poggioadventure.ui.cli.CLIInputHandler;
 import com.mycompany.poggioadventure.ui.gui.views.UI_Flipper;
 import com.mycompany.poggioadventure.model.AdvObject;
+import com.mycompany.poggioadventure.model.AdvObjectContainer;
 import com.mycompany.poggioadventure.parser.CommandType;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -310,6 +312,62 @@ public class UseObserver implements GameObserver, Serializable {
                         }
                         interact = true;
                         break;
+                    case Utils.OBJ_CASE_PC_ID: // Case PC assemblato
+                        // Verifica che il PC sia nella stanza corrente
+                        AdvObject casePc = description.getCurrentRoom().getObject(Utils.OBJ_CASE_PC_ID);
+                        if (casePc == null) {
+                            msg.append("Non vedi nessun PC qui da accendere.\n");
+                            interact = true;
+                            break;
+                        }
+
+                        if (!(casePc instanceof AdvObjectContainer)) {
+                            msg.append("Non puoi usare questo oggetto.\n");
+                            interact = true;
+                            break;
+                        }
+
+                        AdvObjectContainer casePcContainer = (AdvObjectContainer) casePc;
+                        
+                        // Controlla se tutti i componenti sono assemblati nell'ordine corretto
+                        if (!isPcCorrectlyAssembled(casePcContainer)) {
+                            msg.append("Il PC non è ancora completamente assemblato o non è assemblato correttamente!\n");
+                            msg.append("Assicurati di aver inserito tutti i componenti nell'ordine giusto.\n");
+                            interact = true;
+                            break;
+                        }
+
+                        // Controlla se il PC è già stato usato
+                        boolean alreadyUsed = description.getInventory().stream()
+                            .anyMatch(item -> item.getId() == Utils.OBJ_LEVEL2_COMPLETE_ID);
+                            
+                        if (alreadyUsed) {
+                            msg.append("Hai già acceso il PC con successo!\n");
+                            interact = true;
+                            break;
+                        }
+
+                        // Simula l'accensione del PC
+                        msg.append("\n").append("=".repeat(50)).append("\n");
+                        msg.append("🔌 [YELLOW]ACCENSIONE PC IN CORSO...[/]\n");
+                        msg.append("=".repeat(50)).append("\n");
+                        msg.append("Alimentatore: [GREEN]OK[/]\n");
+                        msg.append("CPU: [GREEN]Rilevata e funzionante[/]\n");
+                        msg.append("RAM: [GREEN]16GB riconosciuti[/]\n");
+                        msg.append("SSD: [GREEN]Rilevato[/]\n");
+                        msg.append("GPU: [GREEN]Scheda grafica inizializzata[/]\n");
+                        msg.append("Sistema di raffreddamento: [GREEN]Attivo[/]\n");
+                        msg.append("\n[GREEN]✅ BOOT COMPLETATO CON SUCCESSO![/]\n");
+                        msg.append("[GREEN]Il PC funziona perfettamente! Prova tecnica superata![/]\n");
+                        msg.append("=".repeat(50)).append("\n");
+
+                        // Assegna l'oggetto di completamento
+                        AdvObject level2Complete = new AdvObject(Utils.OBJ_LEVEL2_COMPLETE_ID, "level2Complete");
+                        level2Complete.setVisible(false);
+                        description.getInventory().add(level2Complete);
+
+                        interact = true;
+                        break;
                     default:
                         // Fallback generico per oggetti non specializzati
                         msg.append("Esamini ").append(obj.getName()).append(". ");
@@ -344,5 +402,15 @@ public class UseObserver implements GameObserver, Serializable {
                 flipperWindow = null;
             }
         });
-    }  
+    }
+
+    /**
+     * Verifica se il PC è assemblato correttamente utilizzando PcAssemblyHelper.
+     * 
+     * @param casePc Il contenitore del case PC da verificare
+     * @return true se il PC è assemblato correttamente, false altrimenti
+     */
+    private boolean isPcCorrectlyAssembled(AdvObjectContainer casePc) {
+        return PcAssemblyHelper.isPcCorrectlyAssembled(casePc);
+    }
 }

@@ -40,6 +40,8 @@ import java.util.List;
  */
 public class Level1State extends GameState {
 
+    private GameDescription gameDescription;
+
     /** Costruttore base per configurazione livello */
     public Level1State(long timeLimit, List<Integer> requiredObjects, List<Integer> forbiddenObjects) {
         super(timeLimit, requiredObjects, forbiddenObjects);
@@ -56,6 +58,9 @@ public class Level1State extends GameState {
      */
     @Override
     public void enter(GameDescription gameDescription, OutputHandler output, String playerName) {
+       
+        this.gameDescription = gameDescription;
+
         // NPC Guido - Portinaio con indicazioni per il test
         AdvNPC guido = new AdvNPC(Utils.NPC_GUIDO_ID, "Guido", "Un nano sembra essere il portinaio e sembra essere anche \n\t il tipico interista rompiscatole");
         guido.setAlias(new String[] { "guido", "nano", "segretario", "portinaio"});
@@ -170,6 +175,13 @@ public class Level1State extends GameState {
         tutor.setImagePath(ResourceLoader.IMG_PATH.resolve("Tutor.png").toString());
         tutor.addItemToGive(pen);
 
+        // SSD 
+        AdvObject ssd = new AdvObject(Utils.OBJ_SSD_ID, "SSD", 
+                "Un'unità a stato solido NVMe da 1TB. Fornisce velocità di caricamento e trasferimento dati estremamente elevate.",
+                ResourceLoader.IMG_PATH.resolve("SSD.png").toString());
+        ssd.setAlias(new String[]{"ssd", "nvme", "storage", "disco"});
+        ssd.setPickupable(true);
+
         // Foto decorativa con tema religioso/spaziale
         AdvObject foto = new AdvObject(Utils.OBJ_FOTO_ID, "Foto",
                 "Una foto di San Nicola vestito da Astronauta.\nAnche un Santo può essere un astronauta !",
@@ -194,7 +206,7 @@ public class Level1State extends GameState {
         armadioHall.add(cappotto);
 
         AdvObject pantaloni = new AdvObject(Utils.OBJ_PANTALONI_ID, "Pantaloni", 
-                "Un paio di pantaloni sporchi, emanano un bel profumino.",
+                "Un paio di pantaloni sporchi, emanano un bel profumino.\n\t sembrano sporchi di merda...\n\t sarebbe curioso sapere la storia che c'è dietro.",
                 ResourceLoader.IMG_PATH.resolve("Pantaloni.png").toString());
         pantaloni.setAlias(new String[] { "Pantaloni", "jeans", "trousers"});
         pantaloni.setPickupable(true);
@@ -299,14 +311,6 @@ public class Level1State extends GameState {
         tastiera.setPushable(true);
         contenitore.add(tastiera);
 
-        AdvObject cpu = new AdvObject(Utils.OBJ_CPU_ID, "CPU", 
-                "Il processore principale del computer. Questo è il cervello che farà funzionare tutto il sistema!",
-                ResourceLoader.IMG_PATH.resolve("CPU.png").toString());
-        cpu.setAlias(new String[] { "CPU", "processore", "chip", "centrale"});
-        cpu.setPickupable(true);
-        cpu.setPushable(true);
-        contenitore.add(cpu);
-
         // Rack server (inizialmente chiuso, richiede chiave)
         AdvObjectContainer rack = new AdvObjectContainer(Utils.OBJ_RACK_ID,"Rack",
                 "Un armadio rack, da qui puoi accedere a tutti i server");
@@ -379,6 +383,7 @@ public class Level1State extends GameState {
         Room galileo = new Room(Utils.ROOM_GALILEO_ID, "Galileo", "Sei nella stanza Galileo");
         galileo.setImagePath(ResourceLoader.IMG_PATH.resolve("Galileo.png").toString());        
         galileo.addObject(foto, "C'è una foto con una figura religiosa strana");
+        galileo.addObject(ssd, "C'è un SSD NVMe da 1TB, potrebbe essere utile..");
 
         Room office = new Room(Utils.ROOM_OFFICE_ID, "Direzione", "Sei in direzione");
         office.setImagePath(ResourceLoader.IMG_PATH.resolve("Direzione.png").toString());
@@ -499,6 +504,11 @@ public class Level1State extends GameState {
     /** Esegue callback per transizione al livello successivo */
     @Override
     public void handleSuccess(Runnable onSuccess) {
+        Room galileoRoom = gameDescription.getGameMap().findRoomById(Utils.ROOM_GALILEO_ID);
+        if(galileoRoom != null) {
+                galileoRoom.removeObject(Utils.NPC_DIRETTOREGALILEO_ID);
+                gameDescription.removeFromInventoryById(Utils.OBJ_PENNA_ID);
+        }
         onSuccess.run();
     }
     

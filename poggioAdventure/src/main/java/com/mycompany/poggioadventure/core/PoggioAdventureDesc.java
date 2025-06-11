@@ -4,6 +4,7 @@ import com.mycompany.poggioadventure.observers.OpenObserver;
 import com.mycompany.poggioadventure.observers.InventoryObserver;
 import com.mycompany.poggioadventure.observers.MoveObserver;
 import com.mycompany.poggioadventure.observers.PushObserver;
+import com.mycompany.poggioadventure.observers.PutObserver;
 import com.mycompany.poggioadventure.observers.TalkObserver;
 import com.mycompany.poggioadventure.observers.PickUpObserver;
 import com.mycompany.poggioadventure.observers.LookAtObserver;
@@ -96,7 +97,7 @@ public class PoggioAdventureDesc extends GameDescription implements GameObservab
         getCommands().add(push);
 
         Command use = new Command(CommandType.USE, "usa");
-        use.setAlias(new String[] { "utilizza", "combina"});
+        use.setAlias(new String[] { "utilizza", "combina", "accendi", "attiva", "use", "activate" });
         getCommands().add(use);
 
         Command save = new Command(CommandType.SAVE, "salva");
@@ -106,6 +107,10 @@ public class PoggioAdventureDesc extends GameDescription implements GameObservab
         Command talk = new Command(CommandType.TALK, "parla");
         talk.setAlias(new String[]{"dialoga", "chiedi", "conversa", "ask"});
         getCommands().add(talk);
+
+        Command put = new Command(CommandType.PUT, "metti");
+        put.setAlias(new String[]{"metti", "inserisci", "put", "place", "posiziona", "monta"});
+        getCommands().add(put);
 
         Command iventory = new Command(CommandType.INVENTORY, "inventario");
         iventory.setAlias(new String[] { "inv", "inventory", "i"});
@@ -128,6 +133,7 @@ public class PoggioAdventureDesc extends GameDescription implements GameObservab
         attach(new OpenObserver());
         attach(new UseObserver());
         attach(new TalkObserver());
+        attach(new PutObserver());
     }
 
     /**

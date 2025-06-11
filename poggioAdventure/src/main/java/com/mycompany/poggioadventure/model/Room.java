@@ -260,6 +260,28 @@ public class Room implements Serializable {
     }
 
     /**
+     * Rimuove oggetto dalla stanza tramite ID e rimuove etichetta associata.
+     * 
+     * @param objectId ID dell'oggetto da rimuovere
+     * @return true se l'oggetto è stato trovato e rimosso, false altrimenti
+     */
+    public boolean removeObject(int objectId) {
+        AdvObject objectToRemove = null;
+        for (AdvObject obj : this.objectsInRoom) {
+            if (obj.getId() == objectId) {
+                objectToRemove = obj;
+                break;
+            }
+        }
+        
+        if (objectToRemove != null) {
+            this.objectLookLabels.remove(objectId);
+            return this.objectsInRoom.remove(objectToRemove);
+        }
+        return false;
+    }
+
+    /**
      * Elimina etichetta personalizzata oggetto.
      * 
      * @param objectId ID oggetto target

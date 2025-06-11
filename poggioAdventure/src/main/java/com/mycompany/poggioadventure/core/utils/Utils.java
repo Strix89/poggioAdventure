@@ -113,6 +113,9 @@ public class Utils {
     public static final int NPC_DONMATTEO_ID = 28;
     public static final int NPC_DIRETTOREGALILEO_ID = 29;
     public static final int NPC_TUTOR_ID = 30;
+    public static final int NPC_PINO_ID = 31;
+    public static final int NPC_LUIGI_ID = 32;
+    public static final int NPC_DIRETTORE_LAB_ID = 42;
     
     // ==================== ID OGGETTI MONDO ====================
     
@@ -133,7 +136,6 @@ public class Utils {
     public static final int OBJ_MARTELLO_ID = 16;
     public static final int OBJ_SEGA_CIRCOLARE_ID = 17;
     public static final int OBJ_CONTENITORE_ID = 18;
-    public static final int OBJ_CPU_ID = 18; // NOTA: condivide ID con contenitore
     public static final int OBJ_CAVO_HDMI_ID = 19;
     public static final int OBJ_MOUSE_ID = 20;
     public static final int OBJ_TASTIERA_ID = 21;
@@ -143,6 +145,16 @@ public class Utils {
     public static final int OBJ_SET_CACCIAVITI_ID = 25;
     public static final int OBJ_SALDATORE_ID = 26;
     public static final int OBJ_BOBINA_PLA_ID = 27;
+
+    public static final int OBJ_CASE_PC_ID = 33;
+    public static final int OBJ_CPU_ID = 34;
+    public static final int OBJ_RAM_ID = 35;
+    public static final int OBJ_SCHEDA_MADRE_ID = 36;
+    public static final int OBJ_ALIMENTATORE_ID = 37;
+    public static final int OBJ_PASTA_TERMICA_ID = 38;
+    public static final int OBJ_DISSIPATORE_ID = 39;
+    public static final int OBJ_GPU_ID = 40;
+    public static final int OBJ_SSD_ID = 41;
     
     // ==================== ID OGGETTI SPECIALI ====================
     
