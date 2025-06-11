@@ -206,7 +206,7 @@ public class Level1State extends GameState {
         armadioHall.add(cappotto);
 
         AdvObject pantaloni = new AdvObject(Utils.OBJ_PANTALONI_ID, "Pantaloni", 
-                "Un paio di pantaloni sporchi, emanano un bel profumino.",
+                "Un paio di pantaloni sporchi, emanano un bel profumino.\n\t sembrano sporchi di merda...\n\t sarebbe curioso sapere la storia che c'è dietro.",
                 ResourceLoader.IMG_PATH.resolve("Pantaloni.png").toString());
         pantaloni.setAlias(new String[] { "Pantaloni", "jeans", "trousers"});
         pantaloni.setPickupable(true);

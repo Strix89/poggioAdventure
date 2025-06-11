@@ -132,7 +132,7 @@ public class PutObserver implements GameObserver, Serializable {
         } else {
             // Ordine sbagliato - resetta assemblaggio
             resetAssembly(casePC, description);
-            return "❌ ORDINE ERRATO! L'assemblaggio è stato resettato.\n" +
+            return "[RED]ORDINE ERRATO![/]L'assemblaggio è stato resettato.\n" +
                    "Devi seguire l'ordine corretto di installazione dei componenti.\n";
         }
     }

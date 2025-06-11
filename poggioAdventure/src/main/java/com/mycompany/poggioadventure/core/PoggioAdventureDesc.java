@@ -97,7 +97,7 @@ public class PoggioAdventureDesc extends GameDescription implements GameObservab
         getCommands().add(push);
 
         Command use = new Command(CommandType.USE, "usa");
-        use.setAlias(new String[] { "utilizza", "combina"});
+        use.setAlias(new String[] { "utilizza", "combina", "accendi", "attiva", "use", "activate" });
         getCommands().add(use);
 
         Command save = new Command(CommandType.SAVE, "salva");

@@ -75,7 +75,7 @@ public class Level2State extends GameState {
         // Contenitore principale per assemblaggio PC
         AdvObjectContainer casePc = new AdvObjectContainer(Utils.OBJ_CASE_PC_ID, "Case PC",
                 "Un case per computer desktop vuoto. Qui dovrai assemblare tutti i componenti per creare un sistema funzionante.");
-        casePc.setAlias(new String[]{"case", "chassis", "tower", "cabinet"});
+        casePc.setAlias(new String[]{"case", "chassis", "tower", "cabinet", "pc"});
         casePc.setPickupable(false);
         casePc.setOpenable(true);
         
@@ -136,7 +136,11 @@ public class Level2State extends GameState {
         direttore.setImagePath(ResourceLoader.IMG_PATH.resolve("Direttore.png").toString());
         direttore.setAlias(new String[]{"direttore", "michele", "dottore"});
         direttore.addFirstDialogueLine(playerName + ", finalmente sei arrivato!");
-        direttore.addFirstDialogueLine("Come ti è stato anticipato, in questa prova dovrai assemblare un computer desktop");
+        direttore.addFirstDialogueLine("La seconda prova consiste nell'assemblaggio di un pc desktop");
+        direttore.addFirstDialogueLine("Per fare ciò, dovrai recuperare tutti i componenti necessari\n e assemblarli nell'ordine corretto");
+        direttore.addFirstDialogueLine("Nello specifico, i componenti che ti serviranno sono:");
+        direttore.addFirstDialogueLine("- [RED]Case pc, scheda madre, RAM, SSD, CPU, pasta termica, dissipatore, GPU e alimentatore[/]");
+        direttore.addFirstDialogueLine("Dopo aver assemblato il pc, dovrai accenderlo per completare la prova");
         direttore.addFirstDialogueLine("In fondo al corridoio del laboratorio trovarai già il case del PC vuoto,\n nel quale dovrai inserire tutti i componenti");
         direttore.addFirstDialogueLine("Il primo componente te lo fornisco io, gli altri dovrai recuperarli in giro per il collegio");
         direttore.addItemToGive(schedaMadre);
@@ -159,7 +163,7 @@ public class Level2State extends GameState {
         luigi.addFirstDialogueLine("Non ti preoccupare, non sono un terrorista, mi piace solo far esplodere i condensatori!");
         luigi.addFirstDialogueLine("Per la tua prova, ti consiglio di dare un occhiata in questo laboratorio,\npotresti trovare oggetti utili");
         luigi.addSubsequentDialogueLine("Vuoi sapere un segreto? Ho un dispositivo che può far esplodere i condensatori a distanza!");
-        luigi.addSubsequentDialogueLine("Ma non dirlo a nessuno, è un segreto tra noi due!");
+        luigi.addSubsequentDialogueLine("Ma non ti preoccupare, non succede niente...");
 
         // RECUPERO STANZE per posizionamento oggetti
         Room craftRoom = gameDescription.getGameMap().findRoomById(Utils.ROOM_CRAFT_ROOM_ID);
@@ -190,64 +194,10 @@ public class Level2State extends GameState {
      */
     @Override
     public boolean isCompleted(GameDescription game) {
-        // Trova il case PC nella mappa
-        AdvObjectContainer casePc = findCasePcInMap(game);
-        if (casePc == null || !casePc.isOpen()) {
-            return false;
-        }
-        
-        // Ordine corretto di assemblaggio
-        int[] correctOrder = {
-            Utils.OBJ_SCHEDA_MADRE_ID,
-            Utils.OBJ_RAM_ID,
-            Utils.OBJ_SSD_ID,
-            Utils.OBJ_CPU_ID,
-            Utils.OBJ_PASTA_TERMICA_ID,
-            Utils.OBJ_DISSIPATORE_ID,
-            Utils.OBJ_GPU_ID,
-            Utils.OBJ_ALIMENTATORE_ID
-        };
-        
-        // Verifica assemblaggio completo e corretto
-        List<AdvObject> assembledComponents = casePc.getList();
-        if (assembledComponents.size() == correctOrder.length) {
-            // Verifica ordine corretto
-            for (int i = 0; i < correctOrder.length; i++) {
-                if (assembledComponents.get(i).getId() != correctOrder[i]) {
-                    return false;
-                }
-            }
-            
-            // Se arriviamo qui, l'assemblaggio è completo e corretto
-            // Assegna l'oggetto di completamento se non già presente
-            boolean alreadyHasCompletionObject = game.getInventory().stream()
-                .anyMatch(obj -> obj.getId() == Utils.OBJ_LEVEL2_COMPLETE_ID);
-                
-            if (!alreadyHasCompletionObject) {
-                AdvObject level2Complete = new AdvObject(Utils.OBJ_LEVEL2_COMPLETE_ID, "level2Complete");
-                level2Complete.setVisible(false);
-                game.getInventory().add(level2Complete);
-            }
-            
-            return true;
-        }
-        
-        return false;
+        return game.getInventory().stream()
+        .anyMatch(obj -> obj.getId() == Utils.OBJ_LEVEL2_COMPLETE_ID);
     }
 
-    private AdvObjectContainer findCasePcInMap(GameDescription game) {
-        // Itera attraverso tutti i piani e tutte le stanze
-        for (List<Room> floor : game.getGameMap().getAllFloors()) {
-            for (Room room : floor) {
-                for (AdvObject obj : room.getObjects()) {
-                    if (obj.getId() == Utils.OBJ_CASE_PC_ID && obj instanceof AdvObjectContainer) {
-                        return (AdvObjectContainer) obj;
-                    }
-                }
-            }
-        }
-        return null;
-    }
     
     /**
      * Verifica fallimento: possesso di componenti vietati o incompatibili.
@@ -286,9 +236,10 @@ public class Level2State extends GameState {
         output.writeln("\n" + "=".repeat(60), ColorText.LIGHT_ORANGE);
         output.writeln("LIVELLO 2 - PROVA TECNICA", ColorText.LIGHT_ORANGE);
         output.writeln("=".repeat(60), ColorText.LIGHT_ORANGE);
+        output.writeln("IMAGE:" + ResourceLoader.IMG_PATH.resolve("Burdo_direttore.png").toString());
         output.writeln("\nVedi il Direttore che inzia a correre verso la porta... sembra che non stia molto bene...\n");
         output.writeln("[NPC]Lorenzo Burdo[/]: \"Weee! Ma che piacere conoscenere il candidato di oggi!!\"");
-        output.writeln("[NPC]Lorenzo Burdo[/]: \"Io sono Lorenzo Burdo, il vice direttore del collegio\"");
+        output.writeln("[NPC]Lorenzo Burdo[/]: \"Io sono Lorenzo Burdo, il vicedirettore del collegio\"");
         output.writeln("[NPC]Lorenzo Burdo[/]: \"Ehiii, ma hai tu la mia penna ! Ridammela subito !\"");
         output.writeln("[NPC]Lorenzo Burdo[/]: \"Bene, ora che abbiamo risolto questo piccolo inconveniente, passiamo alla seconda prova !\"");
         output.writeln("[NPC]Lorenzo Burdo[/]: \"Dirigiti in laboratorio, li troverai il Direttore il quale ti darà ulteriori informazioni a riguardo\"");
