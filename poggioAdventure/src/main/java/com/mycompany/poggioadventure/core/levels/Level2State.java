@@ -3,6 +3,7 @@ package com.mycompany.poggioadventure.core.levels;
 import com.mycompany.poggioadventure.core.abstracts.GameDescription;
 import com.mycompany.poggioadventure.core.abstracts.GameState;
 import com.mycompany.poggioadventure.core.utils.Utils;
+import com.mycompany.poggioadventure.core.levels.PcAssemblyHelper;
 import com.mycompany.poggioadventure.model.AdvNPC;
 import com.mycompany.poggioadventure.model.AdvObject;
 import com.mycompany.poggioadventure.model.AdvObjectContainer;
@@ -194,8 +195,33 @@ public class Level2State extends GameState {
      */
     @Override
     public boolean isCompleted(GameDescription game) {
-        return game.getInventory().stream()
-        .anyMatch(obj -> obj.getId() == Utils.OBJ_LEVEL2_COMPLETE_ID);
+        // Trova il case PC nella mappa
+        AdvObjectContainer casePc = findCasePcInMap(game);
+        if (casePc == null || !casePc.isOpen()) {
+            return false;
+        }
+        
+        // Verifica assemblaggio completo e corretto utilizzando l'helper
+        if (PcAssemblyHelper.isPcCorrectlyAssembled(casePc)) {
+            // Controlla se il PC è stato usato (oggetto completamento presente)
+            boolean hasUsedPc = game.getInventory().stream()
+                .anyMatch(obj -> obj.getId() == Utils.OBJ_LEVEL2_COMPLETE_ID);
+                
+            return hasUsedPc; // Completato solo se ha usato il PC
+        }
+        
+        return false;
+    }
+
+    private AdvObjectContainer findCasePcInMap(GameDescription game) {
+        // Cerca il case PC in tutte le stanze di tutti i piani
+        return game.getGameMap().getAllFloors().stream()
+            .flatMap(List::stream) // Flattena tutti i piani in un unico stream di stanze
+            .flatMap(room -> room.getObjects().stream()) // Flattena tutti gli oggetti delle stanze
+            .filter(obj -> obj.getId() == Utils.OBJ_CASE_PC_ID && obj instanceof AdvObjectContainer)
+            .map(obj -> (AdvObjectContainer) obj)
+            .findFirst()
+            .orElse(null);
     }
 
     

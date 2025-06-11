@@ -2,6 +2,7 @@ package com.mycompany.poggioadventure.observers;
 
 import com.mycompany.poggioadventure.core.abstracts.GameDescription;
 import com.mycompany.poggioadventure.core.levels.FlipperLogic;
+import com.mycompany.poggioadventure.core.levels.PcAssemblyHelper;
 import com.mycompany.poggioadventure.core.utils.GameContext;
 import com.mycompany.poggioadventure.core.utils.Utils;
 import com.mycompany.poggioadventure.parser.ParserOutput;
@@ -350,12 +351,12 @@ public class UseObserver implements GameObserver, Serializable {
                         msg.append("\n").append("=".repeat(50)).append("\n");
                         msg.append("🔌 [YELLOW]ACCENSIONE PC IN CORSO...[/]\n");
                         msg.append("=".repeat(50)).append("\n");
-                        msg.append("⚡ Alimentatore: [GREEN]OK[/]\n");
-                        msg.append("🧠 CPU: [GREEN]Rilevata e funzionante[/]\n");
-                        msg.append("💾 RAM: [GREEN]16GB riconosciuti[/]\n");
-                        msg.append("💿 SSD: [GREEN]Rilevato[/]\n");
-                        msg.append("🎮 GPU: [GREEN]Scheda grafica inizializzata[/]\n");
-                        msg.append("❄️ Sistema di raffreddamento: [GREEN]Attivo[/]\n");
+                        msg.append("Alimentatore: [GREEN]OK[/]\n");
+                        msg.append("CPU: [GREEN]Rilevata e funzionante[/]\n");
+                        msg.append("RAM: [GREEN]16GB riconosciuti[/]\n");
+                        msg.append("SSD: [GREEN]Rilevato[/]\n");
+                        msg.append("GPU: [GREEN]Scheda grafica inizializzata[/]\n");
+                        msg.append("Sistema di raffreddamento: [GREEN]Attivo[/]\n");
                         msg.append("\n[GREEN]✅ BOOT COMPLETATO CON SUCCESSO![/]\n");
                         msg.append("[GREEN]Il PC funziona perfettamente! Prova tecnica superata![/]\n");
                         msg.append("=".repeat(50)).append("\n");
@@ -404,33 +405,12 @@ public class UseObserver implements GameObserver, Serializable {
     }
 
     /**
-     * Verifica se il PC è assemblato correttamente con tutti i componenti nell'ordine giusto.
+     * Verifica se il PC è assemblato correttamente utilizzando PcAssemblyHelper.
      * 
      * @param casePc Il contenitore del case PC da verificare
      * @return true se il PC è assemblato correttamente, false altrimenti
      */
     private boolean isPcCorrectlyAssembled(AdvObjectContainer casePc) {
-        int[] correctOrder = {
-            Utils.OBJ_SCHEDA_MADRE_ID,
-            Utils.OBJ_RAM_ID,
-            Utils.OBJ_SSD_ID,
-            Utils.OBJ_CPU_ID,
-            Utils.OBJ_PASTA_TERMICA_ID,
-            Utils.OBJ_DISSIPATORE_ID,
-            Utils.OBJ_GPU_ID,
-            Utils.OBJ_ALIMENTATORE_ID
-        };
-
-        if (casePc.getList().size() != correctOrder.length) {
-            return false;
-        }
-
-        for (int i = 0; i < correctOrder.length; i++) {
-            if (casePc.getList().get(i).getId() != correctOrder[i]) {
-                return false;
-            }
-        }
-
-        return true;
+        return PcAssemblyHelper.isPcCorrectlyAssembled(casePc);
     }
 }

@@ -2,6 +2,7 @@ package com.mycompany.poggioadventure.observers;
 
 import com.mycompany.poggioadventure.core.abstracts.GameDescription;
 import com.mycompany.poggioadventure.core.utils.GameContext;
+import com.mycompany.poggioadventure.core.levels.PcAssemblyHelper;
 import com.mycompany.poggioadventure.core.utils.Utils;
 import com.mycompany.poggioadventure.parser.ParserOutput;
 import com.mycompany.poggioadventure.model.AdvObject;
@@ -15,32 +16,9 @@ import java.util.List;
  * 
  * <p>Gestisce l'inserimento di oggetti in contenitori con validazione
  * dell'ordine corretto per l'assemblaggio del PC nel Level2.
- * 
- * <p><b>Ordine assemblaggio richiesto:</b>
- * <ol>
- *   <li>Scheda madre</li>
- *   <li>RAM</li>
- *   <li>SSD</li>
- *   <li>CPU</li>
- *   <li>Pasta termica</li>
- *   <li>Dissipatore</li>
- *   <li>GPU</li>
- *   <li>Alimentatore</li>
- * </ol>
+ * Utilizza {@link PcAssemblyHelper} per la logica condivisa di assemblaggio.
  */
 public class PutObserver implements GameObserver, Serializable {
-
-    /** Ordine corretto di assemblaggio PC */
-    private static final int[] CORRECT_ASSEMBLY_ORDER = {
-        Utils.OBJ_SCHEDA_MADRE_ID,
-        Utils.OBJ_RAM_ID,
-        Utils.OBJ_SSD_ID,
-        Utils.OBJ_CPU_ID,
-        Utils.OBJ_PASTA_TERMICA_ID,
-        Utils.OBJ_DISSIPATORE_ID,
-        Utils.OBJ_GPU_ID,
-        Utils.OBJ_ALIMENTATORE_ID
-    };
 
     @Override
     public String update(GameDescription description, ParserOutput parserOutput, GameContext gameContext) {
@@ -96,43 +74,36 @@ public class PutObserver implements GameObserver, Serializable {
     }
 
     /**
-     * Gestisce assemblaggio PC con controllo ordine corretto
+     * Gestisce assemblaggio PC con controllo ordine corretto utilizzando PcAssemblyHelper.
      */
     private String handlePcAssembly(AdvObject component, AdvObjectContainer casePC, GameDescription description) {
-        List<AdvObject> currentComponents = casePC.getList();
-        int nextExpectedIndex = currentComponents.size();
-
-        // Controlla se abbiamo già tutti i componenti
-        if (nextExpectedIndex >= CORRECT_ASSEMBLY_ORDER.length) {
+        // Controlla se assemblaggio è già completo
+        if (PcAssemblyHelper.isAssemblyComplete(casePC)) {
             return "Il PC è già completamente assemblato!\n";
         }
 
-        int expectedComponentId = CORRECT_ASSEMBLY_ORDER[nextExpectedIndex];
-
-        if (component.getId() == expectedComponentId) {
+        // Verifica se il componente è quello atteso
+        if (PcAssemblyHelper.isCorrectNextComponent(component.getId(), casePC)) {
             // Ordine corretto - inserisci componente
             description.getInventory().remove(component);
             casePC.add(component);
             
-            String componentName = getComponentName(component.getId());
+            String componentName = PcAssemblyHelper.getComponentName(component.getId());
             StringBuilder result = new StringBuilder();
             result.append("Hai installato correttamente: ").append(componentName).append("\n");
             
             // Messaggio di progresso
-            result.append("Componenti installati: ").append(nextExpectedIndex + 1)
-                  .append("/").append(CORRECT_ASSEMBLY_ORDER.length).append("\n");
-            
-            // Controlla se assemblaggio è completo
-            if (nextExpectedIndex + 1 == CORRECT_ASSEMBLY_ORDER.length) {
-                result.append("\n[GREEN]ASSEMBLAGGIO COMPLETATO![/]\n");
-                result.append("Hai assemblato con successo il computer desktop!\n");
-            }
-            
+            int currentCount = casePC.getList().size();
+            int totalCount = PcAssemblyHelper.getTotalComponentsCount();
+            result.append("Componenti installati: ").append(currentCount)
+                  .append("/").append(totalCount).append("\n");
+                    
             return result.toString();
+            
         } else {
             // Ordine sbagliato - resetta assemblaggio
             resetAssembly(casePC, description);
-            return "[RED]ORDINE ERRATO![/]L'assemblaggio è stato resettato.\n" +
+            return "[RED]ORDINE ERRATO![/] L'assemblaggio è stato resettato.\n" +
                    "Devi seguire l'ordine corretto di installazione dei componenti.\n";
         }
     }
@@ -176,22 +147,5 @@ public class PutObserver implements GameObserver, Serializable {
             description.getInventory().add(component);
         }
         casePC.getList().clear();
-    }
-
-    /**
-     * Ottiene nome user-friendly del componente
-     */
-    private String getComponentName(int componentId) {
-        return switch (componentId) {
-            case Utils.OBJ_SCHEDA_MADRE_ID -> "Scheda madre";
-            case Utils.OBJ_RAM_ID -> "RAM";
-            case Utils.OBJ_SSD_ID -> "SSD";
-            case Utils.OBJ_CPU_ID -> "CPU";
-            case Utils.OBJ_PASTA_TERMICA_ID -> "Pasta termica";
-            case Utils.OBJ_DISSIPATORE_ID -> "Dissipatore";
-            case Utils.OBJ_GPU_ID -> "GPU";
-            case Utils.OBJ_ALIMENTATORE_ID -> "Alimentatore";
-            default -> "Componente sconosciuto";
-        };
     }
 }
