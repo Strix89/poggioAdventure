@@ -3,7 +3,6 @@ package com.mycompany.poggioadventure.core.levels;
 import com.mycompany.poggioadventure.core.abstracts.GameDescription;
 import com.mycompany.poggioadventure.core.abstracts.GameState;
 import com.mycompany.poggioadventure.core.utils.Utils;
-import com.mycompany.poggioadventure.core.levels.PcAssemblyHelper;
 import com.mycompany.poggioadventure.model.AdvNPC;
 import com.mycompany.poggioadventure.model.AdvObject;
 import com.mycompany.poggioadventure.model.AdvObjectContainer;
@@ -65,10 +64,6 @@ public class Level2State extends GameState {
         this.setStartingRoom(gameDescription.getCurrentRoom());
         
         output.writeln("Sembra che il disimpegno si sia aperto..", ColorText.RED);
-
-        // Oggetto completamento livello 2
-        AdvObject level2Complete = new AdvObject(Utils.OBJ_LEVEL2_COMPLETE_ID, "level2Complete");
-        level2Complete.setVisible(false);
 
 
         // -- OGGETTI PER COSTRUIRE IL PC DESKTOP --
@@ -264,7 +259,7 @@ public class Level2State extends GameState {
         output.writeln("=".repeat(60), ColorText.LIGHT_ORANGE);
         output.writeln("IMAGE:" + ResourceLoader.IMG_PATH.resolve("Burdo_direttore.png").toString());
         output.writeln("\nVedi il Direttore che inzia a correre verso la porta... sembra che non stia molto bene...\n");
-        output.writeln("[NPC]Lorenzo Burdo[/]: \"Weee! Ma che piacere conoscenere il candidato di oggi!!\"");
+        output.writeln("[NPC]Lorenzo Burdo[/]: \"Weee! Ma che piacere conoscere il candidato di oggi!!\"");
         output.writeln("[NPC]Lorenzo Burdo[/]: \"Io sono Lorenzo Burdo, il vicedirettore del collegio\"");
         output.writeln("[NPC]Lorenzo Burdo[/]: \"Ehiii, ma hai tu la mia penna ! Ridammela subito !\"");
         output.writeln("[NPC]Lorenzo Burdo[/]: \"Bene, ora che abbiamo risolto questo piccolo inconveniente, passiamo alla seconda prova !\"");
