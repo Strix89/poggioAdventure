@@ -122,6 +122,13 @@ public class FlipperLogic {
                 if (result.isGameCompleted()) {
                     output.writeln("\n🎉 Missione completata! Uscita dalla sessione Flipper...", ColorText.GREEN);
                     sessionActive = false;
+                    
+                    // Pausa drammatica prima di uscire
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
                 }
                 
             } catch (Exception e) {

@@ -40,6 +40,8 @@ import java.util.List;
  */
 public class Level2State extends GameState {
 
+    private GameDescription gameDescription;
+
     /** Costruttore base per configurazione livello */
     public Level2State(long timeLimit, List<Integer> requiredObjects, List<Integer> forbiddenObjects) {
         super(timeLimit, requiredObjects, forbiddenObjects);
@@ -57,6 +59,9 @@ public class Level2State extends GameState {
     @Override
     public void enter(GameDescription gameDescription, OutputHandler output, String playerName) {
         // Sblocca accesso ai laboratori del primo piano
+
+        this.gameDescription = gameDescription;
+
         Room hallway = gameDescription.getGameMap().findRoomById(Utils.ROOM_HALLWAY_ID);
         hallway.setForbidden(false);
         
@@ -124,12 +129,23 @@ public class Level2State extends GameState {
         gpu.setAlias(new String[]{"scheda grafica", "video card", "nvidia", "rtx"});
         gpu.setPickupable(true);
 
+        // Poster informativo sulle frequenze operative dei robot
+        AdvObject poster = new AdvObject(Utils.OBJ_POSTER_ID, "Poster",
+                "\n[NEON_ORANGE]=== FREQUENZE ===[/]\n\n" +
+                "[YELLOW]FREQUENZE OPERATIVE ROBOT:[/]\n" +
+                "• [GREEN]433.92 MHz[/] - Canale comando ricarica\n" +
+                "• [ORANGE]868.0 MHz[/] - Canale override sistema\n" +
+                "• [BLUE]915.0 MHz[/] - Canale arresto temporaneo\n\n" +
+                "[RED]ATTENZIONE:[/] Utilizzare solo in caso di emergenza!\n" +
+                "Formato comando: [frequenza] [comando]");
+        poster.setAlias(new String[]{"poster","foglio"});
+        poster.setPickupable(false);
 
         // -- NPC LIvello 2 --
 
         // DIRETTORE NEL LABORATORIO
         AdvNPC direttore = new AdvNPC(Utils.NPC_DIRETTORE_LAB_ID, "Direttore", "Il direttore del collegio, sembra stia attendendo il tuo arrivo");
-        direttore.setImagePath(ResourceLoader.IMG_PATH.resolve("Direttore.png").toString());
+        direttore.setImagePath(ResourceLoader.IMG_PATH.resolve("DirettoreLab.png").toString());
         direttore.setAlias(new String[]{"direttore", "michele", "dottore"});
         direttore.addFirstDialogueLine(playerName + ", finalmente sei arrivato!");
         direttore.addFirstDialogueLine("La seconda prova consiste nell'assemblaggio di un pc desktop");
@@ -139,6 +155,7 @@ public class Level2State extends GameState {
         direttore.addFirstDialogueLine("Dopo aver assemblato il pc, dovrai accenderlo per completare la prova");
         direttore.addFirstDialogueLine("In fondo al corridoio del laboratorio trovarai già il case del PC vuoto,\n nel quale dovrai inserire tutti i componenti");
         direttore.addFirstDialogueLine("Il primo componente te lo fornisco io, gli altri dovrai recuperarli in giro per il collegio");
+        direttore.addSubsequentDialogueLine(playerName + ", hai già recuperato tutte le compenenti?");
         direttore.addItemToGive(schedaMadre);
 
         //PINO, il manutentore del collegio
@@ -161,6 +178,16 @@ public class Level2State extends GameState {
         luigi.addSubsequentDialogueLine("Vuoi sapere un segreto? Ho un dispositivo che può far esplodere i condensatori a distanza!");
         luigi.addSubsequentDialogueLine("Ma non ti preoccupare, non succede niente...");
 
+        // DOTTOR BUURDOH
+        AdvNPC lorenzo = new AdvNPC(Utils.NPC_LORENZO_ID, "Lorenzo Burdo", "Il vicedirettore del collegio, sembra essere un tipo molto strano");
+        lorenzo.setImagePath(ResourceLoader.IMG_PATH.resolve("Burdo.png").toString());
+        lorenzo.setAlias(new String[]{"burdo", "lorenzo", "vicedirettore"});
+        lorenzo.addFirstDialogueLine("We we che piacere rivederti !");
+        lorenzo.addFirstDialogueLine("Sto cercando il mio giaccone, forse è nell'armadio");
+        lorenzo.addSubsequentDialogueLine("Lo sai che Napoli è la città più bella del mondo? Io ci ho vissuto 40 anni!");
+        lorenzo.addSubsequentDialogueLine("Ma ora sono qui, al collegio, a fare il vicedirettore. Che vita triste...");
+        lorenzo.addSubsequentDialogueLine("Comunque, viva San Gennero e Forza Napoli!"); 
+
         // RECUPERO STANZE per posizionamento oggetti
         Room craftRoom = gameDescription.getGameMap().findRoomById(Utils.ROOM_CRAFT_ROOM_ID);
         Room electronicsLab = gameDescription.getGameMap().findRoomById(Utils.ROOM_ELECTRONICS_LAB_ID);
@@ -168,20 +195,23 @@ public class Level2State extends GameState {
         Room lab5 = gameDescription.getGameMap().findRoomById(Utils.ROOM_LAB5_ID);
         Room entryLab = gameDescription.getGameMap().findRoomById(Utils.ROOM_ENTRY_LAB_ID);
         Room corridorLab = gameDescription.getGameMap().findRoomById(Utils.ROOM_CORRIDOR_LAB_ID);
+        Room hall = gameDescription.getGameMap().findRoomById(Utils.ROOM_HALL_ID);
 
         // -- POSIZIONAMENTO NPC --
-        craftRoom.addObject(pino);
-        electronicsLab.addObject(luigi);
-        entryLab.addObject(direttore);
+        craftRoom.addObject(pino, null);
+        electronicsLab.addObject(luigi, null);
+        entryLab.addObject(direttore, null);
+        hall.addObject(lorenzo, null);
 
         // -- POSIZIONAMENTO OGGETTI --
-        corridorLab.addObject(casePc);
-        lab5.addObject(cpu);
-        craftRoom.addObject(ram);
-        craftRoom.addObject(alimentatore);
-        electronicsLab.addObject(pastaTermica);
-        lab3D.addObject(dissipatore);
-        lab5.addObject(gpu);
+        corridorLab.addObject(casePc, null);
+        lab5.addObject(cpu, "Un processore, sembra essere in buone condizioni");
+        craftRoom.addObject(ram, "Un modulo di RAM DDR4, sembra essere in buone condizioni");
+        craftRoom.addObject(alimentatore, "Un alimentatore da 650W, sembra essere funzionante");
+        electronicsLab.addObject(pastaTermica, "Una siringa di pasta termica, sembra essere nuovo");
+        lab3D.addObject(dissipatore, "Un dissipatore a torre con ventola");
+        lab5.addObject(gpu, "Una scheda grafica NVIDIA, sembra adatta per il tuo PC");
+        lab5.addObject(poster, null);
         
     }
 
@@ -236,6 +266,16 @@ public class Level2State extends GameState {
     /** Esegue callback per completamento del gioco o transizione livello */
     @Override
     public void handleSuccess(Runnable onSuccess) {
+
+        Room entry = gameDescription.getGameMap().findRoomById(Utils.ROOM_ENTRY_ID);
+        Room entryLab = gameDescription.getGameMap().findRoomById(Utils.ROOM_ENTRY_LAB_ID);
+        Room electronicsLab = gameDescription.getGameMap().findRoomById(Utils.ROOM_ELECTRONICS_LAB_ID);
+
+        entry.removeObject(Utils.NPC_GUIDO_ID);
+        entryLab.removeObject(Utils.NPC_DIRETTORE_LAB_ID);
+        electronicsLab.removeObject(Utils.NPC_LUIGI_ID);
+
+
         onSuccess.run();
     }
     
