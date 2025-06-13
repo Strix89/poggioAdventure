@@ -328,6 +328,8 @@ public class GameStateManager {
         if (currentLevelIndex >= 0 && currentLevelIndex < levels.length) {
             currentState = levels[currentLevelIndex];
             
+            currentState.enter(gameDescription, output, playerName);
+            
             levelStartTime = System.currentTimeMillis() - savedLevelElapsedTime;
             
             // Calcolo tempo rimanente con validazione

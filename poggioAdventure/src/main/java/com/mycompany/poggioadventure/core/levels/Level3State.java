@@ -70,7 +70,7 @@ public class Level3State extends GameState {
         flipperZero.setPickupable(true);
         
         // Manuale del Flipper Zero - fornisce istruzioni sui comandi disponibili
-        AdvObject manualeFlipper = new AdvObject(Utils.OBJ_FLIPPER_ZERO_ID, "Manuale Flipper",
+        AdvObject manualeFlipper = new AdvObject(Utils.OBJ_MANUALE_ID, "Manuale Flipper",
                 "[NEON_ORANGE]=== MANUALE FLIPPER ZERO ===[/]\n\n" +
                 "[YELLOW]COMANDI DISPONIBILI:[/]\n" +
                 "• [GREEN]GoToRecharge[/] - Invia i robot alle stazioni di ricarica\n" +
@@ -143,7 +143,7 @@ public class Level3State extends GameState {
                    .boxed()
                    .collect(java.util.stream.Collectors.toSet())
                    .stream()
-                   .anyMatch(id -> this.getForbidenIDObjects().contains(id));
+                   .anyMatch(id -> this.getForbiddenIDObjects().contains(id));
     }
     
     /** Esegue callback per completamento del livello */

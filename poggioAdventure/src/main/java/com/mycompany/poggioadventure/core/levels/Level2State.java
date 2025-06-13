@@ -155,7 +155,7 @@ public class Level2State extends GameState {
         direttore.addFirstDialogueLine("Dopo aver assemblato il pc, dovrai accenderlo per completare la prova");
         direttore.addFirstDialogueLine("In fondo al corridoio del laboratorio trovarai già il case del PC vuoto,\n nel quale dovrai inserire tutti i componenti");
         direttore.addFirstDialogueLine("Il primo componente te lo fornisco io, gli altri dovrai recuperarli in giro per il collegio");
-        direttore.addSubsequentDialogueLine(playerName + ", hai già recuperato tutte le compenenti?");
+        direttore.addSubsequentDialogueLine(playerName + ", hai già recuperato tutte le componenti?");
         direttore.addItemToGive(schedaMadre);
 
         //PINO, il manutentore del collegio
@@ -260,7 +260,7 @@ public class Level2State extends GameState {
                    .boxed()
                    .collect(java.util.stream.Collectors.toSet())
                    .stream()
-                   .anyMatch(id -> this.getForbidenIDObjects().contains(id));
+                   .anyMatch(id -> this.getForbiddenIDObjects().contains(id));
     }
     
     /** Esegue callback per completamento del gioco o transizione livello */

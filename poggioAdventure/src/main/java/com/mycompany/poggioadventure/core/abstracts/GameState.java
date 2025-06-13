@@ -74,7 +74,7 @@ public abstract class GameState implements Serializable {
     }
 
     /** Lista degli ID oggetti vietati che causano fallimento del livello */
-    public List<Integer> getForbidenIDObjects() {
+    public List<Integer> getForbiddenIDObjects() {
         return forbidenIDObjects;
     }
     

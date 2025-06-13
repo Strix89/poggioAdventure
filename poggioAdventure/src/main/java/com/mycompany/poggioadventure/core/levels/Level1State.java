@@ -498,7 +498,7 @@ public class Level1State extends GameState {
                    .boxed()
                    .collect(java.util.stream.Collectors.toSet())
                    .stream()
-                   .anyMatch(id -> this.getForbidenIDObjects().contains(id));
+                   .anyMatch(id -> this.getForbiddenIDObjects().contains(id));
     }
     
     /** Esegue callback per transizione al livello successivo */
