@@ -46,7 +46,7 @@ NPC: [Cupulino, Pino, Luigi D.]
 2.2 Assemblare pc
 2.2.1 Ricerca oggetti ( cpu -> lab , ram -> pino , s.m -> data da michele , alimentatore -> pino , pasta t -> lab, dissipatore -> lab, gpu ->lab, ssd -> galileo)
 2.2.2 Assemblaggio pc 
-Oggetti in ordine di assemblaggio : s.m. ,ram, cpu, p.t., dissipatore, gpu, alimentatore )
+Oggetti in ordine di assemblaggio : s.m. ,ram, ssd, cpu, p.t., dissipatore, gpu, alimentatore )
 Successivamnete collegare cavi ,
 test accensione , (se test accensione = fallito -> restart subquest 2 ).
 
@@ -56,7 +56,7 @@ test accensione , (se test accensione = fallito -> restart subquest 2 ).
 
 3.1 Nel mentre michele si congratula con il candidato arriva il portinaio dicendogli che i robottini sono impazziti 
 3.2 viene dato il manuale di istruzioni dei robot da guido, il quale avverte del problema con quest'ultimi || Trovare flipper zero
-3.2.1 Il manuale contiene tre comandi: GoToRecharge (Win), Override (Lose 30s left) , Stop (+1 min)
+3.2.1 Il manuale contiene tre comandi: GoToRecharge (Win), Override (Game over) , Stop (+5 min al tempo di gioco totale)
 Per inviare comandi con il flipper bisogna inserire la giusta frequenza (descritta in un'altro manuale non prendibile presente nel lab [non dove è presente il flipper])
 Usa flipper zero con inserimento frequenza.
 3.3 Individuare funzioni per fermare i robottini 
@@ -66,14 +66,4 @@ FINE : Michele si congratula confermando la tua ammissione !!
 
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
  
