@@ -13,7 +13,6 @@ import java.io.IOException;
  * Filtro per l'autenticazione delle richieste tramite API Key.
  * Valida l'header X-API-Key confrontandolo con il segreto configurato.
  * 
- * @author Strix89
  */
 @Provider
 public class ApiKeyFilter implements ContainerRequestFilter {

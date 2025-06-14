@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
  * Endpoint REST per la gestione dei giocatori.
  * Fornisce operazioni CRUD, upload/download log e classifica.
  * 
- * @author Strix89
  */
 @jakarta.ws.rs.Path("/players")
 public class PlayerResource {

@@ -15,7 +15,6 @@ import java.util.Properties;
  * Gestisce il pool di connessioni al database usando HikariCP.
  * Inizializza lo schema del database al caricamento della classe.
  * 
- * @author Strix89
  */
 public class DatabaseManager {
 

@@ -73,8 +73,6 @@ public class FlipperResult {
     /** Flag che indica se il comando ha completato il gioco/sfida */
     private final boolean gameCompleted;
     
-    /** Modifica da applicare al timer di gioco (in secondi, può essere negativa) */
-    private final int timeModification;
     
     /**
      * Costruttore privato per garantire l'uso dei factory methods.
@@ -82,13 +80,11 @@ public class FlipperResult {
      * @param message Messaggio descrittivo del risultato
      * @param type Tipo di risultato
      * @param gameCompleted Se l'operazione ha completato il gioco
-     * @param timeModification Secondi da aggiungere/sottrarre al timer
      */
-    public FlipperResult(String message, ResultType type, boolean gameCompleted, int timeModification) {
+    public FlipperResult(String message, ResultType type, boolean gameCompleted) {
         this.message = message;
         this.type = type;
         this.gameCompleted = gameCompleted;
-        this.timeModification = timeModification;
     }
     
     /**
@@ -107,8 +103,8 @@ public class FlipperResult {
      * return FlipperResult.success("Robot reindirizzati!", true, 0);
      * }</pre>
      */
-    public static FlipperResult success(String message, boolean gameCompleted, int timeModification) {
-        return new FlipperResult(message, ResultType.SUCCESS, gameCompleted, timeModification);
+    public static FlipperResult success(String message, boolean gameCompleted) {
+        return new FlipperResult(message, ResultType.SUCCESS, gameCompleted);
     }
     
     /**
@@ -126,7 +122,7 @@ public class FlipperResult {
      * }</pre>
      */
     public static FlipperResult error(String message) {
-        return new FlipperResult(message, ResultType.ERROR, false, 0);
+        return new FlipperResult(message, ResultType.ERROR, false);
     }
     
     /**
@@ -136,7 +132,6 @@ public class FlipperResult {
      * o indesiderati, tipicamente con penalità al timer.
      * 
      * @param message Messaggio di avviso da mostrare all'utente
-     * @param timeModification Modifica al timer (solitamente negativa per penalità)
      * @return Nuova istanza di FlipperResult di tipo WARNING
      * 
      * @example
@@ -144,8 +139,8 @@ public class FlipperResult {
      * return FlipperResult.warning("Override causato instabilità!", -30);
      * }</pre>
      */
-    public static FlipperResult warning(String message, int timeModification) {
-        return new FlipperResult(message, ResultType.WARNING, false, timeModification);
+    public static FlipperResult warning(String message) {
+        return new FlipperResult(message, ResultType.WARNING, false);
     }
     
     /**
@@ -155,7 +150,6 @@ public class FlipperResult {
      * o bonus al giocatore senza essere critici per il completamento.
      * 
      * @param message Messaggio informativo da mostrare all'utente
-     * @param timeModification Modifica al timer (spesso positiva per bonus)
      * @return Nuova istanza di FlipperResult di tipo INFO
      * 
      * @example
@@ -163,8 +157,8 @@ public class FlipperResult {
      * return FlipperResult.info("Robot fermati, bonus tempo!", 60);
      * }</pre>
      */
-    public static FlipperResult info(String message, int timeModification) {
-        return new FlipperResult(message, ResultType.INFO, false, timeModification);
+    public static FlipperResult info(String message) {
+        return new FlipperResult(message, ResultType.INFO, false);
     }
     
     /**
@@ -194,19 +188,5 @@ public class FlipperResult {
         return gameCompleted; 
     }
     
-    /**
-     * Restituisce la modifica da applicare al timer di gioco.
-     * 
-     * <p>Valori possibili:
-     * <ul>
-     *   <li>Positivi: bonus di tempo (secondi aggiunti)</li>
-     *   <li>Negativi: penalità di tempo (secondi sottratti)</li>
-     *   <li>Zero: nessuna modifica al timer</li>
-     * </ul>
-     * 
-     * @return Secondi da aggiungere (+) o sottrarre (-) al timer
-     */
-    public int getTimeModification() { 
-        return timeModification; 
-    }
+
 }

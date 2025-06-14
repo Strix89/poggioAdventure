@@ -11,7 +11,6 @@ import java.util.List;
  * Interfaccia DAO per la gestione dei giocatori.
  * Definisce le operazioni CRUD e di classifica.
  * 
- * @author Strix89
  */
 public interface PlayerDAO {
 

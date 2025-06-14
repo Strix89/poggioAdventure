@@ -4,6 +4,7 @@ import com.mycompany.poggioadventure.core.abstracts.GameDescription;
 import com.mycompany.poggioadventure.core.abstracts.GameState;
 import com.mycompany.poggioadventure.core.levels.Level1State;
 import com.mycompany.poggioadventure.core.levels.Level2State;
+import com.mycompany.poggioadventure.core.levels.Level3State;
 import com.mycompany.poggioadventure.core.utils.TimeManager;
 import com.mycompany.poggioadventure.core.utils.Utils;
 import com.mycompany.poggioadventure.ui.ColorText;
@@ -57,7 +58,8 @@ public class GameStateManager {
     /** Configurazione livelli con limiti di tempo e oggetti richiesti */
     private final GameState[] levels = {
         new Level1State(Utils.LEVEL_1_TIME_LIMIT, Utils.LEVEL_1_REQUIRED_OBJECTS, Utils.LEVEL_1_FORBIDDEN_OBJECTS),
-        new Level2State(Utils.LEVEL_2_TIME_LIMIT, Utils.LEVEL_2_REQUIRED_OBJECTS, Utils.LEVEL_2_FORBIDDEN_OBJECTS) 
+        new Level2State(Utils.LEVEL_2_TIME_LIMIT, Utils.LEVEL_2_REQUIRED_OBJECTS, Utils.LEVEL_2_FORBIDDEN_OBJECTS),
+        new Level3State(Utils.LEVEL_3_TIME_LIMIT, Utils.LEVEL_3_REQUIRED_OBJECTS, Utils.LEVEL_3_FORBIDDEN_OBJECTS)
     };
     
     /**
@@ -104,19 +106,19 @@ public class GameStateManager {
 
         // Verifica condizioni di fallimento specifiche del livello
         if (currentState.isFailureConditionMet(gameDescription)) {
-            currentState.handleFailure(this::handleGameLoss);
+            currentState.handleFailure(this::handleGameLoss, gameDescription);
         }
         
         // Verifica completamento tramite inventario
         if (checkInventoryCompletion()) {
             output.writeln("\n🎉 LIVELLO COMPLETATO!", ColorText.GREEN);
-            currentState.handleSuccess(this::advanceToNextLevel);
+            currentState.handleSuccess(this::advanceToNextLevel, gameDescription);
             return;
         }
         
         // Verifica altre condizioni di completamento
         if (currentState.isCompleted(gameDescription)) {
-            currentState.handleSuccess(this::advanceToNextLevel);
+            currentState.handleSuccess(this::advanceToNextLevel, gameDescription);
             return;
         }
     }

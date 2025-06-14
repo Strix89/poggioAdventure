@@ -3,6 +3,10 @@ package com.mycompany.poggioadventure.core.levels;
 import com.mycompany.poggioadventure.core.abstracts.IFlipperCommandProcessor;
 import com.mycompany.poggioadventure.core.utils.FlipperResult;
 import com.mycompany.poggioadventure.core.utils.GameContext;
+import com.mycompany.poggioadventure.core.utils.StopWatch;
+import com.mycompany.poggioadventure.core.utils.Utils;
+import com.mycompany.poggioadventure.model.AdvObject;
+
 
 import java.util.HashMap;
 import java.util.Map;
@@ -101,19 +105,25 @@ public class FlipperCommandProcessor implements IFlipperCommandProcessor {
                 notifyGameEngine("GoToRecharge");
                 return FlipperResult.success(
                     "SUCCESSO: Robot reindirizzati alle stazioni di ricarica!\nI robot si stanno spegnendo... Prova completata!",
-                    true, 0
+                    true
                 );
                 
             case "Override":
-                return FlipperResult.warning(
-                    "ATTENZIONE: Override eseguito ma ha causato instabilità!\nPenalità: -30 secondi dal timer rimanente.",
-                    -30
+                notifyGameEngine("Override");
+                return FlipperResult.error(
+                    "GAME OVER: Override ha causato un cortocircuito catastrofico!\nTutti i sistemi del collegio sono andati in tilt!"
                 );
                 
             case "Stop":
-                return FlipperResult.info(
-                    "INFO: Robot fermati temporaneamente.\nBonus: +1 minuto aggiunto al timer.",
-                    60
+                if (gameContext.getStopWatch() != null) {
+                    StopWatch stopWatch = gameContext.getStopWatch();
+                    long currentElapsed = stopWatch.getElapsedSeconds();
+                    stopWatch.stop();
+                    stopWatch.startFrom(currentElapsed + 300); // +300 secondi = +5 minuti
+                }
+                
+                return FlipperResult.warning(
+                    "WARNING: Il comando non ti ha aiutato!\nHai avuto una penalità di 5 minuti sul tempo di gioco!"
                 );
                 
             default:
@@ -124,7 +134,15 @@ public class FlipperCommandProcessor implements IFlipperCommandProcessor {
     /** Notifica eventi globali al motore di gioco per comandi critici */
     private void notifyGameEngine(String successfulCommand) {
         if ("GoToRecharge".equals(successfulCommand)) {
-            // TODO: Integrazione con Engine per completamento sfida
+            AdvObject level3Complete = new AdvObject(Utils.OBJ_LEVEL3_COMPLETE_ID, "level3Complete");
+            level3Complete.setVisible(false);
+            gameContext.getInventory().add(level3Complete);
+            gameContext.getLastGame().run();
+        }else if ("Override".equals(successfulCommand)) {
+            AdvObject level3Lose = Utils.buildLoseGameObject();
+            level3Lose.setVisible(false);
+            gameContext.getInventory().add(level3Lose);
+            gameContext.getLastGame().run();
         }
     }
     

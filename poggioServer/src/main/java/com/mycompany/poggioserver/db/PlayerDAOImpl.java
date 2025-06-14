@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
  * Implementazione del DAO per la gestione dei giocatori nel database.
  * Gestisce le operazioni CRUD e la classifica giocatori.
  * 
- * @author Strix89
  */
 public class PlayerDAOImpl implements PlayerDAO {
 

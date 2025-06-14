@@ -105,7 +105,7 @@ public class Engine {
         getGameColoredVersion();
         gameTime = StopWatch.getInstance();
         gameTime.start();
-        gameContext = new GameContext(input, output, errorHandler, logTemp, gameTime);
+        gameContext = new GameContext(input, output, errorHandler, logTemp, gameTime, game.getInventory(), () -> processCommand("osserva"));
         
         // Inizializzazione GameStateManager con callback pattern per eventi di gioco
         try {

@@ -11,7 +11,6 @@ import java.util.Objects;
  * La classe mantiene informazioni sulla migliore performance di un giocatore
  * inclusi punteggio, durata della partita e riferimento al log di gioco.
  * 
- * @author Strix89
  */
 public class PlayerRecord {
 
