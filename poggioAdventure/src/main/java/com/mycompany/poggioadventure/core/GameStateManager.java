@@ -106,19 +106,19 @@ public class GameStateManager {
 
         // Verifica condizioni di fallimento specifiche del livello
         if (currentState.isFailureConditionMet(gameDescription)) {
-            currentState.handleFailure(this::handleGameLoss);
+            currentState.handleFailure(this::handleGameLoss, gameDescription);
         }
         
         // Verifica completamento tramite inventario
         if (checkInventoryCompletion()) {
             output.writeln("\n🎉 LIVELLO COMPLETATO!", ColorText.GREEN);
-            currentState.handleSuccess(this::advanceToNextLevel);
+            currentState.handleSuccess(this::advanceToNextLevel, gameDescription);
             return;
         }
         
         // Verifica altre condizioni di completamento
         if (currentState.isCompleted(gameDescription)) {
-            currentState.handleSuccess(this::advanceToNextLevel);
+            currentState.handleSuccess(this::advanceToNextLevel, gameDescription);
             return;
         }
     }
@@ -327,8 +327,6 @@ public class GameStateManager {
         
         if (currentLevelIndex >= 0 && currentLevelIndex < levels.length) {
             currentState = levels[currentLevelIndex];
-            
-            currentState.enter(gameDescription, output, playerName);
             
             levelStartTime = System.currentTimeMillis() - savedLevelElapsedTime;
             

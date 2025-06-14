@@ -40,8 +40,6 @@ import java.util.List;
  */
 public class Level1State extends GameState {
 
-    private GameDescription gameDescription;
-
     /** Costruttore base per configurazione livello */
     public Level1State(long timeLimit, List<Integer> requiredObjects, List<Integer> forbiddenObjects) {
         super(timeLimit, requiredObjects, forbiddenObjects);
@@ -59,7 +57,6 @@ public class Level1State extends GameState {
     @Override
     public void enter(GameDescription gameDescription, OutputHandler output, String playerName) {
        
-        this.gameDescription = gameDescription;
 
         // NPC Guido - Portinaio con indicazioni per il test
         AdvNPC guido = new AdvNPC(Utils.NPC_GUIDO_ID, "Guido", "Un nano sembra essere il portinaio e sembra essere anche \n\t il tipico interista rompiscatole");
@@ -503,7 +500,7 @@ public class Level1State extends GameState {
     
     /** Esegue callback per transizione al livello successivo */
     @Override
-    public void handleSuccess(Runnable onSuccess) {
+    public void handleSuccess(Runnable onSuccess, GameDescription gameDescription) {
         Room galileoRoom = gameDescription.getGameMap().findRoomById(Utils.ROOM_GALILEO_ID);
         if(galileoRoom != null) {
                 galileoRoom.removeObject(Utils.NPC_DIRETTOREGALILEO_ID);
@@ -514,7 +511,7 @@ public class Level1State extends GameState {
     
     /** Esegue callback per gestione fallimento */
     @Override
-    public void handleFailure(Runnable onFailure) {
+    public void handleFailure(Runnable onFailure, GameDescription gameDescription) {
         onFailure.run();
     }
     

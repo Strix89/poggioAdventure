@@ -35,6 +35,8 @@ public abstract class GameState implements Serializable {
     /** ID degli oggetti che causano fallimento se raccolti */
     private final List<Integer> forbidenIDObjects;
 
+
+
     public GameState(long timeLimit, Room startingRoom, List<Integer> requiredIDObjects, List<Integer> forbiddenIDObjects) {
         this.timeLimit = timeLimit;
         this.requiredIDObjects = requiredIDObjects;
@@ -100,14 +102,14 @@ public abstract class GameState implements Serializable {
      * 
      * @param onSuccess Callback per avanzamento al livello successivo
      */
-    public abstract void handleSuccess(Runnable onSuccess);
+    public abstract void handleSuccess(Runnable onSuccess, GameDescription gameDescription);
     
     /**
      * Gestisce il fallimento del livello con callback per azioni appropriate.
      * 
      * @param onFailure Callback per gestione sconfitta (reset o game over)
      */
-    public abstract void handleFailure(Runnable onFailure);
+    public abstract void handleFailure(Runnable onFailure, GameDescription gameDescription);
     
     /** Identificativo univoco del livello per logging e debugging */
     public abstract String getLevelName();

@@ -148,13 +148,13 @@ public class Level3State extends GameState {
     
     /** Esegue callback per completamento del livello */
     @Override
-    public void handleSuccess(Runnable onSuccess) {
+    public void handleSuccess(Runnable onSuccess, GameDescription gameDescription) {
         onSuccess.run();
     }
     
     /** Esegue callback per gestione fallimento */
     @Override
-    public void handleFailure(Runnable onFailure) {
+    public void handleFailure(Runnable onFailure, GameDescription gameDescription) {
         onFailure.run();
     }
     

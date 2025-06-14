@@ -40,7 +40,6 @@ import java.util.List;
  */
 public class Level2State extends GameState {
 
-    private GameDescription gameDescription;
 
     /** Costruttore base per configurazione livello */
     public Level2State(long timeLimit, List<Integer> requiredObjects, List<Integer> forbiddenObjects) {
@@ -59,8 +58,6 @@ public class Level2State extends GameState {
     @Override
     public void enter(GameDescription gameDescription, OutputHandler output, String playerName) {
         // Sblocca accesso ai laboratori del primo piano
-
-        this.gameDescription = gameDescription;
 
         Room hallway = gameDescription.getGameMap().findRoomById(Utils.ROOM_HALLWAY_ID);
         hallway.setForbidden(false);
@@ -265,7 +262,7 @@ public class Level2State extends GameState {
     
     /** Esegue callback per completamento del gioco o transizione livello */
     @Override
-    public void handleSuccess(Runnable onSuccess) {
+    public void handleSuccess(Runnable onSuccess, GameDescription gameDescription) {
 
         Room entry = gameDescription.getGameMap().findRoomById(Utils.ROOM_ENTRY_ID);
         Room entryLab = gameDescription.getGameMap().findRoomById(Utils.ROOM_ENTRY_LAB_ID);
@@ -281,7 +278,7 @@ public class Level2State extends GameState {
     
     /** Esegue callback per gestione fallimento */
     @Override
-    public void handleFailure(Runnable onFailure) {
+    public void handleFailure(Runnable onFailure, GameDescription gameDescription) {
         onFailure.run();
     }
     
