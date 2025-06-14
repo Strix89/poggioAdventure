@@ -40,8 +40,6 @@ import java.util.List;
  */
 public class Level1State extends GameState {
 
-    private GameDescription gameDescription;
-
     /** Costruttore base per configurazione livello */
     public Level1State(long timeLimit, List<Integer> requiredObjects, List<Integer> forbiddenObjects) {
         super(timeLimit, requiredObjects, forbiddenObjects);
@@ -59,7 +57,6 @@ public class Level1State extends GameState {
     @Override
     public void enter(GameDescription gameDescription, OutputHandler output, String playerName) {
        
-        this.gameDescription = gameDescription;
 
         // NPC Guido - Portinaio con indicazioni per il test
         AdvNPC guido = new AdvNPC(Utils.NPC_GUIDO_ID, "Guido", "Un nano sembra essere il portinaio e sembra essere anche \n\t il tipico interista rompiscatole");
@@ -262,7 +259,7 @@ public class Level1State extends GameState {
         chiaviAuto.setPickupable(true);
 
         AdvObject forbici = new AdvObject(Utils.OBJ_FORBICI_ID, "Forbici",
-                "Un paio di forbici, potrebbero tornarti utili.",
+                "Un paio di forbici, potrebbero tornarti utili",
                 ResourceLoader.IMG_PATH.resolve("Forbici.png").toString());
         forbici.setAlias(new String[] { "Forbici", "attrezzo", "strumento"});
         forbici.setPickupable(true);
@@ -276,7 +273,7 @@ public class Level1State extends GameState {
         martello.setPushable(true);
 
         AdvObject segaCircolare = new AdvObject(Utils.OBJ_SEGA_CIRCOLARE_ID, "Sega circolare",
-                "Una sega circolare, sembra molto affilata.");
+                "Una sega circolare, sembra molto affilata");
         segaCircolare.setAlias(new String[] { "Sega", "circolare"});
         segaCircolare.setPickupable(false);
         segaCircolare.setPushable(true);
@@ -334,7 +331,7 @@ public class Level1State extends GameState {
 
         // Attrezzi di precisione
         AdvObject setCacciaviti = new AdvObject(Utils.OBJ_SET_CACCIAVITI_ID, "Set cacciaviti",
-                "Un set di cacciaviti di precisione, potrebbe esserti utili.",
+                "Un set di cacciaviti di precisione, potrebbe esserti utili",
                 ResourceLoader.IMG_PATH.resolve("Cacciaviti.png").toString());
         setCacciaviti.setAlias(new String[] { "Cacciavite", "cacciaviti", "set"});
         setCacciaviti.setPickupable(true);
@@ -365,11 +362,11 @@ public class Level1State extends GameState {
         Room entry = new Room(Utils.ROOM_ENTRY_ID, "Ingresso", "Ti trovi nell'ingresso di Poggiolevante");
         entry.addObject(guido, null);
         entry.setImagePath(ResourceLoader.IMG_PATH.resolve("Ingresso.png").toString());
-        entry.addObject(post_it, "C'è un post-it attaccato alla porta con delle istruzioni.");
+        entry.addObject(post_it, "C'è un post-it attaccato alla porta con delle istruzioni");
 
         Room hall = new Room(Utils.ROOM_HALL_ID, "Hall", "Ti trovi nella Hall di PoggioLevante.");
         hall.setImagePath(ResourceLoader.IMG_PATH.resolve("Hall.png").toString());
-        hall.addObject(armadioHall, "C'è un armadio di legno chiuso.");
+        hall.addObject(armadioHall,null);
 
         Room reception = new Room(Utils.ROOM_RECEPTION_ID, "Portineria", "Ti trovi nella portineria.");
         reception.setImagePath(ResourceLoader.IMG_PATH.resolve("Portineria.png").toString());
@@ -378,7 +375,7 @@ public class Level1State extends GameState {
 
         Room corridor = new Room(Utils.ROOM_CORRIDOR_ID, "Corridoio", "Ti trovi nel corridoio del primo piano.");
         corridor.setImagePath(ResourceLoader.IMG_PATH.resolve("Corridoio.png").toString());
-        corridor.addObject(vetrina, "C'è una vetrina di legno chiusa.");
+        corridor.addObject(vetrina, null);
 
         Room galileo = new Room(Utils.ROOM_GALILEO_ID, "Galileo", "Sei nella stanza Galileo");
         galileo.setImagePath(ResourceLoader.IMG_PATH.resolve("Galileo.png").toString());        
@@ -402,7 +399,7 @@ public class Level1State extends GameState {
         
         Room entryLab = new Room(Utils.ROOM_ENTRY_LAB_ID, "Ingresso Laboratorio", "Ti trovi nell'ingresso del laboratorio.");
         entryLab.setImagePath(ResourceLoader.IMG_PATH.resolve("Lab.png").toString());
-        entryLab.addObject(rack, "C'è un armadio rack chiuso.");
+        entryLab.addObject(rack, "C'è un armadio rack chiuso");
 
         Room lab5 = new Room(Utils.ROOM_LAB5_ID, "Laboratorio 5", "Sei nel laboratorio 5.");
         lab5.setImagePath(ResourceLoader.IMG_PATH.resolve("Lab5.png").toString());
@@ -498,12 +495,12 @@ public class Level1State extends GameState {
                    .boxed()
                    .collect(java.util.stream.Collectors.toSet())
                    .stream()
-                   .anyMatch(id -> this.getForbidenIDObjects().contains(id));
+                   .anyMatch(id -> this.getForbiddenIDObjects().contains(id));
     }
     
     /** Esegue callback per transizione al livello successivo */
     @Override
-    public void handleSuccess(Runnable onSuccess) {
+    public void handleSuccess(Runnable onSuccess, GameDescription gameDescription) {
         Room galileoRoom = gameDescription.getGameMap().findRoomById(Utils.ROOM_GALILEO_ID);
         if(galileoRoom != null) {
                 galileoRoom.removeObject(Utils.NPC_DIRETTOREGALILEO_ID);
@@ -514,7 +511,7 @@ public class Level1State extends GameState {
     
     /** Esegue callback per gestione fallimento */
     @Override
-    public void handleFailure(Runnable onFailure) {
+    public void handleFailure(Runnable onFailure, GameDescription gameDescription) {
         onFailure.run();
     }
     

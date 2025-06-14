@@ -133,22 +133,36 @@ public class UI_Flipper extends UI_Abstract {
                 JOptionPane.WARNING_MESSAGE);
             return;
         }
-        gameContext.getTemplog().add("[FLIPPER]: " + input);  // Aggiunge il comando al log temporaneo
+        gameContext.getTemplog().add("[FLIPPER]: " + input);
 
         // Processa il comando tramite CommandProcessor
         FlipperResult result = commandProcessor.processCommand(input);
         
-        // Apply effects
-        if (result.getTimeModification() != 0) {
-            applyTimeModification(result.getTimeModification());
-        }
-        
         // Mostra risultato tramite dialog
         showResultDialog(result);
         
-        // Notifica il callback se presente
-        if (onCommandCallback != null) {
-            onCommandCallback.accept(result.getMessage());
+        // Verifica se il comando richiede la chiusura dell'interfaccia
+        boolean shouldClose = result.isGameCompleted() || 
+                            (result.getType() == FlipperResult.ResultType.ERROR && 
+                            result.getMessage().contains("GAME OVER"));
+        
+        if (shouldClose) {
+            // Notifica il callback se presente
+            if (onCommandCallback != null) {
+                if (result.isGameCompleted()) {
+                    onCommandCallback.accept("GAME_COMPLETED");
+                } else {
+                    onCommandCallback.accept("GAME_OVER");
+                }
+            }
+            
+            // Chiudi la finestra dopo un breve delay
+            javax.swing.Timer timer = new javax.swing.Timer(2000, e -> {
+                this.setVisible(false);
+                this.dispose();
+            });
+            timer.setRepeats(false);
+            timer.start();
         }
         
         inputField.setText("");
@@ -185,24 +199,10 @@ public class UI_Flipper extends UI_Abstract {
         
         // Aggiungi informazioni su modifiche al tempo se presenti
         String message = result.getMessage();
-        if (result.getTimeModification() != 0) {
-            message += "\n\n⏱️ Modifica al timer: " + 
-                      (result.getTimeModification() > 0 ? "+" : "") + 
-                      result.getTimeModification() + " secondi";
-        }
         
         JOptionPane.showMessageDialog(this, message, title, messageType);
     }
     
-    /**
-     * Applica modifiche al timer di gioco.
-     */
-    private void applyTimeModification(int seconds) {
-        // Implementa la modifica del timer tramite GameContext
-        // if (gameContext != null && gameContext.getEngine() != null) {
-        //     gameContext.getEngine().modifyCountdown(seconds);
-        // }
-    }
 
     /**
      * Implementazione del metodo astratto getWindowTitle() della superclasse UI_Abstract.
@@ -273,7 +273,7 @@ public class UI_Flipper extends UI_Abstract {
      * Crea un GameContext mock per i test.
      */
     private static GameContext createMockGameContext() {
-        return new GameContext(null, null, null, null, null) {
+        return new GameContext(null, null, null, null, null, null, null) {
             @Override
             public String toString() {
                 return "MockGameContext per test UI_Flipper";

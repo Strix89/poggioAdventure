@@ -70,7 +70,7 @@ public class Utils {
 
     // ==================== CONFIGURAZIONE LIVELLI ====================
     
-    /** Limite tempo Livello 1: 1 minuto per test */
+    /** Limite tempo Livello 1: --> 10 min*/ 
     public static final long LEVEL_1_TIME_LIMIT = 10 * 60 * 1000;
     
     /** ID completamento Livello 1 */
@@ -82,7 +82,7 @@ public class Utils {
     /** Oggetti che causano fallimento Livello 1 */
     public static final List<Integer> LEVEL_1_FORBIDDEN_OBJECTS = List.of(OBJ_LOSE_GAME_ID);
 
-    /** Limite tempo Livello 2: 1 minuto per test */
+    /** Limite tempo Livello 2: --> 15 min*/
     public static final long LEVEL_2_TIME_LIMIT = 15 * 60 * 1000;
     
     /** ID completamento Livello 2 */
@@ -95,7 +95,7 @@ public class Utils {
     public static final List<Integer> LEVEL_2_FORBIDDEN_OBJECTS = List.of(OBJ_LOSE_GAME_ID);
 
     /** Limite tempo Livello 3: 10 minuti */
-    public static final long LEVEL_3_TIME_LIMIT = 10 * 60 * 1000;
+    public static final long LEVEL_3_TIME_LIMIT = 15 * 60 * 1000;
     
     /** ID completamento Livello 3 */
     public static final int OBJ_LEVEL3_COMPLETE_ID = 300;
@@ -116,6 +116,7 @@ public class Utils {
     public static final int NPC_PINO_ID = 31;
     public static final int NPC_LUIGI_ID = 32;
     public static final int NPC_DIRETTORE_LAB_ID = 42;
+    public static final int NPC_LORENZO_ID = 44;
     
     // ==================== ID OGGETTI MONDO ====================
     
@@ -155,10 +156,14 @@ public class Utils {
     public static final int OBJ_DISSIPATORE_ID = 39;
     public static final int OBJ_GPU_ID = 40;
     public static final int OBJ_SSD_ID = 41;
+    public static final int OBJ_POSTER_ID = 43;
+    
+
     
     // ==================== ID OGGETTI SPECIALI ====================
     
     public static final int OBJ_FLIPPER_ZERO_ID = 50;
+    public static final int OBJ_MANUALE_ID = 45;
 
     // ==================== ID STANZE ====================
     

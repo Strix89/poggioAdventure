@@ -1,6 +1,8 @@
 package com.mycompany.poggioadventure.core.utils;
 
 import java.util.List;
+
+import com.mycompany.poggioadventure.model.AdvObject;
 import com.mycompany.poggioadventure.ui.ErrorHandler;
 import com.mycompany.poggioadventure.ui.InputHandler;
 import com.mycompany.poggioadventure.ui.OutputHandler;
@@ -37,6 +39,10 @@ public class GameContext {
     
     /** Cronometro di gioco per misurazione tempo sessione */
     private final StopWatch stopWatch;
+
+    private List<AdvObject> inventory;
+
+    private Runnable lastGame;
     
     /**
      * Inizializza context con tutti i componenti necessari per il funzionamento.
@@ -49,12 +55,14 @@ public class GameContext {
      * @param stopWatch Cronometro di gioco
      */
     public GameContext(InputHandler inputHandler, OutputHandler outputHandler, 
-                      ErrorHandler errorHandler, List<String> templog, StopWatch stopWatch) {
+                      ErrorHandler errorHandler, List<String> templog, StopWatch stopWatch, List<AdvObject> inventory, Runnable lastGame) {
         this.outputHandler = outputHandler;
         this.inputHandler = inputHandler;
         this.errorHandler = errorHandler;
         this.templog = templog;
         this.stopWatch = stopWatch;
+        this.inventory = inventory;
+        this.lastGame = lastGame;
     }
     
     /** Restituisce gestore output per scrittura verso interfaccia */
@@ -83,5 +91,19 @@ public class GameContext {
     /** Restituisce gestore input per ricezione comandi utente */
     public InputHandler getInputHandler() { 
         return inputHandler; 
+    }
+
+    /** Restituisce l'inventario del giocatore */
+    public List<AdvObject> getInventory() {
+        return inventory;
+    }
+
+    /** 
+     * Restituisce l'ultimo gioco eseguito, utile per ripristino stato.
+     * 
+     * @return Runnable dell'ultimo gioco eseguito
+     */
+    public Runnable getLastGame() {
+        return lastGame;
     }
 }
