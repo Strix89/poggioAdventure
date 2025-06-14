@@ -5,24 +5,21 @@ import java.sql.Time;
 import java.util.Objects;
 
 /**
- * DTO per rappresentare una voce nella classifica dei giocatori.
- * Contiene solo i campi necessari per la visualizzazione della classifica.
- */
-/**
- *
+ * DTO per una voce della classifica giocatori.
+ * Contiene solo i campi necessari per la visualizzazione.
+ * 
  * @author Strix89
  */
 public class RankingEntryDTO {
     private String username;
-    private Date data;    // Data dell'ultima vittoria registrata con punteggio
-    private Time ora;     // Ora dell'ultima vittoria registrata con punteggio
-    private Integer punteggio; // Punteggio ottenuto
+    private Date data;      // Data ultima vittoria
+    private Time ora;       // Ora ultima vittoria
+    private Integer punteggio;
 
-    // Costruttore vuoto per JAX-RS/JSON
+    // Costruttore vuoto per serializzazione JSON
     public RankingEntryDTO() {
     }
 
-    // Costruttore con campi
     public RankingEntryDTO(String username, Date data, Time ora, Integer punteggio) {
         this.username = username;
         this.data = data;
@@ -30,7 +27,7 @@ public class RankingEntryDTO {
         this.punteggio = punteggio;
     }
 
-    // Getters e Setters (necessari per la serializzazione JSON)
+    // Getters e Setters per serializzazione JSON
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
     public Date getData() { return data; }
@@ -40,7 +37,6 @@ public class RankingEntryDTO {
     public Integer getPunteggio() { return punteggio; }
     public void setPunteggio(Integer punteggio) { this.punteggio = punteggio; }
 
-    // equals, hashCode, toString (opzionali ma utili)
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
