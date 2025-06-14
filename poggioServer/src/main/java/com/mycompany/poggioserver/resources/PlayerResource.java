@@ -53,7 +53,6 @@ import org.slf4j.LoggerFactory;
  * <p>
  * Principio OOP: Interfaccia utente (web/API) separata dalla logica di business/dati (Commento originale mantenuto).
  * </p>
- * @author Strix89 // Autore originale
  */
 @jakarta.ws.rs.Path("/players") // Tutte le richieste che iniziano con /players saranno gestite da questa classe
 public class PlayerResource {

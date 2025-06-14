@@ -7,10 +7,8 @@ import java.sql.Date;
 import java.sql.Time;
 import java.util.List;
 
-// Principio OOP: Astrazione (definisce il contratto per l'accesso ai dati)
 /**
- *
- * @author Strix89
+ * Principio OOP: Astrazione (definisce il contratto per l'accesso ai dati)
  */
 public interface PlayerDAO {
 

@@ -28,7 +28,6 @@ import java.io.IOException; // Eccezione base per errori I/O (richiesta dalla fi
  * L'annotazione {@link Provider} assicura che Jersey rilevi e registri automaticamente
  * questo filtro all'avvio dell'applicazione.
  *
- * @author Strix89 // Autore originale
  */
 @Provider // Rende questa classe un provider JAX-RS, rilevabile e registrabile automaticamente
 public class ApiKeyFilter implements ContainerRequestFilter {

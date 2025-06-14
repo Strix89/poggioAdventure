@@ -18,7 +18,6 @@ import java.util.Objects;
  * </p>
  * // Principio OOP: Incapsulamento dei dati del giocatore (Commento originale mantenuto)
  *
- * @author Strix89 // Autore originale
  */
 public class PlayerRecord {
 

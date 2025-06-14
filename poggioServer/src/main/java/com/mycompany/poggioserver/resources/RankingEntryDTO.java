@@ -8,10 +8,6 @@ import java.util.Objects;
  * DTO per rappresentare una voce nella classifica dei giocatori.
  * Contiene solo i campi necessari per la visualizzazione della classifica.
  */
-/**
- *
- * @author Strix89
- */
 public class RankingEntryDTO {
     private String username;
     private Date data;    // Data dell'ultima vittoria registrata con punteggio

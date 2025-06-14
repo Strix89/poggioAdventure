@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory; // Factory per ottenere istanze di Logger
  * - Eliminare un giocatore dal database.
  * - Recuperare la classifica dei giocatori (ordinata per punteggio).
  *
- * @author Strix89 // Autore originale
  */
 public class PlayerDAOImpl implements PlayerDAO { // Assumendo che implementi PlayerDAO
 

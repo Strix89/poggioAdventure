@@ -27,7 +27,6 @@ import java.util.Properties; // Per caricare e gestire file di configurazione .p
  * dell'applicazione, leggendo i parametri da un file {@code /db.properties}
  * presente nel classpath.
  *
- * @author Strix89 // Autore originale
  */
 public class DatabaseManager {
 
