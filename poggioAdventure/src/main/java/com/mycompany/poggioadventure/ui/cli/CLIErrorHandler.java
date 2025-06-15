@@ -6,8 +6,6 @@ import java.util.logging.Logger;
 /**
  * Implementazione concreta di ErrorHandler per l'interfaccia a riga di comando (CLI).
  * Gestisce gli errori fatali e recuperabili registrandoli nel sistema di logging.
- * 
- * @author Strix89
  */
 public class CLIErrorHandler implements ErrorHandler {
     

@@ -22,8 +22,6 @@ import java.util.Set;
  *   <li>Serializzazione per persistenza parsing</li>
  * </ul>
  * 
- * <p><b>Pattern:</b> Value Object per identità comando, Entity per
- * raggruppamento varianti linguistiche.
  */
 public class Command implements Serializable {
 

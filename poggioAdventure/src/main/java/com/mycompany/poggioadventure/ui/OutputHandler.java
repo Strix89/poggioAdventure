@@ -16,8 +16,6 @@ import java.util.regex.Pattern;
  *   <li>{@code CLIOutputHandler} - output a console</li>
  *   <li>{@code GUIOutputHandler} - output in componenti grafici</li>
  * </ul>
- * 
- * @author Strix89
  */
 public interface OutputHandler {
     

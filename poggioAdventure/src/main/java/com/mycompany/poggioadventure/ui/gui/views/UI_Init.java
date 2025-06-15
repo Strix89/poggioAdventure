@@ -25,8 +25,6 @@ import javax.swing.border.Border;
  *   <li>Template Method (ereditando da UI_Abstract)</li>
  *   <li>Strategy (tramite MenuManager)</li>
  * </ul>
- * 
- * @author Strix89
  */
 public class UI_Init extends UI_Abstract implements MenuManager {
     

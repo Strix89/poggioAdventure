@@ -22,12 +22,6 @@ import java.util.Set;
  *   <li>Serializzazione completa per persistenza</li>
  * </ul>
  * 
- * <p><b>Pattern implementati:</b>
- * <ul>
- *   <li>Entity: rappresenta oggetti del dominio</li>
- *   <li>State Object: gestisce stati interni</li>
- *   <li>Value Object: ID immutabile per identità</li>
- * </ul>
  */
 public class AdvObject implements Serializable {
 

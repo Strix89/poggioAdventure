@@ -32,9 +32,6 @@ import javax.swing.text.StyledDocument;
  *   <li>StyledDocument manipulation per rich text formatting</li>
  *   <li>Auto-caret positioning per scroll automatico</li>
  * </ul>
- * 
- * <p><b>Pattern:</b> Strategy per output GUI, Decorator per text styling,
- * Observer pattern tramite EDT per UI updates thread-safe.
  */
 public class GUIOutputHandler implements OutputHandler {
 

@@ -59,9 +59,6 @@ import java.util.stream.Collectors;
  *   <li>List&lt;AdvObject&gt; levelInventorySnapshot</li>
  *   <li>Room levelStartingRoomSnapshot</li>
  * </ol>
- * 
- * <p><b>Pattern:</b> Repository per persistenza, Factory per ricostruzione,
- * Callback per gestione asincrona risultati.
  */
 public class SaveGame {
 

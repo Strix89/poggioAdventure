@@ -46,9 +46,6 @@ import javax.imageio.ImageIO;
  *   <li>Gestione degli errori di I/O</li>
  *   <li>Validazione delle risorse caricate</li>
  * </ul>
- * 
- * @author Strix89
- * @version 1.1
  */
 public class ResourceLoader {
     

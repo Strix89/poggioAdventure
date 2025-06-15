@@ -13,8 +13,6 @@ import java.util.Objects; // Utility per operazioni comuni su oggetti (es. equal
  * <p>
  * Contiene solo i campi essenziali per visualizzare una voce nella classifica.
  * Segue le convenzioni JavaBeans (campi privati, costruttore di default, getter/setter pubblici).
- *
- * @author Strix89
  */
 public class RankingEntryDTO {
 

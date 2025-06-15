@@ -31,12 +31,6 @@ import java.util.List;
  *   <li>Serializzazione con campi transient per componenti UI</li>
  * </ul>
  * 
- * <p><b>Pattern implementati:</b>
- * <ul>
- *   <li>Observer: reazione a comando INVENTORY</li>
- *   <li>Strategy: rendering differenziato per tipo interfaccia</li>
- *   <li>Singleton Window: gestione istanza unica finestra</li>
- * </ul>
  */
 public class InventoryObserver implements GameObserver, Serializable {
 

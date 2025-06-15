@@ -33,8 +33,6 @@ import java.io.Serializable;
  *   <li>Messaggi debug per troubleshooting ricerca</li>
  * </ul>
  * 
- * <p><b>Pattern:</b> Observer per comando PICK_UP, Chain of Responsibility
- * per ricerca priorità stanza > contenitori.
  */
 public class PickUpObserver implements GameObserver, Serializable {
 

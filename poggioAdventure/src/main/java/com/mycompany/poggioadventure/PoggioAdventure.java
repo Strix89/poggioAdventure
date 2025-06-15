@@ -9,8 +9,6 @@ import java.util.Arrays;
 /**
  * Classe principale che avvia l'applicazione PoggioAdventure.
  * Supporta due modalità di esecuzione: interfaccia grafica (GUI) e linea di comando (CLI).
- * 
- * @author Strix89
  */
 public class PoggioAdventure {
 

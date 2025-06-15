@@ -12,8 +12,6 @@ import javax.swing.JOptionPane;
  *   <li>Errori fatali (visualizzati come ERROR_MESSAGE)</li>
  *   <li>Errori recuperabili (visualizzati come WARNING_MESSAGE)</li>
  * </ul>
- * 
- * @author Strix89
  */
 public class GUIErrorHandler implements ErrorHandler {
     

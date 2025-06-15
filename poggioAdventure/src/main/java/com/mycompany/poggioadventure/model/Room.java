@@ -24,12 +24,6 @@ import java.io.Serializable;
  *   <li>Supporto immagini per rappresentazione visuale</li>
  * </ul>
  * 
- * <p><b>Pattern implementati:</b>
- * <ul>
- *   <li>Composite: gestione oggetti e contenitori</li>
- *   <li>State: tracking esplorazione per descrizioni adaptive</li>
- *   <li>Strategy: rendering differenziato per oggetti vs NPC</li>
- * </ul>
  */
 public class Room implements Serializable {
     

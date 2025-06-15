@@ -8,8 +8,6 @@ import java.util.List;
 /**
  * Classe migliorata per rappresentare l'output del parser che supporta
  * comandi multipli e operazioni su più oggetti.
- *
- * @author pierpaolo & Elia-Valenza26
  */
 public class ParserOutput implements Serializable {
 
