@@ -13,6 +13,8 @@
 /poggioServer/dependency-reduced-pom.xml
 TODO.txt
 
+/.VSCodeCounter
+
 # macOS
 .DS_Store
 **/.DS_Store
