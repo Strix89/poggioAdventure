@@ -58,9 +58,6 @@ public class Level2State extends GameState {
     @Override
     public void enter(GameDescription gameDescription, OutputHandler output, String playerName) {
         // Sblocca accesso ai laboratori del primo piano
-
-        Room hallway = gameDescription.getGameMap().findRoomById(Utils.ROOM_HALLWAY_ID);
-        hallway.setForbidden(false);
         
         // Continua dalla posizione corrente invece di forzare spostamento
         this.setStartingRoom(gameDescription.getCurrentRoom());

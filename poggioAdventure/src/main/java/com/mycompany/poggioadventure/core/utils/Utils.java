@@ -71,7 +71,7 @@ public class Utils {
     // ==================== CONFIGURAZIONE LIVELLI ====================
     
     /** Limite tempo Livello 1: --> 10 min*/ 
-    public static final long LEVEL_1_TIME_LIMIT = 10 * 60 * 1000;
+    public static final long LEVEL_1_TIME_LIMIT = 10* 60 * 1000;
     
     /** ID completamento Livello 1 */
     public static final int OBJ_LEVEL1_COMPLETE_ID = 100;
