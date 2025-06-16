@@ -312,9 +312,9 @@ public class TestSession implements Serializable {
         
         // Messaggio esito specifico
         if (isFailed) {
-            outputHandler.writeln("[ERROR]❌[/] FALLITO! [NPC]" + npcName + "[/]: " + test.getFailureMessage(), ColorText.WHITE);
+            outputHandler.writeln("[ERROR] FALLITO! [/] [NPC]" + npcName + "[/]: " + test.getFailureMessage(), ColorText.WHITE);
         } else if (isCompleted) {
-            outputHandler.writeln("[SUCCESS]✅[/] SUPERATO! [NPC]" + npcName + "[/]: " + test.getSuccessMessage(), ColorText.WHITE);
+            outputHandler.writeln("[SUCCESS] SUPERATO! [/] [NPC]" + npcName + "[/]: " + test.getSuccessMessage(), ColorText.WHITE);
         } else {
             outputHandler.writeln("ℹ️ TEST NON COMPLETATO.", ColorText.WARNING);
         }
