@@ -1,159 +1,130 @@
 package com.mycompany.poggioadventure.ui.gui.views;
 
-import com.formdev.flatlaf.FlatLightLaf; // Look and Feel FlatLaf leggero
+import com.formdev.flatlaf.FlatLightLaf;
 import com.mycompany.poggioadventure.core.utils.ApiClientResult;
-import com.mycompany.poggioadventure.core.utils.PoggioClientJersey; // Client per interagire con l'API del backend
-import com.mycompany.poggioadventure.ui.UI_Abstract; // Classe astratta base per le interfacce UI
-import com.mycompany.poggioadventure.core.utils.Utils; // Utilità generiche dell'applicazione
-import com.mycompany.poggioadventure.persistence.RankingEntryDTO; // Data Transfer Object per le voci della classifica
+import com.mycompany.poggioadventure.core.utils.PoggioClientJersey;
+import com.mycompany.poggioadventure.ui.UI_Abstract;
+import com.mycompany.poggioadventure.core.utils.Utils;
+import com.mycompany.poggioadventure.persistence.RankingEntryDTO;
 import com.mycompany.poggioadventure.persistence.ResourceLoader;
-import com.mycompany.poggioadventure.ui.gui.GUIErrorHandler; // Gestore centralizzato per gli errori della GUI
-import javax.swing.*; // Componenti base di Swing
-import javax.swing.border.Border; // Interfaccia per la gestione dei bordi dei componenti
-import java.awt.*; // Classi base AWT (dimensioni, colori, layout, ecc.)
+import com.mycompany.poggioadventure.ui.gui.GUIErrorHandler;
+import javax.swing.*;
+import javax.swing.border.Border;
+import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.util.Collections; // Utilità per le collezioni (usato per lista vuota)
-import java.util.List; // Interfaccia per le liste
+import java.util.Collections;
+import java.util.List;
 
 /**
- * Interfaccia grafica (JFrame) per la visualizzazione della classifica
- * dei giocatori in PoggioAdventure.
- *
- * <p>
- * Responsabilità principali:
- * <ul>
- * <li>Recuperare i dati della classifica tramite il client API.</li>
- * <li>Visualizzare la classifica dei punteggi in una lista ordinata.</li>
- * <li>Gestire il caricamento asincrono dei dati per non bloccare
- * l'interfaccia.</li>
- * <li>Fornire una visualizzazione chiara e leggibile all'interno della
- * finestra.</li>
- * </ul>
- *
- * <p>
- * Caratteristiche:
- * <ul>
- * <li>Layout responsive basato sulle dimensioni dello schermo.</li>
- * <li>Stile visivo coerente con il tema dell'applicazione (definito in
- * UI_Config e FlatLaf).</li>
- * <li>Scroll automatico per liste lunghe tramite JScrollPane.</li>
- * </ul>
- *
- * @author Strix89
+ * Schermata per la visualizzazione della classifica dei giocatori.
+ * 
+ * Questa interfaccia si occupa di recuperare e presentare i dati della classifica
+ * dal server backend, mostrando i punteggi in una lista scrollabile.
+ * Implementa anche la funzionalità di download dei log di gioco degli utenti
+ * presenti in classifica tramite selezione e pressione della barra spaziatrice.
+ * 
+ * La UI è progettata per essere responsiva e non bloccare il thread EDT durante
+ * le operazioni di rete, utilizzando thread separati per i caricamenti.
  */
 public class UI_Rank extends UI_Abstract {
 
-    // ============== COMPONENTI UI ==============
-    private JList<String> rankingList; // Componente JList per visualizzare le voci della classifica
-    private JLabel titleLabel; // Etichetta per il titolo "CLASSIFICA"
-    private DefaultListModel<String> rankingModel; // Modello dati che alimenta la JList 'rankingList'
-
-    // ============== COSTRUTTORE ==============
+    /** Lista scrollabile per visualizzare le voci della classifica */
+    private JList<String> rankingList;
+    
+    /** Etichetta per il titolo della schermata */
+    private JLabel titleLabel;
+    
+    /** Modello dati per la lista di classifica */
+    private DefaultListModel<String> rankingModel;
 
     /**
-     * Costruisce una nuova istanza della finestra della classifica.
-     * Chiama il costruttore della superclasse UI_Abstract, che a sua volta
-     * invocherà il metodo initComponents() definito qui per costruire la UI.
+     * Costruisce una nuova finestra della classifica.
      */
     public UI_Rank() {
-        super(); // Chiama il costruttore di UI_Abstract
+        super();
     }
 
-    // ============== INIZIALIZZAZIONE ==============
-
     /**
-     * Metodo chiamato dalla superclasse per inizializzare i componenti della UI.
-     * Orchestra la configurazione della finestra, la creazione dei componenti,
-     * l'impostazione del layout e l'avvio del caricamento dei dati.
+     * Inizializza tutti i componenti dell'interfaccia e avvia
+     * il caricamento dei dati della classifica.
      */
     @Override
     protected void initComponents() {
-        configureFrame(); // Imposta proprietà base del JFrame
-        createComponents(); // Crea le istanze dei componenti Swing
-        setupLayout(); // Organizza i componenti nella finestra usando layout manager
-        loadRankingData(); // Avvia il processo di recupero dati dal backend
-        pack(); // Dimensiona la finestra per adattarsi ai componenti contenuti
+        configureFrame();
+        createComponents();
+        setupLayout();
+        loadRankingData();
+        pack();
     }
 
-    // ============== CONFIGURAZIONE FINESTRA ==============
-
     /**
-     * Configura le proprietà principali del JFrame:
-     * - Imposta le dimensioni preferite calcolate in base allo schermo.
-     * - Definisce l'operazione di chiusura (dispose chiude solo questa finestra).
-     * - Imposta il colore di sfondo del content pane.
-     * - Imposta il layout manager principale (BorderLayout) per il content pane.
+     * Configura le proprietà di base della finestra.
      */
     private void configureFrame() {
-        setPreferredSize(calculateWindowSize()); // Imposta dimensione desiderata
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // Chiude solo questa finestra al click sulla 'X'
-        getContentPane().setBackground(UI_Config.BACKGROUND_COLOR); // Colore sfondo da configurazione
-        getContentPane().setLayout(new BorderLayout()); // Layout principale
+        setPreferredSize(calculateWindowSize());
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        getContentPane().setBackground(UI_Config.BACKGROUND_COLOR);
+        getContentPane().setLayout(new BorderLayout());
     }
 
     /**
-     * Calcola le dimensioni della finestra come frazione delle dimensioni dello
-     * schermo.
-     * Utilizza rapporti definiti in UI_Config per mantenere la proporzionalità.
+     * Calcola le dimensioni appropriate per questa finestra.
      * 
-     * @return Un oggetto Dimension con larghezza e altezza calcolate.
+     * @return Dimensione calcolata in base alla risoluzione dello schermo
      */
     private Dimension calculateWindowSize() {
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize(); // Ottiene dimensioni schermo
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         return new Dimension(
-                (int) (screenSize.width * UI_Config.WINDOW_WIDTH_RATIO), // Calcola larghezza
-                (int) (screenSize.height * UI_Config.WINDOW_HEIGHT_RATIO) // Calcola altezza
+                (int) (screenSize.width * UI_Config.WINDOW_WIDTH_RATIO),
+                (int) (screenSize.height * UI_Config.WINDOW_HEIGHT_RATIO)
         );
     }
 
-    // ============== CREAZIONE COMPONENTI ==============
-
     /**
-     * Metodo contenitore che chiama i metodi specifici per creare
-     * i singoli componenti principali dell'interfaccia.
+     * Crea i componenti principali dell'interfaccia.
      */
     private void createComponents() {
-        createTitleLabel(); // Crea l'etichetta del titolo
-        createRankingList(); // Crea la lista per la classifica
+        createTitleLabel();
+        createRankingList();
     }
 
     /**
-     * Crea e configura l'etichetta JLabel per il titolo "CLASSIFICA".
-     * Imposta font, colore, dimensione (derivata dall'altezza della finestra)
-     * e allineamento del testo.
+     * Crea e configura l'etichetta del titolo.
      */
     private void createTitleLabel() {
         titleLabel = new JLabel("CLASSIFICA");
-        // Imposta il font usando quello definito in UI_Config, in grassetto,
-        // con dimensione calcolata proporzionalmente all'altezza della finestra.
         titleLabel.setFont(UI_Config.getBoldFont().deriveFont(
                 getPreferredSize().height * UI_Config.TITLE_FONT_RATIO));
-        titleLabel.setForeground(UI_Config.TEXT_COLOR); // Colore testo da configurazione
-        titleLabel.setHorizontalAlignment(SwingConstants.CENTER); // Allinea testo al centro
+        titleLabel.setForeground(UI_Config.TEXT_COLOR);
+        titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
     }
 
     /**
-     * Crea e configura la JList che visualizzerà la classifica.
-     * Inizializza il DefaultListModel, crea la JList associata, imposta
-     * font, colori di sfondo e selezione, bordo e colore del testo.
-     * Configura anche un renderer personalizzato per l'aspetto delle celle.
+     * Crea e configura la lista per visualizzare la classifica.
+     * Include l'inizializzazione del modello dati e la configurazione
+     * dell'aspetto grafico e dei listener.
      */
     private void createRankingList() {
-        rankingModel = new DefaultListModel<>(); // Modello dati vuoto
-        rankingList = new JList<>(rankingModel); // Crea JList collegata al modello
-        rankingList.setFont(UI_Config.getNormalFont().deriveFont(18f)); // Font normale, dimensione fissa
-        rankingList.setBackground(UI_Config.BUTTON_BASE_COLOR); // Sfondo della lista
-        rankingList.setSelectionBackground(UI_Config.BUTTON_HOVER_COLOR); // Sfondo cella selezionata
-        rankingList.setBorder(createListBorder()); // Bordo personalizzato
-        rankingList.setForeground(UI_Config.TEXT_COLOR); // Colore testo elementi
-        configureListRenderer(); // Imposta renderer custom per le celle
+        // Inizializzazione base
+        rankingModel = new DefaultListModel<>();
+        rankingList = new JList<>(rankingModel);
+        
+        // Configurazione aspetto
+        rankingList.setFont(UI_Config.getNormalFont().deriveFont(18f));
+        rankingList.setBackground(UI_Config.BUTTON_BASE_COLOR);
+        rankingList.setSelectionBackground(UI_Config.BUTTON_HOVER_COLOR);
+        rankingList.setBorder(createListBorder());
+        rankingList.setForeground(UI_Config.TEXT_COLOR);
+        
+        // Configurazione comportamento
+        configureListRenderer();
         setupKeyListener();
     }
 
     /**
-     * Configura il listener per i tasti della JList.
-     * Gestisce la pressione della barra spaziatrice per scaricare i log.
+     * Configura un listener per la tastiera che permette di scaricare
+     * i log degli utenti in classifica premendo la barra spaziatrice.
      */
     private void setupKeyListener() {
         rankingList.addKeyListener(new KeyAdapter() {
@@ -167,23 +138,22 @@ public class UI_Rank extends UI_Abstract {
     }
 
     /**
-     * Crea un dialog di progresso per il download.
+     * Crea un dialog modale per mostrare lo stato del download in corso.
      * 
-     * @param username L'utente di cui si sta scaricando il log
-     * @return Il dialog configurato
+     * @param username Nome dell'utente di cui si sta scaricando il log
+     * @return Il dialog configurato e pronto per essere visualizzato
      */
     private JDialog createProgressDialog(String username) {
         JDialog dialog = new JDialog(this, "Download in corso...", true);
         dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
         
-        // Utilizza colori da UI_Config
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBackground(UI_Config.BACKGROUND_COLOR);
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         
         JLabel label = new JLabel("Scaricando il log di: " + username);
         label.setHorizontalAlignment(SwingConstants.CENTER);
-        label.setForeground(UI_Config.TEXT_COLOR); // Testo bianco da UI_Config
+        label.setForeground(UI_Config.TEXT_COLOR);
         label.setFont(UI_Config.getNormalFont().deriveFont(14f));
         
         JProgressBar progressBar = new JProgressBar();
@@ -202,11 +172,12 @@ public class UI_Rank extends UI_Abstract {
     }
 
     /**
-     * Mostra il risultato del download all'utente.
+     * Mostra un messaggio con il risultato dell'operazione di download.
+     * Fornisce informazioni dettagliate e suggerimenti in caso di errore.
      * 
-     * @param username L'utente di cui si è tentato il download
-     * @param success Se il download è riuscito
-     * @param errorMessage Il messaggio di errore (se presente)
+     * @param username Nome dell'utente di cui si è tentato il download
+     * @param success Esito dell'operazione (true = successo)
+     * @param errorMessage Messaggio di errore in caso di fallimento
      */
     private void showDownloadResult(String username, boolean success, String errorMessage) {
         
@@ -220,7 +191,7 @@ public class UI_Rank extends UI_Abstract {
             String detailedMessage = "❌ Impossibile scaricare il log di '" + username + "'.\n\n" +
                 "Motivo: " + errorMessage;
             
-            // Aggiungi suggerimenti in base al tipo di errore
+            // Aggiunge suggerimenti contestuali in base al tipo di errore
             if (errorMessage.contains("Timeout")) {
                 detailedMessage += "\n\n💡 Suggerimenti:\n" +
                     "• Verifica la connessione internet\n" +
@@ -240,13 +211,13 @@ public class UI_Rank extends UI_Abstract {
     }
 
     /**
-     * Scarica il file di log dell'utente selezionato nella classifica.
-     * Verifica che ci sia una selezione valida, estrae lo username,
-     * e avvia il download in background.
+     * Gestisce il download del log dell'utente selezionato nella classifica.
+     * Verifica la selezione, estrae il nome utente e avvia il processo di download.
      */
     private void downloadSelectedUserLog() {
         int selectedIndex = rankingList.getSelectedIndex();
 
+        // Verifica che ci sia una selezione valida
         if (selectedIndex == -1) {
             JOptionPane.showMessageDialog(this,
                     "Seleziona prima un utente dalla classifica!",
@@ -257,7 +228,7 @@ public class UI_Rank extends UI_Abstract {
 
         String selectedEntry = rankingModel.getElementAt(selectedIndex);
 
-        // Verifica che non sia un messaggio di errore o stato
+        // Verifica che la selezione non sia un messaggio di stato/errore
         if (selectedEntry.contains("Impossibile caricare") ||
                 selectedEntry.contains("Nessun punteggio") ||
                 selectedEntry.contains("Attendere prego")) {
@@ -267,7 +238,8 @@ public class UI_Rank extends UI_Abstract {
                     JOptionPane.WARNING_MESSAGE);
             return;
         }
-        // Estrae lo username dalla stringa formattata
+        
+        // Estrae lo username dalla voce selezionata
         String username = extractUsernameFromEntry(selectedEntry);
 
         if (username == null || username.trim().isEmpty()) {
@@ -278,16 +250,16 @@ public class UI_Rank extends UI_Abstract {
             return;
         }
 
-        // Avvia il download in background
+        // Avvia il processo di download
         downloadLogInBackground(username);
     }
 
     /**
-     * Estrae lo username dalla stringa formattata della classifica.
-     * Formato atteso: "1 username Punti: 1000 (2024-01-01 12:00:00)"
+     * Estrae il nome utente da una riga della classifica.
+     * Il formato atteso è: "# username Punti: #### (data ora)"
      * 
-     * @param entry La stringa formattata della voce di classifica
-     * @return Lo username estratto o null se non trovato
+     * @param entry Riga della classifica da cui estrarre lo username
+     * @return Nome utente estratto o null in caso di errore
      */
     private String extractUsernameFromEntry(String entry) {
         if (entry == null || entry.trim().isEmpty()) {
@@ -295,22 +267,21 @@ public class UI_Rank extends UI_Abstract {
         }
 
         try {
-            // Rimuove spazi extra e divide la stringa
             String cleanEntry = entry.trim();
             
             // Cerca la posizione della parola "Punti:"
             int puntiIndex = cleanEntry.indexOf("Punti:");
             if (puntiIndex == -1) {
-                return null; // Formato non valido
+                return null;
             }
             
             // Estrae la parte prima di "Punti:"
             String beforePunti = cleanEntry.substring(0, puntiIndex).trim();
             
-            // Divide per spazi e prende dal secondo elemento in poi (saltando il numero di posizione)
+            // Divide per spazi e prende dal secondo elemento in poi
             String[] parts = beforePunti.split("\\s+");
             if (parts.length < 2) {
-                return null; // Non c'è abbastanza informazione
+                return null;
             }
             
             // Ricostruisce lo username (può contenere spazi)
@@ -329,13 +300,14 @@ public class UI_Rank extends UI_Abstract {
     }
 
     /**
-     * Avvia il download del file di log in un thread separato
-     * per non bloccare l'interfaccia utente.
+     * Esegue il download del file di log in un thread background.
+     * Mostra un dialog di progresso durante l'operazione e implementa
+     * un meccanismo di timeout per evitare blocchi indefiniti.
      * 
-     * @param username Lo username di cui scaricare il log
+     * @param username Nome dell'utente di cui scaricare il log
      */
     private void downloadLogInBackground(String username) {
-        // Mostra dialog di progresso
+        // Dialog di progresso
         JDialog progressDialog = createProgressDialog(username);
         
         // Timer per timeout (30 secondi)
@@ -350,9 +322,10 @@ public class UI_Rank extends UI_Abstract {
         timeoutTimer.setRepeats(false);
         timeoutTimer.start();
 
-        // Mostra il dialog DOPO aver configurato il timer
+        // Mostra il dialog dopo la configurazione del timer
         SwingUtilities.invokeLater(() -> progressDialog.setVisible(true));
 
+        // Thread di download
         new Thread(() -> {
             PoggioClientJersey client = null;
             boolean success = false;
@@ -362,13 +335,15 @@ public class UI_Rank extends UI_Abstract {
             try {
                 client = new PoggioClientJersey();
                 
-                // Controlla se il timer è ancora attivo (non è scaduto)
+                // Verifica timeout
                 if (!timeoutTimer.isRunning()) {
                     wasTimeout = true;
                     errorMessage = "Operazione interrotta per timeout";
                 } else {
+                    // Esegue il download
                     ApiClientResult result = client.downloadLogFile(username);
 
+                    // Gestisce il risultato
                     switch (result) {
                         case SUCCESS_OK:
                             success = true;
@@ -393,224 +368,178 @@ public class UI_Rank extends UI_Abstract {
                     errorMessage = "Download interrotto";
                 } else {
                     errorMessage = "Errore imprevisto: " + e.getMessage();
-                    e.printStackTrace(); // Per debug
+                    e.printStackTrace();
                 }
             } finally {
-                // Ferma il timer se è ancora attivo
+                // Arresta il timer
                 if (timeoutTimer.isRunning()) {
                     timeoutTimer.stop();
                 }
                 
+                // Chiude il client API
                 if (client != null) {
                     try {
                         client.close();
                     } catch (Exception e) {
-                        // Ignora errori di chiusura
                         System.err.println("Errore chiusura client: " + e.getMessage());
                     }
                 }
             }
 
-            // Aggiorna UI sul thread EDT
+            // Aggiornamento UI sul thread EDT
             final boolean finalSuccess = success;
             final String finalErrorMessage = errorMessage;
             final boolean finalWasTimeout = wasTimeout;
 
             SwingUtilities.invokeLater(() -> {
-                // Chiudi il dialog se ancora visibile
+                // Chiude il dialog se ancora visibile
                 if (progressDialog.isDisplayable()) {
                     progressDialog.dispose();
                 }
                 
-                // Mostra risultato solo se non c'è stato timeout 
-                // (il timeout mostra già il suo messaggio tramite il timer)
+                // Mostra risultato solo se non c'è stato timeout
                 if (!finalWasTimeout) {
                     showDownloadResult(username, finalSuccess, finalErrorMessage);
                 }
             });
 
-        }, "DownloadThread-" + username).start(); // Nome thread per debug
+        }, "DownloadThread-" + username).start();
     }
 
     /**
-     * Avvia il caricamento asincrono dei dati della classifica dal backend.
-     * Utilizza un nuovo Thread per eseguire l'operazione di rete (chiamata API)
-     * per evitare di bloccare l'Event Dispatch Thread (EDT) di Swing.
-     * Mostra un messaggio temporaneo "Attendere prego..." nella lista.
-     * Al termine dell'operazione (successo o errore), aggiorna la JList
-     * sull'EDT usando SwingUtilities.invokeLater().
+     * Carica in modo asincrono i dati della classifica dal server.
+     * Mostra un messaggio di attesa durante il caricamento e aggiorna
+     * l'interfaccia una volta completata l'operazione.
      */
     private void loadRankingData() {
-        // 1. Preparazione UI (sull'EDT): mostra messaggio di attesa
+        // Messaggio di attesa
         rankingModel.clear();
         rankingModel.addElement("Attendere prego...");
-        // Qui si potrebbero disabilitare altri componenti se necessario
 
-        // 2. Creazione ed avvio del Thread background per l'operazione di rete
+        // Thread di caricamento dati
         new Thread(() -> {
             PoggioClientJersey client = null;
-            List<RankingEntryDTO> rankingData = Collections.emptyList(); // Lista vuota di default
-            boolean errorOccurred = false; // Flag per tracciare errori gravi
+            List<RankingEntryDTO> rankingData = Collections.emptyList();
+            boolean errorOccurred = false;
 
             try {
-                client = new PoggioClientJersey(); // Istanzia il client API
-                List<RankingEntryDTO> result = client.getRanking(); // Esegue la chiamata API (bloccante)
+                client = new PoggioClientJersey();
+                List<RankingEntryDTO> result = client.getRanking();
 
-                // Controlla se il risultato è valido (getRanking ritorna null in caso di errore
-                // gestito internamente)
                 if (result != null) {
-                    rankingData = result; // Assegna i dati ottenuti
+                    rankingData = result;
                 } else {
-                    // Errore gestito dal client (es. risposta non 200 OK), ma è comunque un
-                    // fallimento
                     errorOccurred = true;
                 }
             } catch (Exception e) {
-                // Cattura eccezioni *impreviste* durante creazione/chiamata client nel thread
-                // background
-                new GUIErrorHandler().handleFatalError("ERRORE background thread recupero classifica: ", e);
-                errorOccurred = true; // Segnala l'errore
+                new GUIErrorHandler().handleFatalError("Errore recupero classifica: ", e);
+                errorOccurred = true;
             } finally {
-                // Blocco finally per assicurare la chiusura del client Jersey
-                // Indipendentemente da successo o eccezioni nel try-catch.
                 if (client != null) {
-                    client.close(); // Rilascia le risorse del client (es. connessioni)
+                    client.close();
                 }
             }
 
-            // Prepara le variabili per l'uso nella lambda di invokeLater
-            // Devono essere final o effettivamente final.
+            // Prepara variabili per lambda
             final List<RankingEntryDTO> finalRanking = rankingData;
             final boolean finalErrorOccurred = errorOccurred;
 
-            // 3. Pianifica l'aggiornamento della UI sull'EDT
-            // Usa invokeLater per garantire che le modifiche ai componenti Swing
-            // avvengano nel thread corretto.
+            // Aggiorna UI sul thread EDT
             SwingUtilities.invokeLater(() -> {
                 updateRankingList(finalRanking, finalErrorOccurred);
             });
 
-        }).start(); // Avvia l'esecuzione del thread background
+        }).start();
     }
 
     /**
-     * Aggiorna il contenuto della JList (rankingList) con i dati della classifica
-     * ricevuti dal thread background. Questo metodo DEVE essere eseguito sull'EDT.
-     * Gestisce i diversi scenari: errore durante il caricamento, classifica vuota,
-     * classifica popolata. Formatta ciascuna voce della classifica prima di
-     * aggiungerla.
-     *
-     * @param ranking       La lista di RankingEntryDTO ottenuta (può essere vuota).
-     * @param errorOccurred true se si è verificato un errore grave durante il
-     *                      recupero dati.
+     * Aggiorna la lista della classifica con i dati ricevuti.
+     * Gestisce i diversi casi: errore, lista vuota, o dati validi.
+     * 
+     * @param ranking Lista delle voci di classifica
+     * @param errorOccurred Flag che indica se è avvenuto un errore durante il recupero
      */
     private void updateRankingList(List<RankingEntryDTO> ranking, boolean errorOccurred) {
-        rankingModel.clear(); // Rimuove il messaggio "Attendere prego..." o i dati precedenti
+        rankingModel.clear();
 
         if (errorOccurred) {
-            // Caso: Errore durante il recupero dati
+            // Errore di comunicazione
             rankingModel.addElement("Impossibile caricare i dati.");
-            // Notifica l'utente tramite il gestore di errori (mostra popup/log)
             new GUIErrorHandler().handleRecoverableError("Errore di comunicazione con il server per la classifica.");
 
         } else if (ranking.isEmpty()) {
-            // Caso: Recupero riuscito, ma non ci sono punteggi
+            // Nessun dato
             rankingModel.addElement("Nessun punteggio registrato.");
 
         } else {
-            // Caso: Recupero riuscito, ci sono punteggi da visualizzare
-            int position = 1; // Contatore per la posizione in classifica
+            // Visualizza i dati
+            int position = 1;
             for (RankingEntryDTO entry : ranking) {
-                // Gestione sicura di valori potenzialmente null dal DTO
+                // Gestione sicura di valori null
                 String dateStr = (entry.getData() != null) ? entry.getData().toString() : "N/D";
                 String timeStr = (entry.getOra() != null) ? entry.getOra().toString() : "N/D";
                 String scoreStr = (entry.getPunteggio() != null) ? entry.getPunteggio().toString() : "N/A";
 
-                // Formattazione della stringa per l'elemento della lista:
-                // %-4d: numero intero, allineato a sinistra, larghezza 4
-                // %-25s: stringa (username), allineata a sinistra, larghezza 25
-                // Punti: %-8s: stringa (punteggio), allineata a sinistra, larghezza 8
-                // (%s %s): stringhe (data e ora)
+                // Formattazione per visualizzazione
                 String displayString = String.format("%-4d %-25s Punti: %-8s (%s %s)",
                         position++, entry.getUsername(), scoreStr, dateStr, timeStr);
-                rankingModel.addElement(displayString); // Aggiunge la stringa formattata al modello
+                rankingModel.addElement(displayString);
             }
         }
     }
 
     /**
-     * Configura un renderer personalizzato per le celle della JList 'rankingList'.
-     * Utilizza un DefaultListCellRenderer anonimo per modificare l'aspetto
-     * di ciascuna cella: centra il testo orizzontalmente e aggiunge padding
-     * verticale.
+     * Configura il renderer personalizzato per le celle della lista.
+     * Modifica l'aspetto di ogni cella per migliorare leggibilità e stile.
      */
     private void configureListRenderer() {
         rankingList.setCellRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index,
                     boolean isSelected, boolean cellHasFocus) {
-                // Chiama il metodo della superclasse per ottenere il componente JLabel di base
                 JLabel label = (JLabel) super.getListCellRendererComponent(
                         list, value, index, isSelected, cellHasFocus);
-                // Personalizzazione: centra il testo
                 label.setHorizontalAlignment(SwingConstants.CENTER);
-                // Personalizzazione: aggiunge spazio sopra e sotto il testo (padding)
-                label.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0)); // top, left, bottom, right
-                return label; // Restituisce il JLabel configurato
+                label.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+                return label;
             }
         });
     }
 
-    // ============== LAYOUT ==============
-
     /**
-     * Organizza i componenti creati all'interno della finestra usando layout
-     * manager.
-     * Utilizza un pannello principale (mainPanel) con BorderLayout per contenere
-     * il titolo (NORTH) e la lista scorrevole (CENTER).
-     * Aggiunge padding attorno al pannello principale.
+     * Organizza i componenti nella finestra secondo il layout desiderato.
      */
     private void setupLayout() {
-        // Pannello principale che conterrà titolo e lista
+        // Pannello principale
         JPanel mainPanel = new JPanel(new BorderLayout());
-        mainPanel.setOpaque(false); // Rende il pannello trasparente per mostrare lo sfondo del frame
-        // Aggiunge un bordo vuoto (padding) attorno al pannello principale
+        mainPanel.setOpaque(false);
         mainPanel.setBorder(BorderFactory.createEmptyBorder(
                 UI_Config.BUTTON_INSETS.top,
                 UI_Config.BUTTON_INSETS.left,
                 UI_Config.BUTTON_INSETS.bottom,
                 UI_Config.BUTTON_INSETS.right));
 
-        // Aggiunge il titolo in alto (NORTH)
+        // Posizionamento titolo
         mainPanel.add(titleLabel, BorderLayout.NORTH);
 
-        // Crea uno JScrollPane per permettere lo scorrimento della lista se è lunga
+        // Configurazione area scrollabile per la lista
         JScrollPane scrollPane = new JScrollPane(rankingList);
-        scrollPane.setBorder(null); // Rimuove il bordo predefinito dello JScrollPane
-        // Imposta lo sfondo del viewport (l'area visibile dello scrollpane)
+        scrollPane.setBorder(null);
         scrollPane.getViewport().setBackground(UI_Config.BACKGROUND_COLOR);
-        // Aggiunge lo JScrollPane con la lista al centro (CENTER)
         mainPanel.add(scrollPane, BorderLayout.CENTER);
 
-        // Aggiunge il pannello principale al content pane del JFrame (al centro)
+        // Aggiunta pannello al frame
         add(mainPanel, BorderLayout.CENTER);
     }
 
-    // ============== STILE COMPONENTI ==============
-
     /**
-     * Crea un bordo composito per la JList 'rankingList'.
-     * Combina un bordo esterno (linea colorata) con un bordo interno vuoto
-     * (padding).
+     * Crea un bordo personalizzato per la lista della classifica.
      * 
-     * @return Un oggetto Border configurato.
+     * @return Bordo configurato con linea esterna e padding interno
      */
     private Border createListBorder() {
-        // Crea un bordo composto da:
         return BorderFactory.createCompoundBorder(
-                // 1. Bordo esterno: una linea con colore e spessore definiti
                 BorderFactory.createLineBorder(UI_Config.BORDER_COLOR, 2),
-                // 2. Bordo interno: uno spazio vuoto (padding)
                 BorderFactory.createEmptyBorder(
                         UI_Config.BUTTON_INSETS.top,
                         UI_Config.BUTTON_INSETS.left,
@@ -618,42 +547,29 @@ public class UI_Rank extends UI_Abstract {
                         UI_Config.BUTTON_INSETS.right));
     }
 
-    // ============== METODI OVERRIDE ==============
-
     /**
-     * Fornisce il titolo da visualizzare nella barra del titolo della finestra.
-     * Questo metodo sovrascrive un metodo astratto (o concreto) della superclasse
-     * UI_Abstract.
+     * Restituisce il titolo per la barra della finestra.
      * 
-     * @return Il titolo della finestra.
+     * @return Titolo della finestra
      */
     @Override
     protected String getWindowTitle() {
         return "Classifica - PoggioAdventure";
     }
 
-    // ============== MAIN PER TEST ==============
-
     /**
-     * Metodo main per avviare questa finestra (UI_Rank) in modo indipendente,
-     * utile per testare l'interfaccia grafica isolatamente.
-     * Configura il Look and Feel FlatLaf e crea/visualizza l'istanza di UI_Rank
-     * sull'Event Dispatch Thread (EDT) di Swing.
+     * Entry point per test standalone della finestra.
      * 
-     * @param args Argomenti della riga di comando (non utilizzati).
+     * @param args Parametri da linea di comando (non utilizzati)
      */
     public static void main(String[] args) {
         try {
-            // Imposta il Look and Feel FlatLaf (tema chiaro)
             FlatLightLaf.setup();
-            // Schedula la creazione e visualizzazione della GUI sull'EDT
             EventQueue.invokeLater(() -> {
                 new UI_Rank().setVisible(true);
             });
         } catch (Exception ex) {
-            // Gestisce errori critici durante l'inizializzazione (es. L&F non trovato)
             new GUIErrorHandler().handleFatalError("Errore apertura classifica:", ex);
-            // Termina l'applicazione in caso di errore critico all'avvio
             Utils.exitApplication(Utils.EXIT_CODE_CRITICAL);
         }
     }

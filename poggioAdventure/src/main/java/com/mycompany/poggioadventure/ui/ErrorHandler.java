@@ -11,8 +11,6 @@ package com.mycompany.poggioadventure.ui;
  * 
  * <p>Le implementazioni dovrebbero fornire una gestione appropriata
  * sia per ambienti CLI che GUI.
- * 
- * @author Strix89
  */
 public interface ErrorHandler {
 

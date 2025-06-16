@@ -29,8 +29,6 @@ import java.util.ArrayList;
  *   <li>Visualizzazione immagini e descrizioni</li>
  *   <li>Design responsive con dimensioni calcolate</li>
  * </ul>
- *
- * @author Strix89
  */
 public class UI_Inventory extends UI_Abstract {
     

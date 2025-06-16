@@ -21,9 +21,6 @@ import java.util.ArrayList;
  *   <li>Preservazione line endings e formatting originale</li>
  *   <li>Fallback graceful per colori non riconosciuti</li>
  * </ul>
- * 
- * <p><b>Pattern:</b> Strategy per output CLI, Template Method per
- * processing formattazione, Adapter per ANSI terminal compatibility.
  */
 public class CLIOutputHandler implements OutputHandler {
 

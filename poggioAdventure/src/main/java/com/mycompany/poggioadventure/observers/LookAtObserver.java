@@ -20,8 +20,6 @@ import java.io.Serializable;
  *   <li>Fallback su messaggi standard per stanze non configurate</li>
  * </ul>
  * 
- * <p><b>Pattern:</b> Observer per reazione a comando specifico, State per
- * tracking esplorazione persistente.
  */
 public class LookAtObserver implements GameObserver, Serializable {
 

@@ -5,27 +5,30 @@ import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Classe singleton per la misurazione del tempo trascorso.
- * Implementa un cronometro con funzionalità di start, stop, reset e
- * visualizzazione del tempo trascorso in formato leggibile.
+ * Implementazione thread-safe di un cronometro ad alta precisione.
  * 
- * @author Strix89
+ * Questa classe singleton fornisce funzionalità per tracciare il tempo di gioco,
+ * supportando operazioni di avvio, pausa, ripresa e reset. Utilizza java.time
+ * per misurazioni precise e gestisce correttamente le pause accumulando il tempo.
+ * 
+ * Pattern implementati:
+ * - Singleton (thread-safe con inizializzazione lazy)
  */
 public class StopWatch {
-    // Tempo di inizio del cronometro
+    /** Timestamp dell'ultimo avvio/ripresa del cronometro */
     private Instant startTime;
     
-    // Secondi totali accumulati (per pause/riprese)
+    /** Tempo totale accumulato durante le sessioni precedenti (in secondi) */
     private long totalSeconds;
     
-    // Flag che indica se il cronometro è in esecuzione
+    /** Flag che indica se il cronometro è attualmente in esecuzione */
     private boolean isRunning;
 
     /**
-     * Costruttore privato per implementare il pattern Singleton.
-     * Blocca anche l'inizializzazione riflessiva.
+     * Costruttore privato per garantire singleton.
      * 
-     * @throws IllegalStateException se si tenta di creare una seconda istanza
+     * Include una protezione aggiuntiva contro la creazione di istanze multiple
+     * tramite reflection, verificando che l'holder non contenga già un'istanza.
      */
     private StopWatch() {
         if (InstanceHolder.INSTANCE != null) {
@@ -34,17 +37,20 @@ public class StopWatch {
     }
 
     /**
-     * Holder per l'inizializzazione lazy del Singleton.
-     * Garantisce thread-safety senza bisogno di sincronizzazione.
+     * Classe interna statica per inizializzazione lazy e thread-safe del singleton.
+     * 
+     * Questo approccio sfrutta il meccanismo di class loading di Java per garantire
+     * thread-safety senza costi di sincronizzazione esplicita.
      */
     private static class InstanceHolder {
+        /** Unica istanza della classe, creata al primo accesso a InstanceHolder */
         static final StopWatch INSTANCE = new StopWatch();
     }
 
     /**
-     * Restituisce l'unica istanza del cronometro.
+     * Ottiene l'istanza singleton del cronometro.
      * 
-     * @return Istanza singleton di StopWatch
+     * @return Istanza condivisa di StopWatch, creata solo al primo accesso
      */
     public static StopWatch getInstance() {
         return InstanceHolder.INSTANCE;
@@ -52,6 +58,9 @@ public class StopWatch {
 
     /**
      * Avvia il cronometro se non è già in esecuzione.
+     * 
+     * Salva il timestamp corrente come punto di partenza per il calcolo
+     * del tempo trascorso nella sessione attuale.
      */
     public synchronized void start() {
         if (!isRunning) {
@@ -61,9 +70,12 @@ public class StopWatch {
     }
 
     /**
-     * Avvia il cronometro con un valore iniziale predefinito.
+     * Avvia il cronometro partendo da un valore predefinito.
      * 
-     * @param initialSeconds Valore iniziale in secondi da cui partire
+     * Utile per ripristinare lo stato da un salvataggio o per
+     * iniziare il conteggio da un offset specifico.
+     * 
+     * @param initialSeconds Secondi iniziali da cui partire
      */
     public synchronized void startFrom(long initialSeconds) {
         stop();
@@ -72,8 +84,11 @@ public class StopWatch {
     }
 
     /**
-     * Ferma il cronometro se è in esecuzione.
-     * Il tempo trascorso viene accumulato per eventuali riprese.
+     * Ferma il cronometro, accumulando il tempo trascorso.
+     * 
+     * Quando il cronometro viene fermato, il tempo trascorso dall'ultimo avvio
+     * viene calcolato e aggiunto al totale accumulato, preservando la misurazione
+     * per future riprese.
      */
     public synchronized void stop() {
         if (isRunning) {
@@ -83,7 +98,10 @@ public class StopWatch {
     }
 
     /**
-     * Resetta il cronometro azzerando il tempo accumulato.
+     * Azzera il cronometro, eliminando tutto il tempo accumulato.
+     * 
+     * Ferma il cronometro se è in esecuzione e resetta il contatore a zero.
+     * Utilizzato tipicamente all'inizio di un nuovo gioco o livello.
      */
     public synchronized void reset() {
         stop();
@@ -91,10 +109,12 @@ public class StopWatch {
     }
 
     /**
-     * Restituisce il tempo totale trascorso in secondi.
-     * Include sia il tempo accumulato che quello in corso se il cronometro è attivo.
+     * Calcola il tempo totale trascorso in secondi.
      * 
-     * @return Tempo totale trascorso in secondi
+     * Se il cronometro è in esecuzione, aggiunge al totale accumulato
+     * anche il tempo trascorso dall'ultimo avvio fino ad ora.
+     * 
+     * @return Numero totale di secondi trascorsi
      */
     public synchronized long getElapsedSeconds() {
         long current = totalSeconds;
@@ -105,9 +125,12 @@ public class StopWatch {
     }
 
     /**
-     * Restituisce il tempo trascorso formattato in ore:minuti:secondi (HH:MM:SS).
+     * Formatta il tempo trascorso in una stringa leggibile (HH:MM:SS).
      * 
-     * @return Stringa formattata con il tempo trascorso
+     * Converte i secondi totali in ore, minuti e secondi, formattando
+     * ciascun componente con due cifre e separatori.
+     * 
+     * @return Tempo formattato come stringa "ore:minuti:secondi"
      */
     public String getFormattedTime() {
         long seconds = getElapsedSeconds();
@@ -117,12 +140,13 @@ public class StopWatch {
             seconds % 60);
     }
 
-    // Metodi di sicurezza per il Singleton
-
     /**
-     * Impedisce la clonazione dell'istanza.
+     * Impedisce la clonazione dell'istanza singleton.
      * 
-     * @throws CloneNotSupportedException sempre
+     * Parte della difesa contro la violazione del pattern singleton,
+     * garantisce che non sia possibile duplicare l'istanza.
+     * 
+     * @throws CloneNotSupportedException sempre, impedendo la clonazione
      */
     @Override
     protected Object clone() throws CloneNotSupportedException {
@@ -130,9 +154,12 @@ public class StopWatch {
     }
 
     /**
-     * Garantisce che durante la deserializzazione venga restituita l'istanza singleton.
+     * Gestisce correttamente la deserializzazione per mantenere il singleton.
      * 
-     * @return L'istanza singleton
+     * Se l'oggetto viene deserializzato, questo metodo garantisce che venga
+     * restituita l'istanza singleton invece di creare un nuovo oggetto.
+     * 
+     * @return L'istanza singleton esistente
      */
     protected Object readResolve() {
         return getInstance();

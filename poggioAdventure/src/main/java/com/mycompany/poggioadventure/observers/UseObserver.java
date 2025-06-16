@@ -41,8 +41,6 @@ import java.util.List;
  *   <li>Feedback contestualizzato per progressione prove</li>
  * </ul>
  * 
- * <p><b>Pattern:</b> Observer per comando USE, Strategy per comportamenti
- * oggetto-specifici, Factory per interfacce Flipper.
  */
 public class UseObserver implements GameObserver, Serializable {
 

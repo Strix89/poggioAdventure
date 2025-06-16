@@ -13,11 +13,6 @@ import java.util.List;
     gioco. Possono essere aggiunti AdvObject oppure settare una lista di AdvObject.
     Questo significa che è possibile anche passargli un container.
 */
-
-/**
- *
- * @author pierpaolo
- */
 public class Inventory implements Serializable{
 
     private List<AdvObject> list = new ArrayList<>();

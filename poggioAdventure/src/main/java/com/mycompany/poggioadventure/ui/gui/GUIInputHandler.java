@@ -13,8 +13,6 @@ import javax.swing.JTextField;
  *   <li>Pulire l'input rimuovendo spazi bianchi iniziali/finali</li>
  *   <li>Fornire l'input al sistema di gioco</li>
  * </ul>
- * 
- * @author Strix89
  */
 public class GUIInputHandler implements InputHandler {
     

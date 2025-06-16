@@ -51,7 +51,6 @@ import java.util.stream.IntStream;
  *   <li>Integrazione con servizi esterni (API, database)</li>
  * </ul>
  *
- * @version 1.3
  */
 public class Engine {
     private final GameDescription game;

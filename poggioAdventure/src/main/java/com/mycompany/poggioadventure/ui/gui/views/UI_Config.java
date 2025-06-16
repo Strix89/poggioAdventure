@@ -23,10 +23,6 @@ import java.util.logging.Logger;
  *   <li>Fornisce rapporti dimensionali responsive</li>
  *   <li>Configura spaziature e margini standard</li>
  * </ul>
- * 
- * <p>Pattern: Utility Class (tutti membri statici, costruttore privato)
- * 
- * @author Strix89
  */
 public final class UI_Config {
 

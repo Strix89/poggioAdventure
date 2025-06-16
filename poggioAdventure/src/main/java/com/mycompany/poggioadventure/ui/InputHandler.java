@@ -11,8 +11,6 @@ package com.mycompany.poggioadventure.ui;
  *   <li>{@code CLIInputHandler} - per input da terminale/console</li>
  *   <li>{@code GUIInputHandler} - per input da interfaccia grafica</li>
  * </ul>
- * 
- * @author Strix89
  */
 public interface InputHandler {
     

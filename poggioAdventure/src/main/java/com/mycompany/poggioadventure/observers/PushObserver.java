@@ -32,8 +32,6 @@ import java.util.List;
  *   <li>Esecuzione comportamenti individuali se nessuna combinazione attiva</li>
  * </ol>
  * 
- * <p><b>Pattern:</b> Observer per comando PUSH, Strategy per gestione
- * combinazioni vs comportamenti singoli.
  */
 public class PushObserver implements GameObserver, Serializable {
 

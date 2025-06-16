@@ -23,12 +23,6 @@ import com.mycompany.poggioadventure.model.Room;
  *   <li>Feedback contestuale per movimenti riusciti/falliti</li>
  * </ul>
  * 
- * <p><b>Pattern implementati:</b>
- * <ul>
- *   <li>Observer: reazione a comandi movimento</li>
- *   <li>Strategy: gestione differenziata collegamenti standard vs speciali</li>
- *   <li>Chain of Responsibility: priorità validazione collegamenti</li>
- * </ul>
  */
 public class MoveObserver implements GameObserver, Serializable {
 

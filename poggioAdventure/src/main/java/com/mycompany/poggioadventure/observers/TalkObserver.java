@@ -26,12 +26,6 @@ import java.io.Serializable;
  *   <li>Supporto immagini NPC con controlli visibilità</li>
  * </ul>
  * 
- * <p><b>Pattern implementati:</b>
- * <ul>
- *   <li>Observer: reazione a comando TALK</li>
- *   <li>State Machine: tracking stato interazioni e test</li>
- *   <li>Template Method: flow standardizzato dialogo > test > ricompensa</li>
- * </ul>
  */
 public class TalkObserver implements GameObserver, Serializable {
 

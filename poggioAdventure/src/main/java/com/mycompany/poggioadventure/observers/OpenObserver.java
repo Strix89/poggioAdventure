@@ -24,16 +24,6 @@ import java.io.Serializable;
  *   <li>Rimozione automatica etichette personalizzate post-apertura</li>
  *   <li>Feedback dettagliato per ogni oggetto processato</li>
  * </ul>
- * 
- * <p><b>Design decisions:</b>
- * <ul>
- *   <li>Contenitori mostrano contenuto senza svuotamento automatico</li>
- *   <li>Preserva controllo giocatore su raccolta oggetti</li>
- *   <li>Gestione robusta stati inconsistenti (già aperto)</li>
- * </ul>
- * 
- * <p><b>Pattern:</b> Observer per reazione comando OPEN, Strategy per 
- * handling differenziato oggetti standard vs contenitori.
  */
 public class OpenObserver implements GameObserver, Serializable {
     

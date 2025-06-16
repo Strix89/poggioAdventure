@@ -15,8 +15,6 @@ import java.awt.Color;
  *   <li>Estesa palette di colori specifici (arancioni, rossi, blu, gialli)</li>
  *   <li>Metodi di accesso per entrambi i sistemi di colore</li>
  * </ul>
- * 
- * @author Strix89
  */
 public enum ColorText {
     // ============== COLORI BASE ==============

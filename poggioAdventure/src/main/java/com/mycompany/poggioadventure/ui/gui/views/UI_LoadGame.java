@@ -35,8 +35,6 @@ import java.util.List;
  *   <li>Gestione errori durante il caricamento</li>
  *   <li>Interfaccia intuitiva con feedback visivo</li>
  * </ul>
- *
- * @author Strix89
  */
 public class UI_LoadGame extends UI_Abstract {
 

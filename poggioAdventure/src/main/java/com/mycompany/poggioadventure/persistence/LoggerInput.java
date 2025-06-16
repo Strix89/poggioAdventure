@@ -31,12 +31,6 @@ import java.util.stream.Collectors;
  *   <li>Verifica integrità dati e decodifica sicura</li>
  *   <li>Gestione file temporanei per export/sync</li>
  * </ul>
- * 
- * <p><b>Sicurezza:</b> Prevenzione path traversal, validazione UUID,
- * isolamento directory logs, controlli accesso filesystem.
- * 
- * <p><b>Pattern:</b> Repository per persistenza logs, Factory per
- * generazione filename, Strategy per encoding/decoding.
  */
 public class LoggerInput {
     

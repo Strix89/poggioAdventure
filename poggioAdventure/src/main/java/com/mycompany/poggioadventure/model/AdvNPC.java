@@ -21,12 +21,6 @@ import java.util.List;
  *   <li>Tracking stato interazioni per personalizzazione</li>
  * </ul>
  * 
- * <p><b>Pattern implementati:</b>
- * <ul>
- *   <li>State Machine: gestione stati interazione e test</li>
- *   <li>Strategy: dialoghi contestuali basati su stato</li>
- *   <li>Observer: notifica completamento test per ricompense</li>
- * </ul>
  */
 public class AdvNPC extends AdvObject {
     

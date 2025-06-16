@@ -9,11 +9,6 @@ package com.mycompany.poggioadventure.parser;
  Dovremmo differenziare però tra COMANDI IN GIOCO e COMANDI DI GIOCO (es.
  carica partita, nuova partita, salva & esci dal gioco)
 */
-
-/**
- *
- * @author pierpaolo
- */
 public enum CommandType {
     
     /**

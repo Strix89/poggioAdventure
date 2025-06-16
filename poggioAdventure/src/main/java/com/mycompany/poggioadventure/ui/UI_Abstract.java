@@ -12,8 +12,6 @@ import java.awt.event.ActionListener;
  * Classe astratta base per tutte le finestre GUI dell'applicazione.
  * Implementa un template pattern per l'inizializzazione delle finestre,
  * centralizzando la configurazione comune e delegando parti specifiche alle sottoclassi.
- * 
- * @author Strix89
  */
 public abstract class UI_Abstract extends JFrame {
 

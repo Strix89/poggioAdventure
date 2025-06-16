@@ -1,85 +1,54 @@
 package com.mycompany.poggioadventure.core.utils;
 
 /**
- * Value Object che rappresenta il risultato dell'elaborazione di un comando Flipper Zero.
+ * Classe immutabile che rappresenta il risultato di un'operazione del Flipper Zero.
  * 
- * <p>Implementa il pattern Value Object per incapsulare in modo immutabile
- * tutte le informazioni relative al risultato di un comando del Flipper Zero.
+ * Questa classe implementa il pattern Value Object per incapsulare tutti i dati
+ * relativi all'esito di un comando eseguito sul dispositivo Flipper Zero.
+ * Fornisce informazioni sul successo/fallimento dell'operazione, eventuali messaggi
+ * all'utente e lo stato di avanzamento del gioco.
  * 
- * <p><b>Responsabilità principali:</b>
- * <ul>
- *   <li>Contenere il messaggio di risposta dell'operazione</li>
- *   <li>Specificare il tipo di risultato (successo/errore/avviso/info)</li>
- *   <li>Indicare se il comando ha completato il gioco</li>
- *   <li>Specificare eventuali modifiche al timer di gioco</li>
- * </ul>
- * 
- * <p><b>Pattern utilizzati:</b>
- * <ul>
- *   <li>Value Object: oggetto immutabile che rappresenta un valore</li>
- *   <li>Factory Method: metodi statici per creazione di istanze tipizzate</li>
- *   <li>Enum Strategy: usa enum per definire i tipi di risultato</li>
- * </ul>
- * 
- * <p><b>Utilizzo tipico:</b>
- * <pre>{@code
- * // Creazione di un risultato di successo
- * FlipperResult result = FlipperResult.success("Robot reindirizzati!", true, 0);
- * 
- * // Creazione di un errore
- * FlipperResult error = FlipperResult.error("Frequenza non valida");
- * 
- * // Verifica del tipo di risultato
- * if (result.getType() == FlipperResult.ResultType.SUCCESS) {
- *     // gestisci successo
- * }
- * }</pre>
- * 
- * @author Strix89
- * @version 1.0
- * @since 1.0
+ * Caratteristiche principali:
+ * - Immutabilità: una volta creato, un FlipperResult non può essere modificato
+ * - Factory methods: creazione facilitata attraverso metodi statici tipizzati
+ * - Categorizzazione: risultati classificati per tipo (successo, errore, ecc.)
  */
 public class FlipperResult {
     
     /**
-     * Enumerazione che definisce i possibili tipi di risultato
-     * per un comando Flipper Zero.
+     * Definisce i possibili tipi di risultato di un'operazione Flipper.
      * 
-     * <p>Ogni tipo ha un significato specifico:
-     * <ul>
-     *   <li>{@code SUCCESS}: Operazione completata con successo</li>
-     *   <li>{@code ERROR}: Errore nell'esecuzione del comando</li>
-     *   <li>{@code WARNING}: Comando eseguito ma con problemi</li>
-     *   <li>{@code INFO}: Informazione o comando di utilità</li>
-     * </ul>
+     * Ogni tipo rappresenta una categoria semantica di risposta, utilizzata
+     * per determinare il comportamento dell'interfaccia e del gioco.
      */
     public enum ResultType {
-        /** Comando eseguito con successo completo */
+        /** Operazione completata con successo */
         SUCCESS, 
-        /** Errore nell'esecuzione - comando fallito */
+        /** Operazione fallita a causa di un errore */
         ERROR, 
-        /** Comando eseguito ma con avvertimenti o penalità */
+        /** Operazione riuscita ma con effetti collaterali negativi */
         WARNING, 
-        /** Comando informativo o di utilità */
+        /** Risultato informativo, non critico per il gameplay */
         INFO
     }
     
-    /** Messaggio descrittivo del risultato dell'operazione */
+    /** Messaggio testuale associato al risultato */
     private final String message;
     
-    /** Tipo di risultato (successo, errore, avviso, info) */
+    /** Categoria del risultato */
     private final ResultType type;
     
-    /** Flag che indica se il comando ha completato il gioco/sfida */
+    /** Indica se questa operazione ha portato al completamento del gioco */
     private final boolean gameCompleted;
     
-    
     /**
-     * Costruttore privato per garantire l'uso dei factory methods.
+     * Costruttore interno per creare istanze di FlipperResult.
      * 
-     * @param message Messaggio descrittivo del risultato
+     * Preferire l'uso dei factory methods per una creazione più semantica.
+     * 
+     * @param message Messaggio di feedback all'utente
      * @param type Tipo di risultato
-     * @param gameCompleted Se l'operazione ha completato il gioco
+     * @param gameCompleted Flag di completamento gioco
      */
     public FlipperResult(String message, ResultType type, boolean gameCompleted) {
         this.message = message;
@@ -88,105 +57,81 @@ public class FlipperResult {
     }
     
     /**
-     * Factory method per creare un risultato di successo.
+     * Crea un risultato positivo per un'operazione completata con successo.
      * 
-     * <p>Utilizzato quando un comando Flipper viene eseguito correttamente
-     * e produce l'effetto desiderato.
+     * Da utilizzare quando un comando ha prodotto l'effetto desiderato.
      * 
-     * @param message Messaggio di successo da mostrare all'utente
-     * @param gameCompleted Se questo successo completa il gioco/sfida
-     * @param timeModification Modifica al timer (0 = nessuna modifica)
-     * @return Nuova istanza di FlipperResult di tipo SUCCESS
-     * 
-     * @example
-     * <pre>{@code
-     * return FlipperResult.success("Robot reindirizzati!", true, 0);
-     * }</pre>
+     * @param message Descrizione del successo ottenuto
+     * @param gameCompleted Se questo successo completa la sfida corrente
+     * @return Istanza configurata come successo
      */
     public static FlipperResult success(String message, boolean gameCompleted) {
         return new FlipperResult(message, ResultType.SUCCESS, gameCompleted);
     }
     
     /**
-     * Factory method per creare un risultato di errore.
+     * Crea un risultato negativo per un'operazione fallita.
      * 
-     * <p>Utilizzato quando un comando Flipper fallisce o non può essere eseguito.
-     * Gli errori non modificano il timer e non completano mai il gioco.
+     * Da utilizzare quando un comando non può essere eseguito o ha fallito.
+     * Per convenzione, un errore non può mai completare il gioco.
      * 
-     * @param message Messaggio di errore da mostrare all'utente
-     * @return Nuova istanza di FlipperResult di tipo ERROR
-     * 
-     * @example
-     * <pre>{@code
-     * return FlipperResult.error("Frequenza non valida");
-     * }</pre>
+     * @param message Descrizione dell'errore
+     * @return Istanza configurata come errore
      */
     public static FlipperResult error(String message) {
         return new FlipperResult(message, ResultType.ERROR, false);
     }
     
     /**
-     * Factory method per creare un risultato di avviso.
+     * Crea un risultato di avvertimento per operazioni parzialmente riuscite.
      * 
-     * <p>Utilizzato quando un comando viene eseguito ma con effetti negativi
-     * o indesiderati, tipicamente con penalità al timer.
+     * Da utilizzare quando un comando ha prodotto effetti misti o ha causato
+     * penalità ma è comunque stato eseguito.
      * 
-     * @param message Messaggio di avviso da mostrare all'utente
-     * @return Nuova istanza di FlipperResult di tipo WARNING
-     * 
-     * @example
-     * <pre>{@code
-     * return FlipperResult.warning("Override causato instabilità!", -30);
-     * }</pre>
+     * @param message Descrizione dell'avvertimento
+     * @return Istanza configurata come avvertimento
      */
     public static FlipperResult warning(String message) {
         return new FlipperResult(message, ResultType.WARNING, false);
     }
     
     /**
-     * Factory method per creare un risultato informativo.
+     * Crea un risultato informativo per fornire dettagli non critici.
      * 
-     * <p>Utilizzato per comandi di utilità che forniscono informazioni
-     * o bonus al giocatore senza essere critici per il completamento.
+     * Da utilizzare per comandi che restituiscono informazioni utili
+     * ma non influenzano direttamente lo stato del gioco.
      * 
-     * @param message Messaggio informativo da mostrare all'utente
-     * @return Nuova istanza di FlipperResult di tipo INFO
-     * 
-     * @example
-     * <pre>{@code
-     * return FlipperResult.info("Robot fermati, bonus tempo!", 60);
-     * }</pre>
+     * @param message Contenuto informativo
+     * @return Istanza configurata come informazione
      */
     public static FlipperResult info(String message) {
         return new FlipperResult(message, ResultType.INFO, false);
     }
     
     /**
-     * Restituisce il messaggio descrittivo del risultato.
+     * Restituisce il messaggio associato al risultato.
      * 
-     * @return Stringa con il messaggio da mostrare all'utente
+     * @return Messaggio testuale di feedback
      */
     public String getMessage() { 
         return message; 
     }
     
     /**
-     * Restituisce il tipo di risultato.
+     * Restituisce la categoria di questo risultato.
      * 
-     * @return Enum indicante se è successo, errore, avviso o info
+     * @return Tipo di risultato (SUCCESS, ERROR, WARNING, INFO)
      */
     public ResultType getType() { 
         return type; 
     }
     
     /**
-     * Indica se questo risultato completa il gioco o la sfida.
+     * Verifica se questa operazione ha completato il gioco.
      * 
-     * @return true se il comando ha completato il gioco, false altrimenti
+     * @return true se l'operazione ha portato alla vittoria, false altrimenti
      */
     public boolean isGameCompleted() { 
         return gameCompleted; 
     }
-    
-
 }

@@ -15,54 +15,75 @@ import java.util.List;
 /**
  * Classe astratta che definisce la struttura base per tutti i giochi adventure.
  * 
- * <p>Fornisce il contratto per:
- * <ul>
- *   <li>Gestione dello stato del mondo di gioco (mappa, inventario, stanza corrente)</li>
- *   <li>Sistema di comandi e parsing</li>
- *   <li>Serializzazione completa per salvataggio/caricamento</li>
- *   <li>Template methods per inizializzazione e logica di gioco</li>
- * </ul>
+ * Implementa il pattern Template Method per la gestione del ciclo di gioco e
+ * fornisce l'infrastruttura per la memorizzazione dello stato di gioco.
  * 
- * <p>Implementa Serializable per supportare persistenza dello stato.
- * Le implementazioni concrete devono fornire la logica specifica del gioco
- * tramite i metodi astratti.
+ * La classe gestisce:
+ * - La mappa di gioco con tutte le stanze e i piani
+ * - L'inventario del giocatore
+ * - I comandi disponibili
+ * - La posizione corrente del giocatore
+ * 
+ * Le sottoclassi devono implementare la logica specifica del gioco attraverso
+ * i metodi astratti definiti.
  */
 public abstract class GameDescription implements Serializable {
     private static final long serialVersionUID = 537489926633277910L;
     
-    /** Struttura spaziale del mondo di gioco */
+    /** Mappa del gioco che contiene tutti i piani e le stanze */
     private final GameMap gameMap = new GameMap();
 
-    /** Registro dei comandi disponibili con alias */
+    /** Lista dei comandi disponibili nel gioco */
     private final List<Command> commands = new ArrayList<>();
 
-    /** Inventario del giocatore con oggetti raccolti */
+    /** Inventario del giocatore che contiene gli oggetti raccolti */
     private final List<AdvObject> inventory = new ArrayList<>();
 
-    /** Posizione corrente del giocatore nel mondo */
+    /** Stanza in cui si trova attualmente il giocatore */
     private Room currentRoom;
 
+    /**
+     * Restituisce la lista dei comandi disponibili nel gioco.
+     * 
+     * @return Lista dei comandi disponibili
+     */
     public List<Command> getCommands() {
         return commands;
     }
 
+    /**
+     * Restituisce la stanza corrente in cui si trova il giocatore.
+     * 
+     * @return Stanza corrente
+     */
     public Room getCurrentRoom() {
         return currentRoom;
     }
 
+    /**
+     * Imposta la stanza corrente in cui si trova il giocatore.
+     * Utilizzato per spostare il giocatore tra le stanze.
+     * 
+     * @param currentRoom Nuova stanza corrente
+     */
     public void setCurrentRoom(Room currentRoom) {
         this.currentRoom = currentRoom;
     }
 
+    /**
+     * Restituisce l'inventario del giocatore.
+     * 
+     * @return Lista degli oggetti nell'inventario
+     */
     public List<AdvObject> getInventory() {
         return inventory;
     }
 
     /**
      * Sostituisce completamente l'inventario corrente.
-     * Utilizzato per ripristino stato durante reset livelli o caricamento save.
+     * Utile durante il caricamento di un salvataggio o il reset del gioco.
      * 
-     * @param inventory Nuova collezione di oggetti (null-safe)
+     * @param inventory Nuova collezione di oggetti (può essere null)
      */
     public void setInventory(List<AdvObject> inventory) {
         this.inventory.clear();
@@ -72,10 +93,10 @@ public abstract class GameDescription implements Serializable {
     }
 
     /**
-     * Sostituisce completamente la lista comandi disponibili.
-     * Utilizzato per configurazioni specifiche di livello o modalità.
+     * Sostituisce completamente la lista dei comandi disponibili.
+     * Utile per personalizzare i comandi in base al livello o modalità di gioco.
      * 
-     * @param commands Nuova collezione di comandi (null-safe)
+     * @param commands Nuova collezione di comandi (può essere null)
      */
     public void setCommands(List<Command> commands) {
         this.commands.clear();
@@ -85,8 +106,8 @@ public abstract class GameDescription implements Serializable {
     }
 
     /**
-     * Sostituisce la mappa di gioco eseguendo deep copy delle strutture.
-     * Necessario per reset dei livelli mantenendo isolamento tra stati.
+     * Sostituisce il contenuto della mappa di gioco effettuando una copia profonda.
+     * Fondamentale per il reset dei livelli mantenendo l'isolamento tra gli stati.
      * 
      * @param gameMap Nuova mappa di gioco da copiare
      */
@@ -111,41 +132,63 @@ public abstract class GameDescription implements Serializable {
     }
 
     /**
-     * Template method per inizializzazione specifica del gioco.
-     * Le implementazioni devono configurare comandi, observer, mondo di gioco.
+     * Inizializza il gioco configurando comandi, observer e mondo di gioco.
+     * Le sottoclassi devono implementare questo metodo per definire lo stato iniziale.
      * 
-     * @throws Exception se l'inizializzazione fallisce
+     * @throws Exception Se si verificano errori durante l'inizializzazione
      */
     public abstract void init() throws Exception;
 
     /**
-     * Template method per elaborazione dei comandi del giocatore.
-     * Deve gestire la logica di gioco e aggiornare lo stato del mondo.
+     * Elabora il prossimo comando del giocatore aggiornando lo stato del gioco.
+     * Le sottoclassi devono implementare la logica di gioco specifica.
      * 
-     * @param list Lista di output del parser da elaborare
-     * @param gameContext Contesto con handler I/O e utilità
+     * @param list Lista di output dal parser da elaborare
+     * @param gameContext Contesto di gioco con gestori I/O e utilities
      */
     public abstract void nextMove(List<ParserOutput> list, GameContext gameContext);
     
-    /** Messaggio di benvenuto formattato per interfaccia CLI */
+    /**
+     * Restituisce il messaggio di benvenuto formattato per l'interfaccia a riga di comando.
+     * 
+     * @return Messaggio di benvenuto per CLI
+     */
     public abstract String getCLIWelcomeMsg();
     
-    /** Messaggio di benvenuto formattato per interfaccia GUI */
+    /**
+     * Restituisce il messaggio di benvenuto formattato per l'interfaccia grafica.
+     * 
+     * @return Messaggio di benvenuto per GUI
+     */
     public abstract String getGUIWelcomeMsg();
     
-    /** Versione del gioco formattata per interfaccia CLI */
+    /**
+     * Restituisce la versione del gioco formattata per l'interfaccia a riga di comando.
+     * 
+     * @return Versione del gioco per CLI
+     */
     public abstract String getCLIGameVersion();
     
-    /** Versione del gioco formattata per interfaccia GUI */
+    /**
+     * Restituisce la versione del gioco formattata per l'interfaccia grafica.
+     * 
+     * @return Versione del gioco per GUI
+     */
     public abstract String getGUIGameVersion();
 
+    /**
+     * Restituisce la mappa di gioco.
+     * 
+     * @return Mappa del gioco con tutti i piani e le stanze
+     */
     public GameMap getGameMap() {
         return gameMap;
     }
 
     /**
-     * Crea deep copy dell'intera istanza utilizzando serializzazione.
-     * Garantisce isolamento completo tra copie per salvataggi e checkpoint.
+     * Crea una copia profonda (deep copy) dell'intera istanza di gioco.
+     * Utilizza la serializzazione per garantire un isolamento completo tra le copie.
+     * Fondamentale per implementare salvataggi e checkpoint.
      * 
      * @return Nuova istanza clonata completamente indipendente
      */
@@ -155,7 +198,8 @@ public abstract class GameDescription implements Serializable {
     }
 
     /**
-     * Rimuove un oggetto dall'inventario tramite il suo ID.
+     * Rimuove un oggetto dall'inventario del giocatore tramite il suo ID.
+     * Utile quando un oggetto viene utilizzato o scambiato.
      * 
      * @param id ID dell'oggetto da rimuovere
      * @return true se l'oggetto è stato trovato e rimosso, false altrimenti

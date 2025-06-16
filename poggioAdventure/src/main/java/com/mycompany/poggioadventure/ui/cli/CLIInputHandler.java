@@ -19,9 +19,6 @@ import java.util.Scanner;
  *   <li>Gestione EOF e stream closure con eccezioni appropriate</li>
  *   <li>Validation stream availability prima di lettura</li>
  * </ul>
- * 
- * <p><b>Pattern:</b> Adapter per standardizzare input console,
- * Strategy per implementazione specifica CLI dell'InputHandler.
  */
 public class CLIInputHandler implements InputHandler {
     
