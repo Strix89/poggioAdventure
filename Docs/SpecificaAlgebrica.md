@@ -1,4 +1,4 @@
-# Specifica Algebrica di gameMap
+# Specifica Algebrica
 
 ## Descrizione della Classe
 
@@ -44,10 +44,10 @@ _dove 'error' è un elemento speciale indefinito._
 
 ## Costruttori e Osservatori
 
-### Costruttori (criterio di minimalità)
+### Costruttori
 
-- `newMap()` - costruttore base
-- `addRoom(gameMap, room, floor)` - costruttore generativo
+- `newMap()`
+- `addRoom(gameMap, room, floor)`
 
 ### Osservatori
 
@@ -65,6 +65,6 @@ _dove 'error' è un elemento speciale indefinito._
 |                               |  `newMap()`                | `addRoom(gm, r, fl)`                         |
 | `getRoomByName(gm, name)`     | `null`                     | `getRoomByName(gm, name)`                    |
 | `findRoomById(gm, id)`        | `null`                     | `findRoomById(gm, id)`                       |
-| `getAllFloors(gm)`            | `null`                | `getAllFloors(gm)`                           |
+| `getAllFloors(gm)`            | `null`                     | `getAllFloors(gm)`                           |
 | `linkFloors(gm, r1, r2, dir)` | `error`                    | `linkFloors(gm, r1, r2, dir)`                |
 | `alterateNpcImages(gm, obs)`  | `newMap()`                 | `addRoom(alterateNpcImages(gm, obs), r, fl)` |
