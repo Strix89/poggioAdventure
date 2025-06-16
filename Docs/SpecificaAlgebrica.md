@@ -2,7 +2,7 @@
 
 ## Descrizione della Classe
 
-La classe `gameMap` gestisce la struttura spaziale del mondo di gioco organizzato su più piani. Fornisce operazioni per l'aggiunta e ricerca di stanze, il collegamento bidirezionale tra stanze e la manipolazione delle immagini degli NPC presenti. La struttura interna utilizza una lista di piani, dove ogni piano contiene le stanze associate.
+La classe `gameMap` rappresenta la mappa di gioco strutturata su livelli multipli che definisce l'architettura spaziale dell'ambiente di gioco. Essa implementa funzionalità per inserire e ottenere stanze, creare collegamenti bidirezionali tra stanze e di omettere o meno le immagini degli NPC presenti in queste utlime. L'organizzazione interna si basa su una collezione stratificata di piani, ciascuno dei quali raccoglie le stanze corrispondenti.
 
 ## Specifica Sintattica
 
