@@ -501,6 +501,8 @@ public class Level1State extends GameState {
     /** Esegue callback per transizione al livello successivo */
     @Override
     public void handleSuccess(Runnable onSuccess, GameDescription gameDescription) {
+        Room hallway = gameDescription.getGameMap().findRoomById(Utils.ROOM_HALLWAY_ID);
+        hallway.setForbidden(false);
         Room galileoRoom = gameDescription.getGameMap().findRoomById(Utils.ROOM_GALILEO_ID);
         if(galileoRoom != null) {
                 galileoRoom.removeObject(Utils.NPC_DIRETTOREGALILEO_ID);

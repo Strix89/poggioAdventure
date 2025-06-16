@@ -16,3 +16,5 @@ TODO.txt
 # macOS
 .DS_Store
 **/.DS_Store
+.idea/
+/poggioAdventure/.idea/
