@@ -405,3 +405,296 @@ Le principali chiamate REST implementate sono:
 >Segue le convenzioni JavaBeans (costruttore vuoto, getter e setter pubblici) per garantire la compatibilità con i framework di serializzazione/deserializzazione JSON utilizzati nelle chiamate REST.  
 >Inoltre, implementa i metodi `equals`, `hashCode` e `toString` per un corretto funzionamento nelle collezioni e per facilitare il debug.
 >Per la controparte server, la stessa struttura è definita nella classe [`RankingEntryDTO`](poggioServer/src/main/java/com/mycompany/poggioserver/resources/RankingEntryDTO.java).
+
+# Lambda Expression, Stream e Pipeline
+
+Le **Lambda Expression** e gli **Stream** sono strumenti moderni di Java che permettono di scrivere codice più pulito ed efficiente, specialmente quando si lavora con collezioni di dati. 
+Nel progetto *PoggioAdventure*, abbiamo usato queste funzionalità per rendere il codice più compatto, leggibile e facile da gestire.
+
+### 1. Filtraggio e Manipolazione di Collezioni
+
+Un esempio si trova nel sistema di salvataggio, dove si utilizzano **stream** e **lambda** per filtrare e raccogliere i file di salvataggio associati a un determinato giocatore:
+
+```java
+// filepath: poggioAdventure/src/main/java/com/mycompany/poggioadventure/persistence/SaveGame.java
+List<Path> existingSaves = Files.list(SAVE_DIR)
+    .filter(p -> {
+        String fileName = p.getFileName().toString();
+        return fileName.startsWith(playerName + "_") && fileName.endsWith(".dat");
+    })
+    .collect(Collectors.toList());
+```
+In questo frammento, viene creato uno stream di file nella directory dei salvataggi, filtrato tramite una lambda che seleziona solo quelli appartenenti al giocatore corrente, e infine raccolto in una lista. Questo approccio sostituisce cicli tradizionali e rende il codice più espressivo.
+
+### 2. Analisi delle Risposte nei Test (Stream Pipeline)
+
+Nel sistema dei quiz/logica, gli **Stream** vengono utilizzate per confrontare in modo funzionale le risposte date dal giocatore con quelle corrette, calcolando rapidamente il numero di errori:
+
+```java
+// filepath: poggioAdventure/src/main/java/com/mycompany/poggioadventure/core/levels/Test.java
+public int countWrongAnswers(List<Integer> answers) {
+    return (int) java.util.stream.IntStream.range(0, Math.min(questions.size(), answers.size()))
+        .filter(i -> !questions.get(i).isCorrectAnswer(answers.get(i)))
+        .count();
+}
+```
+Qui si crea una pipeline che itera sugli indici delle domande, filtra quelli in cui la risposta è errata (tramite una lambda), e conta il totale. Questo pattern è ricorrente in tutto il progetto per operazioni di confronto e conteggio.
+
+### 3. Mapping e Trasformazione di Oggetti
+
+Per estrarre rapidamente gli ID degli oggetti richiesti per un test, si utilizza una **stream pipeline** con operazione di mapping:
+
+```java
+// filepath: poggioAdventure/src/main/java/com/mycompany/poggioadventure/core/levels/Test.java
+public List<Integer> getRequiredObjectIds() {
+    if (requiredObjects == null) {
+        return null;
+    }
+    return requiredObjects.stream()
+        .map(AdvObject::getId)
+        .collect(java.util.stream.Collectors.toList());
+}
+```
+In questo caso, la lambda `AdvObject::getId` viene applicata a ogni elemento della lista, producendo una nuova lista di ID in modo compatto e leggibile.
+
+### 4. Uso di Optional e Lambda per Gestione Null-Safe
+
+Per verificare la presenza di oggetti richiesti, si sfrutta `Optional` con lambda per evitare controlli null espliciti:
+
+```java
+// filepath: poggioAdventure/src/main/java/com/mycompany/poggioadventure/core/levels/Test.java
+public boolean hasRequiredObjects() {
+    return java.util.Optional.ofNullable(requiredObjects)
+        .map(list -> !list.isEmpty())
+        .orElse(false);
+}
+```
+Questo pattern riduce la verbosità e rende la logica più robusta contro i `NullPointerException`.
+
+### 5. Uso di Lambda per Eventi e Callback
+
+Nel codice di avvio della GUI, viene utilizzata una lambda per eseguire il setup dell’interfaccia grafica in modo asincrono e thread-safe:
+
+```java
+// filepath: poggioAdventure/src/main/java/com/mycompany/poggioadventure/PoggioAdventure.java
+if(guiMode) {
+    java.awt.EventQueue.invokeLater(() -> {
+        UI_Init uiInit = new UI_Init();
+        uiInit.setVisible(true);
+    });
+}
+```
+Questa lambda viene passata come callback da eseguire nel thread dell’Event Dispatch Thread di Swing.
+
+# Swing
+
+Per offrire un'esperienza utente moderna e accessibile anche a chi non ama la riga di comando, PoggioAdventure implementa una **interfaccia grafica completa** basata su **Swing**, la libreria standard di Java per la creazione di GUI. L'uso di Swing è stato fondamentale per realizzare un'interfaccia ricca, personalizzabile e facilmente estendibile, in grado di gestire output testuale formattato, immagini, input utente e dialog interattivi.
+
+## Architettura e Pattern
+
+L'interfaccia grafica è stata progettata seguendo il pattern **MVC** (Model-View-Controller), separando la logica di gioco dalla presentazione. Tutte le finestre Swing derivano dalla classe astratta [`UI_Abstract`](poggioAdventure/src/main/java/com/mycompany/poggioadventure/ui/UI_Abstract.java), che centralizza la configurazione comune (tema, stili, layout) e fornisce un template method per l'inizializzazione delle componenti:
+
+```java
+// filepath: poggioAdventure/src/main/java/com/mycompany/poggioadventure/ui/UI_Abstract.java
+public abstract class UI_Abstract extends JFrame {
+    public UI_Abstract() {
+        initUI(); // Template method
+    }
+
+    private void initUI() {
+        FlatLightLaf.setup(); // Tema moderno
+        setTitle(getWindowTitle());
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        getContentPane().setLayout(new BorderLayout(10, 10));
+        getContentPane().setBackground(UI_Config.BACKGROUND_COLOR);
+        setIconImage(UI_Config.getShieldImage());
+        initComponents(); // Hook per le sottoclassi
+        applyDialogStyles();
+        setResizable(false);
+        setLocationRelativeTo(null);
+    }
+
+    protected abstract void initComponents();
+    protected abstract String getWindowTitle();
+}
+```
+Questa struttura garantisce coerenza visiva e comportamentale tra tutte le finestre dell'applicazione.
+
+## Componenti Principali
+
+### 1. Finestra di Gioco Principale
+
+La finestra principale del gioco è implementata nella classe [`UI_Game`](poggioAdventure/src/main/java/com/mycompany/poggioadventure/ui/gui/views/UI_Game.java), che integra:
+
+- **JTextPane** per l'output del gioco, con supporto a testo colorato e immagini.
+- **JTextField** per l'inserimento dei comandi da parte dell'utente.
+- **JButton** per inviare i comandi.
+- **JScrollPane** per gestire lo scrolling automatico dell'output.
+- **Dialog di conferma e salvataggio** tramite `JOptionPane`.
+
+Esempio di creazione del pannello di output e input:
+
+```java
+// filepath: poggioAdventure/src/main/java/com/mycompany/poggioadventure/ui/gui/views/UI_Game.java
+private JPanel createLeftPanel() {
+    JPanel panel = new JPanel(new BorderLayout(10, 10));
+    panel.setOpaque(false);
+
+    gameOutputArea = new JTextPane();
+    gameOutputArea.setEditable(false);
+    gameOutputArea.setFont(UI_Config.getNormalFont().deriveFont(18f));
+    gameOutputArea.setForeground(Color.WHITE);
+    gameOutputArea.setBackground(new Color(60, 60, 60));
+    
+    outputScrollPane = new JScrollPane(gameOutputArea);
+    outputScrollPane.setBorder(createSectionBorder("Log Gioco"));
+
+    JPanel inputPanel = new JPanel(new BorderLayout(10, 10));
+    inputPanel.setOpaque(false);
+    
+    commandInput = new JTextField();
+    sendButton = createButton("INVIA", UI_Config.BUTTON_BASE_COLOR, 14f);
+    // ...
+}
+```
+
+### 2. OutputHandler per GUI
+
+La classe [`GUIOutputHandler`](poggioAdventure/src/main/java/com/mycompany/poggioadventure/ui/gui/GUIOutputHandler.java) si occupa di gestire l'output formattato nella JTextPane, supportando markup per colori e immagini, e garantendo la **thread safety** tramite `SwingUtilities.invokeLater`:
+
+```java
+// filepath: poggioAdventure/src/main/java/com/mycompany/poggioadventure/ui/gui/GUIOutputHandler.java
+@Override
+public void writeFormatted(String formattedMessage, ColorText baseColor) {
+    SwingUtilities.invokeLater(() -> {
+        try {
+            StyledDocument doc = outputPane.getStyledDocument();
+            // Parsing e inserimento testo colorato e immagini
+            // ...
+            outputPane.setCaretPosition(doc.getLength());
+        } catch (BadLocationException ex) {
+            // Gestione errori
+        }
+    });
+}
+```
+Questo permette di visualizzare in modo ricco e dinamico sia testo che immagini, migliorando l'immersione del giocatore.
+
+### 3. Finestre Speciali e Dialoghi
+
+Oltre alla finestra principale, sono state realizzate altre interfacce dedicate, come:
+
+- **UI_Flipper**: una finestra custom per l'interazione con il "Flipper Zero", con input dedicato e visualizzazione di immagini ASCII.
+- **UI_Inventory**: pannello per la gestione e visualizzazione dell'inventario, con descrizioni testuali e layout responsive.
+- **UI_NewGame** e **UI_Init**: schermate di avvio e creazione nuova partita, con effetti hover, validazione input e feedback tramite dialoghi Swing.
+
+Tutte queste finestre sfruttano componenti Swing come `JPanel`, `JLabel`, `JTextArea`, `JButton`, e dialoghi modali tramite `JOptionPane` per fornire feedback immediato all'utente.
+
+### 4. Personalizzazione e Temi
+
+Per migliorare l'aspetto grafico, è stato adottato il tema **FlatLaf**, che dona un look moderno e professionale a tutte le finestre. La personalizzazione dei colori, font e icone avviene tramite la classe [`UI_Config`](poggioAdventure/src/main/java/com/mycompany/poggioadventure/ui/gui/views/UI_Config.java), garantendo coerenza e facilità di manutenzione.
+
+### Integrazione con la Logica di Gioco
+
+L'integrazione tra la GUI e la logica di gioco avviene tramite pattern **Strategy**: le classi `GUIInputHandler` e `GUIOutputHandler` implementano le interfacce comuni `InputHandler` e `OutputHandler`, permettendo di intercambiare facilmente la modalità CLI e GUI senza modificare la logica sottostante.
+
+### Esempio di Avvio GUI
+
+L'avvio della GUI sfrutta una lambda per garantire l'esecuzione nel thread dell'**Event Dispatch Thread** di Swing:
+
+```java
+// filepath: poggioAdventure/src/main/java/com/mycompany/poggioadventure/PoggioAdventure.java
+if(guiMode) {
+    java.awt.EventQueue.invokeLater(() -> {
+        UI_Init uiInit = new UI_Init();
+        uiInit.setVisible(true);
+    });
+}
+```
+# Thread e Programmazione Concorrente
+
+La programmazione concorrente è stata adottata in *PoggioAdventure* per garantire un'esperienza utente fluida, reattiva e moderna sia in modalità CLI che GUI. L'utilizzo dei thread consente di gestire operazioni che richiedono attese (come timer, download di file o transizioni di stato) senza bloccare l'interfaccia utente o il flusso principale del gioco.
+
+### 1. Gestione del Timer di Gioco
+
+Uno degli utilizzi principali dei thread è nella gestione del **countdown** e del **cronometro di gioco**. La classe [`TimeManager`](poggioAdventure/src/main/java/com/mycompany/poggioadventure/core/utils/TimeManager.java) implementa l'interfaccia `Runnable` e viene eseguita in un thread dedicato, così da non bloccare il thread principale durante il countdown:
+
+```java
+// filepath: poggioAdventure/src/main/java/com/mycompany/poggioadventure/core/utils/TimeManager.java
+@Override
+public void run() {
+    while (inEsecuzione && tempoTrascorso < tempoTotale) {
+        try {
+            Thread.sleep(intervallo);
+        } catch (InterruptedException e) {
+            break; // Terminazione richiesta
+        }
+        tempoTrascorso += intervallo;
+    }
+    inEsecuzione = false;
+}
+```
+In questo modo, il timer può essere avviato, fermato o riavviato in modo asincrono, senza interferire con l'elaborazione dei comandi o l'aggiornamento della GUI.
+
+### 2. Aggiornamento Thread-Safe della GUI
+
+Nell'interfaccia grafica, tutte le operazioni che modificano componenti Swing vengono eseguite nel **thread dell'Event Dispatch Thread (EDT)**, come raccomandato dalle best practice Java. Ad esempio, la classe [`GUIOutputHandler`](poggioAdventure/src/main/java/com/mycompany/poggioadventure/ui/gui/GUIOutputHandler.java) utilizza `SwingUtilities.invokeLater` per garantire che l'output venga renderizzato in modo sicuro e reattivo:
+
+```java
+// filepath: poggioAdventure/src/main/java/com/mycompany/poggioadventure/ui/gui/GUIOutputHandler.java
+@Override
+public void writeFormatted(String formattedMessage, ColorText baseColor) {
+    SwingUtilities.invokeLater(() -> {
+        try {
+            StyledDocument doc = outputPane.getStyledDocument();
+            // Parsing e inserimento testo colorato e immagini
+            // ...
+            outputPane.setCaretPosition(doc.getLength());
+        } catch (BadLocationException ex) {
+            // Gestione errori
+        }
+    });
+}
+```
+Questo pattern viene utilizzato in tutta la GUI per evitare condizioni di race e garantire la stabilità dell'interfaccia anche durante operazioni concorrenti.
+
+### 3. Gestione Asincrona di Eventi e Transizioni di Stato
+
+Alcune operazioni, come la gestione della fine del gioco o il download di file di log dal server, vengono eseguite in thread separati per non bloccare l'interazione dell'utente. Ad esempio, nella gestione della fine partita in modalità GUI, viene avviato un nuovo thread per gestire la transizione e le eventuali attese:
+
+```java
+// filepath: poggioAdventure/src/main/java/com/mycompany/poggioadventure/core/GameStateManager.java
+if (output instanceof GUIOutputHandler) {
+    new Thread(() -> {
+        try {
+            Thread.sleep(2000);
+            onGameCompleted.run();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }, "GameCompletionHandler").start();
+} else {
+    if (onGameCompleted != null) {
+        onGameCompleted.run();
+    }
+}
+```
+In questo modo, la GUI rimane reattiva anche durante le pause o le operazioni di cleanup.
+
+### 4. Download di File in Background
+
+Per operazioni di I/O potenzialmente lente, come il download dei file di log dal server, viene utilizzato un thread dedicato che mostra una finestra di progresso e gestisce eventuali timeout senza bloccare la GUI:
+
+```java
+// filepath: poggioAdventure/src/main/java/com/mycompany/poggioadventure/ui/gui/views/UI_Rank.java
+private void downloadLogInBackground(String username) {
+    new Thread(() -> {
+        // ... download file ...
+        // Aggiornamento UI sul thread EDT
+        SwingUtilities.invokeLater(() -> {
+            // ... aggiorna stato UI ...
+        });
+    }, "LogDownloadThread").start();
+}
+```
+Questo approccio migliora l'usabilità e previene blocchi dell'interfaccia durante operazioni di rete.
