@@ -165,7 +165,7 @@ public class GameStateManager {
             
             // Ripristino completo dello stato dal checkpoint
             gameDescription.setInventory(Utils.cloneList(levelInventorySnapshot));
-            gameDescription.setGameMap((GameMap) Utils.deepClone(levelMapSnapshot));
+            gameDescription.setGameMap(levelMapSnapshot);
             
             // Ripristino stanza corrente con fallback robusti
             if (levelStartingRoomSnapshot != null) {

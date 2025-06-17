@@ -94,7 +94,7 @@ public class Utils {
     /** Oggetti che causano fallimento Livello 2 */
     public static final List<Integer> LEVEL_2_FORBIDDEN_OBJECTS = List.of(OBJ_LOSE_GAME_ID);
 
-    /** Limite tempo Livello 3: 10 minuti */
+    /** Limite tempo Livello 3: 15 minuti */
     public static final long LEVEL_3_TIME_LIMIT = 15 * 60 * 1000;
     
     /** ID completamento Livello 3 */
