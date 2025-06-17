@@ -109,13 +109,6 @@ public class GameStateManager {
             currentState.handleFailure(this::handleGameLoss, gameDescription);
         }
         
-        // Verifica completamento tramite inventario
-        if (checkInventoryCompletion()) {
-            output.writeln("\n🎉 LIVELLO COMPLETATO!", ColorText.GREEN);
-            currentState.handleSuccess(this::advanceToNextLevel, gameDescription);
-            return;
-        }
-        
         // Verifica altre condizioni di completamento
         if (currentState.isCompleted(gameDescription)) {
             currentState.handleSuccess(this::advanceToNextLevel, gameDescription);
@@ -148,30 +141,6 @@ public class GameStateManager {
         }
     }
     
-    /**
-     * Verifica se il giocatore possiede tutti gli oggetti richiesti per il completamento.
-     * Utilizza matching per ID per evitare problemi di referenze.
-     */
-    private boolean checkInventoryCompletion() {
-        if (currentState == null) return false;
-        
-        List<Integer> requiredObjects = currentState.getRequiredIDObjects();
-        if (requiredObjects.isEmpty()) return false;
-        
-        List<AdvObject> inventory = gameDescription.getInventory();
-        
-        // Verifica presenza di tutti gli oggetti richiesti
-        for (Integer requiredId : requiredObjects) {
-            boolean found = inventory.stream()
-                .anyMatch(obj -> obj.getId() == requiredId);
-            if (!found) {
-                return false;
-            }
-        }
-        
-        return true;
-    }
-    
     public void advanceToNextLevel() {
         currentLevelIndex++;
         
@@ -196,7 +165,7 @@ public class GameStateManager {
             
             // Ripristino completo dello stato dal checkpoint
             gameDescription.setInventory(Utils.cloneList(levelInventorySnapshot));
-            gameDescription.setGameMap((GameMap) Utils.deepClone(levelMapSnapshot));
+            gameDescription.setGameMap(levelMapSnapshot);
             
             // Ripristino stanza corrente con fallback robusti
             if (levelStartingRoomSnapshot != null) {

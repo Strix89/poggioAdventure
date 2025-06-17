@@ -6,6 +6,7 @@ import com.mycompany.poggioadventure.core.utils.Utils;
 import com.mycompany.poggioadventure.parser.ParserOutput;
 import com.mycompany.poggioadventure.model.AdvObject;
 import com.mycompany.poggioadventure.parser.Command;
+import com.mycompany.poggioadventure.parser.CommandType;
 import com.mycompany.poggioadventure.model.Room;
 
 import java.io.Serializable;
@@ -111,22 +112,68 @@ public abstract class GameDescription implements Serializable {
      * 
      * @param gameMap Nuova mappa di gioco da copiare
      */
-    public void setGameMap(GameMap gameMap) {
-        // Non possiamo sostituire l'istanza final, ma possiamo copiare il contenuto
-        if (gameMap != null) {
+    public void setGameMap(GameMap sourceMapToCopyContentFrom) {
+        if (sourceMapToCopyContentFrom == null) {
             this.gameMap.getAllFloors().clear();
-            // Copia correttamente ogni piano e le sue stanze
-            for (int i = 0; i < gameMap.getAllFloors().size(); i++) {
-                List<Room> originalFloor = gameMap.getAllFloors().get(i);
-                List<Room> clonedFloor = new ArrayList<>();
-                
-                // Clona ogni stanza del piano
-                for (Room room : originalFloor) {
-                    Room clonedRoom = (Room) Utils.deepClone(room);
-                    clonedFloor.add(clonedRoom);
+            return;
+        }
+
+        this.gameMap.getAllFloors().clear();
+        java.util.Map<Integer, Room> newClonedRoomsById = new java.util.HashMap<>(); // Mappa l'ID della stanza originale al suo nuovo clone primario
+
+        // Primo passaggio: crea un clone primario per ogni stanza nella mappa sorgente
+        // e popola this.gameMap.allFloors con questi cloni primari.
+        // I loro riferimenti interni N/S/E/W saranno inizialmente "sbagliati" (punteranno a cloni secondari).
+        for (java.util.List<Room> originalFloor : sourceMapToCopyContentFrom.getAllFloors()) {
+            java.util.List<Room> newClonedFloorForInternalMap = new java.util.ArrayList<>();
+            for (Room roomToClone : originalFloor) {
+                Room primaryClonedRoom = (Room) Utils.deepClone(roomToClone);
+                newClonedRoomsById.put(roomToClone.getId(), primaryClonedRoom);
+                newClonedFloorForInternalMap.add(primaryClonedRoom);
+            }
+            this.gameMap.getAllFloors().add(newClonedFloorForInternalMap);
+        }
+
+        for (java.util.List<Room> floorOfPrimaryClones : this.gameMap.getAllFloors()) {
+            for (Room primaryClonedRoom : floorOfPrimaryClones) {
+                Room originalRoom = sourceMapToCopyContentFrom.findRoomById(primaryClonedRoom.getId());
+                if (originalRoom == null) {
+                    continue;
                 }
-                
-                this.gameMap.getAllFloors().add(clonedFloor);
+                // Ricostruisci Nord
+                if (originalRoom.getNorth() != null) {
+                    primaryClonedRoom.setNorth(newClonedRoomsById.get(originalRoom.getNorth().getId()));
+                } else {
+                    primaryClonedRoom.setNorth(null);
+                }
+                // Ricostruisci Sud
+                if (originalRoom.getSouth() != null) {
+                    primaryClonedRoom.setSouth(newClonedRoomsById.get(originalRoom.getSouth().getId()));
+                } else {
+                    primaryClonedRoom.setSouth(null);
+                }
+                // Ricostruisci Est
+                if (originalRoom.getEast() != null) {
+                    primaryClonedRoom.setEast(newClonedRoomsById.get(originalRoom.getEast().getId()));
+                } else {
+                    primaryClonedRoom.setEast(null);
+                }
+                // Ricostruisci Ovest
+                if (originalRoom.getWest() != null) {
+                    primaryClonedRoom.setWest(newClonedRoomsById.get(originalRoom.getWest().getId()));
+                } else {
+                    primaryClonedRoom.setWest(null);
+                }
+                // Ricostruisci LinkedRoom
+                if (originalRoom.getLinkedRoom() != null) {
+                    primaryClonedRoom.setLinkedRoom(
+                        newClonedRoomsById.get(originalRoom.getLinkedRoom().getId()),
+                        originalRoom.getLinkedDirection()
+                    );
+                } else {
+                    // Assicurati che la stanza collegata sia correttamente rimossa se l'originale non ne aveva una
+                    primaryClonedRoom.setLinkedRoom(null, CommandType.NONE);
+                }
             }
         }
     }

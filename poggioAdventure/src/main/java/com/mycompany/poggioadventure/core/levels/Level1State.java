@@ -501,6 +501,7 @@ public class Level1State extends GameState {
     /** Esegue callback per transizione al livello successivo */
     @Override
     public void handleSuccess(Runnable onSuccess, GameDescription gameDescription) {
+        // Sblocca accesso ai laboratori del primo piano (sotto terra)
         Room hallway = gameDescription.getGameMap().findRoomById(Utils.ROOM_HALLWAY_ID);
         hallway.setForbidden(false);
         Room galileoRoom = gameDescription.getGameMap().findRoomById(Utils.ROOM_GALILEO_ID);
