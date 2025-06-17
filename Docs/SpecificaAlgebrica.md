@@ -42,7 +42,7 @@ Per definire il set minimo di equazioni, organizziamo le informazioni in una tab
 
 Questa sezione definisce le proprietà degli operatori tramite un insieme minimale di equazioni (assiomi). Queste equazioni sono derivate direttamente dalla tabella precedente.
 
-***declare*** l: list, i, j: item, n: integer;
+***declare***: *l: list, i, j: item, n: integer*;
 
 ```
 head(addFirst(i, l)) = i
