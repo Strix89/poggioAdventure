@@ -9,6 +9,7 @@ Una delle caratteristiche più importanti di qualsiasi avventura testuale modern
 Il fulcro del sistema di salvataggio risiede nel metodo `saveGame()` della classe `Engine`, il quale effettua una chiamata al metodo statico `saveGame()` della classe `SaveGame` dove viene utilizzata la serializzazione di oggetti per mantenere l'intero stato del gioco:
 
 ```java
+// filepath: poggioAdventure/src/main/java/com/mycompany/poggioadventure/persistence/SaveGame.java
 public static void saveGame(Engine engine, OutputHandler output) {
 PoggioClientJersey gameClient = null;
 try {
@@ -97,6 +98,7 @@ Parallelamente al sistema di salvataggio, il progetto implementa un sistema di l
 La classe `LoggerInput` rappresenta il nucleo di questo sistema:
 
 ```java
+// filepath: poggioAdventure/src/main/java/com/mycompany/poggioadventure/persistence/LoggerInput.java
 private void createLogFile() {
 if (fileName == null) return;
 
@@ -115,6 +117,7 @@ try {
 Quando il giocatore completa l'avventura, il sistema automaticamente elimina sia i file di salvataggio che i log locali, come si può vedere nel metodo `handleGameCompleted()`:
 
 ```java
+// filepath: poggioAdventure/src/main/java/com/mycompany/poggioadventure/core/GameStateManager.java
 private void handleGameCompleted() {
 // Ferma il cronometro di gioco
 gameTime.stop();
@@ -175,6 +178,7 @@ Il sistema di gestione delle risorse è centralizzato nella classe `ResourceLoad
 Nello specifico, il file contente le stopwords viene caricato attraverso il metodo `loadFileListInSet()`. Le stopwords rappresentano parole comuni (articoli, preposizioni, congiunzioni) che il parser del gioco deve ignorare per concentrarsi sui termini significativi dei comandi:
 
 ```java
+// filepath: poggioAdventure/src/main/java/com/mycompany/poggioadventure/persistence/ResourceLoader.java
 public static Set<String> loadFileListInSet(File file) throws IOException {
 if (file == null) {
     throw new IllegalArgumentException("Il file non può essere null");
@@ -199,6 +203,7 @@ Questo approccio permette di configurare il comportamento del parser senza dover
 Un'altro aspetto del sistema di gestione file è l'integrazione con un server esterno attraverso la classe `PoggioClientJersey`. Questa implementazione permette di scaricare file di log dal server, consentendo ai giocatori di condividere i propri progressi e scaricare log di altri giocatori per confronti.
 
 ```java
+// filepath: poggioAdventure/src/main/java/com/mycompany/poggioadventure/core/utils/PoggioClientJersey.java
 public ApiClientResult downloadLogFile(String username) {
 String localSavePath = ResourceLoader.LOGS_DW_DIRECTORY.resolve(username + "_log.txt").toString();
 
