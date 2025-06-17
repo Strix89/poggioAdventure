@@ -1,0 +1,50 @@
+# Programmazione Generica in PoggioAdventure:
+
+La ***programmazione generica*** è stata utilizzata  nel progetto PoggioAdventure per garantire type safety, migliorare le performance e aumentare la leggibilità del codice. La nostra implementazione si appoggia principalmente sui Java Generics, che ci permettono di parametrizzare tipi e metodi per lavorare con diversi tipi di dati mantenendo sempre la sicurezza dei tipi durante la compilazione.
+
+---
+
+## A cosa servono i nostri metodi generici?
+
+La classe `Utils`  rappresenta un esempio di come la programmazione generica è stata sfruttata per creare una libreria di utility robusta e riutilizzabile. I metodi generici che abbiamo creato qui dentro ci servono per risolvere problemi specifici del nostro gioco, come gestire i salvataggi, lo stato della partita o manipolare le liste di oggetti in modo sicuro.
+
+---
+
+## Il metodo `deepClone` : `public static <T extends Serializable> T deepClone(T obj)`
+
+Abbiamo deciso di implementare `deepClone` come metodo generico perché avevamo bisogno di una soluzione universale per la clonazione  che funzionasse con qualsiasi tipo di oggetto serializzabile. Senza i generics, saremmo stati costretti a creare metodi separati per ogni tipo, con evidente spreco di codice.
+
+### Utilizzi nel progetto:
+Utilizziamo questo metodo in modo strategico in `GameDescription.clone()` per creare snapshot completi dello stato di gioco. Questa funzionalità è fondamentale per il nostro sistema di checkpoint implementato in `GameStateManager`, dove la usiamo per salvare lo stato della mappa prima di ogni transizione di livello: quando il giocatore fallisce un livello, il sistema può ripristinare istantaneamente la configurazione precedente senza dover ricostruire manualmente ogni singolo oggetto.
+
+`GameMap levelMapSnapshot = (GameMap) Utils.deepClone(gameDescription.getGameMap());`
+
+`Room levelStartingRoomSnapshot = (Room) Utils.deepClone(currentState.getStartingRoom());`
+
+
+Se il giocatore fallisce e il livello deve essere ricaricato con `resetCurrentLevel()`. Questo ci garantisce che il livello torni esattamente com'era al momento del checkpoint.
+
+`gameDescription.setGameMap(levelMapSnapshot);`
+
+`Room clonedStartingRoom = (Room) Utils.deepClone(levelStartingRoomSnapshot)`
+
+## Il metodo `cloneList`: `public static <T extends Serializable> List<T> cloneList(List<T> list)`
+
+Questo metodo serve a creare una copia completamente indipendente di una lista.
+
+### Utilizzi specifici nel progetto:
+Tale metodo è importante nella gestione dell'inventario del giocatore all'interno del sistema di checkpoint. In GameStateManager nel metodo `transitionToLevel()` , utilizziamo cloneList per creare uno snapshot dell'inventario che rappresenta esattamente gli oggetti che il giocatore possiede all'inizio del livello.
+
+`List<AdvObject> levelInventorySnapshot = Utils.cloneList(gameDescription.getInventory())`
+
+Quando un livello deve essere resettato a causa di timeout o fallimento, `resetCurrentLevel()` utilizza cloneList per ripristinare l'inventario: 
+
+`gameDescription.setInventory(Utils.cloneList(levelInventorySnapshot))`. 
+
+Questo processo elimina tutti gli oggetti raccolti durante il tentativo fallito e ripristina precisamente la List<AdvObject> originale, garantendo che ogni oggetto sia una copia completamente indipendente.
+
+Il metodo trova applicazione anche nel sistema di salvataggio, dove `restoreFromSave()` lo utilizza per isolare gli snapshot dell'inventario: 
+
+`this.levelInventorySnapshot = Utils.cloneList(savedLevelInventorySnapshot)`
+
+Questo assicura che l'inventario caricato da file sia completamente separato dalle operazioni di gioco correnti.
