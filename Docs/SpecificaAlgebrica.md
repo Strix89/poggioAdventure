@@ -58,9 +58,9 @@ get(addFirst(i, l), n) = if n == 0 then i else get(tail(addFirst(i,l)), n-1)
 
 Questo insieme di equazioni è:
 
-**Completo**: Permette di determinare il risultato di qualsiasi sequenza di operazioni.
-**Consistente**: Non permette di derivare contraddizioni (es. true = false).
-**Minimale** (non ridondante): Nessuna equazione è derivabile dalle altre.
+- **Completo**: Permette di determinare il risultato di qualsiasi sequenza di operazioni.
+- **Consistente**: Non permette di derivare contraddizioni (es. true = false).
+- **Minimale** (non ridondante): Nessuna equazione è derivabile dalle altre.
 
 ## Specifica di restrizione
 Questa parte gestisce i casi d'errore, ovvero l'applicazione di operatori a stati non validi.
