@@ -1,70 +1,74 @@
 # Specifica Algebrica
 
-## Descrizione della Classe
+La struttura dati che più abbiamo utilizzato nel nostro progetto è la Lista, per questo si riporta la sua Specifica Algebrica di seguito.
 
-La classe `gameMap` rappresenta la mappa di gioco strutturata su livelli multipli che definisce l'architettura spaziale dell'ambiente di gioco. Essa implementa funzionalità per inserire e ottenere stanze, creare collegamenti bidirezionali tra stanze e di omettere o meno le immagini degli NPC presenti in queste utlime. L'organizzazione interna si basa su una collezione stratificata di piani, ciascuno dei quali raccoglie le stanze corrispondenti.
+## Specifica sintattica
 
-## Specifica Sintattica
+***sorts***: list, item, boolean, integer
 
-**sorts:** `gameMap`, `room`, `floor`, `obscure`, `name`, `direction`, `id`, `floors`
+***operations***:
 
-**operations:**
+```
+//Costruttori
+newList() -> list
+addFirst(item, list) -> list
 
-- `newMap() → gameMap`
-- `addRoom(gameMap, room, floor) → gameMap`
-- `linkFloors(gameMap, room, room, direction) → gameMap`
-- `getRoomByName(gameMap, name) → room`
-- `findRoomById(gameMap, id) → room`
-- `getAllFloors(gameMap) → floors`
-- `alterateNpcImagеs(gameMap, obscure) → gameMap`
+// Osservatori
+head(list) -> item
+tail(list) -> list
+isEmpty(list) -> boolean
+size(list) -> integer
+add(list, item) -> list
+get(list, integer) -> item
+```
 
-_Note: I sort `room`, `floor`, `direction`, `name`, `id`, `floors` e `obscure` sono ausiliari alla definizione di `gameMap`._
-
-## Specifica Semantica
-
-**declare** `gm: gameMap`, `r: room`, `id: id`, `fl: floor`, `dir: direction`, `name: name`, `obs: obscure`, `fls: floors`
-
-- `getRoombyName(newMap(), name) = null`
-- `getRoombyName(addRoom(gm, r, fl), name) = getRoombyName(gm, name)`
-- `findRoomById(newMap(), id) = null`
-- `findRoomById(addRoom(gm, r, fl), id) = findRoomById(gm, id)`
-- `getAllFloors(newMap()) = null`
-- `getAllFloors(addRoom(gm, r, fl)) = getAllFloors(gm)`
-- `alterateNpcImages(newMap(), obs) = newMap()`
-- `alterateNpcImages(addRoom(gm, r, fl), obs) = addRoom(alterateNpcImages(gm, obs), r, fl)`
-
-## Specifica di Restrizione
-
-**restrictions**
-
-- `linkFloors(newMap(), r1, r2, dir) = error`
-- `addRoom(gm, r, fl) = error` se `fl < 0 OR fl > fls`
-
-_dove 'error' è un elemento speciale indefinito._
-
-## Costruttori e Osservatori
-
-### Costruttori
-
-- `newMap()`
-- `addRoom(gameMap, room, floor)`
-
-### Osservatori
-
-- `getRoomByName(gameMap, name)`
-- `findRoomById(gameMap, id)`
-- `getAllFloors(gameMap)`
-- `linkFloors(gameMap, room, room, direction)`
-- `alterateNpcImages(gameMap, obscure)`
-
-## Tabella Costruttori-Osservatori
+## Tabella Costruttori/Osservazioni
+Per definire il set minimo di equazioni, organizziamo le informazioni in una tabella che mostra il risultato di ogni osservatore applicato a ogni costruttore. Sia `l'` una lista generata da un costruttore, `l` una lista generica, `i` un item generico e `n` un intero.
 
 
-| **osservatori**               | **Costruttore**            | **Costruttore**                              |
-| ------------------------------| -------------------------- | -------------------------------------------- |
-|                               |  `newMap()`                | `addRoom(gm, r, fl)`                         |
-| `getRoomByName(gm, name)`     | `null`                     | `getRoomByName(gm, name)`                    |
-| `findRoomById(gm, id)`        | `null`                     | `findRoomById(gm, id)`                       |
-| `getAllFloors(gm)`            | `null`                     | `getAllFloors(gm)`                           |
-| `linkFloors(gm, r1, r2, dir)` | `error`                    | `linkFloors(gm, r1, r2, dir)`                |
-| `alterateNpcImages(gm, obs)`  | `newMap()`                 | `addRoom(alterateNpcImages(gm, obs), r, fl)` |
+| **Osservatore** (applicato a `l'`) | **Costruttore:** `l' = newList()` | **Costruttore:**`l' = addFirst(i, l)` |
+| :--- | :--- | :--- |
+| `head(l')` | `error` | `i` |
+| `tail(l')` | `error` | `l` |
+| `isEmpty(l')` | `true` | `false` |
+| `size(l')` | `0` | `1 + size(l)` |
+| `add(l', j)` | `addFirst(j, newList())` | `addFirst(i, add(l, j))` |
+| `get(l', n)` | `error` | `if n == 0 then i else get(l, n - 1)` |
+
+
+**Nota**: L'operatore `add` è stato definito in modo ricorsivo. Una definizione alternativa per `add(addFirst(i, l), item_to_add)` è `addFirst(i, add(l, item_to_add))`, che è più semplice e conduce alle stesse proprietà.
+
+## Specifica semantica
+
+Questa sezione definisce le proprietà degli operatori tramite un insieme minimale di equazioni (assiomi). Queste equazioni sono derivate direttamente dalla tabella precedente.
+
+***declare*** l: list, i, j: item, n: integer;
+
+```
+head(addFirst(i, l)) = i
+tail(addFirst(i, l)) = l
+isEmpty(newList()) = true
+isEmpty(addFirst(i, l)) = false
+size(newList()) = 0
+size(addFirst(i, l)) = 1 + size(l)
+add(newList(), i) = addFirst(i, newList())
+add(addFirst(i, l), j) = addFirst(i, add(l, j))
+get(addFirst(i, l), n) = if n == 0 then i else get(tail(addFirst(i,l)), n-1)
+```
+
+Questo insieme di equazioni è:
+
+**Completo**: Permette di determinare il risultato di qualsiasi sequenza di operazioni.
+**Consistente**: Non permette di derivare contraddizioni (es. true = false).
+**Minimale** (non ridondante): Nessuna equazione è derivabile dalle altre.
+
+## Specifica di restrizione
+Questa parte gestisce i casi d'errore, ovvero l'applicazione di operatori a stati non validi.
+
+***restrictions***
+```
+head(newList()) = error
+tail(newList()) = error
+get(newList(), n) = error
+get(l, n) = error if n < 0 or n >= size(l)
+```
