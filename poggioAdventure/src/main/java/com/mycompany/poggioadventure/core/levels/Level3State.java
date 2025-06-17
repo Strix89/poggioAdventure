@@ -116,12 +116,22 @@ public class Level3State extends GameState {
 
         // -- RECUPERO STANZE per posizionamento oggetti --
         Room electronicsLab = gameDescription.getGameMap().findRoomById(Utils.ROOM_ELECTRONICS_LAB_ID);
+        Room corridorLab = gameDescription.getGameMap().findRoomById(Utils.ROOM_CORRIDOR_LAB_ID);
 
         // -- POSIZIONAMENTO NPC --
         entryLab.addObject(guidoPanico, null);
         entryLab.addObject(direttore, null);
         electronicsLab.addObject(luigi, null);
 
+        entryLab.removeObject(Utils.NORMAL_ROBOT_ID);
+
+        AdvNPC robot1 = new AdvNPC(Utils.NPC_ROBOT_1, "TERESA", "Un robot aspirapolvere impazzito che sta aspirando tutto ciò che trova.");
+        robot1.setImagePath(ResourceLoader.IMG_PATH.resolve("Robot1.png").toString());
+        AdvNPC robot2 = new AdvNPC(Utils.NPC_ROBOT_2, "BOB", "Un robot aspirapolvere che sembra fuori controllo.");
+        robot2.setImagePath(ResourceLoader.IMG_PATH.resolve("Robot2.png").toString());
+
+        entryLab.addObject(robot1, null);
+        corridorLab.addObject(robot2, null);
     }
 
     /**

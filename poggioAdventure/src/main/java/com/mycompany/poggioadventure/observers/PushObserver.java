@@ -74,13 +74,13 @@ public class PushObserver implements GameObserver, Serializable {
                 if (obj == null) continue;
 
                 switch (obj.getId()) {
-                    case 24 -> hasPulsanteRack = true;
-                    case 16 -> hasMartello = true;
-                    case 18 -> hasCPU = true;
-                    case 8  -> hasBastonAnziani = true;
-                    case 21 -> hasTastiera = true;
-                    case 4  -> hasFotoSanNicola = true;
-                    case 27 -> hasBobbinaPLA = true;
+                    case Utils.OBJ_PULSANTE_ID -> hasPulsanteRack = true;
+                    case Utils.OBJ_MARTELLO_ID -> hasMartello = true;
+                    case Utils.OBJ_CPU_ID -> hasCPU = true;
+                    case Utils.OBJ_BASTONE_ID  -> hasBastonAnziani = true;
+                    case Utils.OBJ_TASTIERA_ID -> hasTastiera = true;
+                    case Utils.OBJ_FOTO_ID  -> hasFotoSanNicola = true;
+                    case Utils.OBJ_BOBINA_PLA_ID -> hasBobbinaPLA = true;
                 }
             }
 

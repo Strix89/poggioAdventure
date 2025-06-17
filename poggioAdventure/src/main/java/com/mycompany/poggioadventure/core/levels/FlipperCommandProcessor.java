@@ -86,7 +86,7 @@ public class FlipperCommandProcessor implements IFlipperCommandProcessor {
         // Verifica corrispondenza frequenza-comando con tolleranza 0.1 MHz
         double expectedFreq = VALID_FREQUENCIES.get(command);
         if (Math.abs(frequency - expectedFreq) > 0.1) {
-            return FlipperResult.error("Frequenza errata per '" + command + "'.\nFrequenza richiesta: " + expectedFreq + " MHz");
+            return FlipperResult.error("Frequenza errata per '" + command + "'.");
         }
         
         return executeCommand(command);
