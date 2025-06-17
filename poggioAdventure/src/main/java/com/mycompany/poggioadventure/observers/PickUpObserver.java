@@ -54,7 +54,7 @@ public class PickUpObserver implements GameObserver, Serializable {
             List<AdvObject> objectsToPick = parserOutput.getRoomObjects();
 
             if (objectsToPick == null || objectsToPick.isEmpty()) {
-                msg.append("Non c'è niente da [NEON_ORANGE]raccogliere[/] con quel nome, [PINK]GAY[/].");
+                msg.append("Non c'è niente da [NEON_ORANGE]raccogliere[/] con quel nome, [PINK]Cerebroleso[/].");
             } else {
                 for (AdvObject obj : objectsToPick) {
                     boolean foundAndPicked = false;
