@@ -60,7 +60,7 @@ public class Level2State extends GameState {
         // Continua dalla posizione corrente invece di forzare spostamento
         this.setStartingRoom(gameDescription.getCurrentRoom());
         
-        output.writeln("Sembra che il disimpegno si sia aperto..", ColorText.ROSE);
+        output.writeln("Sembra che il disimpegno si sia aperto..", ColorText.LIGHT_PINK);
 
         // -- OGGETTI PER COSTRUIRE IL PC DESKTOP --
 

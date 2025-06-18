@@ -67,7 +67,7 @@ public class FlipperCommandProcessor implements IFlipperCommandProcessor {
         
         var matcher = COMMAND_PATTERN.matcher(input.trim());
         if (!matcher.matches()) {
-            return FlipperResult.error("Formato non valido. Usa: [frequenza] [comando]\nEsempio: 433.92 GoToRecharge");
+            return FlipperResult.error("Formato non valido. Usa: [frequenza] [comando]");
         }
         
         double frequency;

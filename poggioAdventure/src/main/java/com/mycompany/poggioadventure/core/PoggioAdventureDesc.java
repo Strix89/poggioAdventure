@@ -218,7 +218,7 @@ public class PoggioAdventureDesc extends GameDescription implements GameObservab
         return ""
                 + "====================================================================================\n"
                 + "Sei una matricola in cerca di ammissione a questo prestigioso collegio,\n"
-                + "dove solo con l'aiuto di Dio e dei santi potrai uscirne residente, o forse no..."
+                + "dove solo con l'aiuto di Dio e dei santi potrai uscirne residente, o forse no...\n"
                 + "====================================================================================";
     }
     

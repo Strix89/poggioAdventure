@@ -127,9 +127,11 @@ public class Level3State extends GameState {
 
         AdvNPC robot1 = new AdvNPC(Utils.NPC_ROBOT_1, "TERESA", "Un robot aspirapolvere impazzito che sta aspirando tutto ciò che trova.");
         robot1.setImagePath(ResourceLoader.IMG_PATH.resolve("Robot1.png").toString());
+        robot1.addFirstDialogueLine("Sei [PINK]scemo[/]? Vuoi veramente parlare con un [GRAY]robot[/] aspirapolvere?");
         robot1.addSubsequentDialogueLine("Sei [PINK]scemo[/]? Vuoi veramente parlare con un [GRAY]robot[/] aspirapolvere?");
         AdvNPC robot2 = new AdvNPC(Utils.NPC_ROBOT_2, "BOB", "Un robot aspirapolvere che sembra fuori controllo.");
         robot2.setImagePath(ResourceLoader.IMG_PATH.resolve("Robot2.png").toString());
+        robot2.addFirstDialogueLine("Sei [PINK]scemo[/]? Vuoi veramente parlare con un [GRAY]robot[/] aspirapolvere?");
         robot2.addSubsequentDialogueLine("Sei [PINK]scemo[/]? Vuoi veramente parlare con un [GRAY]robot[/] aspirapolvere?");
 
         entryLab.addObject(robot1, null);
