@@ -88,11 +88,11 @@ public class PushObserver implements GameObserver, Serializable {
 
             // SCENARIO CRITICO 1: Pulsante emergenza rack
             if (hasPulsanteRack) {
-                msg.append("ATTENZIONE! Hai premuto il pulsante di emergenza del rack!\n");
-                msg.append("Tutti i robot del collegio iniziano a comportarsi in modo anomalo!\n");
-                msg.append("Il sistema di sicurezza si attiva e chiude tutte le porte!\n");
+                msg.append("[RED]ATTENZIONE![/] Hai premuto il pulsante di emergenza del rack!\n");
+                msg.append("Tutti i [NPC]robot[/] del collegio iniziano a comportarsi in modo anomalo!\n");
+                msg.append("Il sistema di sicurezza si attiva e spegne tutte le macchine!\n");
                 msg.append("Il Direttore Michele ti caccia immediatamente dal collegio!\n");
-                msg.append("GAME OVER - La tua ammissione è stata revocata!\n");
+                msg.append("[NPC]Direttore[/]: [RED]GAME OVER[/] - Non puoi essere ammesso sei un [RED]idiota[/]!\n");
                 specialCombinationHandled = true;
                 description.getInventory().add(Utils.buildLoseGameObject());
             }
