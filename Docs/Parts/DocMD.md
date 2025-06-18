@@ -1,4 +1,3 @@
-<!-- INTESTAZIONE -->
 <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid #ccc;">
   <div style="text-align: left;">
     <img src="LogoUniba.jpg" alt="Università degli Studi di Bari Aldo Moro" style="height: 60px;">
@@ -40,7 +39,6 @@
   </div>
 </div>
 
-<!-- CONTENUTO PRINCIPALE -->
 
 # INDICE
 
@@ -99,7 +97,7 @@ Nel corso della propria avventura è possibile trovare, prendere e usare una mol
 ![Mappa di gioco](GameMap.jpeg)
 
 ---
-## 2 Come Giocare
+## 2. Come Giocare
 
 Per iniziare la tua avventura in PoggioAdventure, dovrai prima compilare il gioco visto che nella repository non è incluso il `.jar`. Trattandosi di un progetto Maven, il processo è standard:
 - C'è bisogno di avere `maven` installato. 
@@ -139,22 +137,22 @@ Il gioco supporta due modalità di interfaccia:
 java -jar poggioAdventure.jar --cli` (questa è anche la modalità predefinita se non specifichi nulla).
 ```
 
-## Flusso di gioco
+## 3. Flusso di gioco
 
-## 1. Avvio dell'Applicazione:
+### 3.1 Avvio dell'Applicazione:
 
 Quando l'utente avvia il file JAR (`java -jar poggioAdventure.jar`), l'applicazione inizializza l'interfaccia utente principale, che può essere grafica (GUI) o a riga di comando (CLI) a seconda del parametro passato .
 *   **GUI**: Viene istanziata e visualizzata la finestra `UI_Init`.
 *   **CLI**: Viene avviato `CLIMenu` per gestire le interazioni.
 >Entrambe le classi implementano l'interfaccia `MenuManager.java`
-## 2. Menu Principale (`UI_Init` / `CLIMenu`):
+### 3.2 Menu Principale (`UI_Init` / `CLIMenu`):
 
 L'utente si trova di fronte a un menu con le seguenti opzioni:
 *   **Nuova Partita**: Inizia una nuova avventura.
 *   **Carica Partita**: Riprende una partita salvata in precedenza.
 *   **Classifica**: Visualizza la classifica con i giocatori.
 *   **Esci**: Termina l'applicazione.
-### 2.1. Nuova Partita:
+#### 3.2.1 Nuova Partita:
 
 1.  **Interfaccia Utente**:
     *   **GUI**: Viene aperta la finestra `UI_NewGame`.
@@ -173,7 +171,7 @@ L'utente si trova di fronte a un menu con le seguenti opzioni:
         *   Viene mostrato un messaggio di errore.
         *   L'utente viene reindirizzato al menu principale (`UI_Init` o `CLIMenu`) per caricare la partita o scegliere un nome diverso.
     *   **Errore di Connessione/Altro**: Viene mostrato un messaggio di errore appropriato.
-### 2.2. Carica Partita:
+#### 3.2.2. Carica Partita:
 
 1.  **Interfaccia Utente**:
     *   **GUI**: Viene aperta la finestra `UI_LoadGame`.
@@ -199,7 +197,7 @@ L'utente si trova di fronte a un menu con le seguenti opzioni:
         *   Se `deletePlayerFromServerBoolean` è true, contatta il server tramite `PoggioClientJersey.deletePlayer()` per rimuovere l'utente.
         *   Trova e elimina il file di log associato (`SaveGame.findLogFileName` e `LoggerInput.deleteLogFile`).
         *   Elimina il file di salvataggio `.dat`.
-### 2.3. Classifica:
+#### 3.2.3 Classifica:
 
 1.  **Interfaccia Utente**:
     *   **GUI**: Viene aperta la finestra `UI_Rank`.
@@ -210,13 +208,13 @@ L'utente si trova di fronte a un menu con le seguenti opzioni:
 4. **Download  Salvataggio (Opzionale)**:  
    -  **GUI**: Si può scaricare il file di log di chi è nella classifica (cliccando **BARRA SPAZIATRICE**)
    -  **CLI:** Comparirà un sotto menu che guiderà l'utente qualora voglia scaricare un salvataggio.
-### 2.4. Esci
+#### 3.2.4 Esci
 
 L'applicazione viene terminata (`Utils.exitApplication(0)`).
-## 3. Focus Engine:
+### 3.3 Focus Engine:
 
 Una volta iniziata o caricata una partita, l'`Engine` di gioco prende il controllo.
-#### 3.1.1. Creazione e Inizializzazione
+#### 3.3.1 Creazione e Inizializzazione
 
 Un'istanza di `Engine` viene creata da `EngineFactory` (sia per nuove partite che per caricamenti).
 Necessita dei seguenti componenti principali:
@@ -246,7 +244,7 @@ Durante l'inizializzazione, l'`Engine`:
     *   Chiama `gameStateManager.startGame()` per avviare il primo livello.
     *   Mostra la descrizione della stanza iniziale.
 
-#### 3.1.2. Ciclo di Gioco e Processamento Comandi
+#### 3.3.2 Ciclo di Gioco e Processamento Comandi
 *   **GUI**: `UI_Game` ha un campo di input per i comandi. Quando l'utente invia un comando, `UI_Game` chiama `engine.processCommand(commandText)`.
 *   **CLI**: `engine.startGameLoop()` entra in un ciclo che attende l'input dall'utente tramite `inputHandler.getInput()` e poi chiama `engine.processCommand(command)`.
 
@@ -269,11 +267,11 @@ Il metodo `Engine.saveGame()`:
 5.  Riavvia `gameTime`.
 6.  Contatta il server tramite `PoggioClientJersey.addUser(playerName)` (usato dalla classe funzionale `SaveGame`) per assicurarsi che l'utente esista nel database del server e nel caso non esistesse, di inserirlo.
 
-### 3.2. Gestione dei Livelli (`GameStateManager`)
+#### 3.3.3 Gestione dei Livelli (`GameStateManager`)
 
 Il `GameStateManager` (GSM) è responsabile della logica di progressione tra i livelli, della gestione del tempo per ogni livello, dei checkpoint e delle condizioni di vittoria/sconfitta (grazie a `Engine`).
 Contiene un array di `GameState` (es. `Level1State`, `Level2State`, `Level3State`), ognuno rappresentante un livello del gioco.
-#### 3.2.1. `checkStateAfterCommand()`
+#### 3.3.4 `checkStateAfterCommand()`
 Questo metodo viene chiamato dall'`Engine` dopo ogni comando.
 1.  **Controllo Tempo Scaduto**: Verifica `timeManager.getTempoRimanente()`. Se è <= 0:
     *   Mostra un messaggio di tempo scaduto.
@@ -282,13 +280,13 @@ Questo metodo viene chiamato dall'`Engine` dopo ogni comando.
     *   Chiama `currentState.handleFailure(this::handleGameLoss, gameDescription)`. `handleGameLoss` è una callback al metodo dell'`Engine` che gestisce la sconfitta definitiva.
 1.  **Controllo Condizioni di Completamento Livello**: Verifica `currentState.isCompleted(gameDescription)`. Se true:
     *   Chiama `currentState.handleSuccess(this::advanceToNextLevel, gameDescription)`. `advanceToNextLevel` è un metodo del GSM.
-#### 3.2.2. `advanceToNextLevel()`
+#### 3.3.5 `advanceToNextLevel()`
 
 1.  Incrementa `currentLevelIndex`.
 2.  Se `currentLevelIndex` supera il numero di livelli disponibili, chiama `handleGameCompletion()` (callback all'`Engine` per la vittoria finale).
 3.  Altrimenti, chiama `transitionToLevel(levels[currentLevelIndex], true)` per passare al livello successivo, creando un nuovo checkpoint (Utile per il reset del livello).
 
-#### 3.2.3. `transitionToLevel(GameState newState, boolean createSnapshot)`
+#### 3.3.6 `transitionToLevel(GameState newState, boolean createSnapshot)`
 
 1.  Imposta `currentState = newState`.
 2.  Chiama `currentState.enter(gameDescription, output, playerName)`. Questo metodo, implementato in ogni classe `LevelXState`, configura il mondo di gioco per quel livello (posiziona NPC, oggetti specifici del livello, ecc.).
@@ -301,7 +299,7 @@ Questo metodo viene chiamato dall'`Engine` dopo ogni comando.
     Questi snapshot servono per il `resetCurrentLevel`.
 5.  Inizializza e avvia un `TimeManager` specifico per il livello, usando `currentState.getTimeLimit()`.
 6.  Mostra la descrizione del nuovo livello (`currentState.getLevelDescription(...)`).
-#### 3.2.4. `resetCurrentLevel()` (Checkpoint)
+#### 3.3.7 `resetCurrentLevel()` (Checkpoint)
 Chiamato quando il tempo per un livello scade.
 1.  Mostra un messaggio di reset.
 2.  Ferma il `timeManager` corrente.
@@ -313,7 +311,7 @@ Chiamato quando il tempo per un livello scade.
 5.  Chiama la callback `onSaveGame.run()` (che punta a `Engine.saveGame()`) per effettuare un salvataggio automatico. (Sempre per la questione del tempo di gioco che aumenta e per il possibile punteggio che diminuisce se il giocatore termina l'avventura con successo).
 6.  Mostra nuovamente la descrizione del livello e la stanza corrente.
 
-#### 3.2.5. `restoreFromSave(...)`
+#### 3.3.8 `restoreFromSave(...)`
 
 Chiamato quando si carica una partita.
 
@@ -322,7 +320,7 @@ Chiamato quando si carica una partita.
 3.  Calcola il tempo rimanente per il livello (`levelTimeLimit - savedLevelElapsedTime`).
 4.  Se il tempo rimanente è positivo, inizializza e avvia il `timeManager` con questo tempo.
 5.  Altrimenti (tempo scaduto durante il salvataggio/caricamento), chiama `resetCurrentLevel()`
-### 3.3. Interazione con il Mondo di Gioco (`GameDescription` e Observer)
+### 3.4 Interazione con il Mondo di Gioco (`GameDescription` e Observer)
 
 `GameDescription` (es. `PoggioAdventureDesc`) definisce la struttura del mondo: stanze, oggetti, NPC, comandi.
 Il metodo `PoggioAdventureDesc.nextMove(List<ParserOutput> list, GameContext gameContext)` è centrale:
@@ -333,9 +331,10 @@ Il metodo `PoggioAdventureDesc.nextMove(List<ParserOutput> list, GameContext gam
     *   L'observer aggiunge messaggi di feedback a una lista interna (`messages` in `PoggioAdventureDesc`).
     *   Dopo la notifica, `flushObserverMessages()` scrive i messaggi raccolti sull'`OutputHandler`.
     *   Se la stanza è cambiata, `displayRoomInfo()` mostra nome e descrizione della nuova stanza.
-## 4. Scenari Specifici
 
-### 4.1. Superamento di un Livello
+## 3.5 Scenari Specifici
+
+#### 3.5.1 Superamento di un Livello
   
 1.  Il giocatore compie un'azione che soddisfa la condizione di completamento del livello corrente. Gli oggetti *Fobidden* e *Required* vengono passato come costruttori, in questo caso nel `GameStateManager`.
     *   Esempio `Level1State`: Il giocatore completa il test del `DirettoreGalileo`, e il `Test.handleTestCompletion` aggiunge l'oggetto `level1Complete` (ID `Utils.OBJ_LEVEL1_COMPLETE_ID`) all'inventario.
@@ -344,7 +343,8 @@ Il metodo `PoggioAdventureDesc.nextMove(List<ParserOutput> list, GameContext gam
 4.  `GameStateManager.advanceToNextLevel()`:
     *   Se ci sono altri livelli, chiama `transitionToLevel()` per caricare il livello successivo, creare un nuovo checkpoint e resettare il timer.
     *   Se è l'ultimo livello, chiama `handleGameCompletion()` (callback a `Engine.handleGameCompleted()`).
-### 4.2. Tempo Scaduto
+
+### 3.6 Tempo Scaduto
 
 1.  Il `TimeManager` del livello corrente raggiunge lo zero.
 2.  `GameStateManager.checkStateAfterCommand()` rileva che `timeManager.getTempoRimanente() <= 0`.
@@ -353,7 +353,8 @@ Il metodo `PoggioAdventureDesc.nextMove(List<ParserOutput> list, GameContext gam
 5.  Il `TimeManager` del livello viene resettato al suo limite originale.
 6.  Viene effettuato un salvataggio automatico (`Engine.saveGame()`).
 7.  Il giocatore ricomincia il livello corrente.
-### 4.3. Vittoria Finale
+
+### 3.7 Vittoria Finale
   
 1.  Il giocatore completa l'ultimo livello.
 2.  `GameStateManager.advanceToNextLevel()` determina che non ci sono più livelli e chiama la callback `onGameCompleted` (che punta a `Engine.handleGameCompleted()`).
@@ -371,7 +372,7 @@ Il metodo `PoggioAdventureDesc.nextMove(List<ParserOutput> list, GameContext gam
         *   Chiama `SaveGame.deleteSave(targetSave, errorHandler, false)` (il `false` indica di non eliminare il giocatore dal server in questo frangente, dato che ha vinto).
     *   Elimina il file di log originale (`LoggerInput.deleteLogFile(logger.getPathFile())`).
     *   Chiama `returnToAppropriateMenu()` per tornare a `UI_Init` (GUI) o al `CLIMenu` (CLI).
-### 4.4. Sconfitta Finale
+### 3.8 Sconfitta Finale
 
 1.  Il giocatore compie un'azione che porta a una condizione di fallimento definita dal livello.
     *   Esempio `Level3State`: Il giocatore usa il Flipper Zero con il comando `Override`. `FlipperCommandProcessor.notifyGameEngine` aggiunge l'oggetto `level3Lose` (ID `Utils.OBJ_LOSE_GAME_ID`) all'inventario.
@@ -387,17 +388,8 @@ Il metodo `PoggioAdventureDesc.nextMove(List<ParserOutput> list, GameContext gam
     *   Elimina il file di log originale (`LoggerInput.deleteLogFile(logger.getPathFile())`).
     *   Chiama `returnToAppropriateMenu()`.
 
-
-## 2. Come giocare
-
 ---
 
-
-## 3. Flusso di Gioco
-
-[Inserire qui l'introduzione alla progettazione]
-
----
 
 ## 4. Progettazione
 
