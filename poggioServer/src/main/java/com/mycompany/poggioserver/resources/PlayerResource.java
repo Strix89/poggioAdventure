@@ -42,9 +42,6 @@ public class PlayerResource {
     private static final Logger logger = LoggerFactory.getLogger(PlayerResource.class);
     private final PlayerDAO playerDAO = new PlayerDAOImpl();
 
-    // Usa la configurazione centralizzata per i percorsi
-    private static final String UPLOAD_LOG_DIRECTORY = PathConfiguration.getUploadedLogsPathString();
-
     /**
      * POST /players/{username} - Crea un nuovo giocatore
      */
