@@ -216,23 +216,19 @@ public class PoggioAdventureDesc extends GameDescription implements GameObservab
     @Override
     public String getGUIWelcomeMsg() {
         return ""
-                + "==============================================================================\n"
-                + "                             BENVENUTO NEL COLLEGIO TECNOMAGICO DI SAN JOSE MARIA \n"
-                + "==============================================================================\n"
+                + "====================================================================================\n"
                 + "Sei una matricola in cerca di ammissione a questo prestigioso collegio,\n"
-                + "dove solo i più brillanti superano le prove.\n"
-                + "==============================================================================";
+                + "dove solo con l'aiuto di Dio e dei santi potrai uscirne residente, o forse no..."
+                + "====================================================================================";
     }
     
     @Override
     public String getCLIWelcomeMsg() {
         return ""
-                + "========================================================================\n"
-                + "       BENVENUTO NEL COLLEGIO TECNOMAGICO DI SAN JOSE MARIA \n"
-                + "========================================================================\n"
+                + "====================================================================================\n"
                 + "Sei una matricola in cerca di ammissione a questo prestigioso collegio,\n"
-                + "dove solo i più brillanti superano le prove.\n"
-                + "========================================================================";
+                + "dove solo con l'aiuto di Dio e dei santi potrai uscirne residente, o forse no...\n"
+                + "====================================================================================";
     }
 
     @Override

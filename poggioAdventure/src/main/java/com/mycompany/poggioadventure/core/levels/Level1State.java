@@ -467,6 +467,12 @@ public class Level1State extends GameState {
 
         // Collegamento tra i piani (scala nel corridoio)
         gameDescription.getGameMap().linkFloors(corridor, hallway, CommandType.NORD);
+
+        AdvNPC robot = new AdvNPC(Utils.NORMAL_ROBOT_ID, "TERESA", "Un robot aspirapolvere sembra un po' rinco********, si muove in maniera strana");
+        robot.setImagePath(ResourceLoader.IMG_PATH.resolve("Aspirapolvere.png").toString());
+        robot.addSubsequentDialogueLine("Sei [PINK]scemo[/]? Vuoi veramente parlare con un [GRAY]robot[/] aspirapolvere?");
+
+        entryLab.addObject(robot, null);
         
         // Configurazione punto di partenza
         gameDescription.setCurrentRoom(entry);

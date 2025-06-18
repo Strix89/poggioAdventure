@@ -117,6 +117,9 @@ public class Utils {
     public static final int NPC_LUIGI_ID = 32;
     public static final int NPC_DIRETTORE_LAB_ID = 42;
     public static final int NPC_LORENZO_ID = 44;
+    public static final int NPC_ROBOT_1 =  46;
+    public static final int NPC_ROBOT_2 =  47;
+    public static final int NORMAL_ROBOT_ID = 48;
     
     // ==================== ID OGGETTI MONDO ====================
     
