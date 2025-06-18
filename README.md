@@ -31,7 +31,7 @@ Un'avventura testuale ambientata nel Collegio di PoggioLevante a Bari, sviluppat
 
 1. Clona la repository:
 ```bash
-git clone https://github.com/[tuo-username]/poggioAdventure.git
+git clone https://github.com/Strix89/poggioAdventure.git
 cd poggioAdventure
 ```
 
