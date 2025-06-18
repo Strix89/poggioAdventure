@@ -111,7 +111,7 @@ public class FlipperCommandProcessor implements IFlipperCommandProcessor {
             case "Override":
                 notifyGameEngine("Override");
                 return FlipperResult.error(
-                    "GAME OVER: Override ha causato un cortocircuito catastrofico!\nTutti i sistemi del collegio sono andati in tilt!"
+                    "GAME OVER: I robottini sono andati a schiantarsi contro il rack \n disastro catastrofico, il Direttore si mette a [CYAN]piangere[/]!\nTutti i sistemi del collegio sono andati in tilt!"
                 );
                 
             case "Stop":
@@ -123,7 +123,7 @@ public class FlipperCommandProcessor implements IFlipperCommandProcessor {
                 }
                 
                 return FlipperResult.warning(
-                    "WARNING: Il comando non ti ha aiutato!\nHai avuto una penalità di 5 minuti sul tempo di gioco!"
+                    "WARNING: Il comando non ti ha aiutato!\nI robottini si sono fermati un attimo\n ma hanno ricominciato ad impazzire\nHai avuto una penalità di 5 minuti sul tempo di gioco!"
                 );
                 
             default:
