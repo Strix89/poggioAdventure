@@ -2,6 +2,7 @@ package com.mycompany.poggioserver;
 
 // Import gestione Database
 import com.mycompany.poggioserver.db.DatabaseManager; // Classe per gestire connessioni/pool DB
+import com.mycompany.poggioserver.config.PathConfiguration;
 
 // Import componenti JAX-RS/Jersey (Filtri, Risorse, Features)
 import com.mycompany.poggioserver.filters.ApiKeyFilter; // Filtro per validare le API Key nelle richieste
@@ -55,6 +56,17 @@ public class PoggioServer {
     public static void main(String[] args) throws IOException {
         logger.info("Avvio PoggioServer...");
 
+        // Inizializza la configurazione dei percorsi
+        logger.info("Inizializzazione configurazione percorsi...");
+        try {
+            PathConfiguration.ensureDirectoriesExist();
+            PathConfiguration.logConfiguredPaths();
+            logger.info("Configurazione percorsi completata");
+        } catch (Exception e) {
+            logger.error("FATAL: Errore inizializzazione percorsi", e);
+            System.exit(1);
+        }
+
         // Inizializza il DatabaseManager (triggera il blocco static)
         logger.info("Inizializzazione DatabaseManager...");
         try {
@@ -84,7 +96,7 @@ public class PoggioServer {
         } catch (java.net.UnknownHostException e) {
             logger.warn("Impossibile determinare l'IP locale");
         }
-        logger.info("File properties DB: {}", DatabaseManager.class.getResource(DatabaseManager.getPropFile()));
+        logger.info("File properties DB: {}", DatabaseManager.getPropFile());
 
         // Registra shutdown hook per chiusura pulita
         logger.info("Registrazione shutdown hook...");

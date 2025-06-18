@@ -1,5 +1,6 @@
 package com.mycompany.poggioserver.resources;
 
+import com.mycompany.poggioserver.config.PathConfiguration;
 import com.mycompany.poggioserver.db.PlayerDAO;
 import com.mycompany.poggioserver.db.PlayerDAOImpl;
 import com.mycompany.poggioserver.model.PlayerRecord;
@@ -41,8 +42,8 @@ public class PlayerResource {
     private static final Logger logger = LoggerFactory.getLogger(PlayerResource.class);
     private final PlayerDAO playerDAO = new PlayerDAOImpl();
 
-    // Directory per i file log uploadati
-    private static final String UPLOAD_LOG_DIRECTORY = Paths.get("resources", "uploaded_logs").toAbsolutePath().toString();
+    // Usa la configurazione centralizzata per i percorsi
+    private static final String UPLOAD_LOG_DIRECTORY = PathConfiguration.getUploadedLogsPathString();
 
     /**
      * POST /players/{username} - Crea un nuovo giocatore
@@ -158,11 +159,11 @@ public class PlayerResource {
                                .type(MediaType.APPLICATION_JSON).build();
             }
 
-            // Salvataggio file log
+            // Salvataggio file log usando percorsi centralizzati
             logger.debug("Salvataggio file log...");
             Path targetPath = null;
             try {
-                Path uploadDir = Paths.get(UPLOAD_LOG_DIRECTORY);
+                Path uploadDir = PathConfiguration.getUploadedLogsPath();
                 Files.createDirectories(uploadDir);
 
                 String originalFileName = fileDisposition.getFileName();
@@ -414,15 +415,15 @@ public class PlayerResource {
                                .type(MediaType.APPLICATION_JSON).build();
             }
 
-            // Validazione sicurezza e controllo esistenza file
+            // Validazione sicurezza usando percorsi centralizzati
             Path logPath;
             File logFile;
             try {
                 logPath = Paths.get(serverLogPath).normalize();
                 logFile = logPath.toFile();
 
-                // Controllo anti path traversal
-                Path uploadDir = Paths.get(UPLOAD_LOG_DIRECTORY).toAbsolutePath().normalize();
+                // Controllo anti path traversal usando percorso centralizzato
+                Path uploadDir = PathConfiguration.getUploadedLogsPath().toAbsolutePath().normalize();
                 if (!logPath.toAbsolutePath().startsWith(uploadDir)) {
                     logger.error("PATH TRAVERSAL bloccato! User: {}, Path: '{}'", username, serverLogPath);
                     return Response.status(Response.Status.FORBIDDEN)

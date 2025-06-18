@@ -10,6 +10,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -48,52 +49,68 @@ import javax.imageio.ImageIO;
  * </ul>
  */
 public class ResourceLoader {
+
+    /**
+     * Percorso della directory contenente il file JAR eseguibile.
+     * Tutti gli altri percorsi sono relativi a questa directory.
+     */
+    private static final Path JAR_DIRECTORY = getJarDirectory();
     
     /**
-     * Percorso assoluto del file contenente le stopwords.
-     * <p>Le stopwords sono termini ignorati durante l'analisi del testo.
-     * <p>Percorso predefinito: {@code resources/stopwords}
+     * Determina la directory contenente il file JAR eseguibile.
+     * 
+     * @return Path della directory contenente il JAR
      */
-    public static final Path STOPWORDS_PATH = Paths.get("resources", "stopwords").toAbsolutePath();
+    private static Path getJarDirectory() {
+        try {
+            // Ottieni il percorso del JAR corrente
+            Path jarPath = Paths.get(ResourceLoader.class.getProtectionDomain()
+                .getCodeSource().getLocation().toURI());
+            
+            // Se è un file JAR, restituisci la directory padre
+            if (jarPath.toString().endsWith(".jar")) {
+                return jarPath.getParent();
+            } else {
+                // Durante lo sviluppo (esecuzione da IDE), usa la directory di lavoro corrente
+                return Paths.get("").toAbsolutePath();
+            }
+        } catch (URISyntaxException ex) {
+            Logger.getLogger(ResourceLoader.class.getName())
+                .log(Level.WARNING, "Impossibile determinare la directory del JAR, uso directory corrente", ex);
+            return Paths.get("").toAbsolutePath();
+        }
+    }
     
     /**
-     * Percorso assoluto della directory dei salvataggi del gioco.
-     * <p>Contiene tutti gli stati di gioco salvati.
-     * <p>Percorso predefinito: {@code sav/}
-     * <p>Viene creata automaticamente se non esiste.
+     * Percorso del file contenente le stopwords, relativo al JAR.
      */
-    public static final Path SAVES_DIRECTORY = Paths.get("resources", "sav").toAbsolutePath();
+    public static final Path STOPWORDS_PATH = JAR_DIRECTORY.resolve("resources/stopwords");
     
     /**
-     * Percorso assoluto della directory dei log scaricati del gioco.
-     * <p>Contiene tutti gli stati di gioco salvati.
-     * <p>Percorso predefinito: {@code sav/}
-     * <p>Viene creata automaticamente se non esiste.
+     * Percorso della directory dei salvataggi del gioco, relativo al JAR.
      */
-    public static final Path LOGS_DW_DIRECTORY = Paths.get("resources", "down_logs").toAbsolutePath();
-    
-     /**
-     * Percorso assoluto della directory delle immagini.
-     * <p>Contiene tutti gli asset grafici del gioco.
-     * <p>Percorso predefinito: {@code resources/img/}
-     */
-    public static final Path IMG_PATH = Paths.get("resources", "img").toAbsolutePath();
+    public static final Path SAVES_DIRECTORY = JAR_DIRECTORY.resolve("resources/sav");
     
     /**
-     * Percorso assoluto della directory dei font.
-     * <p>Contiene tutti i file dei font utilizzati nel gioco.
-     * <p>Percorso predefinito: {@code resources/fonts/}
+     * Percorso della directory dei log scaricati del gioco, relativo al JAR.
      */
-    public static final Path FONTS_PATH = Paths.get("resources", "fonts").toAbsolutePath();
-    
+    public static final Path LOGS_DW_DIRECTORY = JAR_DIRECTORY.resolve("resources/down_logs");
     
     /**
-     * Percorso assoluto della directory dei log dell'applicazione.
-     * <p>Contiene i file di log delle sessioni.
-     * <p>Percorso predefinito: {@code resources/logs/}
-     * <p>Viene creata automaticamente se non esiste.
+     * Percorso della directory delle immagini, relativo al JAR.
      */
-    public static final Path LOGS_DIRECTORY = Paths.get("resources", "logs").toAbsolutePath();
+    public static final Path IMG_PATH = JAR_DIRECTORY.resolve("resources/img");
+    
+    /**
+     * Percorso della directory dei font, relativo al JAR.
+     */
+    public static final Path FONTS_PATH = JAR_DIRECTORY.resolve("resources/fonts");
+    
+    /**
+     * Percorso della directory dei log dell'applicazione, relativo al JAR.
+     */
+    public static final Path LOGS_DIRECTORY = JAR_DIRECTORY.resolve("resources/logs");
+;
 
     /**
      * Carica un'immagine dal filesystem.

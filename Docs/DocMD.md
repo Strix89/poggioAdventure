@@ -474,6 +474,11 @@ Questo package gestisce tutta l'interazione con il database H2.
 - `PlayerDAOImpl.java`
     - È l'implementazione concreta di `PlayerDAO`. Contiene le query SQL e la logica JDBC per interagire con la tabella `players`.
 ---
+#### Package com.mycompany.poggioserver.config:
+Gestisce i percorsi di file e directory utilizzati dall'applicazione, fornendo un punto di accesso unificato per la gestione delle risorse.
+
+- `PathConfiguration.java`
+ Determina automaticamente il percorso base del jar e risolve tutti i percorsi relativi necessari (risorse, log uploadati, configurazione database). Fornisce metodi per la creazione automatica delle directory necessarie e logging di debug per la configurazione dei percorsi.
 #### Package `com.mycompany.poggioserver.filters`
 Contiene i filtri JAX-RS per intercettare e processare le richieste. Definendo interfacce e annotazioni standard.
 -  `ApiKeyFilter.java`

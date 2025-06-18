@@ -1,11 +1,14 @@
 package com.mycompany.poggioserver.db;
 
+import com.mycompany.poggioserver.config.PathConfiguration;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -19,7 +22,6 @@ import java.util.Properties;
 public class DatabaseManager {
 
     private static final Logger logger = LoggerFactory.getLogger(DatabaseManager.class);
-    private static final String PROPERTIES_FILE = "/db.properties";
     private static HikariDataSource dataSource;
 
     /**
@@ -30,7 +32,7 @@ public class DatabaseManager {
         try {
             logger.info("Inizializzazione DatabaseManager...");
 
-            // Carica configurazione dal file properties
+            // Carica configurazione usando percorso centralizzato
             Properties dbProps = loadProperties();
 
             // Configura HikariCP
@@ -59,7 +61,7 @@ public class DatabaseManager {
             logger.info("Inizializzazione DatabaseManager completata");
 
         } catch (IOException e) {
-            logger.error("FATAL: Errore caricamento file properties '{}'", PROPERTIES_FILE, e);
+            logger.error("FATAL: Errore caricamento file properties", e);
             throw new RuntimeException("Impossibile caricare la configurazione del database.", e);
         } catch (NumberFormatException e) {
             logger.error("FATAL: Errore formato numerico nelle proprietà HikariCP", e);
@@ -71,18 +73,34 @@ public class DatabaseManager {
     }
 
     /**
-     * Carica le proprietà di configurazione dal classpath.
+     * Carica le proprietà di configurazione dal file esterno o dal classpath.
      */
     private static Properties loadProperties() throws IOException {
         Properties properties = new Properties();
-        try (InputStream input = DatabaseManager.class.getResourceAsStream(PROPERTIES_FILE)) {
+        
+        // Prima prova a caricare dal file esterno usando percorso centralizzato
+        Path externalPropertiesPath = PathConfiguration.getDbPropertiesPath();
+        if (externalPropertiesPath.toFile().exists()) {
+            logger.info("Caricamento properties da file esterno: {}", externalPropertiesPath.toAbsolutePath());
+            try (InputStream input = Files.newInputStream(externalPropertiesPath)) {
+                properties.load(input);
+                logger.info("File properties esterno caricato con successo");
+                return properties;
+            }
+        }
+        
+        // Fallback al file nel classpath
+        String classpathFile = "/db.properties";
+        logger.info("File esterno non trovato, caricamento da classpath: {}", classpathFile);
+        try (InputStream input = DatabaseManager.class.getResourceAsStream(classpathFile)) {
             if (input == null) {
-                logger.error("File properties '{}' non trovato nel classpath", PROPERTIES_FILE);
-                throw new IOException("File properties non trovato: " + PROPERTIES_FILE);
+                logger.error("File properties '{}' non trovato né nel filesystem né nel classpath", classpathFile);
+                throw new IOException("File properties non trovato: " + classpathFile);
             }
             properties.load(input);
-            logger.info("File properties caricato: {}", PROPERTIES_FILE);
+            logger.info("File properties caricato da classpath");
         }
+        
         return properties;
     }
 
@@ -138,6 +156,10 @@ public class DatabaseManager {
      * Restituisce il path del file properties utilizzato.
      */
     public static String getPropFile(){
-        return PROPERTIES_FILE;
+        Path externalPath = PathConfiguration.getDbPropertiesPath();
+        if (externalPath.toFile().exists()) {
+            return externalPath.toString();
+        }
+        return "/db.properties (classpath)";
     }
 }
