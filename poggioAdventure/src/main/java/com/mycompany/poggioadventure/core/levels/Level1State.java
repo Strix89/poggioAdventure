@@ -466,6 +466,7 @@ public class Level1State extends GameState {
         gameDescription.getGameMap().linkFloors(corridor, hallway, CommandType.NORD);
 
         AdvNPC robot = new AdvNPC(Utils.NORMAL_ROBOT_ID, "TERESA", "Un robot aspirapolvere sembra un po' rinco********, si muove in maniera strana");
+        robot.setAlias(new String[] { "robot", "aspirapolvere"});
         robot.setImagePath(ResourceLoader.IMG_PATH.resolve("Aspirapolvere.png").toString());
         robot.addFirstDialogueLine("Sei [PINK]scemo[/]? Vuoi veramente parlare con un [GRAY]robot[/] aspirapolvere?");
         robot.addSubsequentDialogueLine("Sei [PINK]scemo[/]? Vuoi veramente parlare con un [GRAY]robot[/] aspirapolvere?");
