@@ -126,7 +126,7 @@ public class UI_Flipper extends UI_Abstract {
         String input = inputField.getText().trim();
         if (input.isEmpty()) {
             JOptionPane.showMessageDialog(this,
-                "Inserisci un comando!\n\nFormato: [frequenza] [comando]\nEsempio: 433.92 GoToRecharge",
+                "Inserisci un comando!\n\nFormato: [frequenza] [comando]",
                 "Input Vuoto",
                 JOptionPane.WARNING_MESSAGE);
             return;
