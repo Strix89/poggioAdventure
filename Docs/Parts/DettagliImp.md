@@ -634,8 +634,6 @@ if(guiMode) {
 
 La programmazione concorrente è stata adottata in *PoggioAdventure* per garantire un'esperienza utente fluida, reattiva e moderna sia in modalità CLI che GUI. L'utilizzo dei thread consente di gestire operazioni che richiedono attese (come timer, download di file o transizioni di stato) senza bloccare l'interfaccia utente o il flusso principale del gioco.
 
-## Stop watch  (aumentare il valore ) ?
-
 ### 1. Gestione del Timer di Gioco
 
 Uno degli utilizzi principali dei thread è nella gestione del **countdown** e del **cronometro di gioco**. La classe [`TimeManager`](poggioAdventure/src/main/java/com/mycompany/poggioadventure/core/utils/TimeManager.java) implementa l'interfaccia `Runnable` e viene eseguita in un thread dedicato, così da non bloccare il thread principale durante il countdown:
