@@ -168,8 +168,8 @@ L'utente si trova di fronte a un menu con le seguenti opzioni:
         *   **CLI**: `CLIMenu` avvia `engine.startGameLoop()`.
     *  Nel caso venisse inserito un **Utente Già Esistente nel DB (`ApiClientResult.SUCCESS_OK`)**:
         *   Viene mostrato un messaggio di errore.
-                                                        *   L'utente viene reindirizzato al menu principale (`UI_Init` o `CLIMenu`) per caricare la partita o scegliere un nome diverso.
-                                                    *   **Errore di Connessione/Altro**: Viene mostrato un messaggio di errore appropriato.
+                                                                *   L'utente viene reindirizzato al menu principale (`UI_Init` o `CLIMenu`) per caricare la partita o scegliere un nome diverso.
+                                                            *   **Errore di Connessione/Altro**: Viene mostrato un messaggio di errore appropriato.
 #### 3.2.2. Carica Partita:
 
 1.  **Interfaccia Utente**:
@@ -403,7 +403,7 @@ L'interfaccia (in questo caso, la classe astratta) `GameState` definisce i met
 
 Quando l'`Engine` deve controllare se un livello è completato, non lo fa direttamente. Chiama il `GameStateManager`, che a sua volta delega la chiamata all'oggetto stato corrente. Questo rende il codice pulito e facile da estendere: per aggiungere un "Livello 4", basta creare una nuova classe `Level4State` e aggiornare le regole di transizione nel `GameStateManager`, senza toccare il motore di gioco `GameDescription`.
 
---- 
+---
 #### Singleton
 Ci sono componenti che, per loro natura, devono esistere in una sola istanza per tutta l'applicazione, o meglio per tutta la partita. Un esempio **perfetto** è il cronometro di gioco (per il tempo totale di gioco).
 
@@ -446,7 +446,7 @@ Ogni finestra specifica, come `UI_Game` o  `UI_Inventory`, estende `UI_Abstra
 
 Il vantaggio risiende nel fatto che tutte le finestre abbiano un comportamento e un aspetto di base uniformi, riutilizzando il codice di configurazione e demandando alle classi figlie solo la creazione delle loro *caratteristiche uniche*.
 
---- 
+---
 #### Factory
 E' stato utilizzato per nascondere la complessità legata alla creazione di oggetti. Invece di spargere logica di inizializzazione complessa in giro per il codice, la centralizziamo in un unico punto.
 
@@ -464,7 +464,7 @@ EntryPoint del server.
         - Configurare le risorse REST (`PlayerResource`), i filtri (`ApiKeyFilter`) e le feature (supporto JSON e multipart).
         - Inizializzare il gestore del database.
         - Avviare il server e gestire lo shutdown.
---- 
+---
 #### Package `com.mycompany.poggioserver.db`:
 Questo package gestisce tutta l'interazione con il database H2.
 - `DatabaseManager.java`
@@ -474,7 +474,7 @@ Questo package gestisce tutta l'interazione con il database H2.
 - `PlayerDAOImpl.java`
     - È l'implementazione concreta di `PlayerDAO`. Contiene le query SQL e la logica JDBC per interagire con la tabella `players`.
 ---
-#### Package com.mycompany.poggioserver.config:
+#### `Package com.mycompany.poggioserver.config`:
 Gestisce i percorsi di file e directory utilizzati dall'applicazione, fornendo un punto di accesso unificato per la gestione delle risorse.
 
 - `PathConfiguration.java`
@@ -624,7 +624,7 @@ Gestione della persistenza locale dei salvataggi, caricamento delle risorse (fil
     - Contiene i dati serializzati relativi a username, punteggio, data, ora e percorso del log.
     - Facilita la deserializzazione automatica delle risposte REST per la classifica.
 
---- 
+---
 #### Package: `com.mycompany.poggioadventure.ui`
 Questo package contiene tutte le classi dedicate alla presentazione e gestione dell’interfaccia utente del gioco, sia per la modalità grafica (GUI, tramite Swing) sia per la modalità a riga di comando (CLI). L’obiettivo è fornire un layer di presentazione, garantendo un’esperienza coerente sia su console che su interfaccia grafica.
 
