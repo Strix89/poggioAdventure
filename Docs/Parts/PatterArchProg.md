@@ -1,6 +1,6 @@
 # Progettazione
 
-Per sviluppare questa avventura è stato preso fondamentalmente il progetto base fornito durante il corso (**anno** ***2023-2024***) ed è stato esteso (modificato in alcune sue parti). Aggiungendo componenti cruciali come la progressione di livelli, alcuni observer e una gestione dell'*output/input*diversa, più granulare (*etc..*).
+Per sviluppare questa avventura è stato preso fondamentalmente il progetto base fornito durante il corso (**anno** ***2023-2024***) ed è stato esteso (modificato in alcune sue parti). Aggiungendo componenti cruciali come la progressione di livelli, alcuni observer e una gestione dell'*output/input* diversa, più granulare (*etc..*).
 Successivamente è stato creato un secondo *modulo* che si occupa esclusivamente di gestire il server con DB per la classifica `poggioServer`.
 
 ## ***Pattern utilizzati per il progetto:***
@@ -9,28 +9,40 @@ Per gestire la progressione del gioco attraverso i vari livelli, abbiamo impleme
 La classe `GameStateManager` agisce come "contesto". Mantiene un riferimento allo stato corrente (es. `Level1State`) e gestisce le transizioni tra gli stati.
 L'interfaccia (in questo caso, la classe astratta) `GameState` definisce i metodi comuni a tutti gli stati, come `enter()`, `isCompleted()`, ecc.
 
-Quando l'`Engine` deve controllare se un livello è completato, non lo fa direttamente. Chiama il `GameStateManager`, che a sua volta delega la chiamata all'oggetto stato corrente. Questo rende il codice pulito e incredibilmente facile da estendere: per aggiungere un "Livello 4", mi basta creare una nuova classe `Level4State` e aggiornare le regole di transizione nel `GameStateManager`, senza toccare il motore di gioco.
+Quando l'`Engine` deve controllare se un livello è completato, non lo fa direttamente. Chiama il `GameStateManager`, che a sua volta delega la chiamata all'oggetto stato corrente. Questo rende il codice pulito e facile da estendere: per aggiungere un "Livello 4", basta creare una nuova classe `Level4State` e aggiornare le regole di transizione nel `GameStateManager`, senza toccare il motore di gioco `GameDescription`.
 
 --- 
 #### 2. Singleton
-Ci sono componenti che, per loro natura, devono esistere in una sola istanza per tutta l'applicazione, o meglio per tutta la partita. - Un esempio **perfetto** è il cronometro di gioco (per il tempo totale di gioco).
+Ci sono componenti che, per loro natura, devono esistere in una sola istanza per tutta l'applicazione, o meglio per tutta la partita. Un esempio **perfetto** è il cronometro di gioco (per il tempo totale di gioco).
 
 - La classe `Stopwatch` è implementata come un Singleton. Ha un costruttore privato per impedire la creazione di nuove istanze e fornisce un metodo statico `getInstance()` che restituisce sempre la stessa, unica istanza del cronometro.
 
-Il vantaggio è la garanzia di avere un **unico punto di accesso globale** a una risorsa condivisa. Qualsiasi parte del codice, che sia un observer, un livello di stato o l'interfaccia utente, può ottenere il riferimento al cronometro tramite `Stopwatch.getInstance()` e interagire con esso, senza bisogno di passarsi l'oggetto di mano in mano e con la certezza che si tratti sempre dello stesso timer.
+Il vantaggio è la garanzia di avere un **unico punto di accesso globale** a una risorsa condivisa. Qualsiasi parte del codice, che sia un observer, un LevelXState o l'interfaccia utente, può ottenere il riferimento al cronometro tramite `Stopwatch.getInstance()` e interagire con esso, con la certezza che si tratti sempre dello stesso oggetto.
 
 ---
 #### 3. Observer
 Per gestire le azioni di gioco in modo disaccoppiato, abbiamo fatto uso e esteso il pattern **Observer** (già presente nel *progetto base*).
 
-- Il `PoggioAdventureDesc` implementa `GameObservable`. Quando un'azione viene eseguita, notificano tutti gli `Observer` registrati.
+- Il `PoggioAdventureDesc` implementa `GameObservable`. Quando un'azione viene eseguita, vengono notificati tutti gli `Observer` registrati.
 - Classi come `UseObserver` o `InventoryObserver` sono gli Observer. Ognuna è specializzata per reagire a un tipo di comando.
 
 Questo rende il sistema **estremamente flessibile**: per aggiungere un nuovo comando, mi basta creare un nuovo **observer** senza modificare il motore di gioco.
 
 ---
 #### 4. Strategy
-Il pattern **Strategy** è stato utilizzato per gestire le due modalità di **output** (CLI e GUI) o di **input** o di **error**. L'interfaccia `OutputHandler` ad esempio definisce il contratto, mentre `CLIOutputHandler` e `GUIOutputHandler` sono le strategie concrete. L'`Engine` lavora con l'interfaccia, permettendomi di cambiare **"al volo"** la strategia di output.
+Il pattern **Strategy** è stato utilizzato per gestire le due modalità di **output** (CLI e GUI) o di **input** o di **error**. L'interfaccia `OutputHandler` ad esempio definisce il contratto, mentre `CLIOutputHandler` e `GUIOutputHandler` sono le strategie concrete. L'`Engine` lavora con l'interfaccia, permettendo di cambiare **"al volo"** la strategia di output.
+
+>**Per gestire i colori** in modo coerente tra CLI e GUI, viene utilizzato un sistema di markup personalizzato. Il testo da colorare è racchiuso in tag, come `[RED]testo rosso[/]`. L'interfaccia `OutputHandler` definisce una `Pattern` (`COLOR_BLOCK_PATTERN`) per riconoscere questi blocchi.
+>L'enum `ColorText` mappa un nome di colore (es. `RED` sia al codice di escape ANSI per la console, sia all'oggetto `java.awt.Color` per Swing.
+>Quindi:
+    - `CLIOutputHandler`: Processa la stringa, trova i blocchi di colore tramite regex e sostituisce i tag con i codici ANSI corrispondenti presi da `ColorText`.
+    - `GUIOutputHandler`: Opera su un `JTextPane`. Utilizza `SwingUtilities.invokeLater` per la sicurezza dei thread. Quando trova un blocco di colore, usa uno `StyledDocument` per applicare il `java.awt.Color` corrispondente al segmento di testo.
+
+>La **gestione delle Immagini** è simile a quella dei colori, tuttavia è supportata solo nell'interfaccia grafica. Un'immagine viene indicata nella stringa di *output* con un tag speciale, ad esempio `IMAGE: path/to/image.png`. Anche questo è definito da una regex in `OutputHandler`.
+   Quindi:
+    - `GUIOutputHandler`: Quando rileva un tag `IMAGE:`, carica l'immagine tramite `ResourceLoader`, la scala per adattarla all'interfaccia e la inserisce nel `JTextPane`.
+    - `CLIOutputHandler`: Riconosce i tag `IMAGE:` e li ignora, poiché non può renderizzare immagini nella console.
+
 
 ---
 #### 5. Template Method
@@ -40,13 +52,13 @@ Nel nostro caso, la classe astratta `UI_Abstract` funge da "Template". Al suo 
 
 Ogni finestra specifica, come `UI_Game` o  `UI_Inventory`, estende `UI_Abstract` e fornisce la propria implementazione di `initComponents()`. In questo modo, `UI_Game` crea i pannelli di gioco, `UI_Inventory` crea la lista degli oggetti e l'area dei dettagli, ma entrambe seguono la stessa sequenza di inizializzazione definita in `initUI()`.
 
-Il vantaggio è enorme: garantiamo che tutte le finestre abbiano un comportamento e un aspetto di base uniformi, riutilizzando il codice di configurazione e demandando alle classi figlie solo la creazione dei loro componenti unici.
+Il vantaggio risiende nel fatto che tutte le finestre abbiano un comportamento e un aspetto di base uniformi, riutilizzando il codice di configurazione e demandando alle classi figlie solo la creazione delle loro *caratteristiche uniche*.
 
 --- 
 #### 6. Factory
 E' stato utilizzato per nascondere la complessità legata alla creazione di oggetti. Invece di spargere logica di inizializzazione complessa in giro per il codice, la centralizziamo in un unico punto.
 
-Creare un'istanza di `Engine` *non è banale*. `EngineFactory` si occupa di tutto questo, esponendo metodi semplici come `createNewGame(...)`. Il client (ad esempio `CLIMenu` non deve fare altro che chiamare questo metodo, senza preoccuparsi dei dettagli interni. 
+Creare un'istanza di `Engine` *non è banale*. `EngineFactory` si occupa di tutto questo, esponendo metodi semplici come `createNewGame(...)`. Il client (ad esempio `CLIMenu`) non deve fare altro che chiamare questo metodo, senza preoccuparsi dei dettagli interni. 
 
 ---
 # Struttura dei Package del Server (`poggioServer`)
@@ -75,7 +87,7 @@ Contiene i filtri JAX-RS per intercettare e processare le richieste. Definendo i
 -  `ApiKeyFilter.java`
     - Implementa un filtro di sicurezza che intercetta ogni richiesta in arrivo. Controlla la presenza e la validità di un header `X-API-Key`. Se la chiave non è corretta, la richiesta viene bloccata con uno stato `401 Unauthorized`, proteggendo così gli endpoint da accessi non autorizzati.
 ---
-### Struttura dei Package Avventura (`poggioAdventure`)
+# Struttura dei Package dell'Avventura (`poggioAdventure`)
 Si è cercato di progettare un'architettura modulare che separa la logica di gioco, il modello dei dati e l'interfaccia utente. Al suo interno è contenuto anche la classe che si occupa di fare da client per la comunicazione dei giocatori e punteggi al server.
 
 ---
@@ -88,10 +100,10 @@ Si è cercato di progettare un'architettura modulare che separa la logica di gio
 ## Package `com.mycompany.poggioadventure.core`:
 -  `Engine.java`
      È il motore di gioco principale che orchestra l'intera applicazione.
-	    - Gestisce il game loop principale (`startGameLoop`) se chiamato con CLI.
-        - Coordina l'interazione tra il parser, il modello di gioco (`PoggioAdventureDesc`) e l'interfaccia utente (CLI/GUI).
-        - Gestisce lo stato della sessione, inclusi salvataggio, caricamento e tempo di gioco totale.
-        - Implementa una strategia per tornare al menu corretto (`returnToGUIMenu` o `returnToCLIMenu`) a seconda della modalità di gioco scelta, al termine di una partita.
+     - Gestisce il game loop principale (`startGameLoop`) se chiamato con CLI.
+     - Coordina l'interazione tra il parser, il modello di gioco (`PoggioAdventureDesc`) e l'interfaccia utente (CLI/GUI).
+     - Gestisce lo stato della sessione, inclusi salvataggio, caricamento e tempo di gioco totale.
+     - Implementa una strategia per tornare al menu corretto (`returnToGUIMenu` o `returnToCLIMenu`) a seconda della modalità di gioco scelta, al termine di una partita.
 - `PoggioAdventureDesc.java`
     -  È l'implementazione concreta di `GameDescription` che contiene la logica specifica dell'avventura.
         - Inizializza il mondo di gioco, inclusi comandi, stanze e observer. Volendo si può inizializzare la mappa base di gioco (con tutti gli elementi) già al suo interno tramite il metodo `.init` ma abbiamo preferito assegnare questa responsabilità al `GameStateManager`.
@@ -132,13 +144,13 @@ Questo package contiene le implementazioni concrete dei livelli di gioco. Ogni c
     - Classe funzionale di utilità statica che supporta la logica del `Level2State`.
 - `Question.java`
 	- Modella una singola domanda a risposta multipla utilizzata nei test logici del gioco (ad esempio nel primo livello).
-- `Test.java`
+-  `Test.java`
     - **Funzione**: Classe-dati che modella un test (con delle domande) a risposta multipla, serve solo a rappresentare dati, senza logica complessa.
 - `TestSession.java`
-	- Gestisce la logica di esecuzione interattiva di un `Test`. Si interfaccia con l'`OutputHandler` per la CLI e con `JOptionPane` per la GUI.
-- `FlipperLogic.java`
-    - Agisce da **Facade** per l'interfaccia contestuale del "Flipper Zero" nel `Level3State`. Fornisce un'interfaccia unificata per avviare l'interazione con il Flipper, nascondendo la complessità di gestire la CLI o la GUI. Delega l'elaborazione dei comandi a `FlipperCommandProcessor]`.
-- `FlipperCommandProcessor.java`
+    - Gestisce la logica di esecuzione interattiva di un `Test`. Si interfaccia con l'`OutputHandler` per la CLI e con `JOptionPane` per la GUI.
+-  `FlipperLogic.java`
+    - Agisce da **Facade** per l'interfaccia contestuale del "Flipper Zero" nel `Level3State`. Fornisce un'interfaccia unificata per avviare l'interazione con il Flipper, nascondendo la complessità di gestire la CLI o la GUI. Delega l'elaborazione dei comandi a `FlipperCommandProcessor`.
+-  `FlipperCommandProcessor.java`
     - Implementa la logica di business. Esegue il parsing e la validazione dell'input dell'utente (es. `[frequenza] [comando]`). Contiene la logica per ogni comando (`GoToRecharge`, `Override`, `Stop`) e ne determina le conseguenze (vittoria, sconfitta, penalità di tempo).
 - `PcAssemblyHelper.java`
 	- Classe *funzionale* di utilità che centralizza la logica di validazione e gestione dell’assemblaggio del PC nel secondo livello. Definisce l’ordine corretto dei componenti da inserire nel case del PC (scheda madre, RAM, SSD, CPU, pasta termica, dissipatore, GPU, alimentatore). Garantisce coerenza e riutilizzo della logica di assemblaggio.
@@ -171,7 +183,7 @@ Questo package contiene tutte le classi che rappresentano i modelli dati del mon
 - `AdvObjectContainer.java`
     Estende `AdvObject` e rappresenta un contenitore che può includere altri oggetti (es. armadi, cassetti). Permette la logica di apertura/chiusura e la gestione del contenuto.
 - `AdvNPC.java`
-    Modella un personaggio non giocante. Gestisce dialoghi, alias, immagini e logica di interazione con il giocatore (es. consegna oggetti, dialoghi ramificati).
+    Estende `AdvObject` e modella un personaggio non giocante. Gestisce dialoghi, alias, immagini e logica di interazione con il giocatore (es. consegna oggetti, dialoghi ramificati).
 - `Inventory.java` 
     Rappresenta l’inventario del giocatore. Gestisce l’aggiunta, la rimozione e la ricerca di oggetti, oltre a fornire utility per la visualizzazione e la serializzazione dello stato.
 - `Room.java`  
@@ -230,7 +242,7 @@ Questo package contiene tutte le classi dedicate alla presentazione e gestione d
     Contiene tutte le classi per la gestione dell’interfaccia grafica:
     - Gestione pannelli, dialoghi e output grafico (`GUIOutputHandler`)
     - Gestione errori tramite dialoghi Swing (`GUIErrorHandler`)
-    - Sottopackage `views` con tutte le schermate principali del gioco (partita, inventario, classifica, configurazione, ecc.)
+    - Sottopackage `views` con tutte le schermate principali del gioco (partita, inventario, classifica, ecc.)
 - **`UI_Abstract`**  
     Classe base astratta per tutte le finestre GUI, centralizza la configurazione e l’inizializzazione dei componenti.
 - `CLIOutputHandler`/ `GUIOutputHandler`  
@@ -240,7 +252,7 @@ Questo package contiene tutte le classi dedicate alla presentazione e gestione d
 - `CLIInputHandler`
     Implementazione per la modalità console
     - Utilizza uno `Scanner` su `System.in` per leggere l’input.
-    - Effettua il trimming automatico degli spazi bianchi.
+    - Effettua il **trimming** automatico degli spazi bianchi.
 - `GUIInputHandler`
     Implementazione per la modalità grafica:
     - Riceve l’input da un componente `JTextField` Swing.
