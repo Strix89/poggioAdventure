@@ -497,7 +497,7 @@ Per offrire un'esperienza utente moderna e accessibile anche a chi non ama la ri
 
 ## Architettura e Pattern
 
-L'interfaccia grafica è stata progettata seguendo il pattern **MVC** (Model-View-Controller), separando la logica di gioco dalla presentazione. Tutte le finestre Swing derivano dalla classe astratta [`UI_Abstract`](poggioAdventure/src/main/java/com/mycompany/poggioadventure/ui/UI_Abstract.java), che centralizza la configurazione comune (tema, stili, layout) e fornisce un template method per l'inizializzazione delle componenti:
+L'interfaccia grafica separa la logica di gioco dalla presentazione. Tutte le finestre Swing derivano dalla classe astratta [`UI_Abstract`](poggioAdventure/src/main/java/com/mycompany/poggioadventure/ui/UI_Abstract.java), che centralizza la configurazione comune (tema, stili, layout) e fornisce un template method per l'inizializzazione delle componenti:
 
 ```java
 // filepath: poggioAdventure/src/main/java/com/mycompany/poggioadventure/ui/UI_Abstract.java
@@ -592,16 +592,29 @@ Oltre alla finestra principale, sono state realizzate altre interfacce dedicate,
 - **UI_Flipper**: una finestra custom per l'interazione con il "Flipper Zero", con input dedicato e visualizzazione di immagini ASCII.
 - **UI_Inventory**: pannello per la gestione e visualizzazione dell'inventario, con descrizioni testuali e layout responsive.
 - **UI_NewGame** e **UI_Init**: schermate di avvio e creazione nuova partita, con effetti hover, validazione input e feedback tramite dialoghi Swing.
+- **Validazione dell'Input e Feedback Utente**: Per garantire una robusta interazione, la validazione dell'input è gestita centralmente tramite la classe [`GUIErrorHandler`](poggioAdventure/src/main/java/com/mycompany/poggioadventure/ui/gui/GUIErrorHandler.java). Questa classe utilizza `JOptionPane` per mostrare dialoghi di errore modali, fornendo un feedback chiaro e immediato all'utente senza interrompere bruscamente l'applicazione. Ad esempio, quando un utente inserisce dati non validi, come un nome vuoto nella schermata di nuova partita, viene invocato questo handler.
+
+    ```java
+    // filepath: poggioAdventure/src/main/java/com/mycompany/poggioadventure/ui/gui/GUIErrorHandler.java
+    // ...existing code...
+    @Override
+    public void handleRecoverableError(String message) {
+        JOptionPane.showMessageDialog(
+            null, // Componente padre (null = centro schermo)
+            message,
+            "Errore",
+            JOptionPane.WARNING_MESSAGE
+        );
+    }
+    ```
+    Questo approccio è utilizzato in diverse parti dell'interfaccia, come in [`UI_NewGame`](poggioAdventure/src/main/java/com/mycompany/poggioadventure/ui/gui/views/UI_NewGame.java) per la validazione del nome e in [`UI_Flipper`](poggioAdventure/src/main/java/com/mycompany/poggioadventure/ui/gui/views/UI_Flipper.java) per i comandi vuoti, garantendo coerenza nel feedback all'utente.
 
 Tutte queste finestre sfruttano componenti Swing come `JPanel`, `JLabel`, `JTextArea`, `JButton`, e dialoghi modali tramite `JOptionPane` per fornire feedback immediato all'utente.
+
 
 ### 4. Personalizzazione e Temi
 
 Per migliorare l'aspetto grafico, è stato adottato il tema **FlatLaf**, che dona un look moderno e professionale a tutte le finestre. La personalizzazione dei colori, font e icone avviene tramite la classe [`UI_Config`](poggioAdventure/src/main/java/com/mycompany/poggioadventure/ui/gui/views/UI_Config.java), garantendo coerenza e facilità di manutenzione.
-
-### Integrazione con la Logica di Gioco
-
-L'integrazione tra la GUI e la logica di gioco avviene tramite pattern **Strategy**: le classi `GUIInputHandler` e `GUIOutputHandler` implementano le interfacce comuni `InputHandler` e `OutputHandler`, permettendo di intercambiare facilmente la modalità CLI e GUI senza modificare la logica sottostante.
 
 ### Esempio di Avvio GUI
 
@@ -616,9 +629,12 @@ if(guiMode) {
     });
 }
 ```
+
 # Thread e Programmazione Concorrente
 
 La programmazione concorrente è stata adottata in *PoggioAdventure* per garantire un'esperienza utente fluida, reattiva e moderna sia in modalità CLI che GUI. L'utilizzo dei thread consente di gestire operazioni che richiedono attese (come timer, download di file o transizioni di stato) senza bloccare l'interfaccia utente o il flusso principale del gioco.
+
+## Stop watch  (aumentare il valore ) ?
 
 ### 1. Gestione del Timer di Gioco
 
@@ -641,27 +657,15 @@ public void run() {
 ```
 In questo modo, il timer può essere avviato, fermato o riavviato in modo asincrono, senza interferire con l'elaborazione dei comandi o l'aggiornamento della GUI.
 
-### 2. Aggiornamento Thread-Safe della GUI
+### 2. Cronometro di Gioco (StopWatch)
 
-Nell'interfaccia grafica, tutte le operazioni che modificano componenti Swing vengono eseguite nel **thread dell'Event Dispatch Thread (EDT)**, come raccomandato dalle best practice Java. Ad esempio, la classe [`GUIOutputHandler`](poggioAdventure/src/main/java/com/mycompany/poggioadventure/ui/gui/GUIOutputHandler.java) utilizza `SwingUtilities.invokeLater` per garantire che l'output venga renderizzato in modo sicuro e reattivo:
+A differenza del `TimeManager` che gestisce i countdown dei livelli con un thread attivo, il cronometro principale del gioco, implementato nella classe `StopWatch`, non utilizza un thread dedicato per l'incremento del tempo.
 
-```java
-// filepath: poggioAdventure/src/main/java/com/mycompany/poggioadventure/ui/gui/GUIOutputHandler.java
-@Override
-public void writeFormatted(String formattedMessage, ColorText baseColor) {
-    SwingUtilities.invokeLater(() -> {
-        try {
-            StyledDocument doc = outputPane.getStyledDocument();
-            // Parsing e inserimento testo colorato e immagini
-            // ...
-            outputPane.setCaretPosition(doc.getLength());
-        } catch (BadLocationException ex) {
-            // Gestione errori
-        }
-    });
-}
-```
-Questo pattern viene utilizzato in tutta la GUI per evitare condizioni di race e garantire la stabilità dell'interfaccia anche durante operazioni concorrenti.
+Il suo funzionamento si basa su un approccio "on-demand":
+-   Quando il cronometro viene avviato, memorizza il timestamp corrente (`System.currentTimeMillis()`).
+-   Ogni volta che viene richiesto il tempo trascorso, calcola la differenza tra il timestamp attuale e quello di avvio.
+
+Questo design è efficiente perché non consuma risorse per un thread in background. La classe garantisce la **thread-safety** attraverso l'uso di metodi `synchronized`, rendendola sicura per l'accesso concorrente da parte di diversi componenti del gioco, ma la logica di conteggio non è attiva, bensì passiva e basata su calcoli istantanei.
 
 ### 3. Gestione Asincrona di Eventi e Transizioni di Stato
 
