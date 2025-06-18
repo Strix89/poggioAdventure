@@ -34,7 +34,7 @@ Nel corso della propria avventura è possibile trovare, prendere e usare una mol
 ## 2. Come Giocare:
 
 Per iniziare la tua avventura in PoggioAdventure, dovrai prima compilare il gioco visto che nella repository non è incluso il `.jar`. Trattandosi di un progetto Maven, il processo è standard:
-- C'è bisogno di avere `maven` installato. 
+- C'è bisogno di avere `maven` installato [`maven-compiler 3.11.0`]. 
 - C'è bisogno anche di avere la Java JDK 19`.
 - Apri un terminale nella directory principale del progetto `poggioAdventure` (stessa cosa per `poggioServer`) e digita:
 ```shell

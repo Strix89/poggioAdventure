@@ -142,19 +142,16 @@ public class Level1State extends GameState {
         // Post-it con istruzioni di gioco per nuovi giocatori
         AdvObject post_it = new AdvObject(Utils.OBJ_POST_IT_ID, "post-it",
         "\nUn [ITEM]post-it[/] attaccato alla porta con le istruzioni per l'avventura.\n\n" +
-        "[EMERALD]=== ISTRUZIONI PER L'AVVENTURA ===[/]\n\n" +
-        "[NEON_ORANGE]COMANDI MOVIMENTO[/]:\n" +
+        "[EMERALD]=== ISTRUZIONI PER L'AVVENTURA ===[/]\n" +
         "[NEON_ORANGE]•[/] nord/n, sud/s, est/e, ovest/o - per spostarti\n" +
         "[NEON_ORANGE]•[/] inventario/inv - controlla i tuoi oggetti\n\n" +
-        "[NEON_ORANGE]COMANDI OGGETTI[/]:\n" +
         "[NEON_ORANGE]•[/] raccogli [oggetto] - prendi un oggetto\n" +
         "[NEON_ORANGE]•[/] usa [oggetto] - utilizza un oggetto\n" +
         "[NEON_ORANGE]•[/] apri [contenitore] - apri armadi/vetrine\n" +
         "[NEON_ORANGE]•[/] osserva [oggetto] - esamina attentamente\n" +
         "[NEON_ORANGE]•[/] premi [oggetto] - attiva/spingi qualcosa\n\n" +
-        "[NEON_ORANGE]COMANDI SOCIALI[/]:\n" +
+        "[NEON_ORANGE]•[/] accendi [oggetto] - accendi qualcosa (es. pc)\n" + 
         "[NEON_ORANGE]•[/] parla [npc] - conversa con i personaggi\n\n" +
-        "[NEON_ORANGE]COMANDI SISTEMA[/]:\n" +
         "[NEON_ORANGE]•[/] salva - salva la partita\n" +
         "[NEON_ORANGE]•[/] end/esci - termina il gioco\n",
         ResourceLoader.IMG_PATH.resolve("post_it.png").toString());

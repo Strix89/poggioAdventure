@@ -212,10 +212,9 @@ public class UseObserver implements GameObserver, Serializable {
                         if (rack != null) {
                             if (rack.isOpen()) {
                                 msg.append("Il rack è già aperto. ");
-                                msg.append("All'interno potresti trovare strumenti per controllare i robot!\n");
+                                msg.append("All'interno potresti trovare oggetti [PINK]particolari[/] privi di sicurezza!\n");
                             } else {
-                                msg.append("Usi la chiave per aprire il rack del server. ");
-                                msg.append("Ora puoi accedere ai controlli dei robot!\n");
+                                msg.append("[NEON_ORANGE]Usi[/] la chiave per aprire il rack del server. ");
                                 rack.setOpenable(true);
                             }
                         }
