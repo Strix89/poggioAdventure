@@ -16,7 +16,7 @@
     <h2 style="font-size: 22px; margin-top: 0; margin-bottom: 15px; color: #000;">Spaccamelons</h2>
     <!-- IMMAGINE CENTRATA -->
     <div style="margin: 15px 0;">
-      <img src="Welcome.png" alt="Logo PoggioAdventure" style="width: 300px; height: auto; border-radius: 10px;">
+      <img src="Welcome.png" alt="Logo PoggioAdventure" style="width: 450px; height: auto; border-radius: 10px;">
     </div>
     <!-- SEZIONE AUTORI STILIZZATA PIÙ COMPATTA -->
     <div style="margin: 20px 0; padding: 10px 0; border-top: 1px solid #FF0000		; border-bottom: 1px solid #FF0000	;">
@@ -82,7 +82,7 @@ Durante l'esplorazione e l'evolversi del gioco è possibile incontrare diversi p
 - **Lorenzo Burdo** - Il logorroico vicedirettore entusiasta dell'arrivo di una nuova matricola.
 - **Luigi la Scimmia** - Un genio a cui piace far esplodere cose, esperto anche di cose illegali.
 - **Pino il Manutentore** - Il "tuttofare" del collegio, oltre ad essere un fumatore incallito.
- 
+
 > Per far immergere il giocatore ancora di più nella quotidianità degli sviluppatori sono state prese foto reali dei personaggi e sono state convertite in stile ***Studio Ghibli***; stessa cosa è stata fatta con le stanze del collegio.
 > Queste immagini saranno visualizzabili però se e solo se il gioco verrà avviato in modalità *interfaccia grafica*.
 
@@ -169,8 +169,8 @@ L'utente si trova di fronte a un menu con le seguenti opzioni:
         *   **CLI**: `CLIMenu` avvia `engine.startGameLoop()`.
     *  Nel caso venisse inserito un **Utente Già Esistente nel DB (`ApiClientResult.SUCCESS_OK`)**:
         *   Viene mostrato un messaggio di errore.
-        *   L'utente viene reindirizzato al menu principale (`UI_Init` o `CLIMenu`) per caricare la partita o scegliere un nome diverso.
-    *   **Errore di Connessione/Altro**: Viene mostrato un messaggio di errore appropriato.
+                                                        *   L'utente viene reindirizzato al menu principale (`UI_Init` o `CLIMenu`) per caricare la partita o scegliere un nome diverso.
+                                                    *   **Errore di Connessione/Altro**: Viene mostrato un messaggio di errore appropriato.
 #### 3.2.2. Carica Partita:
 
 1.  **Interfaccia Utente**:
@@ -335,7 +335,7 @@ Il metodo `PoggioAdventureDesc.nextMove(List<ParserOutput> list, GameContext gam
 ## 3.5 Scenari Specifici
 
 #### 3.5.1 Superamento di un Livello
-  
+
 1.  Il giocatore compie un'azione che soddisfa la condizione di completamento del livello corrente. Gli oggetti *Fobidden* e *Required* vengono passato come costruttori, in questo caso nel `GameStateManager`.
     *   Esempio `Level1State`: Il giocatore completa il test del `DirettoreGalileo`, e il `Test.handleTestCompletion` aggiunge l'oggetto `level1Complete` (ID `Utils.OBJ_LEVEL1_COMPLETE_ID`) all'inventario.
 2.  `GameState.isCompleted(gameDescription)` (es. `Level1State.isCompleted`) verifica la presenza dell'oggetto richiesto nell'inventario e restituisce `true`.
@@ -355,7 +355,7 @@ Il metodo `PoggioAdventureDesc.nextMove(List<ParserOutput> list, GameContext gam
 7.  Il giocatore ricomincia il livello corrente.
 
 ### 3.7 Vittoria Finale
-  
+
 1.  Il giocatore completa l'ultimo livello.
 2.  `GameStateManager.advanceToNextLevel()` determina che non ci sono più livelli e chiama la callback `onGameCompleted` (che punta a `Engine.handleGameCompleted()`).
 3.  `Engine.handleGameCompleted()`:
@@ -413,19 +413,15 @@ La struttura dati che più abbiamo utilizzato nel nostro progetto è la Lista, p
 
 ***operations***:
 
-```
-//Costruttori
 newList() -> list
 addFirst(item, list) -> list
 
-// Osservatori
 head(list) -> item
 tail(list) -> list
 isEmpty(list) -> boolean
 size(list) -> integer
 add(list, item) -> list
 get(list, integer) -> item
-```
 
 #### Tabella Costruttori/Osservazioni
 Per definire il set minimo di equazioni, organizziamo le informazioni in una tabella che mostra il risultato di ogni osservatore applicato a ogni costruttore. Sia `l'` una lista generata da un costruttore, `l` una lista generica, `i` un item generico e `n` un intero.
