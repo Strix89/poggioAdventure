@@ -86,7 +86,7 @@ public class PickUpObserver implements GameObserver, Serializable {
                                         foundAndPicked = true;
                                         break;
                                     } else {
-                                        msg.append("Non puoi [NEON_ORANGE]raccogliere[/] questo oggetto: [ITEM]").append(obj.getName()).append("\n");
+                                        msg.append("Non puoi [NEON_ORANGE]raccogliere[/] questo oggetto: [ITEM]").append(obj.getName()).append("[/]\n");
                                         foundAndPicked = true;
                                         break;
                                     }
