@@ -151,6 +151,7 @@ public class Level1State extends GameState {
         "[NEON_ORANGE]•[/] osserva [oggetto] - esamina attentamente\n" +
         "[NEON_ORANGE]•[/] premi [oggetto] - attiva/spingi qualcosa\n\n" +
         "[NEON_ORANGE]•[/] accendi [oggetto] - accendi qualcosa (es. pc)\n" + 
+        "[NEON_ORANGE]•[/] metti [oggetto] - inserisce qualcosa\n" +
         "[NEON_ORANGE]•[/] parla [npc] - conversa con i personaggi\n\n" +
         "[NEON_ORANGE]•[/] salva - salva la partita\n" +
         "[NEON_ORANGE]•[/] end/esci - termina il gioco\n",
